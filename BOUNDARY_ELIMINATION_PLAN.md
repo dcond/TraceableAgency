@@ -95,3 +95,39 @@ REMAINING TO LAND (mechanical, in-source):
 
 DECISION: numerator-coherence clause is in source but DORMANT. Either complete the wiring
 (steps 1-6) or revert the clause to avoid an unused interface strengthening.
+
+---
+## SESSION 4: fields 1 & 2 LANDED IN SOURCE (kernel-checked). Field 3 remains.
+
+COMMITTED & PUSHED (github dcond/TraceableAgency, commit 64a4b06):
+- Field 2: hfun_eq_normalizedValue_idChannel_of_scale (rfl, definitional).
+- Field 1 FULLY PROVED and in source (External/EntropyReductionClosure.lean):
+    * marginalValue_support_face  — new coherence clause on
+      FinitePosteriorIntegralRepresentationAssumptions (genuine HM property).
+    * fsSupportEquiv / restrictToSupport_eq_relabel_fullSupport.
+    * wrapScale + wrapScale_fullSupport / _boundary_nondeg / _singleton.
+    * boundaryCompleteScale : the boundary-completed ScaleCoherenceStructure
+      (all 4 fields re-proved; singleton branchCoeff via original, nondeg via
+      support_face_scale, full-support unchanged).
+    * field1_boundaryComplete : normalizedValue q P = normalizedValue (q|supp)(P|supp)
+      at boundary q — the exact FiniteNormalizedValueSupportBoundaryAssumptions content.
+  All depend only on [propext, Classical.choice, Quot.sound]; full build green (8622).
+- Also verified in scratch (scratch_boundary_elim/w_scale_ALL_VERIFIED.lean):
+  wrapCross (boundary-completed CrossPriorBlockRepresentation, transparent transport)
+  and field1_interface_wrapper.
+
+REMAINING — field 3 (FiniteRestrictedCoarseRevealValueAssumptions) + final drop of hcard:
+Field 3 target: normalizedValue (s|supp)(C|supp) = Hfun(p|supp) for s = sigmaDist p q boundary.
+Route (all tools exist, assembly is the work):
+  1. dependent reindex: s|supp ≃ sigmaDist (p|supp) (fun k' => (q k'.1)|supp), and
+     C|supp transports to coarseRevealChannel over supp(p). (sigmaSupportEquiv is the core,
+     already compiled in scratch bf3_equiv.lean; needs the channel-transport lemmas + the
+     restricted-fibre sigmaDist identity.)
+  2. normalizedValue relabel-invariance engine (compiled in scratch bf3_relabel.lean as
+     normalizedValue_relabelAction_of_crossPrior) — NOT yet in source.
+  3. apply coarseReveal_value_eq_Hfun_of_axioms_fullSupport to the full-support s|supp.
+Then: build the boundary-completed cross-prior rep (wrapCross) through the entropy/Faddeev
+spine and discharge all 3 boundary facts, dropping FiniteCardinalSupportBoundaryAssumptions
+from the final theorem. NOTE: wrapCross changes Hfun (= normalizedValue·id on wrapped scale),
+so the FaddeevEntropyForm/α·Shannon/MIRep chain must be re-derived on wrapCross — a spine
+rebuild, the largest remaining chunk.
