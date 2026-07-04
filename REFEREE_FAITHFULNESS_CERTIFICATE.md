@@ -1,5 +1,20 @@
 # Referee Faithfulness Certificate — Paper ⇄ Lean, Side by Side
 
+> **UPDATE (cardinal-boundary assumption eliminated).** Since the original drafting, the
+> `FiniteCardinalSupportBoundaryAssumptions` boundary field has been **removed** from the
+> convention bundle `FinalHarmlessConventions` / `FinalConstructedRepresentativeConventions`.
+> Its three facts are now **proved theorems**, not assumptions:
+> `field1_boundaryComplete` (boundary normalized-value support restriction),
+> `hfun_eq_normalizedValue_idChannel_of_scale` (boundary `Hfun` identity), and
+> `field3_restricted_coarse_reveal` (restricted coarse-reveal value). The exported theorem
+> `MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions` routes through
+> `MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputs_noCardinal`; verified via `#print`
+> that `FiniteCardinalSupportBoundaryAssumptions` is absent from every convention structure.
+> Any text below that lists `support_boundary` / `FiniteCardinalSupportBoundaryAssumptions` as a
+> live convention field is historical and superseded by this note. Axiom footprint unchanged:
+> `[propext, Classical.choice, Quot.sound]`.
+
+
 **Purpose.** This is the single document a human referee reads **together with the paper**
 (`empowerment_v5(1).tex`) to be convinced that the paper's **main theorem is true** — without
 reading any proof. It answers the only questions the Lean kernel cannot answer for you:

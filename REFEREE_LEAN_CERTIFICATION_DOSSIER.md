@@ -1,5 +1,20 @@
 # Referee Lean Certification Dossier
 
+> **UPDATE (cardinal-boundary assumption eliminated).** Since the original drafting, the
+> `FiniteCardinalSupportBoundaryAssumptions` boundary field has been **removed** from the
+> convention bundle `FinalHarmlessConventions` / `FinalConstructedRepresentativeConventions`.
+> Its three facts are now **proved theorems**, not assumptions:
+> `field1_boundaryComplete` (boundary normalized-value support restriction),
+> `hfun_eq_normalizedValue_idChannel_of_scale` (boundary `Hfun` identity), and
+> `field3_restricted_coarse_reveal` (restricted coarse-reveal value). The exported theorem
+> `MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions` routes through
+> `MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputs_noCardinal`; verified via `#print`
+> that `FiniteCardinalSupportBoundaryAssumptions` is absent from every convention structure.
+> Any text below that lists `support_boundary` / `FiniteCardinalSupportBoundaryAssumptions` as a
+> live convention field is historical and superseded by this note. Axiom footprint unchanged:
+> `[propext, Classical.choice, Quot.sound]`.
+
+
 **Subject:** Final Lean theorem `TraceableAgency.MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions`
 **Paper:** `empowerment_v5(1).tex`, Theorem 1 ("Mutual-information characterisation", `thm:main`, TeX lines 767–800)
 **Lean project:** `/Users/u1970555/daniele-workspace/TraceableAgency`
