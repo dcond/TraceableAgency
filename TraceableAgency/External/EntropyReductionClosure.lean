@@ -1,0 +1,3071 @@
+/-
+Copyright (c) 2026 Daniele Condorelli. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Daniele Condorelli
+-/
+import TraceableAgency.External.PreEntropyConstruction
+
+/-!
+# Stage ER-C: Entropy Reduction from the Closed Pre-Entropy Spine
+
+This file replaces the legacy monolith consumers (`entropyReduction_of_axioms`,
+`crossPriorBlock_of_axioms`, which consume `FiniteScaleCoherenceAssumptions` and
+`FiniteBranchAggregationAssumptions`) by constructors that run through the
+closed interaction-collapse spine:
+
+* `EntropyReductionRepresentation_of_interactionCollapse` — entropy reduction
+  from any `InteractionCollapseUniversalChainScaleStructure`;
+* `crossPriorBlockRepresentation_of_preUniversalBridge` — the scaled paper
+  blockbridge from the pre-universal unscaled bridge, replacing the
+  `FiniteCrossPriorBlockAssumptions` monolith;
+* `entropyReduction_of_preEntropyReady` /
+  `crossPriorBlockRepresentation_of_preEntropyReady` — both targets from a
+  single `PreEntropyReadyFaceScalesStructure`.
+
+Route hygiene for the pre-Faddeev constructors below: no
+`FiniteScaleCoherenceAssumptions`, `FiniteBranchAggregationAssumptions`,
+or `FiniteCrossPriorBlockAssumptions` is consumed.  The final sections of this
+file then deliberately enter the Faddeev/Shannon and MI spine interfaces.
+-/
+
+namespace TraceableAgency
+
+universe u
+
+/-- Combined final Herstein--Milnor/Blackwell interface for the cleaned route.
+
+The current development uses two HM-shaped interfaces: `FiniteHersteinMilnorAssumptions`
+constructs the selected posterior value representative once posterior-law
+sufficiency is available, while
+`ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions` supplies the
+affine and integral consequences used later.
+
+The Blackwell field is the *pure* finite Blackwell equivalence theorem
+`FiniteSamePosteriorLawBlackwellEquivalenceAssumptions` (same posterior law at a
+full-support prior ⇒ the two experiments are mutual garblings/post-processings).
+The paper-specific block-comparison replacement package
+`FiniteBlackwellPosteriorAssumptions` is *not* an input here: it is reconstructed
+internally from this pure theorem plus the A4/A3/A1 replacement plumbing via
+`blackwellPosteriorReplacement_of_samePosteriorGarblings`.  This keeps the external
+boundary exactly at the classical Blackwell theorem. -/
+structure FinalHMInterface.{v} where
+  blackwell : FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{v}
+  hm_rep : FiniteHersteinMilnorAssumptions.{v}
+  hm_affine : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{v}
+
+/-- Posterior-law sufficiency from the combined final HM interface.
+
+The pure Blackwell equivalence theorem is first upgraded to the block-comparison
+replacement package by `blackwellPosteriorReplacement_of_samePosteriorGarblings`
+(A4/A3/A1 plumbing, proved internally), then fed to
+`from_axioms_to_posterior_of_blackwell`. -/
+theorem posteriorLawSufficiency_of_FinalHMInterface
+    (hhm : FinalHMInterface.{u})
+    {F : PrefFamily.{u}}
+    (hax : TraceAxioms F) :
+    PosteriorLawSufficiency F :=
+  from_axioms_to_posterior_of_blackwell F
+    (blackwellPosteriorReplacement_of_samePosteriorGarblings hhm.blackwell) hax
+
+/-- Data-carrying posterior value representative from the combined final HM
+interface. -/
+noncomputable def posteriorValueRepresentation_of_FinalHMInterface
+    (hhm : FinalHMInterface.{u})
+    {F : PrefFamily.{u}}
+    (hax : TraceAxioms F) :
+    PosteriorValueRepresentation F :=
+  posteriorValueRep_of_HersteinMilnor F hhm.hm_rep
+    (posteriorLawSufficiency_of_FinalHMInterface hhm hax)
+
+/-- Affine/integral HM consequences from the combined final HM interface. -/
+def classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+    (hhm : FinalHMInterface.{u}) :
+    ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u} :=
+  hhm.hm_affine
+
+/--
+**Entropy reduction from interaction collapse.**
+
+Paper Lemma faddeevsketch, entropy-reduction part: once the universal chain
+scale is available, the entropy-reduction identity is the already proved
+`value_entropy_reduction_of_scale` applied to the `scale_coherence` field.
+-/
+noncomputable def EntropyReductionRepresentation_of_interactionCollapse
+    {F : PrefFamily.{u}}
+    (h : InteractionCollapseUniversalChainScaleStructure F) :
+    EntropyReductionRepresentation F :=
+  EntropyReductionRepresentation_of_scale F h.scale_coherence
+
+/--
+**Scaled cross-prior blockbridge from the pre-universal unscaled bridge.**
+
+Paper Lemma blockbridge, rescaled (TeX lines 1776–1827, 2547–2557).  The
+unscaled bridge is stated for the face-scale value functional; the hypothesis
+`hagg` records that the entropy-reduction representation carries the same
+branch-aggregation structure (definitional for the pre-entropy closure
+constructors).  Division by the universal positive scale then mirrors
+`crossPriorBlockRepresentation_of_unscaled` without consuming the
+`FiniteCrossPriorBlockAssumptions` monolith.
+-/
+noncomputable def crossPriorBlockRepresentation_of_preUniversalBridge
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hbridge : FinitePreUniversalCrossPriorBlockBridgeFor hfaces)
+    (hax : TraceAxioms F)
+    (hentropy : EntropyReductionRepresentation F)
+    (hagg :
+      hentropy.scale_coherence.branch_agg =
+        hfaces.branch_result.branch_agg) :
+    CrossPriorBlockRepresentation F where
+  entropy_reduction := hentropy
+  cross_prior_block_rep := by
+    intro A B O Y _ _ _ _ _ _ _ _ _ _ q r hq hr P Q
+    have hraw := hbridge.unscaled_cross_prior_block_rep hax q r hq hr P Q
+    rw [hagg, hraw]
+    have hscale :
+        hentropy.scale_coherence.scale q = hentropy.scale_coherence.scale r :=
+      hentropy.scale_coherence.scale_universal q r hq hr
+    have hpos : 0 < hentropy.scale_coherence.scale q :=
+      hentropy.scale_coherence.scale_pos q hq
+    rw [← hscale]
+    exact (div_le_div_iff_of_pos_right hpos).symm
+
+/--
+**Entropy reduction from the pre-entropy-ready construction object.**
+
+Composes `InteractionCollapseUniversalScale_of_preEntropyReady` with the
+internal `ScaleCoherenceStructure → EntropyReductionRepresentation` bridge.
+-/
+noncomputable def entropyReduction_of_preEntropyReady
+    {F : PrefFamily.{u}}
+    (hready : PreEntropyReadyFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hax : TraceAxioms F) :
+    EntropyReductionRepresentation F :=
+  EntropyReductionRepresentation_of_interactionCollapse
+    (InteractionCollapseUniversalScale_of_preEntropyReady hready hhm huniq hax)
+
+/--
+**Scaled cross-prior blockbridge from the pre-entropy-ready construction
+object.**
+
+The interaction-collapse constructor builds its `ScaleCoherenceStructure` with
+`branch_agg := hready.hfaces.branch_result.branch_agg`, so the value functional
+of the resulting entropy-reduction representation is definitionally the
+face-scale value functional of `hready.cross_prior_blockbridge`; the alignment
+hypothesis is discharged by `rfl`.
+-/
+noncomputable def crossPriorBlockRepresentation_of_preEntropyReady
+    {F : PrefFamily.{u}}
+    (hready : PreEntropyReadyFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hax : TraceAxioms F) :
+    CrossPriorBlockRepresentation F :=
+  crossPriorBlockRepresentation_of_preUniversalBridge
+    hready.cross_prior_blockbridge hax
+    (entropyReduction_of_preEntropyReady hready hhm huniq hax)
+    rfl
+
+/-!
+## Stage ER-B: Entropy regularity for the concrete entropy candidate
+
+`EntropyRegularity` (nonnegativity + singleton-zero) is proved for any
+cross-prior block representation whose `Hfun` is the full-revelation
+normalized value (definitional for every constructor in this file).
+
+* nonnegativity at full support: A4 (outcome-postprocessing aversion) with
+  `postprocess id T = T` and the cross-prior bridge give
+  `V̂_q(id) ≥ V̂_q(U_A) = 0`;
+* singleton-zero: a point mass restricts to a subsingleton support face,
+  where every experiment has zero value;
+* boundary priors: routed through the single named residual
+  `FiniteNormalizedValueSupportBoundaryAssumptions` (a projection of the root
+  `FiniteCardinalSupportBoundaryAssumptions`).
+
+The old target `FiniteEntropyRegularityFromAxiomsAssumptions` (∀ `hentropy`)
+is not produced: it quantifies over arbitrary entropy representations and is
+too strong.  The repaired target fixes `Hfun` to full revelation.
+-/
+
+/-- Post-processing the identity channel is the post-processing kernel itself. -/
+theorem postprocess_idChannel_left
+    {A O : Type u} [Fintype A] [DecidableEq A] [Fintype O]
+    (T : Channel A O) :
+    Channel.postprocess Channel.idChannel T = T := by
+  funext a
+  ext o
+  change (∑ b, (Dist.pure a) b * T b o) = T a o
+  rw [Finset.sum_eq_single a
+    (fun b _ hba => by rw [Dist.pure_apply, if_neg hba, zero_mul])
+    (fun h => absurd (Finset.mem_univ a) h)]
+  rw [Dist.pure_apply_self, one_mul]
+
+/-- Full revelation dominates no information in normalized value at
+full-support priors: A4 with `T = U_A` plus the scaled cross-prior bridge. -/
+theorem normalizedValue_id_nonneg_of_crossPrior_fullSupport
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hq : q.FullSupport) :
+    0 ≤ normalizedValue hcross.entropy_reduction.scale_coherence q
+      Channel.idChannel := by
+  have ha4 :=
+    hax.a4 (Channel.idChannel : Channel A A)
+      (Channel.uninformativeChannelU A) q
+  rw [postprocess_idChannel_left] at ha4
+  have hbridge :=
+    (hcross.cross_prior_block_rep q q hq hq
+      (Channel.idChannel : Channel A A)
+      (Channel.uninformativeChannelU A)).mp ha4
+  have hzero :
+      hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V q
+        (experimentOfChannel (Channel.uninformativeChannelU A)) = 0 :=
+    hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.zero_normalized
+      q hq
+  simp only [normalizedValue]
+  calc (0 : ℝ)
+      = hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V q
+          (experimentOfChannel (Channel.uninformativeChannelU A)) /
+        hcross.entropy_reduction.scale_coherence.scale q := by
+        rw [hzero, zero_div]
+    _ ≤ _ := hbridge
+
+/-- Nonnegativity of the full-revelation normalized value at every prior,
+with the boundary case routed through the support-restriction residual. -/
+theorem normalizedValue_id_nonneg_of_crossPrior
+    (hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) :
+    0 ≤ normalizedValue hcross.entropy_reduction.scale_coherence q
+      Channel.idChannel := by
+  by_cases hq : q.FullSupport
+  · exact normalizedValue_id_nonneg_of_crossPrior_fullSupport hax hcross q hq
+  · haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    rw [hnorm.normalizedValue_support_restrict_boundary F hax hcross
+        Channel.idChannel q hq,
+      normalizedValue_restrict_idChannel_eq_idSupport
+        hcross.entropy_reduction q]
+    exact normalizedValue_id_nonneg_of_crossPrior_fullSupport hax hcross
+      q.restrictToSupport (Dist.restrictToSupport_fullSupport q)
+
+/-- A positive coordinate of a point mass identifies the point. -/
+theorem eq_of_pure_pos
+    {A : Type u} [Fintype A] [DecidableEq A]
+    {a b : A} (hb : 0 < (Dist.pure a) b) : b = a := by
+  by_contra hne
+  rw [Dist.pure_apply, if_neg hne] at hb
+  exact lt_irrefl 0 hb
+
+/-- The support face of a point mass is a subsingleton. -/
+theorem subsingleton_supportSubtype_pure
+    {A : Type u} [Fintype A] [DecidableEq A] (a : A) :
+    Subsingleton (supportSubtype (Dist.pure a)) := by
+  refine ⟨fun b c => Subtype.ext ?_⟩
+  rw [eq_of_pure_pos b.property, eq_of_pure_pos c.property]
+
+/-- The full-revelation normalized value of a point mass vanishes: its support
+face is a subsingleton, where every experiment is uninformative. -/
+theorem normalizedValue_id_pure_eq_zero_of_crossPrior
+    (hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (a : A) :
+    normalizedValue hcross.entropy_reduction.scale_coherence (Dist.pure a)
+      Channel.idChannel = 0 := by
+  by_cases hq : (Dist.pure a).FullSupport
+  · haveI : Subsingleton A :=
+      ⟨fun b c => by rw [eq_of_pure_pos (hq b), eq_of_pure_pos (hq c)]⟩
+    have hV0 :
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V
+          (Dist.pure a) (experimentOfChannel Channel.idChannel) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep
+        (Dist.pure a) hq Channel.idChannel
+    simp [normalizedValue, hV0]
+  · haveI : Nonempty (supportSubtype (Dist.pure a)) :=
+      supportSubtype_nonempty (Dist.pure a)
+    haveI : Subsingleton (supportSubtype (Dist.pure a)) :=
+      subsingleton_supportSubtype_pure a
+    rw [hnorm.normalizedValue_support_restrict_boundary F hax hcross
+        Channel.idChannel (Dist.pure a) hq,
+      normalizedValue_restrict_idChannel_eq_idSupport
+        hcross.entropy_reduction (Dist.pure a)]
+    have hV0 :
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V
+          (Dist.pure a).restrictToSupport
+          (experimentOfChannel
+            (Channel.idChannel :
+              Channel (supportSubtype (Dist.pure a))
+                (supportSubtype (Dist.pure a)))) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep
+        (Dist.pure a).restrictToSupport
+        (Dist.restrictToSupport_fullSupport (Dist.pure a))
+        Channel.idChannel
+    simp [normalizedValue, hV0]
+
+/--
+**Entropy regularity for full-revelation entropy candidates.**
+
+Repaired Stage ER-B target: `EntropyRegularity` for any cross-prior block
+representation whose `Hfun` is the full-revelation normalized value.  The
+boundary residual is the single named support-restriction interface.
+-/
+theorem entropyRegularity_of_crossPrior_boundary
+    (hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hHfun :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A),
+        hcross.entropy_reduction.Hfun q =
+          normalizedValue hcross.entropy_reduction.scale_coherence q
+            Channel.idChannel) :
+    EntropyRegularity F hcross.entropy_reduction where
+  H_nonneg := fun q => by
+    rw [hHfun q]
+    exact normalizedValue_id_nonneg_of_crossPrior hnorm hax hcross q
+  H_singleton := fun a => by
+    rw [hHfun (Dist.pure a)]
+    exact normalizedValue_id_pure_eq_zero_of_crossPrior hnorm hax hcross a
+
+/-- Entropy regularity for the pre-entropy-ready cross-prior representation:
+its `Hfun` is `Hcandidate`, i.e. definitionally the full-revelation normalized
+value, so the alignment hypothesis is `rfl`. -/
+theorem entropyRegularity_of_preEntropyReady
+    (hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hready : PreEntropyReadyFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hax : TraceAxioms F) :
+    EntropyRegularity F
+      (crossPriorBlockRepresentation_of_preEntropyReady
+        hready hhm huniq hax).entropy_reduction :=
+  entropyRegularity_of_crossPrior_boundary hnorm hax _ (fun _ => rfl)
+
+/-!
+## Stage ER-D: concrete Faddeev-recursion inputs
+
+The legacy recursion-input structures in `Faddeev.lean` quantify over an
+arbitrary `EntropyReductionRepresentation`.  The closed pre-entropy route
+constructs a specific representation, with `Hfun` definitionally equal to the
+full-revelation normalized value.  The declarations below target that concrete
+representation rather than strengthening the old public structures.
+-/
+
+/-- Entropy reduction produced by the minimal full pre-entropy closure route. -/
+noncomputable def entropyReduction_of_fullPreEntropyClosure_minimal
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    EntropyReductionRepresentation F :=
+  EntropyReductionRepresentation_of_interactionCollapse
+    (InteractionCollapseUniversalScale_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax)
+
+/-- Cross-prior block representation produced by the minimal full
+pre-entropy closure route and the product-quasi-additive blockbridge. -/
+noncomputable def crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    CrossPriorBlockRepresentation F :=
+  crossPriorBlockRepresentation_of_preUniversalBridge
+    (finitePreUniversalCrossPriorBlockBridge_of_productQuasiAdditivity hprod)
+    hax
+    (entropyReduction_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax)
+    rfl
+
+/-- Entropy regularity for the minimal full pre-entropy closure route. -/
+theorem entropyRegularity_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    EntropyRegularity F
+      (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax).entropy_reduction :=
+  entropyRegularity_of_crossPrior_boundary
+    (normalizedValueSupportBoundary_of_cardinalBoundary hcard) hax _ (fun _ => rfl)
+
+/-- The positive support of a block-embedded fibre distribution is equivalent
+to the fibre's positive support. -/
+noncomputable def blockEmbedSupportEquiv
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (k : K) (q : Dist (Act k)) :
+    supportSubtype (blockEmbedDist Act k q) ≃ supportSubtype q where
+  toFun b := by
+    rcases b with ⟨ka, hb⟩
+    rcases ka with ⟨j, a⟩
+    have hjk : j = k := by
+      by_contra hne
+      have hzero : blockEmbedDist Act k q ⟨j, a⟩ = 0 :=
+        blockEmbedDist_apply_ne Act hne q a
+      rw [hzero] at hb
+      linarith
+    subst j
+    exact ⟨a, by simpa using hb⟩
+  invFun a := ⟨⟨k, a.1⟩, by simpa using a.2⟩
+  left_inv b := by
+    rcases b with ⟨ka, hb⟩
+    rcases ka with ⟨j, a⟩
+    have hjk : j = k := by
+      by_contra hne
+      have hzero : blockEmbedDist Act k q ⟨j, a⟩ = 0 :=
+        blockEmbedDist_apply_ne Act hne q a
+      rw [hzero] at hb
+      linarith
+    subst j
+    rfl
+  right_inv a := by
+    rfl
+
+/-- Support restriction of a block-embedded distribution is the relabeling of
+the intrinsic support-restricted fibre distribution. -/
+theorem restrict_blockEmbed_eq_relabel_support
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (k : K) (q : Dist (Act k)) :
+    (blockEmbedDist Act k q).restrictToSupport =
+      Relabeling.relabelDist (blockEmbedSupportEquiv Act k q).symm
+        q.restrictToSupport := by
+  ext b
+  rcases b with ⟨ka, hb⟩
+  rcases ka with ⟨j, a⟩
+  have hjk : j = k := by
+    by_contra hne
+    have hzero : blockEmbedDist Act k q ⟨j, a⟩ = 0 :=
+      blockEmbedDist_apply_ne Act hne q a
+    rw [hzero] at hb
+    linarith
+  subst j
+  simp [Relabeling.relabelDist, blockEmbedSupportEquiv, Dist.restrictToSupport_apply]
+
+/-- Pointwise formula for pushing a support-face distribution back to the
+ambient action type by support inclusion. -/
+theorem actionPushforward_supportIncludeKernel_apply
+    {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) (t : Dist (supportSubtype q)) (a : A) :
+    Channel.actionPushforward t (supportIncludeKernel q) a =
+      if h : q a > 0 then t ⟨a, h⟩ else 0 := by
+  unfold Channel.actionPushforward supportIncludeKernel
+  change (∑ c : supportSubtype q, t c * (Dist.pure c.1) a) =
+    if h : q a > 0 then t ⟨a, h⟩ else 0
+  by_cases hqa : q a > 0
+  · rw [dif_pos hqa]
+    let b : supportSubtype q := ⟨a, hqa⟩
+    rw [Finset.sum_eq_single b]
+    · simp [b]
+    · intro c _ hc
+      have hne : c.1 ≠ a := by
+        intro hca
+        apply hc
+        exact Subtype.ext hca
+      rw [Dist.pure_apply_ne c.1 a (fun h => hne h.symm), mul_zero]
+    · intro hb
+      exact absurd (Finset.mem_univ b) hb
+  · rw [dif_neg hqa]
+    apply Finset.sum_eq_zero
+    intro c _
+    have hne : c.1 ≠ a := by
+      intro hca
+      exact hqa (hca ▸ c.2)
+    rw [Dist.pure_apply_ne c.1 a (fun h => hne h.symm), mul_zero]
+
+/-- The support of a support-included distribution is equivalent to the
+distribution's intrinsic positive support. -/
+noncomputable def supportIncludePushforwardSupportEquiv
+    {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) (t : Dist (supportSubtype q)) :
+    supportSubtype (Channel.actionPushforward t (supportIncludeKernel q)) ≃
+      supportSubtype t where
+  toFun b := by
+    rcases b with ⟨a, hb⟩
+    have hqa : q a > 0 := by
+      by_contra hnot
+      have happly :=
+        actionPushforward_supportIncludeKernel_apply q t a
+      rw [happly, dif_neg hnot] at hb
+      linarith
+    refine ⟨⟨a, hqa⟩, ?_⟩
+    have happly :=
+      actionPushforward_supportIncludeKernel_apply q t a
+    rw [happly, dif_pos hqa] at hb
+    exact hb
+  invFun b := by
+    refine ⟨b.1.1, ?_⟩
+    have happly :=
+      actionPushforward_supportIncludeKernel_apply q t b.1.1
+    rw [happly, dif_pos b.1.2]
+    exact b.2
+  left_inv b := by
+    rcases b with ⟨a, hb⟩
+    apply Subtype.ext
+    rfl
+  right_inv b := by
+    rcases b with ⟨a, hb⟩
+    apply Subtype.ext
+    rfl
+
+/-- Restricting a support-included distribution is the relabeling of the
+intrinsic support restriction. -/
+theorem restrict_supportInclude_eq_relabel_support
+    {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) (t : Dist (supportSubtype q)) :
+    (Channel.actionPushforward t (supportIncludeKernel q)).restrictToSupport =
+      Relabeling.relabelDist (supportIncludePushforwardSupportEquiv q t).symm
+        t.restrictToSupport := by
+  ext b
+  rcases b with ⟨a, hb⟩
+  have hqa : q a > 0 := by
+    by_contra hnot
+    have happly :=
+      actionPushforward_supportIncludeKernel_apply q t a
+    rw [happly, dif_neg hnot] at hb
+    linarith
+  simp [Relabeling.relabelDist, supportIncludePushforwardSupportEquiv,
+    Dist.restrictToSupport_apply, actionPushforward_supportIncludeKernel_apply,
+    hqa]
+
+/-- Full-support fibre block embedding preserves the concrete entropy
+candidate of the minimal full pre-entropy closure route. -/
+theorem Hfun_blockEmbed_fullSupport_of_fullPreEntropyClosure_minimal
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)]
+    [Nonempty ((k : K) × Act k)]
+    (k : K) (q : Dist (Act k)) (hq : q.FullSupport) :
+    (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun
+        (blockEmbedDist Act k q) =
+      (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun q := by
+  change
+    hfaces.branch_result.branch_agg.value_rep.V (blockEmbedDist Act k q)
+        (experimentOfChannel
+          (Channel.idChannel : Channel ((k : K) × Act k) ((k : K) × Act k))) /
+      hfaces.branch_result.scale_factorization.scale (blockEmbedDist Act k q)
+    =
+    hfaces.branch_result.branch_agg.value_rep.V q
+        (experimentOfChannel
+          (Channel.idChannel : Channel (Act k) (Act k))) /
+      hfaces.branch_result.scale_factorization.scale q
+  rw [hconv.block_value.block_face_value hax Act k q hq]
+  rw [hconv.block_scale.block_face_scale hax Act k q hq]
+  rfl
+
+/-- Full-support relabeling invariance for the concrete entropy candidate
+constructed by the minimal full pre-entropy closure route. -/
+theorem Hfun_relabel_fullSupport_of_fullPreEntropyClosure_minimal
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (e : A ≃ B) (q : Dist A) (hq : q.FullSupport) :
+    (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun
+        (Relabeling.relabelDist e q) =
+      (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun q := by
+  have hq' : (Relabeling.relabelDist e q).FullSupport :=
+    Relabeling.relabelDist_fullSupport e q hq
+  by_cases hA : Subsingleton A
+  · haveI : Subsingleton A := hA
+    haveI : Subsingleton B :=
+      ⟨fun b₁ b₂ => by
+        apply e.symm.injective
+        exact Subsingleton.elim (e.symm b₁) (e.symm b₂)⟩
+    have hV_left :
+        hfaces.branch_result.branch_agg.value_rep.V
+            (Relabeling.relabelDist e q)
+            (experimentOfChannel
+              (Channel.idChannel : Channel B B)) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hfaces.branch_result.branch_agg.value_rep
+        (Relabeling.relabelDist e q) hq'
+        (Channel.idChannel : Channel B B)
+    have hV_right :
+        hfaces.branch_result.branch_agg.value_rep.V q
+            (experimentOfChannel
+              (Channel.idChannel : Channel A A)) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hfaces.branch_result.branch_agg.value_rep q hq
+        (Channel.idChannel : Channel A A)
+    change
+      hfaces.branch_result.branch_agg.value_rep.V
+          (Relabeling.relabelDist e q)
+          (experimentOfChannel
+            (Channel.idChannel : Channel B B)) /
+        hfaces.branch_result.scale_factorization.scale
+          (Relabeling.relabelDist e q)
+      =
+      hfaces.branch_result.branch_agg.value_rep.V q
+          (experimentOfChannel
+            (Channel.idChannel : Channel A A)) /
+        hfaces.branch_result.scale_factorization.scale q
+    rw [hV_left, hV_right]
+    simp
+  · have hpos :
+        FiniteProductScaleZPositiveAssumptionsFor hfaces hprod :=
+      productScaleZpositive_of_sliceTransform hprod haff
+    have hfull :
+        FiniteFullSupportSelectedPosteriorValueRelabelingFor hfaces :=
+      finiteFullSupportSelectedPosteriorValueRelabeling_of_HM_productNormalization
+        hhm huniq hpos
+    have hV :
+        fullRevelationValueForFaceScales hfaces (Relabeling.relabelDist e q) =
+          fullRevelationValueForFaceScales hfaces q :=
+      fullRevelationValueForFaceScales_relabel_eq_fullSupport
+        hfull hax e q hq hA
+    have hscale :
+        hfaces.branch_result.scale_factorization.scale (Relabeling.relabelDist e q) =
+          hfaces.branch_result.scale_factorization.scale q := by
+      exact
+        (InteractionCollapseUniversalScale_of_fullPreEntropyClosure_minimal
+          hfaces hhm huniq hprod haff hconv hax).scale_coherence.scale_universal
+          (Relabeling.relabelDist e q) q hq' hq
+    change
+      fullRevelationValueForFaceScales hfaces (Relabeling.relabelDist e q) /
+        hfaces.branch_result.scale_factorization.scale (Relabeling.relabelDist e q)
+      =
+      fullRevelationValueForFaceScales hfaces q /
+        hfaces.branch_result.scale_factorization.scale q
+    rw [hV, hscale]
+
+/-- Embedding a distribution on a support face back into the ambient action
+type preserves the concrete entropy candidate of the minimal full pre-entropy
+closure route. -/
+theorem Hfun_supportInclude_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) :
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    ∀ (t : Dist (supportSubtype q)),
+      (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun
+          (Channel.actionPushforward t (supportIncludeKernel q)) =
+        (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+          hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun t := by
+  letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  intro t
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  let hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u} :=
+    normalizedValueSupportBoundary_of_cardinalBoundary hcard
+  let hid : FiniteHfunBoundaryIdentityAssumptions.{u} :=
+    hfunBoundaryIdentity_of_cardinalBoundary hcard
+  let hreg : EntropyRegularity F hcross.entropy_reduction :=
+    entropyRegularity_of_fullPreEntropyClosure_minimal
+      hcard hfaces hhm huniq hprod haff hconv hax
+  let hhfun : FiniteHfunSupportRestrictionAssumptions.{u} :=
+    hfunSupportRestriction_of_boundaryIdentity hnorm hid
+  haveI :
+      Nonempty (supportSubtype (Channel.actionPushforward t (supportIncludeKernel q))) :=
+    supportSubtype_nonempty (Channel.actionPushforward t (supportIncludeKernel q))
+  haveI : Nonempty (supportSubtype t) := supportSubtype_nonempty t
+  have hleft :
+      hcross.entropy_reduction.Hfun
+          (Channel.actionPushforward t (supportIncludeKernel q)) =
+        hcross.entropy_reduction.Hfun
+          (Channel.actionPushforward t (supportIncludeKernel q)).restrictToSupport :=
+    hhfun.Hfun_support_restrict F hax hcross hreg
+      (Channel.actionPushforward t (supportIncludeKernel q))
+  have hright :
+      hcross.entropy_reduction.Hfun t =
+        hcross.entropy_reduction.Hfun t.restrictToSupport :=
+    hhfun.Hfun_support_restrict F hax hcross hreg t
+  have hrestrict :
+      (Channel.actionPushforward t (supportIncludeKernel q)).restrictToSupport =
+        Relabeling.relabelDist (supportIncludePushforwardSupportEquiv q t).symm
+          t.restrictToSupport :=
+    restrict_supportInclude_eq_relabel_support q t
+  have hrel :
+      hcross.entropy_reduction.Hfun
+          (Relabeling.relabelDist (supportIncludePushforwardSupportEquiv q t).symm
+            t.restrictToSupport) =
+        hcross.entropy_reduction.Hfun t.restrictToSupport :=
+    Hfun_relabel_fullSupport_of_fullPreEntropyClosure_minimal
+      hhm huniq haff hconv hax
+      (supportIncludePushforwardSupportEquiv q t).symm t.restrictToSupport
+      (Dist.restrictToSupport_fullSupport t)
+  calc
+    hcross.entropy_reduction.Hfun
+        (Channel.actionPushforward t (supportIncludeKernel q))
+        = hcross.entropy_reduction.Hfun
+            (Channel.actionPushforward t (supportIncludeKernel q)).restrictToSupport := hleft
+    _ = hcross.entropy_reduction.Hfun
+          (Relabeling.relabelDist (supportIncludePushforwardSupportEquiv q t).symm
+            t.restrictToSupport) := by rw [hrestrict]
+    _ = hcross.entropy_reduction.Hfun t.restrictToSupport := hrel
+    _ = hcross.entropy_reduction.Hfun t := hright.symm
+
+/-- Block embedding preserves the concrete entropy candidate of the minimal
+full pre-entropy closure route.  Boundary fibres are routed through the single
+cardinal support-boundary interface and the support-face relabeling above. -/
+theorem Hfun_blockEmbed_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)]
+    [Nonempty ((k : K) × Act k)]
+    (k : K) (q : Dist (Act k)) :
+    (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun
+        (blockEmbedDist Act k q) =
+      (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun q := by
+  by_cases hq : q.FullSupport
+  · exact Hfun_blockEmbed_fullSupport_of_fullPreEntropyClosure_minimal
+      hhm huniq haff hconv hax Act k q hq
+  · let hcross :=
+      crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax
+    let hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u} :=
+      normalizedValueSupportBoundary_of_cardinalBoundary hcard
+    let hid : FiniteHfunBoundaryIdentityAssumptions.{u} :=
+      hfunBoundaryIdentity_of_cardinalBoundary hcard
+    let hreg : EntropyRegularity F hcross.entropy_reduction :=
+      entropyRegularity_of_fullPreEntropyClosure_minimal
+        hcard hfaces hhm huniq hprod haff hconv hax
+    let hhfun : FiniteHfunSupportRestrictionAssumptions.{u} :=
+      hfunSupportRestriction_of_boundaryIdentity hnorm hid
+    haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    haveI : Nonempty (supportSubtype (blockEmbedDist Act k q)) :=
+      supportSubtype_nonempty (blockEmbedDist Act k q)
+    have hleft :
+        hcross.entropy_reduction.Hfun (blockEmbedDist Act k q) =
+          hcross.entropy_reduction.Hfun
+            (blockEmbedDist Act k q).restrictToSupport :=
+      hhfun.Hfun_support_restrict F hax hcross hreg (blockEmbedDist Act k q)
+    have hright :
+        hcross.entropy_reduction.Hfun q =
+          hcross.entropy_reduction.Hfun q.restrictToSupport :=
+      hhfun.Hfun_support_restrict F hax hcross hreg q
+    have hrestrict :
+        (blockEmbedDist Act k q).restrictToSupport =
+          Relabeling.relabelDist (blockEmbedSupportEquiv Act k q).symm
+            q.restrictToSupport :=
+      restrict_blockEmbed_eq_relabel_support Act k q
+    have hrel :
+        hcross.entropy_reduction.Hfun
+            (Relabeling.relabelDist (blockEmbedSupportEquiv Act k q).symm
+              q.restrictToSupport) =
+          hcross.entropy_reduction.Hfun q.restrictToSupport :=
+      Hfun_relabel_fullSupport_of_fullPreEntropyClosure_minimal
+        hhm huniq haff hconv hax
+        (blockEmbedSupportEquiv Act k q).symm q.restrictToSupport
+        (Dist.restrictToSupport_fullSupport q)
+    calc
+      hcross.entropy_reduction.Hfun (blockEmbedDist Act k q)
+          = hcross.entropy_reduction.Hfun
+              (blockEmbedDist Act k q).restrictToSupport := hleft
+      _ = hcross.entropy_reduction.Hfun
+            (Relabeling.relabelDist (blockEmbedSupportEquiv Act k q).symm
+              q.restrictToSupport) := by rw [hrestrict]
+      _ = hcross.entropy_reduction.Hfun q.restrictToSupport := hrel
+      _ = hcross.entropy_reduction.Hfun q := hright.symm
+
+/-- Posterior-law integrals are preserved by support restriction for the
+concrete entropy candidate of the minimal full pre-entropy closure route. -/
+theorem posteriorLawIntegral_supportRestrict_Hfun_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O]
+    (P : Channel A O) (q : Dist A) :
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    posteriorLawIntegral q P
+        (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+          hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun =
+      posteriorLawIntegral q.restrictToSupport (Channel.restrictToSupport P q)
+        (crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+          hfaces hhm huniq hprod haff hconv hax).entropy_reduction.Hfun := by
+  letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  letI : DecidableEq O := Classical.decEq O
+  have hsupport :=
+    posteriorLawIntegral_restrictToSupport P q
+      (fun d => hcross.entropy_reduction.Hfun d)
+  rw [hsupport]
+  unfold posteriorLawIntegral
+  apply Finset.sum_congr rfl
+  intro o _
+  congr 1
+  exact
+    Hfun_supportInclude_of_fullPreEntropyClosure_minimal
+      hcard hhm huniq haff hconv hax q
+      (Channel.posterior (Channel.restrictToSupport P q) q.restrictToSupport o)
+
+/-- Coarse-reveal entropy reduction for the concrete entropy candidate of the
+minimal full pre-entropy closure route. -/
+theorem coarseReveal_entropyReduction_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F)
+    {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)]
+    [Nonempty ((k : K) × Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    let hcross :=
+      crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax
+    hcross.entropy_reduction.Hfun (sigmaDist p q) =
+      normalizedValue hcross.entropy_reduction.scale_coherence (sigmaDist p q)
+        (coarseRevealChannel Act) +
+      posteriorLawIntegral (sigmaDist p q) (coarseRevealChannel Act)
+        hcross.entropy_reduction.Hfun := by
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  let s : Dist ((k : K) × Act k) := sigmaDist p q
+  let C : Channel ((k : K) × Act k) K := coarseRevealChannel Act
+  by_cases hs : s.FullSupport
+  · have hER :=
+      hcross.entropy_reduction.value_entropy_reduction s hs C
+    have hER' :
+        normalizedValue hcross.entropy_reduction.scale_coherence s C =
+          hcross.entropy_reduction.Hfun s -
+            posteriorLawIntegral s C hcross.entropy_reduction.Hfun := by
+      simpa [normalizedValue] using hER
+    change hcross.entropy_reduction.Hfun s =
+      normalizedValue hcross.entropy_reduction.scale_coherence s C +
+        posteriorLawIntegral s C hcross.entropy_reduction.Hfun
+    linarith
+  · let hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u} :=
+      normalizedValueSupportBoundary_of_cardinalBoundary hcard
+    let hid : FiniteHfunBoundaryIdentityAssumptions.{u} :=
+      hfunBoundaryIdentity_of_cardinalBoundary hcard
+    let hreg : EntropyRegularity F hcross.entropy_reduction :=
+      entropyRegularity_of_fullPreEntropyClosure_minimal
+        hcard hfaces hhm huniq hprod haff hconv hax
+    let hhfun : FiniteHfunSupportRestrictionAssumptions.{u} :=
+      hfunSupportRestriction_of_boundaryIdentity hnorm hid
+    haveI : Nonempty (supportSubtype s) := supportSubtype_nonempty s
+    have hH :
+        hcross.entropy_reduction.Hfun s =
+          hcross.entropy_reduction.Hfun s.restrictToSupport :=
+      hhfun.Hfun_support_restrict F hax hcross hreg s
+    have hV :
+        normalizedValue hcross.entropy_reduction.scale_coherence s C =
+          normalizedValue hcross.entropy_reduction.scale_coherence
+            s.restrictToSupport (Channel.restrictToSupport C s) :=
+      normalizedValue_support_restrict_of_boundary hnorm F hax hcross C s
+    have hI :
+        posteriorLawIntegral s C hcross.entropy_reduction.Hfun =
+          posteriorLawIntegral s.restrictToSupport (Channel.restrictToSupport C s)
+            hcross.entropy_reduction.Hfun :=
+      posteriorLawIntegral_supportRestrict_Hfun_of_fullPreEntropyClosure_minimal
+        hcard hhm huniq haff hconv hax C s
+    have hER :=
+      hcross.entropy_reduction.value_entropy_reduction
+        s.restrictToSupport (Dist.restrictToSupport_fullSupport s)
+        (Channel.restrictToSupport C s)
+    have hER' :
+        normalizedValue hcross.entropy_reduction.scale_coherence
+            s.restrictToSupport (Channel.restrictToSupport C s) =
+          hcross.entropy_reduction.Hfun s.restrictToSupport -
+            posteriorLawIntegral s.restrictToSupport
+              (Channel.restrictToSupport C s)
+              hcross.entropy_reduction.Hfun := by
+      simpa [normalizedValue] using hER
+    change hcross.entropy_reduction.Hfun s =
+      normalizedValue hcross.entropy_reduction.scale_coherence s C +
+        posteriorLawIntegral s C hcross.entropy_reduction.Hfun
+    rw [hH, hV, hI]
+    linarith
+
+/-- Finite Faddeev recursion for the concrete entropy candidate produced by
+the minimal full pre-entropy closure route. -/
+theorem satisfiesFiniteFaddeevRecursion_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    let hcross :=
+      crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax
+    SatisfiesFiniteFaddeevRecursion hcross.entropy_reduction.Hfun := by
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  let hnorm : FiniteNormalizedValueSupportBoundaryAssumptions.{u} :=
+    normalizedValueSupportBoundary_of_cardinalBoundary hcard
+  let hid : FiniteHfunBoundaryIdentityAssumptions.{u} :=
+    hfunBoundaryIdentity_of_cardinalBoundary hcard
+  let hrestricted : FiniteRestrictedCoarseRevealValueAssumptions.{u} :=
+    restrictedCoarseRevealValue_of_cardinalBoundary hcard
+  let hreg : EntropyRegularity F hcross.entropy_reduction :=
+    entropyRegularity_of_fullPreEntropyClosure_minimal
+      hcard hfaces hhm huniq hprod haff hconv hax
+  let hhfun : FiniteHfunSupportRestrictionAssumptions.{u} :=
+    hfunSupportRestriction_of_boundaryIdentity hnorm hid
+  change SatisfiesFiniteFaddeevRecursion hcross.entropy_reduction.Hfun
+  intro K _ _ _ Act _ _ _ _ p q
+  have hER :=
+    coarseReveal_entropyReduction_of_fullPreEntropyClosure_minimal
+      (hcard := hcard) (hhm := hhm) (huniq := huniq)
+      (haff := haff) (hconv := hconv) (hax := hax)
+      (Act := Act) (p := p) (q := q)
+  have hV :=
+    coarseReveal_value_eq_Hfun_of_axioms
+      hnorm hhfun hrestricted F hax hcross hreg Act p q
+  have hInt :
+      posteriorLawIntegral (sigmaDist p q) (coarseRevealChannel Act)
+          hcross.entropy_reduction.Hfun =
+        ∑ k, p k * hcross.entropy_reduction.Hfun (q k) := by
+    exact posteriorLawIntegral_coarseReveal_sigmaDist_Hfun_of_blockEmbed
+      hcross.entropy_reduction.Hfun Act p q
+      (fun k =>
+        Hfun_blockEmbed_of_fullPreEntropyClosure_minimal
+          (hcard := hcard) (hhm := hhm) (huniq := huniq)
+          (haff := haff) (hconv := hconv) (hax := hax)
+          (Act := Act) (k := k) (q := q k))
+  change hcross.entropy_reduction.Hfun (sigmaDist p q) =
+    hcross.entropy_reduction.Hfun p +
+      ∑ k, p k * hcross.entropy_reduction.Hfun (q k)
+  rw [hER, hV, hInt]
+
+/-- `FaddeevRecursionForm` for the concrete entropy candidate produced by the
+minimal full pre-entropy closure route. -/
+theorem faddeevRecursionForm_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    let hcross :=
+      crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+        hfaces hhm huniq hprod haff hconv hax
+    FaddeevRecursionForm F hcross.entropy_reduction := by
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  exact
+    { regularity :=
+        entropyRegularity_of_fullPreEntropyClosure_minimal
+          hcard hfaces hhm huniq hprod haff hconv hax
+      grouping_recursion :=
+        satisfiesFiniteFaddeevRecursion_of_fullPreEntropyClosure_minimal
+          (hcard := hcard) (hhm := hhm) (huniq := huniq)
+          (haff := haff) (hconv := hconv) (hax := hax) }
+
+/-- `FaddeevEntropyForm` for the concrete entropy candidate produced by the
+minimal full pre-entropy closure route.  The only Faddeev/Shannon input is the
+classical finite Faddeev theorem interface. -/
+noncomputable def FaddeevEntropyForm_of_fullPreEntropyClosure_minimal
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    FaddeevEntropyForm F := by
+  let hcross :=
+    crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal
+      hfaces hhm huniq hprod haff hconv hax
+  let hrecForm : FaddeevRecursionForm F hcross.entropy_reduction :=
+    faddeevRecursionForm_of_fullPreEntropyClosure_minimal
+      (hcard := hcard) (hhm := hhm) (huniq := huniq)
+      (haff := haff) (hconv := hconv) (hax := hax)
+  let hex := hfad.of_recursion F hrecForm
+  let alpha := Classical.choose hex
+  have hspec := Classical.choose_spec hex
+  have hH :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A),
+        hcross.entropy_reduction.Hfun q = alpha * H(q) :=
+    hspec.2
+  have hHfun_pos :
+      0 < hcross.entropy_reduction.Hfun
+        (Dist.uniform (A := ULift.{u, 0} Bool)) :=
+    uniform_ulift_bool_Hfun_pos_of_A1 F hax hcross hrecForm
+  exact
+    { cross_prior := hcross
+      alpha := alpha
+      alpha_pos :=
+        alpha_strict_pos_of_positive_Hfun_witness
+          F hax hcross hrecForm hHfun_pos alpha hH
+      H_eq_alpha_shannon := hH
+      a3_block_equivalence := a3_block_equivalence_of_traceAxioms F hax }
+
+/-- Same Faddeev/Shannon interface as
+`FaddeevEntropyForm_of_fullPreEntropyClosure_minimal`, with affine uniqueness
+filled by the internal finite uniqueness theorem. -/
+noncomputable def FaddeevEntropyForm_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    FaddeevEntropyForm F :=
+  FaddeevEntropyForm_of_fullPreEntropyClosure_minimal
+    (hcard := hcard) (hfad := hfad) (hhm := hhm)
+    (huniq := classicalFiniteAffineUtilityUniquenessAssumptions)
+    (haff := haff) (hconv := hconv) (hax := hax)
+
+/-- Full-support MI representation package obtained from the closed
+pre-entropy spine and the classical finite Faddeev theorem interface. -/
+theorem fullSupportSufficiencyMIPackage_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    FullSupportSufficiencyMIPackage F :=
+  FullSupportSufficiencyMIPackage_of_FaddeevEntropyForm F
+    (FaddeevEntropyForm_of_fullPreEntropyClosure_minimal_internalUniqueness
+      (hcard := hcard) (hfad := hfad) (hhm := hhm)
+      (haff := haff) (hconv := hconv) (hax := hax))
+
+/-- Full-support block MI representation package obtained from the closed
+pre-entropy spine and the classical finite Faddeev theorem interface. -/
+theorem fullSupportBlockMI_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    FullSupportBlockMI F :=
+  FullSupportBlockMI_of_FaddeevEntropyForm F
+    (FaddeevEntropyForm_of_fullPreEntropyClosure_minimal_internalUniqueness
+      (hcard := hcard) (hfad := hfad) (hhm := hhm)
+      (haff := haff) (hconv := hconv) (hax := hax))
+
+/-- Boundary extension for MI representation obtained internally from the
+support-restriction theorem and the full-support block MI package. -/
+theorem fullSupportMIRepExtendsToBoundary_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    FullSupportMIRepExtendsToBoundary F :=
+  FullSupportMIRepExtendsToBoundary_of_supportRestriction F
+    (fullSupportBlockMI_of_fullPreEntropyClosure_minimal_internalUniqueness
+      (hcard := hcard) (hfad := hfad) (hhm := hhm)
+      (haff := haff) (hconv := hconv) (hax := hax))
+
+/-- Final sufficiency package obtained from the closed pre-entropy spine,
+internal boundary extension, and the classical finite Faddeev theorem
+interface. -/
+theorem sufficiencyMIPackage_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    SufficiencyMIPackage F :=
+  (fullSupportMIRepExtendsToBoundary_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard := hcard) (hfad := hfad) (hhm := hhm)
+    (haff := haff) (hconv := hconv) (hax := hax))
+    hax
+    (fullSupportSufficiencyMIPackage_of_fullPreEntropyClosure_minimal_internalUniqueness
+      (hcard := hcard) (hfad := hfad) (hhm := hhm)
+      (haff := haff) (hconv := hconv) (hax := hax))
+
+/-- Final mutual-information representation obtained from the closed
+pre-entropy spine and the classical finite Faddeev theorem interface. -/
+theorem MIRep_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard : FiniteCardinalSupportBoundaryAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    MIRep F :=
+  MIRep_of_SufficiencyMIPackage F
+    (sufficiencyMIPackage_of_fullPreEntropyClosure_minimal_internalUniqueness
+      (hcard := hcard) (hfad := hfad) (hhm := hhm)
+      (haff := haff) (hconv := hconv) (hax := hax))
+
+/-- Left-slice affine transform for the selected face-scale representative
+from HM public-mixture affinity, A8 same-order transport, internal finite
+affine-utility uniqueness, and the singleton slice convention. -/
+theorem finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces) :
+    FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces :=
+  faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
+    (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
+    (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
+    (faceScaleProductLeftSliceSameOrder_of_A8 hfaces)
+    hsingle
+    classicalFiniteAffineUtilityUniquenessAssumptions
+
+/-- Harmless conventions still needed after the final MI assembly.
+
+The pre-entropy representative/gauge bundle fixes support-face representatives,
+product-reference `Z`, and singleton universal scale.  The singleton slice field
+fixes the degenerate one-action left-slice affine normalization.  The boundary
+field fixes the support-restricted representative used after deleting
+zero-probability actions. -/
+structure FinalHarmlessConventions
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces) : Prop where
+  singleton_slice :
+    FiniteFaceScaleSingletonSliceAffineConventionFor hfaces
+  pre_entropy :
+    PreEntropyRepresentativeGaugeConventions hfaces hprod
+  support_boundary :
+    FiniteCardinalSupportBoundaryAssumptions.{u}
+
+/-- Affine linear-part package supplied by the HM component of the final
+interface. -/
+noncomputable def affineLinearPart_of_FinalHMInterface
+    (hhm : FinalHMInterface.{u}) :
+    FiniteAffineLinearPartAssumptions.{u} :=
+  finiteAffineLinearPartAssumptions_of_HM
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+
+/-- Posterior integral representation supplied by the HM component of the
+final interface. -/
+noncomputable def posteriorIntegralRepresentation_of_FinalHMInterface
+    (hhm : FinalHMInterface.{u}) :
+    FinitePosteriorIntegralRepresentationAssumptions.{u} :=
+  finitePosteriorIntegralRepresentation_of_HM
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+
+/-- Boundary linear-part transport from the HM integral representation plus the
+support-face marginal-value transport convention. -/
+theorem boundaryLinearPartTransport_of_FinalHM_marginalConvention
+    (hhm : FinalHMInterface.{u})
+    (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
+    (hmarginal :
+      FiniteSupportFaceMarginalValueTransportConvention
+        (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+        hboundary) :
+    FiniteBoundaryLinearPartTransportAssumptions
+      (affineLinearPart_of_FinalHMInterface hhm)
+      hboundary :=
+  boundaryLinearPartTransport_of_integralRepresentation
+    (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+    hboundary hmarginal
+
+/-- Faithful branch package with the internal HM/finite-linear-algebra fields
+filled automatically.
+
+The remaining inputs are exactly the boundary/support representative choices
+and the boundary/singleton scale-factorization transports.  This exposes more
+of the proof order than passing an opaque `FiniteFaithfulBranchAggregationAssumptions`
+bundle. -/
+noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_components
+    (hhm : FinalHMInterface.{u})
+    (hatomic : FiniteAtomicPosteriorTangentSpanningAssumptions.{u})
+    (hsupportFace : FiniteSupportFaceRepresentativeConventionAssumptions.{u})
+    (hboundaryCoeff : FiniteBoundaryCoefficientScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hmarginal :
+      FiniteSupportFaceMarginalValueTransportConvention
+        (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+        (boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff))
+    (hboundaryScale :
+      ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+        (hV : PosteriorValueRepresentation F),
+        let hlin := affineLinearPart_of_FinalHMInterface hhm
+        let hpath :=
+          branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+            hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+            (atomicLinearTangentSpanning_of_atomic hatomic) F hax hV
+        let hboundary :=
+          boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff
+        let hvalue :=
+          boundaryValueTransport_of_supportFaceRepresentativeConvention
+            hsupportFace
+        let hcoeff :=
+          boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+            (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+              hhm hboundary hmarginal)
+        FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+          (faithfulBranchAggregationStructure_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+          (faithfulBranchFullSupportScale_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff))
+    (hsingleScale :
+      ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+        (hV : PosteriorValueRepresentation F),
+        let hlin := affineLinearPart_of_FinalHMInterface hhm
+        let hpath :=
+          branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+            hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+            (atomicLinearTangentSpanning_of_atomic hatomic) F hax hV
+        let hboundary :=
+          boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff
+        let hvalue :=
+          boundaryValueTransport_of_supportFaceRepresentativeConvention
+            hsupportFace
+        let hcoeff :=
+          boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+            (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+              hhm hboundary hmarginal)
+        FiniteBranchScaleFactorizationSingletonConvention
+          (faithfulBranchAggregationStructure_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+          (faithfulBranchFullSupportScale_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)) :
+    FiniteFaithfulBranchAggregationAssumptions.{u} where
+  linear_part := affineLinearPart_of_FinalHMInterface hhm
+  tangent_spanning := atomicLinearTangentSpanning_of_atomic hatomic
+  same_sign_scalar := finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+  support_face_rep := hsupportFace
+  boundary_coeff_scale := hboundaryCoeff
+  singleton_scale := hsingle
+  boundary_linear_transport :=
+    boundaryLinearPartTransport_of_FinalHM_marginalConvention
+      hhm (boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff)
+      hmarginal
+  boundary_scale_factorization := hboundaryScale
+  singleton_scale_factorization := hsingleScale
+
+/-- Faithful branch package from the final HM interface and explicit
+support/boundary conventions, with finite atomic tangent spanning discharged by
+the internal theorem `finiteAtomicPosteriorTangentSpanning`. -/
+noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_conventions
+    (hhm : FinalHMInterface.{u})
+    (hsupportFace : FiniteSupportFaceRepresentativeConventionAssumptions.{u})
+    (hboundaryCoeff : FiniteBoundaryCoefficientScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hmarginal :
+      FiniteSupportFaceMarginalValueTransportConvention
+        (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+        (boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff))
+    (hboundaryScale :
+      ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+        (hV : PosteriorValueRepresentation F),
+        let hlin := affineLinearPart_of_FinalHMInterface hhm
+        let hpath :=
+          branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+            hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+            (atomicLinearTangentSpanning_of_atomic
+              finiteAtomicPosteriorTangentSpanning) F hax hV
+        let hboundary :=
+          boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff
+        let hvalue :=
+          boundaryValueTransport_of_supportFaceRepresentativeConvention
+            hsupportFace
+        let hcoeff :=
+          boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+            (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+              hhm hboundary hmarginal)
+        FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+          (faithfulBranchAggregationStructure_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+          (faithfulBranchFullSupportScale_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff))
+    (hsingleScale :
+      ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+        (hV : PosteriorValueRepresentation F),
+        let hlin := affineLinearPart_of_FinalHMInterface hhm
+        let hpath :=
+          branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+            hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+            (atomicLinearTangentSpanning_of_atomic
+              finiteAtomicPosteriorTangentSpanning) F hax hV
+        let hboundary :=
+          boundaryFaceScale_of_coefficientScaleConvention hboundaryCoeff
+        let hvalue :=
+          boundaryValueTransport_of_supportFaceRepresentativeConvention
+            hsupportFace
+        let hcoeff :=
+          boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+            (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+              hhm hboundary hmarginal)
+        FiniteBranchScaleFactorizationSingletonConvention
+          (faithfulBranchAggregationStructure_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+          (faithfulBranchFullSupportScale_of_components
+            F hax hV hlin hpath hboundary hsingle hvalue hcoeff)) :
+    FiniteFaithfulBranchAggregationAssumptions.{u} :=
+  faithfulBranchAggregationAssumptions_of_FinalHM_components
+    hhm finiteAtomicPosteriorTangentSpanning
+    hsupportFace hboundaryCoeff hsingle hmarginal
+    hboundaryScale hsingleScale
+
+/-- Harmless support/boundary/singleton conventions needed to build the
+faithful branch package from the data-carrying HM interface.
+
+These fields only choose support-face representatives, boundary coefficient
+scales, singleton normalisations, and the corresponding support-restricted
+scale transports; the finite tangent-spanning and same-sign linear-algebra
+content is proved internally. -/
+structure FinalFaithfulBranchConventions
+    (hhm : FinalHMInterface.{u}) where
+  support_face : FiniteSupportFaceRepresentativeConventionAssumptions.{u}
+  boundary_coeff : FiniteBoundaryCoefficientScaleConventionAssumptions.{u}
+  singleton_scale : FiniteBranchSingletonScaleConventionAssumptions.{u}
+  marginal_value :
+    FiniteSupportFaceMarginalValueTransportConvention
+      (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+      (boundaryFaceScale_of_coefficientScaleConvention boundary_coeff)
+  boundary_scale :
+    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+      (hV : PosteriorValueRepresentation F),
+      let hlin := affineLinearPart_of_FinalHMInterface hhm
+      let hpath :=
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+          hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+          (atomicLinearTangentSpanning_of_atomic
+            finiteAtomicPosteriorTangentSpanning) F hax hV
+      let hboundary :=
+        boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+      let hvalue :=
+        boundaryValueTransport_of_supportFaceRepresentativeConvention
+          support_face
+      let hcoeff :=
+        boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+          (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+            hhm hboundary marginal_value)
+      FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+        (faithfulBranchAggregationStructure_of_components
+          F hax hV hlin hpath hboundary singleton_scale hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_components
+          F hax hV hlin hpath hboundary singleton_scale hvalue hcoeff)
+  singleton_scale_factorization :
+    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+      (hV : PosteriorValueRepresentation F),
+      let hlin := affineLinearPart_of_FinalHMInterface hhm
+      let hpath :=
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+          hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+          (atomicLinearTangentSpanning_of_atomic
+            finiteAtomicPosteriorTangentSpanning) F hax hV
+      let hboundary :=
+        boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+      let hvalue :=
+        boundaryValueTransport_of_supportFaceRepresentativeConvention
+          support_face
+      let hcoeff :=
+        boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+          (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+            hhm hboundary marginal_value)
+      FiniteBranchScaleFactorizationSingletonConvention
+        (faithfulBranchAggregationStructure_of_components
+          F hax hV hlin hpath hboundary singleton_scale hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_components
+          F hax hV hlin hpath hboundary singleton_scale hvalue hcoeff)
+
+/-- Producer from the explicit faithful-branch convention bundle. -/
+noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+    (hhm : FinalHMInterface.{u})
+    (hconv : FinalFaithfulBranchConventions hhm) :
+    FiniteFaithfulBranchAggregationAssumptions.{u} :=
+  faithfulBranchAggregationAssumptions_of_FinalHM_conventions
+    hhm hconv.support_face hconv.boundary_coeff hconv.singleton_scale
+    hconv.marginal_value hconv.boundary_scale
+    hconv.singleton_scale_factorization
+
+/-- Raw coherent face scales from the data-carrying HM interface and the
+faithful branch/coherent scale components.
+
+This is the formal dependency order used by the paper before product gauge
+normalisation.  It does not assert that an arbitrary already-selected
+`hfaces` is product-normalised. -/
+noncomputable def rawCoherentFaceScales_of_FinalHM_faithfulBranch
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hscaleRelabel :
+      FiniteChainScaleRelabelingAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hfaceScale :
+      FiniteSupportFaceScaleAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax))) :
+    CoherentRelabelingFaceScalesStructure F :=
+  CoherentRelabelingFaceScales_of_faithfulBranch
+    hfaith F hax
+    (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    hscaleRelabel hfaceScale
+
+/-- Coherent face scales obtained by applying a positive gauge directly to the
+faithful branch/cocycle/scale package, then proving the transformed scale
+relabeling and support-face equations.
+
+This is closer to the paper's proof order than first requiring raw face scales
+to be coherent: the gauge choice itself is what fixes the coherent
+representative. -/
+noncomputable def coherentFaceScales_of_FinalHM_positiveGauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport)) :
+    CoherentRelabelingFaceScalesStructure F :=
+  CoherentRelabelingFaceScales_of_positiveGaugeBranch
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax))
+    hgauge hrel hsupport
+
+/-- Product quasi-additivity for a face-scale representative built by the
+positive-gauge branch route. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_positiveGauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor hpair)
+    (hassoc :
+      FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair)
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor hpair) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport) :=
+  productQuasiAdditivityForFaceScales_of_finalProductComponents
+    hpair hcurrentGauge hassoc hsingle
+
+/-- Product quasi-additivity for a positive-gauge representative, using
+value-level triple-product associativity as the source of the interaction
+associativity equations. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductData
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor hpair) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport) :=
+  productQuasiAdditivity_of_FinalHM_positiveGauge
+    hhm hfaith hax hgauge hrel hsupport hpair hcurrentGauge
+    (faceScaleProductInteractionAssociativity_of_valueAssociativity_currentGauge
+      hcurrentGauge htriple)
+    hsingle
+
+/-- Product quasi-additivity for a positive-gauge representative from the
+source product-data fields: the left-slice affine transform is supplied by HM,
+and pairwise bilinearity is reconstructed from intercept linearity and slope
+affinity. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hintercept :
+      FiniteFaceScaleProductInterceptPositiveLinearAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hslope :
+      FiniteFaceScaleProductSlopeAffineAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope))
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope)) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport) :=
+  productQuasiAdditivity_of_FinalHM_positiveGaugeProductData
+    hhm hfaith hax hgauge hrel hsupport
+    (faceScaleProductPairwiseBilinearity_of_multiPieces
+      (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+        (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+          hhm)
+        hsingleSlice)
+      hintercept hslope)
+    hcurrentGauge htriple hsingleInteraction
+
+/-- Intercept positive-linearity for the constructed positive-gauge
+representative, derived from the HM left-slice theorem, A8 intercept
+same-order, HM public-mix affinity, and internal finite affine-utility
+uniqueness. -/
+theorem productInterceptPositiveLinear_of_FinalHM_positiveGauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport)) :
+    FiniteFaceScaleProductInterceptPositiveLinearAssumptionsFor
+      (faceScaleProductLeftSliceAffine_of_transform
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          hsingleSlice)) :=
+  faceScaleProductInterceptPositiveLinear_of_order_affinity_uniqueness
+    (faceScaleProductInterceptSameOrder_of_A8
+      (faceScaleProductLeftSliceAffine_of_transform
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          hsingleSlice)))
+    (faceScaleProductInterceptPublicMixAffinity_of_HM
+      (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+      (faceScaleProductLeftSliceAffine_of_transform
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          hsingleSlice)))
+    (classicalFaceScaleSecondCoordinateAffineUniqueness_of_finiteAffineUtility
+      (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+      (faceScaleProductLeftSliceAffine_of_transform
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          hsingleSlice))
+      classicalFiniteAffineUtilityUniquenessAssumptions)
+
+/-- Face-scale product-swap value equality from selected value relabeling.
+
+This is the selected-representative replacement for
+`faceScaleProduct_value_swap_eq_of_value_relabeling`: it does not consume the
+obsolete all-representatives relabeling package. -/
+theorem faceScaleProduct_value_swap_eq_of_selectedRelabeling
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
+    (hax : TraceAxioms F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B) (P : Channel A O) (R : Channel B Y) :
+    hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel P R)) =
+      hfaces.branch_result.branch_agg.value_rep.V (prodDist r q)
+        (experimentOfChannel (prodChannel R P)) := by
+  have hrel :=
+    hsel.V_relabel_eq hax
+      (Equiv.prodComm A B) (Equiv.prodComm O Y)
+      (prodDist q r) (prodChannel P R)
+  have hrel' :
+      hfaces.branch_result.branch_agg.value_rep.V (prodDist r q)
+          (experimentOfChannel (prodChannel R P)) =
+        hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+          (experimentOfChannel (prodChannel P R)) := by
+    simpa [relabelDist_prodComm q r, relabelChannel_prodComm P R] using hrel
+  exact hrel'.symm
+
+/-- Product-slope affinity from selected relabeling.
+
+This is the same coefficient-swap argument as
+`faceScaleProductSlopeAffine_of_HM_A8_relabeling`, but it uses the selected
+product-normalized representative instead of the obsolete broad relabeling
+interface. -/
+theorem faceScaleProductSlopeAffine_of_selectedRelabeling
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
+    {hslice : FiniteFaceScaleProductLeftSliceAffineAssumptionsFor hfaces}
+    (hlin :
+      FiniteFaceScaleProductInterceptPositiveLinearAssumptionsFor hslice) :
+    FiniteFaceScaleProductSlopeAffineAssumptionsFor hslice where
+  slope_affine_in_second_value := by
+    intro hax A B _ _ _ _ _ _ q r hq hr hA
+    classical
+    have hHq :
+        hfaces.branch_result.branch_agg.value_rep.V q
+          (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
+      faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hA
+    obtain ⟨Bqr, _hBqr_pos, hBqr⟩ := hlin.intercept_positive_linear hax q r hq hr
+    obtain ⟨Brq, hBrq_pos, hBrq⟩ := hlin.intercept_positive_linear hax r q hr hq
+    refine ⟨Brq,
+      (hslice.leftSliceSlope hax r q (Channel.idChannel : Channel A A) - Bqr) /
+        hfaces.branch_result.branch_agg.value_rep.V q
+          (experimentOfChannel (Channel.idChannel : Channel A A)),
+      hBrq_pos, ?_⟩
+    intro Y _ _ R
+    have h1 :=
+      hslice.left_slice_affine hax q r hq hr
+        (Channel.idChannel : Channel A A) R
+    have h2 :=
+      faceScaleProduct_value_swap_eq_of_selectedRelabeling hsel hax
+        q r (Channel.idChannel : Channel A A) R
+    have h3 :=
+      hslice.left_slice_affine hax r q hr hq R
+        (Channel.idChannel : Channel A A)
+    have hIqr := hBqr R
+    have hIrq := hBrq (Channel.idChannel : Channel A A)
+    have key :
+        hslice.leftSliceSlope hax q r R *
+            hfaces.branch_result.branch_agg.value_rep.V q
+              (experimentOfChannel (Channel.idChannel : Channel A A)) =
+          hslice.leftSliceSlope hax r q (Channel.idChannel : Channel A A) *
+              hfaces.branch_result.branch_agg.value_rep.V r
+                (experimentOfChannel R) +
+            Brq * hfaces.branch_result.branch_agg.value_rep.V q
+              (experimentOfChannel (Channel.idChannel : Channel A A)) -
+            Bqr * hfaces.branch_result.branch_agg.value_rep.V r
+              (experimentOfChannel R) := by
+      have hchain := h1.symm.trans (h2.trans h3)
+      rw [hIqr, hIrq] at hchain
+      linarith [hchain]
+    have hgoal :
+        hslice.leftSliceSlope hax q r R =
+          Brq +
+            (hslice.leftSliceSlope hax r q (Channel.idChannel : Channel A A) - Bqr) /
+              hfaces.branch_result.branch_agg.value_rep.V q
+                (experimentOfChannel (Channel.idChannel : Channel A A)) *
+              hfaces.branch_result.branch_agg.value_rep.V r
+                (experimentOfChannel R) := by
+      field_simp
+      linear_combination key
+    exact hgoal
+
+/-- Product quasi-additivity for a positive-gauge representative with the
+intercept positive-linearity field discharged internally. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hslope :
+      FiniteFaceScaleProductSlopeAffineAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm hfaith hax hgauge hrel hsupport hsingleSlice)
+          hslope))
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm hfaith hax hgauge hrel hsupport hsingleSlice)
+          hslope)) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport) :=
+  productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData
+    hhm hfaith hax hgauge hrel hsupport hsingleSlice
+    (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+      hhm hfaith hax hgauge hrel hsupport hsingleSlice)
+    hslope hcurrentGauge htriple hsingleInteraction
+
+/-- Product quasi-additivity for a positive-gauge representative whose selected
+representatives have already been product-normalized.
+
+The product-normalized selected representative package supplies selected value
+relabeling; selected relabeling supplies both the product-swap slope proof and
+triple-product value associativity.  Thus this constructor no longer takes the
+obsolete all-representatives relabeling package, an explicit slope-affinity
+field, or an explicit triple-product associativity field. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hnorm :
+      FiniteProductNormalizedSelectedRepresentativesFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm hfaith hax hgauge hrel hsupport hsingleSlice)
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+              hnorm)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm hfaith hax hgauge hrel hsupport hsingleSlice))))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm hfaith hax hgauge hrel hsupport hsingleSlice)
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+              hnorm)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm hfaith hax hgauge hrel hsupport hsingleSlice)))) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport) :=
+  productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
+    hhm hfaith hax hgauge hrel hsupport hsingleSlice
+    (faceScaleProductSlopeAffine_of_selectedRelabeling
+      (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+        hnorm)
+      (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport hsingleSlice))
+    hcurrentGauge
+    (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport)
+      (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+        hnorm))
+    hsingleInteraction
+
+/-- Product-normalised coherent face scales obtained by applying the selected
+positive product gauge to the raw coherent representatives. -/
+noncomputable def productNormalizedFaceScales_of_FinalHM_gauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hscaleRelabel :
+      FiniteChainScaleRelabelingAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hfaceScale :
+      FiniteSupportFaceScaleAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair) :
+    CoherentRelabelingFaceScalesStructure F :=
+  (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+    hhm hfaith hax hscaleRelabel hfaceScale).gaugeTransform hgauge.gauge
+
+/-- Product quasi-additivity for the product-gauge-normalised representatives.
+
+The product quasi-additivity package is constructed for the transformed
+witness, not required for arbitrary raw face scales. -/
+noncomputable def productQuasiAdditivity_of_FinalHM_gauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hscaleRelabel :
+      FiniteChainScaleRelabelingAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hfaceScale :
+      FiniteSupportFaceScaleAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_gaugeTransform
+          hpair hgauge.gauge)) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (productNormalizedFaceScales_of_FinalHM_gauge
+        hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge) :=
+  productQuasiAdditivityForFaceScales_of_gaugeTransformedProductData
+    hpair hgauge htriple hsingle
+
+/-- Existential form of the corrected product-normalised representative
+construction.
+
+The witnesses are the post-gauge face-scale representatives and their product
+quasi-additivity package.  This is the target shape needed to avoid the false
+claim that every arbitrary coherent representative is already normalised. -/
+theorem existsProductNormalizedFaceScales_of_FinalHM_gauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hscaleRelabel :
+      FiniteChainScaleRelabelingAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hfaceScale :
+      FiniteSupportFaceScaleAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_gaugeTransform
+          hpair hgauge.gauge))
+    (hconv :
+      FinalHarmlessConventions
+        (productNormalizedFaceScales_of_FinalHM_gauge
+          hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge)
+        (productQuasiAdditivity_of_FinalHM_gauge
+          hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge
+          htriple hsingle)) :
+    ∃ hfaces : CoherentRelabelingFaceScalesStructure F,
+      ∃ hprod : FiniteProductQuasiAdditivityForFaceScales hfaces,
+        FinalHarmlessConventions hfaces hprod :=
+  ⟨productNormalizedFaceScales_of_FinalHM_gauge
+      hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge,
+    productQuasiAdditivity_of_FinalHM_gauge
+      hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge htriple hsingle,
+    hconv⟩
+
+/-- Cleanest currently valid final wrapper.
+
+This wrapper discharges the left-slice affine input internally and bundles only
+the harmless singleton, representative/gauge, and support-boundary conventions.
+The face-scale structure and product quasi-additivity remain explicit because
+the current Lean development has no producer for them from just
+`TraceAxioms F` and HM. -/
+theorem MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (hconv : FinalHarmlessConventions hfaces hprod)
+    (hax : TraceAxioms F) :
+    MIRep F :=
+  MIRep_of_fullPreEntropyClosure_minimal_internalUniqueness
+    (hcard := hconv.support_boundary)
+    (hfad := hfad)
+    (hhm := hhm)
+    (haff := finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+      hhm hconv.singleton_slice)
+    (hconv := hconv.pre_entropy)
+    (hax := hax)
+
+/-- Final MI route through an explicitly constructed product-normalised
+face-scale representative.
+
+The theorem no longer takes `hfaces` or `hprod` as standalone inputs.  It first
+constructs the raw face-scale representative from the data-carrying HM
+interface and faithful branch/coherent-scale components, applies the selected
+positive product gauge, constructs product quasi-additivity for that
+post-gauge representative, and then calls the existing Stage-F MI theorem. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConstructedPreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hscaleRelabel :
+      FiniteChainScaleRelabelingAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hfaceScale :
+      FiniteSupportFaceScaleAssumptionsFor
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (rawCoherentFaceScales_of_FinalHM_faithfulBranch
+          hhm hfaith hax hscaleRelabel hfaceScale))
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_gaugeTransform
+          hpair hgauge.gauge))
+    (hconv :
+      FinalHarmlessConventions
+        (productNormalizedFaceScales_of_FinalHM_gauge
+          hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge)
+        (productQuasiAdditivity_of_FinalHM_gauge
+          hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge
+          htriple hsingle)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (productNormalizedFaceScales_of_FinalHM_gauge
+      hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_gauge
+        hhm hfaith hax hscaleRelabel hfaceScale hpair hgauge
+        htriple hsingle)
+    hconv hax
+
+/-- Final MI route through the corrected "choose gauge, then name the coherent
+face scales" dependency order.
+
+Compared with `MIRep_of_TraceAxioms_FinalHM_Faddeev_withConstructedPreEntropy`,
+this theorem does not require raw chain-scale relabelling or raw support-face
+scale compatibility.  Instead, it starts from the faithful branch/cocycle/scale
+package and a positive gauge whose transformed scale satisfies those two
+coherence equations. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withPositiveGaugePreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hcurrentGauge : FiniteFaceScaleProductGaugeConventionFor hpair)
+    (hassoc :
+      FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair)
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor hpair)
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport
+          hpair hcurrentGauge hassoc hsingle)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (coherentFaceScales_of_FinalHM_positiveGauge
+      hhm hfaith hax hgauge hrel hsupport)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_positiveGauge
+        hhm hfaith hax hgauge hrel hsupport
+        hpair hcurrentGauge hassoc hsingle)
+    hconv hax
+
+/-- Final MI route through the corrected positive-gauge dependency order, with
+product interaction associativity derived internally from value-level
+triple-product associativity. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withPositiveGaugeProductData
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hpair :
+      FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hcurrentGauge : FiniteFaceScaleProductGaugeConventionFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hsingle :
+      FiniteFaceScaleSingletonInteractionConventionFor hpair)
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGaugeProductData
+          hhm hfaith hax hgauge hrel hsupport
+          hpair hcurrentGauge htriple hsingle)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (coherentFaceScales_of_FinalHM_positiveGauge
+      hhm hfaith hax hgauge hrel hsupport)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_positiveGaugeProductData
+        hhm hfaith hax hgauge hrel hsupport
+        hpair hcurrentGauge htriple hsingle)
+    hconv hax
+
+/-- Final MI route through positive-gauge source product data.  This theorem
+does not take `hfaces`, `hprod`, or the opaque pairwise-bilinearity package as
+inputs: the face scales are constructed from the positive gauge, product
+quasi-additivity is reconstructed from HM left-slice affinity plus
+intercept/slope product data, and then the existing Stage-F theorem is applied.
+-/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withPositiveGaugeSourceProductData
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hintercept :
+      FiniteFaceScaleProductInterceptPositiveLinearAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hslope :
+      FiniteFaceScaleProductSlopeAffineAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope))
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope))
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm hfaith hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData
+          hhm hfaith hax hgauge hrel hsupport hsingleSlice
+          hintercept hslope hcurrentGauge htriple hsingleInteraction)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (coherentFaceScales_of_FinalHM_positiveGauge
+      hhm hfaith hax hgauge hrel hsupport)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData
+        hhm hfaith hax hgauge hrel hsupport hsingleSlice
+        hintercept hslope hcurrentGauge htriple hsingleInteraction)
+    hconv hax
+
+/-- Final MI route with the faithful branch package constructed from explicit
+support/boundary/singleton conventions, and product quasi-additivity
+constructed from positive-gauge source product data.
+
+This is the strongest current theorem in this file: it does not take
+`hfaces`, `hprod`, `hfaith`, or `hpair` as standalone inputs. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withBranchConventionsAndPositiveGaugeSourceProductData
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hintercept :
+      FiniteFaceScaleProductInterceptPositiveLinearAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hslope :
+      FiniteFaceScaleProductSlopeAffineAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope))
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          hintercept hslope))
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport hsingleSlice
+          hintercept hslope hcurrentGauge htriple hsingleInteraction)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_withPositiveGaugeSourceProductData
+    hfad hhm
+    (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+      hhm hbranchConv)
+    hax hgauge hrel hsupport hsingleSlice
+    hintercept hslope hcurrentGauge htriple hsingleInteraction hconv
+
+/-- Final MI route with faithful branch conventions and positive-gauge product
+data, with product intercept positive-linearity discharged internally. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withBranchConventionsAndPositiveGaugeProductData_internalIntercept
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hslope :
+      FiniteFaceScaleProductSlopeAffineAssumptionsFor
+        (faceScaleProductLeftSliceAffine_of_transform
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm hbranchConv)
+            hax hgauge hrel hsupport hsingleSlice)
+          hslope))
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm hbranchConv)
+            hax hgauge hrel hsupport hsingleSlice)
+          hslope))
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport hsingleSlice
+          hslope hcurrentGauge htriple hsingleInteraction)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (coherentFaceScales_of_FinalHM_positiveGauge
+      hhm
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+        hhm hbranchConv)
+      hax hgauge hrel hsupport)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm hbranchConv)
+        hax hgauge hrel hsupport hsingleSlice
+        hslope hcurrentGauge htriple hsingleInteraction)
+    hconv hax
+
+/-- Final MI route through constructed positive-gauge face scales and
+product-normalized selected representatives.
+
+Compared with
+`MIRep_of_TraceAxioms_FinalHM_Faddeev_withBranchConventionsAndPositiveGaugeProductData_internalIntercept`,
+this theorem no longer asks for product-slope affinity or triple-product value
+associativity.  Both are derived from the selected relabeling package obtained
+from `FiniteProductNormalizedSelectedRepresentativesFor`. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                  hhm hbranchConv)
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hsingleSlice :
+      FiniteFaceScaleSingletonSliceAffineConventionFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hnorm :
+      FiniteProductNormalizedSelectedRepresentativesFor
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport))
+    (hcurrentGauge :
+      FiniteFaceScaleProductGaugeConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm hbranchConv)
+            hax hgauge hrel hsupport hsingleSlice)
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+              hnorm)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              hax hgauge hrel hsupport hsingleSlice))))
+    (hsingleInteraction :
+      FiniteFaceScaleSingletonInteractionConventionFor
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+              hhm)
+            hsingleSlice)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm hbranchConv)
+            hax hgauge hrel hsupport hsingleSlice)
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+              hnorm)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm hbranchConv)
+              hax hgauge hrel hsupport hsingleSlice))))
+    (hconv :
+      FinalHarmlessConventions
+        (coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport)
+        (productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm hbranchConv)
+          hax hgauge hrel hsupport hsingleSlice hnorm
+          hcurrentGauge hsingleInteraction)) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
+    hfad
+    (coherentFaceScales_of_FinalHM_positiveGauge
+      hhm
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+        hhm hbranchConv)
+      hax hgauge hrel hsupport)
+    (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+    (hprod :=
+      productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm hbranchConv)
+        hax hgauge hrel hsupport hsingleSlice hnorm
+        hcurrentGauge hsingleInteraction)
+    hconv hax
+
+/-- Final harmless representative/gauge/support conventions for the constructed
+pre-entropy route.
+
+The bundle is deliberately dependent on the data-carrying HM interface and the
+primitive trace axioms because the selected face-scale representative is
+constructed from them before the product-normalising gauge is chosen.  It does
+not contain `hfaces` or `hprod` as fields; those are reconstructed from the
+preceding fields. -/
+structure FinalConstructedRepresentativeConventions
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  branch : FinalFaithfulBranchConventions hhm
+  gauge : PositiveFaceScaleGauge.{u}
+  scale_relabel :
+    ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+      gauge.gauge (Relabeling.relabelDist e q) *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).scale_factorization.scale (Relabeling.relabelDist e q) =
+        gauge.gauge q *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).scale_factorization.scale q
+  support_scale :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+      [Nonempty (supportSubtype r)]
+      (_hr_nonempty : ∃ a : A, 0 < r a)
+      (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hr_boundary : ¬ r.FullSupport),
+      (gauge.gauge q / gauge.gauge r) *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).branch_agg.branchCoeff q r =
+        (gauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm branch)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q) /
+          (gauge.gauge r.restrictToSupport *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm branch)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale r.restrictToSupport)
+  singleton_slice :
+    FiniteFaceScaleSingletonSliceAffineConventionFor
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax gauge scale_relabel support_scale)
+  product_normalized :
+    FiniteProductNormalizedSelectedRepresentativesFor
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax gauge scale_relabel support_scale)
+  current_product_gauge :
+    FiniteFaceScaleProductGaugeConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          singleton_slice)
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax gauge scale_relabel support_scale singleton_slice)
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+            product_normalized)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale singleton_slice)))
+  singleton_interaction :
+    FiniteFaceScaleSingletonInteractionConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          singleton_slice)
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax gauge scale_relabel support_scale singleton_slice)
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+            product_normalized)
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale singleton_slice)))
+  harmless :
+    FinalHarmlessConventions
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax gauge scale_relabel support_scale)
+      (productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax gauge scale_relabel support_scale singleton_slice
+        product_normalized current_product_gauge singleton_interaction)
+
+/-- Clean final route through the constructed product-normalised representative.
+
+This is the exported theorem matching the corrected TeX dependency order:
+`TraceAxioms + HM data + Faddeev + harmless representative/gauge/support
+conventions` produce `MIRep F`.  The coherent face-scale representative and its
+product quasi-additivity proof are constructed internally and are not theorem
+inputs. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hconv : FinalConstructedRepresentativeConventions hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
+    hfad hhm hconv.branch hax hconv.gauge hconv.scale_relabel
+    hconv.support_scale hconv.singleton_slice hconv.product_normalized
+    hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
+
+end TraceableAgency

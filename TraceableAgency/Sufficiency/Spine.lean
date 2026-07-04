@@ -1,0 +1,902 @@
+/-
+Copyright (c) 2026 Daniele Condorelli. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Daniele Condorelli
+-/
+import TraceableAgency.Behaviour.MIPreference
+import TraceableAgency.Main
+import TraceableAgency.External.Blackwell
+import TraceableAgency.External.HersteinMilnor
+
+/-!
+# Sufficiency Proof Spine
+
+This file defines the abstract architecture for the sufficiency direction of
+Theorem 1: TraceAxioms F → MIRep F.
+
+The proof follows the paper's roadmap (empowerment_v5.tex, lines 801-820):
+
+1. **Posterior-law sufficiency**: Block comparisons and Blackwell equivalence
+   imply that only the induced posterior law matters (Lemmas blockcoh--blackwell).
+
+2. **Posterior-separable representation**: Public-coin independence gives affine
+   structure; Herstein--Milnor yields a posterior-separable integral representation
+   (Lemmas plsuff--actionbase).
+
+3. **Branch aggregation**: Branchwise monotonicity (A7) implies cardinal branch
+   aggregation with path-independent coefficients (Lemma branchagg).
+
+4. **Scale coherence**: The branch-coefficient cocycle, normalised chain rule,
+   face-scale alignment, and a two-grouping argument collapse the interaction
+   term to give a universal chain scale (Lemmas chain--scalecoherence).
+
+5. **Entropy reduction and cross-prior bridge**: Full revelation defines entropy,
+   channels have entropy-reduction values, and a separate scaled block bridge
+   handles cross-prior comparisons.
+
+6. **Faddeev**: The derived recursion is Faddeev's, so H = α·Shannon
+   (Lemma faddeevsketch).
+
+7. **Mutual information representation**: Entropy reduction gives MIRep F
+   (Lemma globalsketch).
+
+## External Assumptions
+
+This architecture uses explicit, named external assumptions:
+- Finite Blackwell posterior-law replacement
+- Herstein--Milnor posterior value representation
+- Branch aggregation
+- Scale coherence
+- Entropy reduction
+- Cross-prior block representation
+- Faddeev entropy characterisation
+- Boundary extension from full support
+
+These are NOT proved here but are bundled in documented structures.
+
+## What This File Provides
+
+1. Core sufficiency propositions (interfaces for each proof stage)
+2. `SufficiencyMIPackage`: the final package strong enough to imply MIRep
+3. `MIRep_of_SufficiencyMIPackage`: collapse from α·MI to MI representation
+4. `SufficiencySpineAssumptions`: bridges between stages
+5. `SufficiencyStatement_of_spine`: assembly theorem
+6. Connection to main theorem spine
+-/
+
+set_option linter.style.header false
+
+namespace TraceableAgency
+
+universe u
+
+/-!
+## Auxiliary Definitions for Posterior Laws
+
+These support the sufficiency propositions with meaningful posterior-law concepts.
+-/
+
+/-- The posterior-law integral for an experiment at prior q:
+    ∫ φ(r) dμ_{q,E}(r) = Σ_o m(o) * φ(r_o).
+    This uses the existing FiniteExperimentOn structure. -/
+noncomputable def posteriorLawIntegralExp' {A : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) (φ : Dist A → ℝ) : ℝ :=
+  posteriorLawIntegralExp q E φ
+
+/-- The posterior-law integral as a specific functional for channels:
+    ∫ φ(r) dμ_{q,P}(r) = Σ_o m(o) * φ(r_o).
+    This captures the induced posterior law's integration behavior. -/
+noncomputable def posteriorLawIntegral' {A O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype O] [DecidableEq O]
+    (q : Dist A) (P : Channel A O) (φ : Dist A → ℝ) : ℝ :=
+  ∑ o, (Channel.outcomeMarginal P q) o * φ (Channel.posterior P q o)
+
+/-- Two channels induce the same posterior law at q iff they give the same
+    posterior-law integral for all bounded continuous φ. -/
+def SamePosteriorLaw {A O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (P : Channel A O) (Q : Channel A Y) : Prop :=
+  ∀ φ : Dist A → ℝ, Continuous φ →
+    posteriorLawIntegral' q P φ = posteriorLawIntegral' q Q φ
+
+/-!
+## Auxiliary: Experiment from Channel
+
+Packages a channel into a FiniteExperimentOn structure for use in value functionals.
+-/
+
+/-- Package a channel as a finite experiment.
+    This allows value functionals V : Dist A → FiniteExperimentOn A → ℝ
+    to be evaluated on channels. -/
+def experimentOfChannel {A O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O]
+    (P : Channel A O) : FiniteExperimentOn A :=
+  FiniteExperimentOn.ofChannel P
+
+/-- Alias for the canonical uninformative channel from Basic/Channel.lean.
+    Uses `Channel.uninformativeChannelU` which has outcome type PUnit.{u+1}. -/
+abbrev uninformativeChannelU := @Channel.uninformativeChannelU
+
+/-!
+## Stage 1: Posterior-Law Sufficiency
+
+Paper Lemmas blockcoh--blackwell, plsuff (lines 810-973).
+
+At a full-support prior, experiments with the same posterior law are ranked identically.
+This is the key reduction that makes the comparison depend only on the induced
+distribution of beliefs, not on the specific channel structure.
+
+Note: `PosteriorLawSufficiency` is defined in External/Blackwell.lean along with
+`from_axioms_to_posterior_of_blackwell` which proves it from `FiniteBlackwellPosteriorAssumptions`.
+-/
+
+/-!
+## Stage 2: Posterior-Separable Representation
+
+Paper Lemma postsep (lines 1000-1196).
+
+There exists a value functional V that:
+1. Depends only on the posterior law (respects SamePosteriorLawExp)
+2. Represents the block-comparison preference
+3. Will eventually be shown to be affine (via Herstein--Milnor)
+-/
+
+/--
+**Posterior Value Representation (explicit)**
+
+A real-valued functional V on experiments, carried explicitly (not existentially).
+This allows later stages to reference the same V.
+
+Paper: "There is a continuous affine functional F_q : M_q → ℝ such that
+μ ≽_q ν ↔ F_q(μ) ≥ F_q(ν)"
+-/
+structure PosteriorValueRepresentation (F : PrefFamily.{u}) where
+  /-- The value functional V : (prior, experiment) → ℝ -/
+  V : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+      Dist A → FiniteExperimentOn A → ℝ
+  /-- V respects posterior-law equivalence: same posterior law ⟹ same value -/
+  respects_same_posterior_law :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (E E' : FiniteExperimentOn A),
+      SamePosteriorLawExp q E E' → V q E = V q E'
+  /-- V represents block comparisons at full-support priors -/
+  represents_block_comparisons :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport)
+      (E₁ E₂ : FiniteExperimentOn A),
+      ExperimentPairPref F E₁ E₂ q q ↔ V q E₁ ≥ V q E₂
+  /-- V is zero-normalized: V_q(δ_q) = 0 (no-information value is zero).
+      Paper (line 1204, 1301, 1383): F_q(δ_q) = 0.
+      The no-information experiment is the uninformative channel U_A. -/
+  zero_normalized :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport),
+      V q (experimentOfChannel (uninformativeChannelU A)) = 0
+
+/--
+**Posterior-Separable Representation** (Prop version)
+
+Existence statement: there exists a PosteriorValueRepresentation.
+-/
+def PosteriorSeparableRepresentation (F : PrefFamily.{u}) : Prop :=
+  Nonempty (PosteriorValueRepresentation F)
+
+/--
+**From Posterior-Law Sufficiency to Value Representation via Herstein-Milnor**
+
+This is the second bridge in the sufficiency spine.
+Paper: Lemma postsep (lines 1000-1196).
+
+The proof uses the external Herstein-Milnor assumption to construct
+a PosteriorValueRepresentation from PosteriorLawSufficiency.
+-/
+noncomputable def posteriorValueRep_of_HersteinMilnor
+    (F : PrefFamily.{u})
+    (hhm : FiniteHersteinMilnorAssumptions.{u})
+    (hpls : PosteriorLawSufficiency F) :
+    PosteriorValueRepresentation F where
+  V := fun {A} [Fintype A] [DecidableEq A] [Nonempty A] q E =>
+    hhm.V F hpls q E
+  respects_same_posterior_law := fun {A} [_] [_] [_] q E E' hsame =>
+    hhm.V_respects_same_posterior_law F hpls q E E' hsame
+  represents_block_comparisons := fun {A} [_] [_] [_] q hq E₁ E₂ =>
+    hhm.V_represents_block_comparisons F hpls q hq E₁ E₂
+  zero_normalized := fun {A} [_] [_] [_] q hq => by
+    have h := hhm.V_zero_normalized F hpls q hq
+    have heq : experimentOfChannel (uninformativeChannelU A) = uninformativeExperiment A := by
+      simp only [experimentOfChannel, uninformativeChannelU, uninformativeExperiment,
+                 Channel.uninformativeChannelU, FiniteExperimentOn.ofChannel]
+    rw [heq]
+    exact h
+
+/-- Convert the theorem-shaped Herstein--Milnor conclusion into the spine's
+posterior value representation. -/
+noncomputable def posteriorValueRep_of_HersteinMilnorConclusion
+    (F : PrefFamily.{u})
+    (hpls : PosteriorLawSufficiency F)
+    (hhm : FiniteHersteinMilnorConclusionFor F hpls) :
+    PosteriorValueRepresentation F where
+  V := fun {A} [Fintype A] [DecidableEq A] [Nonempty A] q E =>
+    hhm.V q E
+  respects_same_posterior_law := fun {A} [_] [_] [_] q E E' hsame =>
+    hhm.V_respects_same_posterior_law q E E' hsame
+  represents_block_comparisons := fun {A} [_] [_] [_] q hq E₁ E₂ =>
+    hhm.V_represents_block_comparisons q hq E₁ E₂
+  zero_normalized := fun {A} [_] [_] [_] q hq => by
+    have h := hhm.V_zero_normalized q hq
+    have heq : experimentOfChannel (uninformativeChannelU A) = uninformativeExperiment A := by
+      simp only [experimentOfChannel, uninformativeExperiment, FiniteExperimentOn.ofChannel]
+    rw [heq]
+    exact h
+
+/-- From the paper axioms to a posterior value representation using the cleaner
+theorem-shaped Herstein--Milnor interface: Lean proves the HM hypotheses, then
+the external theorem supplies the value conclusion. -/
+noncomputable def posteriorValueRep_of_axioms_HMTheorem
+    (F : PrefFamily.{u})
+    (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
+    (hhm : ClassicalFiniteHersteinMilnorTheoremAssumptions.{u})
+    (hax : TraceAxioms F) :
+    PosteriorValueRepresentation F :=
+  posteriorValueRep_of_HersteinMilnorConclusion F
+    (from_axioms_to_posterior_of_blackwell F hblackwell hax)
+    (finiteHersteinMilnorConclusion_of_blackwell_axioms F hblackwell hhm hax)
+
+/--
+**From Axioms to Value Representation (Combined Bridge)**
+
+Combines the Blackwell and Herstein-Milnor external assumptions to
+go directly from TraceAxioms to PosteriorValueRepresentation.
+
+Paper: Lemmas blockcoh--blackwell + postsep (lines 810-1196).
+-/
+noncomputable def posteriorValueRep_of_axioms
+    (F : PrefFamily.{u})
+    (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
+    (hhm : FiniteHersteinMilnorAssumptions.{u})
+    (hax : TraceAxioms F) :
+    PosteriorValueRepresentation F :=
+  posteriorValueRep_of_HersteinMilnor F hhm
+    (from_axioms_to_posterior_of_blackwell F hblackwell hax)
+
+/-!
+## Stage 3: Branch Aggregation Structure
+
+Paper Lemma branchagg (lines 1830-2068).
+
+From branchwise monotonicity (A7), we derive that the value of a sequential
+experiment is an aggregation of branch values with positive coefficients.
+-/
+
+/--
+**Branch Aggregation Structure**
+
+The value functional decomposes into branch contributions with positive
+coefficients β(q, r) depending only on prior and reached posterior.
+
+Paper (line 1838): "There are positive branch coefficients β(q, r_o), depending only on q
+and the reached posterior r_o, such that for every continuation profile {Q^o},
+F_q(μ_{q,P₁▷{Q^o}}) = F_q(μ_{q,P₁}) + Σ_o m(o) β(q,r_o) F_{r_o}(μ_{r_o,Q^o})"
+-/
+structure BranchAggregationStructure (F : PrefFamily.{u}) where
+  /-- The underlying value representation -/
+  value_rep : PosteriorValueRepresentation F
+  /-- Branch coefficient β(q, r) depending on prior q and reached posterior r.
+      Paper notation: β(q, r_o) -/
+  branchCoeff :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+      Dist A → Dist A → ℝ
+  /-- Branch coefficients are positive for nondegenerate posteriors.
+      Paper (line 1832): "positive branch coefficients" -/
+  branchCoeff_pos :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q r : Dist A) (_hq : q.FullSupport) (_hr : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b),
+      0 < branchCoeff q r
+  /-- Branch aggregation formula (uniform continuation outcome type version).
+      Paper (line 1838): F_q(μ_{q,P₁▷{Q^o}}) = F_q(μ_{q,P₁}) + Σ_o m(o) β(q,r_o) F_{r_o}(μ_{r_o,Q^o})
+      Note: We sum over all outcomes; zero-probability branches contribute zero. -/
+  branch_aggregation :
+    ∀ {A O₁ O₂ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O₁] [DecidableEq O₁] [Fintype O₂] [DecidableEq O₂]
+      (q : Dist A) (_hq : q.FullSupport)
+      (P₁ : Channel A O₁) (Q : O₁ → Channel A O₂),
+      value_rep.V q (experimentOfChannel (P₁ ▷ Q)) =
+      value_rep.V q (experimentOfChannel P₁) +
+      ∑ o₁ : O₁,
+        (Channel.outcomeMarginal P₁ q) o₁ *
+        branchCoeff q (Channel.posterior P₁ q o₁) *
+        value_rep.V (Channel.posterior P₁ q o₁) (experimentOfChannel (Q o₁))
+
+/-!
+## Stage 4: Scale Coherence Structure
+
+Paper Lemmas chain--scalecoherence (lines 2108-2500).
+
+The branch-coefficient cocycle β(q,r) = a_q/a_r collapses to a universal scale.
+-/
+
+/--
+**Scale Coherence Structure**
+
+The branch coefficients satisfy a cocycle property β(q,r) = a_q/a_r,
+and a two-grouping argument shows a_q is actually universal (independent of q).
+
+Paper (line 2117-2119): "β(q,r) β(r,s) = β(q,s) ...
+Hence β(q,r) = a_q/a_r for positive scales a_q"
+
+Paper (line 817-818): "Lemma scalecoherence uses the chain rule and a two-grouping
+argument to eliminate the interaction term and prove the scale a_q is universal."
+-/
+structure ScaleCoherenceStructure (F : PrefFamily.{u}) where
+  /-- Branch aggregation structure (prerequisite). -/
+  branch_agg : BranchAggregationStructure F
+  /-- The prior-dependent scale function a_q.
+      Paper (line 2164): a_q := 1/β(q_0,q) -/
+  scale :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+      Dist A → ℝ
+  /-- Scale is positive at full-support priors.
+      Paper: "positive scales a_q" -/
+  scale_pos :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport),
+      0 < scale q
+  /-- Branch coefficients factor as β(q,r) = a_q/a_r (cocycle property).
+      Paper (line 2168): β(q,r) = a_q/a_r -/
+  branchCoeff_factorization :
+    ∀ {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O₁] [DecidableEq O₁]
+      (q : Dist A) (_hq : q.FullSupport)
+      (P₁ : Channel A O₁) (o₁ : O₁),
+      BranchPositive P₁ q o₁ →
+      branch_agg.branchCoeff q (Channel.posterior P₁ q o₁) =
+        scale q / scale (Channel.posterior P₁ q o₁)
+  /-- Universal scale: a_q = a is independent of q.
+      Paper (line 817-818): "prove the scale a_q is universal" -/
+  scale_universal :
+    ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport),
+      scale q = scale r
+
+/-!
+## Stage 5: Entropy Reduction Representation
+
+Paper Lemma faddeevsketch first part (lines 2504-2548).
+
+With universal scale a, define entropy H(q) as the rescaled full-revelation value.
+Then every channel value reduces to an entropy-difference formula.
+-/
+
+/--
+**Entropy Reduction Representation**
+
+With universal scale, the value functional takes the entropy-reduction form:
+V̂_q(μ_{q,P}) = H(q) - Σ_o m(o) H(r_o)
+
+where V̂ = V/a is the rescaled value functional.
+
+Paper (line 2541): "F̂_q(μ_{q,P}) = H(q) - Σ_{o:m(o)>0} m(o) H(r_o)"
+-/
+structure EntropyReductionRepresentation (F : PrefFamily.{u}) where
+  /-- Scale coherence (prerequisite). -/
+  scale_coherence : ScaleCoherenceStructure F
+  /-- The entropy function H(q) = V̂_q(χ_q) where χ_q is full revelation.
+      Paper (line 2361): H(q) := F_q(χ_q) -/
+  Hfun :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+      Dist A → ℝ
+  /-- The value functional satisfies the entropy-reduction formula.
+      Paper (line 2541): V̂_q(μ_{q,P}) = H(q) - Σ_o m(o) H(r_o).
+      Using posteriorLawIntegral: V̂_q(E) = H(q) - ∫ H(r) dμ_{q,E}(r) -/
+  value_entropy_reduction :
+    ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O]
+      (q : Dist A) (_hq : q.FullSupport) (P : Channel A O),
+      scale_coherence.branch_agg.value_rep.V q (experimentOfChannel P) /
+        scale_coherence.scale q =
+      Hfun q - posteriorLawIntegral q P Hfun
+
+/-!
+## Stage 5b: Cross-Prior Block Representation
+
+Paper Lemma blockbridge (lines 1776-1827), reused after scale coherence in
+Lemma faddeevsketch (lines 2547-2557).
+
+This is deliberately separate from entropy reduction. The paper proves
+blockbridge before entropy reduction, then observes that universal scale lets it
+be read in the normalized value units.
+-/
+
+/--
+**Cross-Prior Block Representation (scaled)**
+
+The normalized value functional represents block comparisons across possibly
+different priors and action alphabets.
+-/
+structure CrossPriorBlockRepresentation (F : PrefFamily.{u}) where
+  /-- Entropy reduction representation whose normalized value is used below. -/
+  entropy_reduction : EntropyReductionRepresentation F
+  /-- Cross-prior block representation (scaled).
+      Paper Lemma blockbridge + scale coherence (lines 1776-1827, 2547-2557):
+      q^0 ≽_{P⊔Q} r^1 ↔ V̂(q,P) ≥ V̂(r,Q)
+      where V̂ = V/a is the rescaled (normalized) value functional.
+      This is the key bridge that enables cross-prior comparisons. -/
+  cross_prior_block_rep :
+    ∀ {A B O Y : Type u}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      [Fintype O] [DecidableEq O]
+      [Fintype Y] [DecidableEq Y]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport)
+      (P : Channel A O) (Q : Channel B Y),
+      F.rel (blockChannel P Q) (inlDist q) (inrDist r) ↔
+        entropy_reduction.scale_coherence.branch_agg.value_rep.V q (experimentOfChannel P) /
+          entropy_reduction.scale_coherence.scale q ≥
+        entropy_reduction.scale_coherence.branch_agg.value_rep.V r (experimentOfChannel Q) /
+          entropy_reduction.scale_coherence.scale r
+
+/-!
+## Stage 6: Faddeev Entropy Form
+
+Paper Lemma faddeevsketch Faddeev part (lines 2560-2646).
+
+The function H satisfies Faddeev's recursion, hence H = α·Shannon for some α ≥ 0.
+-/
+
+/--
+**Faddeev Entropy Form**
+
+The entropy function H satisfies Faddeev's recursion and therefore
+equals α · Shannon entropy for some α ≥ 0.
+
+Paper (line 2520): "H(q) = α Sh(q) for some α ≥ 0"
+-/
+structure FaddeevEntropyForm (F : PrefFamily.{u}) where
+  /-- Cross-prior block representation, carrying the prerequisite entropy-reduction
+      representation separately from the entropy-reduction theorem itself. -/
+  cross_prior : CrossPriorBlockRepresentation F
+  /-- The positive scale α from Faddeev's theorem.
+      Paper: α ≥ 0, and α > 0 follows from local non-triviality. -/
+  alpha : ℝ
+  /-- α is positive (from local non-triviality: ∃ q with H(q) > 0). -/
+  alpha_pos : 0 < alpha
+  /-- H = α · Shannon entropy.
+      Paper (line 2520): "Faddeev's theorem therefore gives H(q) = α Sh(q)" -/
+  H_eq_alpha_shannon :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A),
+      cross_prior.entropy_reduction.Hfun q = alpha * H(q)
+  /-- A3 duplicate-block equivalence.
+      Paper Axiom A3 first clause (line 122):
+        q ≽_P q' ↔ q^0 ≽_{P⊔P} (q')^1
+      This is carried from TraceAxioms and is needed for the global-sketch proof. -/
+  a3_block_equivalence :
+    ∀ {A O : Type u} [Fintype A] [DecidableEq A]
+      [Fintype O] [DecidableEq O]
+      (P : Channel A O) (q q' : Dist A),
+      F.rel P q q' ↔ F.rel (blockChannel P P) (inlDist q) (inrDist q')
+
+/-!
+## Final Sufficiency Packages
+
+We define two packages:
+1. `SufficiencyMIPackage`: the full package matching `MIRep` (no Nonempty restriction)
+2. `FullSupportSufficiencyMIPackage`: restricted to full-support priors (provable from Faddeev)
+
+The paper's proof works first on full-support priors. Extending to boundary priors
+requires support restriction / face continuity arguments.
+-/
+
+/--
+**Final Sufficiency Package**
+
+The end result of the sufficiency proof: a positive scale α such that
+F.rel P q q' ↔ α·I(q,P) ≥ α·I(q',P).
+
+Since α > 0, this is equivalent to I(q,P) ≥ I(q',P), i.e., MIRep F.
+
+Note: This quantifies over all finite A (including empty), matching MIRep.
+-/
+def SufficiencyMIPackage (F : PrefFamily.{u}) : Prop :=
+  ∃ (alpha : ℝ), 0 < alpha ∧
+    ∀ {A O : Type u} [Fintype A] [DecidableEq A]
+      [Fintype O] [DecidableEq O]
+      (P : Channel A O) (q q' : Dist A),
+      F.rel P q q' ↔ alpha * mutualInfo q P ≥ alpha * mutualInfo q' P
+
+/--
+**Full-Support Sufficiency Package**
+
+The MI representation restricted to full-support priors.
+This is what the paper's globalsketch lemma proves directly.
+
+Paper: Lemma globalsketch (lines 2659-2720) works with full-support priors.
+Extension to boundary priors uses support restriction / face continuity.
+-/
+def FullSupportSufficiencyMIPackage (F : PrefFamily.{u}) : Prop :=
+  ∃ (alpha : ℝ), 0 < alpha ∧
+    ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O]
+      (P : Channel A O) (q q' : Dist A),
+      q.FullSupport → q'.FullSupport →
+      (F.rel P q q' ↔ alpha * mutualInfo q P ≥ alpha * mutualInfo q' P)
+
+/--
+**Full-Support Block MI Package**
+
+The MI representation for block-supported cross-prior comparisons whose two
+branches may have different action and outcome alphabets.
+
+This is the support-face block comparison needed by boundary extension when
+the two boundary priors have different positive supports.
+-/
+def FullSupportBlockMI (F : PrefFamily.{u}) : Prop :=
+  ∃ (alpha : ℝ), 0 < alpha ∧
+    ∀ {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+      (P : Channel A O) (Q : Channel B Y) (q : Dist A) (r : Dist B),
+      q.FullSupport →
+      r.FullSupport →
+      (F.rel (blockChannel P Q) (inlDist q) (inrDist r) ↔
+        alpha * mutualInfo q P ≥ alpha * mutualInfo r Q)
+
+/--
+**Boundary Extension**
+
+Extends full-support MI representation to arbitrary priors.
+This corresponds to the paper's Lemma supprestrict (support restriction).
+
+**Paper method (Lemma supprestrict, lines 1700-1730):**
+For boundary prior r with support B ⊂ A:
+1. The posterior law μ_{r,P} depends only on rows P(·|b) for b ∈ B
+2. Channels agreeing on B are indifferent at prior r
+3. F.rel comparison at r equals comparison at restricted prior r|_B on face B
+4. This uses A5 (neutrality under stochastic maps) for the projection/embedding
+
+**Proof of representation extension (paper line 2707):**
+If q or q' is on the boundary, restrict each pair (q,P) and (q',P) to their
+positive-probability supports, apply the full-support theorem on each restricted
+alphabet, and pull back. Deleting zero-probability actions preserves MI.
+
+**Required infrastructure (not yet implemented):**
+- Support subtypes as finite types
+- Distribution restriction: q|_B : Dist B for B = supp(q)
+- Channel restriction: P|_B : Channel B O
+- MI invariance: mutualInfo q P = mutualInfo (q|_B) (P|_B) when supp(q) ⊆ B
+- Preference transfer via A5: F.rel P q q' ↔ F.rel (P|_B) (q|_B) (q'|_B)
+
+This is an explicit bridge goal, not proved in the current stage.
+-/
+def FullSupportMIRepExtendsToBoundary (F : PrefFamily.{u}) : Prop :=
+  TraceAxioms F → FullSupportSufficiencyMIPackage F → SufficiencyMIPackage F
+
+/--
+**Collapse Lemma**: SufficiencyMIPackage implies MIRep.
+
+This is pure arithmetic using alpha_pos.
+-/
+theorem MIRep_of_SufficiencyMIPackage
+    (F : PrefFamily.{u})
+    (hpkg : SufficiencyMIPackage F) :
+    MIRep F := by
+  obtain ⟨alpha, hα_pos, hrep⟩ := hpkg
+  intro A O instFA instDA instFO instDO P q q'
+  have h : F.rel P q q' ↔ alpha * mutualInfo q P ≥ alpha * mutualInfo q' P :=
+    hrep P q q'
+  rw [h]
+  constructor
+  · intro hge
+    nlinarith
+  · intro hge
+    nlinarith
+
+/--
+**Full-Support Faddeev-to-MI Bridge**: FaddeevEntropyForm implies FullSupportSufficiencyMIPackage.
+
+This is the non-tautological proof of the final bridge for full-support priors.
+The proof combines:
+1. a3_block_equivalence: F.rel P q q' ↔ F.rel (blockChannel P P) (inlDist q) (inrDist q')
+2. cross_prior_block_rep: block comparison ↔ normalized value comparison
+3. value_entropy_reduction: V̂(q,P) = Hfun(q) - posteriorLawIntegral q P Hfun
+4. H_eq_alpha_shannon: Hfun(q) = α · H(q)
+5. mutualInfo_eq_entropy_sub_posteriorLawIntegral: I(q,P) = H(q) - posteriorLawIntegral q P entropy
+
+Paper: Lemma globalsketch (lines 2659-2720).
+-/
+private theorem fullSupportMI_rep_aux
+    (F : PrefFamily.{u})
+    (hfad : FaddeevEntropyForm F)
+    {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O]
+    (P : Channel A O) (q q' : Dist A)
+    (hq : q.FullSupport) (hq' : q'.FullSupport) :
+    F.rel P q q' ↔ hfad.alpha * mutualInfo q P ≥ hfad.alpha * mutualInfo q' P := by
+  rw [hfad.a3_block_equivalence P q q']
+  rw [hfad.cross_prior.cross_prior_block_rep q q' hq hq' P P]
+  have h_val_q := hfad.cross_prior.entropy_reduction.value_entropy_reduction q hq P
+  have h_val_q' := hfad.cross_prior.entropy_reduction.value_entropy_reduction q' hq' P
+  have h_Hfun_eq : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (r : Dist A),
+      hfad.cross_prior.entropy_reduction.Hfun r = hfad.alpha * H(r) := hfad.H_eq_alpha_shannon
+  have h_lin : ∀ r : Dist A, posteriorLawIntegral r P hfad.cross_prior.entropy_reduction.Hfun =
+      hfad.alpha * posteriorLawIntegral r P entropy := fun r => by
+    unfold posteriorLawIntegral
+    simp only [h_Hfun_eq]
+    rw [Finset.mul_sum]
+    congr 1; ext o; ring
+  have h_mi_q := mutualInfo_eq_entropy_sub_posteriorLawIntegral q P
+  have h_mi_q' := mutualInfo_eq_entropy_sub_posteriorLawIntegral q' P
+  rw [h_val_q, h_val_q', h_Hfun_eq, h_Hfun_eq, h_lin, h_lin, h_mi_q, h_mi_q']
+  constructor <;> intro h <;> linarith
+
+theorem FullSupportSufficiencyMIPackage_of_FaddeevEntropyForm
+    (F : PrefFamily.{u})
+    (hfad : FaddeevEntropyForm F) :
+    FullSupportSufficiencyMIPackage F :=
+  ⟨hfad.alpha, hfad.alpha_pos, @fullSupportMI_rep_aux F hfad⟩
+
+/--
+**Full-Support Block MI from Faddeev Form**
+
+This is the cross-support analogue of `FullSupportSufficiencyMIPackage`.
+It is derived from the existing cross-prior block representation and Faddeev
+entropy form; it is not a boundary-specific external assumption.
+-/
+private theorem fullSupportBlockMI_rep_aux
+    (F : PrefFamily.{u})
+    (hfad : FaddeevEntropyForm F)
+    {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (P : Channel A O) (Q : Channel B Y) (q : Dist A) (r : Dist B)
+    (hq : q.FullSupport) (hr : r.FullSupport) :
+    F.rel (blockChannel P Q) (inlDist q) (inrDist r) ↔
+      hfad.alpha * mutualInfo q P ≥ hfad.alpha * mutualInfo r Q := by
+  rw [hfad.cross_prior.cross_prior_block_rep q r hq hr P Q]
+  have h_val_q := hfad.cross_prior.entropy_reduction.value_entropy_reduction q hq P
+  have h_val_r := hfad.cross_prior.entropy_reduction.value_entropy_reduction r hr Q
+  have h_Hfun_eq : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (s : Dist A),
+      hfad.cross_prior.entropy_reduction.Hfun s = hfad.alpha * H(s) := hfad.H_eq_alpha_shannon
+  have h_lin_q : posteriorLawIntegral q P hfad.cross_prior.entropy_reduction.Hfun =
+      hfad.alpha * posteriorLawIntegral q P entropy := by
+    unfold posteriorLawIntegral
+    simp only [h_Hfun_eq]
+    rw [Finset.mul_sum]
+    congr 1
+    ext o
+    ring
+  have h_lin_r : posteriorLawIntegral r Q hfad.cross_prior.entropy_reduction.Hfun =
+      hfad.alpha * posteriorLawIntegral r Q entropy := by
+    unfold posteriorLawIntegral
+    simp only [h_Hfun_eq]
+    rw [Finset.mul_sum]
+    congr 1
+    ext y
+    ring
+  have h_mi_q := mutualInfo_eq_entropy_sub_posteriorLawIntegral q P
+  have h_mi_r := mutualInfo_eq_entropy_sub_posteriorLawIntegral r Q
+  rw [h_val_q, h_val_r, h_Hfun_eq, h_Hfun_eq, h_lin_q, h_lin_r, h_mi_q, h_mi_r]
+  constructor <;> intro h <;> linarith
+
+theorem FullSupportBlockMI_of_FaddeevEntropyForm
+    (F : PrefFamily.{u})
+    (hfad : FaddeevEntropyForm F) :
+    FullSupportBlockMI F :=
+  ⟨hfad.alpha, hfad.alpha_pos, @fullSupportBlockMI_rep_aux F hfad⟩
+
+/--
+**Combined Final Bridge**: FaddeevEntropyForm plus boundary extension implies SufficiencyMIPackage.
+
+This combines the full-support proof with the boundary extension assumption.
+-/
+theorem SufficiencyMIPackage_of_FaddeevEntropyForm_and_boundary
+    (F : PrefFamily.{u})
+    (hfad : FaddeevEntropyForm F)
+    (hboundary : FullSupportMIRepExtendsToBoundary F)
+    (hax : TraceAxioms F) :
+    SufficiencyMIPackage F :=
+  hboundary hax (FullSupportSufficiencyMIPackage_of_FaddeevEntropyForm F hfad)
+
+/-!
+## Sufficiency Spine Assumptions
+
+These express that the paper's sufficiency stages yield the final MI package.
+Each bridge is an explicit assumption that will be refined/proved in later stages.
+-/
+
+/--
+**Sufficiency Spine Assumptions**
+
+Bundle of bridge assumptions connecting the sufficiency stages.
+Each field is an implication that will be proved in subsequent stages.
+
+Note: The sufficiency stages carry data (value functional V, branch coefficients β,
+scale function a, entropy function H, and scale α). The bridges therefore return
+data-carrying structures, not bare Props. The final step produces SufficiencyMIPackage
+which is Prop (via existential).
+-/
+structure SufficiencySpineAssumptions where
+  /-- Stage 1: Axioms imply posterior-law sufficiency.
+      Paper Lemmas blockcoh--blackwell, plsuff. -/
+  from_axioms_to_posterior :
+    ∀ F : PrefFamily.{u}, TraceAxioms F → PosteriorLawSufficiency F
+  /-- Stage 2: Posterior-law sufficiency implies posterior-separable representation.
+      Paper Lemma postsep. Uses Herstein--Milnor.
+      Returns a chosen value functional V. -/
+  posterior_to_value_rep :
+    ∀ F : PrefFamily.{u}, PosteriorLawSufficiency F → PosteriorValueRepresentation F
+  /-- Stage 3: Value representation implies branch aggregation.
+      Paper Lemma branchagg. Uses A7.
+      Returns the same V plus branch coefficients β(q,r). -/
+  value_rep_to_branch :
+    ∀ F : PrefFamily.{u}, PosteriorValueRepresentation F → BranchAggregationStructure F
+  /-- Stage 4: Branch aggregation implies scale coherence.
+      Paper Lemmas chain--scalecoherence.
+      Returns the same (V, β) plus scale function a_q and cocycle/universality. -/
+  branch_to_scale :
+    ∀ F : PrefFamily.{u}, BranchAggregationStructure F → ScaleCoherenceStructure F
+  /-- Stage 5: Scale coherence implies entropy reduction representation.
+      Paper Lemma faddeevsketch first part.
+      Returns the same (V, β, a) plus entropy function H. -/
+  scale_to_entropy_reduction :
+    ∀ F : PrefFamily.{u}, ScaleCoherenceStructure F → EntropyReductionRepresentation F
+  /-- Stage 5b: Entropy reduction plus blockbridge gives cross-prior block representation.
+      Paper Lemma blockbridge plus universal scale.
+      Returns the normalized cross-prior comparison bridge. -/
+  entropy_reduction_to_cross_prior :
+    ∀ F : PrefFamily.{u}, EntropyReductionRepresentation F → CrossPriorBlockRepresentation F
+  /-- Stage 6a: Cross-prior block representation plus Faddeev recursion implies Faddeev form.
+      Paper Lemma faddeevsketch Faddeev recursion. Uses Faddeev's theorem.
+      Returns the same (V, β, a, H) plus scale α with H = α·Shannon. -/
+  entropy_to_faddeev :
+    ∀ F : PrefFamily.{u}, CrossPriorBlockRepresentation F → FaddeevEntropyForm F
+  /-- Stage 6b: Faddeev form implies full-support MI package.
+      Paper Lemma globalsketch (full-support case).
+      **PROVED**: See `FullSupportSufficiencyMIPackage_of_FaddeevEntropyForm`. -/
+  faddeev_to_full_support_mi_package :
+    ∀ F : PrefFamily.{u}, FaddeevEntropyForm F → FullSupportSufficiencyMIPackage F
+  /-- Stage 6c: Boundary extension from full-support to arbitrary priors.
+      Paper: support restriction / face continuity argument.
+      This uses TraceAxioms (notably support-restriction machinery) and extends
+      the full-support result to priors with zero-probability states. -/
+  boundary_extension :
+    ∀ F : PrefFamily.{u}, FullSupportMIRepExtendsToBoundary F
+
+/-!
+## Assembly Theorem
+-/
+
+/--
+**Sufficiency Assembly**
+
+Given the spine assumptions, derive SufficiencyStatement.
+-/
+theorem SufficiencyStatement_of_spine
+    (hspine : SufficiencySpineAssumptions.{u}) :
+    SufficiencyStatement.{u} := by
+  intro F hax
+  apply MIRep_of_SufficiencyMIPackage F
+  have h1 : PosteriorLawSufficiency F := hspine.from_axioms_to_posterior F hax
+  have h2 : PosteriorValueRepresentation F := hspine.posterior_to_value_rep F h1
+  have h3 : BranchAggregationStructure F := hspine.value_rep_to_branch F h2
+  have h4 : ScaleCoherenceStructure F := hspine.branch_to_scale F h3
+  have h5 : EntropyReductionRepresentation F := hspine.scale_to_entropy_reduction F h4
+  have h5b : CrossPriorBlockRepresentation F := hspine.entropy_reduction_to_cross_prior F h5
+  have h6 : FaddeevEntropyForm F := hspine.entropy_to_faddeev F h5b
+  have h7 : FullSupportSufficiencyMIPackage F := hspine.faddeev_to_full_support_mi_package F h6
+  exact hspine.boundary_extension F hax h7
+
+/-!
+## Connection to Main Theorem Spine
+-/
+
+/--
+**Sufficiency and Block Scale from Spine**
+
+Given sufficiency spine assumptions, derive both SufficiencyStatement
+and BlockScaleStatement.
+
+Note: The block scale derivation uses `blockSameScaleRep_of_MIRep` which
+is proved in Main.lean. The connection is via the existing theorem
+`blockScaleStatement_from_sufficiency`.
+-/
+theorem SufficiencyAndBlockScale_of_spine
+    (hspine : SufficiencySpineAssumptions.{u}) :
+    SufficiencyStatement.{u} ∧ BlockScaleStatement.{u} := by
+  constructor
+  · exact SufficiencyStatement_of_spine hspine
+  · exact blockScaleStatement_from_sufficiency
+      (SufficiencyStatement_of_spine hspine) blockScaleFromMIRepStatement
+
+/--
+**Main Theorem from Spine and DPI**
+
+Given sufficiency spine assumptions and the explicit finite DPI assumptions
+used by the benchmark direction, derive the full main characterisation.
+-/
+theorem MainCharacterizationWithMoreover_of_spine_and_DPI
+    (hspine : SufficiencySpineAssumptions.{u})
+    (hdpi : FiniteDPIAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} := by
+  apply main_characterization_from_spine
+  · exact SufficiencyStatement_of_spine hspine
+  · exact BenchmarkStatement_of_DPI hdpi
+  · exact (SufficiencyAndBlockScale_of_spine hspine).2
+
+/-!
+## External Assumptions Documentation
+
+The sufficiency proof relies on external classical results that are not
+proved in this development. These are documented here and will be
+bundled in External/ files.
+-/
+
+/--
+**External Herstein--Milnor Assumption**
+
+The Herstein--Milnor mixture-space theorem (1953) states that a complete,
+transitive, continuous preference on a mixture space has an affine
+(expected utility) representation.
+
+Used in: Stage 2 (posterior-separable representation).
+Reference: Herstein & Milnor, "An Axiomatic Approach to Measurable Utility"
+-/
+def HersteinMilnorAssumption : Prop :=
+  ∀ {X : Type u} [inst : Nonempty X]
+    (rel : X → X → Prop)
+    (mix : ℝ → X → X → X)
+    (_hcomplete : ∀ x y, rel x y ∨ rel y x)
+    (_htrans : ∀ x y z, rel x y → rel y z → rel x z)
+    (_hcont : ∀ x y z, rel x y → ∃ t : ℝ, 0 < t ∧ t < 1 ∧ rel (mix t z x) y)
+    (_hmix : ∀ t x y, mix t x y = mix (1-t) y x),
+    ∃ (f : X → ℝ), ∀ x y, rel x y ↔ f x ≥ f y
+
+/--
+**External Faddeev Assumption**
+
+Faddeev's theorem (1956) characterises Shannon entropy as the unique
+(up to scale) function satisfying certain recursion properties on
+finite probability distributions.
+
+Used in: Stage 6a (entropy form).
+Reference: Faddeev (1956), Baez--Fritz--Leinster (2011) Theorem 6.
+
+Note: The full statement involves continuity, permutation invariance,
+expansibility, and Faddeev's recursion. This documentation-level predicate is
+not consumed by the assembled theorem; the active interface is split in
+`External.Faddeev` into entropy regularity, Faddeev recursion, classical
+Faddeev, and positivity assumptions.
+-/
+def FaddeevAssumption : Prop :=
+  ∀ (H_func : ∀ {A : Type u} [Fintype A] [DecidableEq A], Dist A → ℝ)
+    (_hcont : ∀ {A : Type u} [Fintype A] [DecidableEq A],
+      Continuous (fun q : Dist A => H_func q))
+    (_hpoint :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] (a : A),
+        H_func (Dist.pure a) = 0),
+    ∃ (α : ℝ), α ≥ 0 ∧ ∀ {A : Type u} [Fintype A] [DecidableEq A] (q : Dist A),
+      H_func q = α * H(q)
+
+/--
+**External Finite Blackwell Assumption**
+
+The finite Blackwell theorem relates statistical sufficiency to garbling.
+This is closely related to the DPI assumptions already in External/Blackwell.lean.
+
+Used in: Stage 1 (posterior-law sufficiency).
+Reference: Blackwell (1953).
+-/
+def FiniteBlackwellAssumption : Prop :=
+  ∀ {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (_hq : q.FullSupport)
+    (P : Channel A O) (Q : Channel A Y),
+    SamePosteriorLaw q P Q →
+    ∃ (T : Channel O Y), ∀ a o, (Channel.postprocess P T) a o = Q a o
+
+end TraceableAgency
