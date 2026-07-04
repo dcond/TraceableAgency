@@ -3493,4 +3493,309 @@ theorem field3_restricted_coarse_reveal
         exact mul_pos (Dist.restrictToSupport_fullSupport p x.1)
           (Dist.restrictToSupport_fullSupport (q x.1.1) x.2))]
 
+
+
+/-! ## hcard-free MI route from per-cross boundary facts -/
+
+/- Per-hcross coarse-reveal value: assemble from the three boundary facts (all now
+   proved theorems for the wrapped structure), reusing the full-support lemma. -/
+theorem coarseVal_forCross
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    -- field 1 (boundary normalized-value support restriction) for THIS hcross:
+    (hnormC : ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O] (P : Channel A O) (q : Dist A), ¬ q.FullSupport →
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      normalizedValue hcross.entropy_reduction.scale_coherence q P =
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          q.restrictToSupport (Channel.restrictToSupport P q))
+    -- field 3 (restricted coarse-reveal) for THIS hcross:
+    (hrestrC : ∀ {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+      (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+      (p : Dist K) (q : ∀ k, Dist (Act k)), ¬ (sigmaDist p q).FullSupport →
+      haveI : Nonempty (supportSubtype (sigmaDist p q)) := supportSubtype_nonempty _
+      haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+      normalizedValue hcross.entropy_reduction.scale_coherence
+          (sigmaDist p q).restrictToSupport
+          (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q)) =
+        hcross.entropy_reduction.Hfun p.restrictToSupport)
+    -- Hfun support restriction for THIS hcross (field 2 + field 1 at id):
+    (hhfunC : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A),
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      hcross.entropy_reduction.Hfun q = hcross.entropy_reduction.Hfun q.restrictToSupport)
+    {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (sigmaDist p q) (coarseRevealChannel Act) =
+      hcross.entropy_reduction.Hfun p := by
+  by_cases hsig : (sigmaDist p q).FullSupport
+  · exact coarseReveal_value_eq_Hfun_of_axioms_fullSupport F hax hcross hreg Act p q hsig
+  · haveI : Nonempty (supportSubtype (sigmaDist p q)) := supportSubtype_nonempty _
+    haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+    have h1 := hnormC (coarseRevealChannel Act) (sigmaDist p q) hsig
+    have h3 := hrestrC Act p q hsig
+    have hH := hhfunC p
+    rw [h1, h3, ← hH]
+
+/- Faddeev recursion from per-hcross coarse value. -/
+theorem satisfiesFaddeevRecursion_forCross
+    (hblock : FiniteHfunBlockEmbeddingInvarianceAssumptions.{u})
+    (hred : FiniteCoarseRevealEntropyReductionAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    (hcoarse : ∀ {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+      (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+      (p : Dist K) (q : ∀ k, Dist (Act k)),
+      normalizedValue hcross.entropy_reduction.scale_coherence
+          (sigmaDist p q) (coarseRevealChannel Act) =
+        hcross.entropy_reduction.Hfun p) :
+    SatisfiesFiniteFaddeevRecursion hcross.entropy_reduction.Hfun := by
+  intro K _ _ _ Act _ _ _ _ p q
+  have hER := hred.coarse_reveal_entropy_reduction F hax hreg Act p q
+  have hV := hcoarse Act p q
+  have hInt :
+      posteriorLawIntegral (sigmaDist p q) (coarseRevealChannel Act)
+          hcross.entropy_reduction.Hfun =
+        ∑ k, p k * hcross.entropy_reduction.Hfun (q k) :=
+    posteriorLawIntegral_coarseReveal_sigmaDist_Hfun_of_blockEmbed
+      hcross.entropy_reduction.Hfun Act p q
+      (fun k => hblock.Hfun_blockEmbed F hax hreg Act k (q k))
+  change hcross.entropy_reduction.Hfun (sigmaDist p q) =
+    hcross.entropy_reduction.Hfun p +
+      ∑ k, p k * hcross.entropy_reduction.Hfun (q k)
+  rw [hER, hV, hInt]
+
+/- FaddeevEntropyForm from per-hcross coarse value. -/
+noncomputable def FaddeevEntropyForm_forCross
+    (hblock : FiniteHfunBlockEmbeddingInvarianceAssumptions.{u})
+    (hred : FiniteCoarseRevealEntropyReductionAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    (hcoarse : ∀ {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+      (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+      (p : Dist K) (q : ∀ k, Dist (Act k)),
+      normalizedValue hcross.entropy_reduction.scale_coherence
+          (sigmaDist p q) (coarseRevealChannel Act) =
+        hcross.entropy_reduction.Hfun p) :
+    FaddeevEntropyForm F := by
+  have hrecForm : FaddeevRecursionForm F hcross.entropy_reduction :=
+    { regularity := hreg
+      grouping_recursion :=
+        satisfiesFaddeevRecursion_forCross hblock hred F hax hcross hreg hcoarse }
+  have hex := hfad.of_recursion F hrecForm
+  have hH : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A),
+      hcross.entropy_reduction.Hfun q = (Classical.choose hex) * H(q) :=
+    (Classical.choose_spec hex).2
+  have hHfun_pos : 0 < hcross.entropy_reduction.Hfun (Dist.uniform (A := ULift.{u,0} Bool)) :=
+    uniform_ulift_bool_Hfun_pos_of_A1 F hax hcross hrecForm
+  exact
+    { cross_prior := hcross
+      alpha := Classical.choose hex
+      alpha_pos :=
+        alpha_strict_pos_of_positive_Hfun_witness F hax hcross hrecForm hHfun_pos
+          (Classical.choose hex) hH
+      H_eq_alpha_shannon := hH
+      a3_block_equivalence := a3_block_equivalence_of_traceAxioms F hax }
+
+/- MIRep from per-hcross coarse value (no FiniteCardinalSupportBoundaryAssumptions). -/
+theorem MIRep_forCross
+    (hblock : FiniteHfunBlockEmbeddingInvarianceAssumptions.{u})
+    (hred : FiniteCoarseRevealEntropyReductionAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    (hcoarse : ∀ {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+      (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+      (p : Dist K) (q : ∀ k, Dist (Act k)),
+      normalizedValue hcross.entropy_reduction.scale_coherence
+          (sigmaDist p q) (coarseRevealChannel Act) =
+        hcross.entropy_reduction.Hfun p) :
+    MIRep F :=
+  let hfe : FaddeevEntropyForm F :=
+    FaddeevEntropyForm_forCross hblock hred hfad F hax hcross hreg hcoarse
+  MIRep_of_SufficiencyMIPackage F
+    (FullSupportMIRepExtendsToBoundary_of_supportRestriction F
+      (FullSupportBlockMI_of_FaddeevEntropyForm F hfe) hax
+      (FullSupportSufficiencyMIPackage_of_FaddeevEntropyForm F hfe))
+
+
+
+/-! ## Capstone: boundary-completed MI route with no cardinal-boundary assumption -/
+
+/- Wrapped cross-prior representation: same as hcross but with the boundary-completed scale. -/
+noncomputable def wrapCross
+    {F : PrefFamily.{u}} (hcross : CrossPriorBlockRepresentation F)
+    (hsf : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A) [Nonempty (supportSubtype r)]
+      (_hn : ∃ a : A, 0 < r a) (_hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hb : ¬ r.FullSupport),
+      hcross.entropy_reduction.scale_coherence.branch_agg.branchCoeff q r =
+        hcross.entropy_reduction.scale_coherence.scale q /
+          hcross.entropy_reduction.scale_coherence.scale r.restrictToSupport)
+    : CrossPriorBlockRepresentation F where
+  entropy_reduction :=
+    EntropyReductionRepresentation_of_scale F
+      (boundaryCompleteScale hcross.entropy_reduction.scale_coherence hsf)
+  cross_prior_block_rep := by
+    intro A B O Y _ _ _ _ _ _ _ _ _ _ q r hq hr P Q
+    have hsq : wrapScale hcross.entropy_reduction.scale_coherence q =
+        hcross.entropy_reduction.scale_coherence.scale q :=
+      wrapScale_fullSupport _ q hq
+    have hsr : wrapScale hcross.entropy_reduction.scale_coherence r =
+        hcross.entropy_reduction.scale_coherence.scale r :=
+      wrapScale_fullSupport _ r hr
+    have hb := hcross.cross_prior_block_rep q r hq hr P Q
+    rw [← hsq, ← hsr] at hb
+    exact hb
+
+/- Per-hcross nonneg of normalizedValue at id (boundary case uses per-hcross field1). -/
+theorem normalizedValue_id_nonneg_forCross
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hnormC : ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O] (P : Channel A O) (q : Dist A), ¬ q.FullSupport →
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      normalizedValue hcross.entropy_reduction.scale_coherence q P =
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          q.restrictToSupport (Channel.restrictToSupport P q))
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A) :
+    0 ≤ normalizedValue hcross.entropy_reduction.scale_coherence q Channel.idChannel := by
+  by_cases hq : q.FullSupport
+  · exact normalizedValue_id_nonneg_of_crossPrior_fullSupport hax hcross q hq
+  · haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    rw [hnormC Channel.idChannel q hq,
+      normalizedValue_restrict_idChannel_eq_idSupport hcross.entropy_reduction q]
+    exact normalizedValue_id_nonneg_of_crossPrior_fullSupport hax hcross
+      q.restrictToSupport (Dist.restrictToSupport_fullSupport q)
+
+/- Per-hcross pure-zero. -/
+theorem normalizedValue_id_pure_zero_forCross
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hnormC : ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O] (P : Channel A O) (q : Dist A), ¬ q.FullSupport →
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      normalizedValue hcross.entropy_reduction.scale_coherence q P =
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          q.restrictToSupport (Channel.restrictToSupport P q))
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (a : A) :
+    normalizedValue hcross.entropy_reduction.scale_coherence (Dist.pure a) Channel.idChannel = 0 := by
+  by_cases hq : (Dist.pure a).FullSupport
+  · haveI : Subsingleton A :=
+      ⟨fun b c => by rw [eq_of_pure_pos (hq b), eq_of_pure_pos (hq c)]⟩
+    have hV0 : hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V
+        (Dist.pure a) (experimentOfChannel Channel.idChannel) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep (Dist.pure a) hq Channel.idChannel
+    simp [normalizedValue, hV0]
+  · haveI : Nonempty (supportSubtype (Dist.pure a)) := supportSubtype_nonempty (Dist.pure a)
+    haveI : Subsingleton (supportSubtype (Dist.pure a)) := subsingleton_supportSubtype_pure a
+    rw [hnormC Channel.idChannel (Dist.pure a) hq,
+      normalizedValue_restrict_idChannel_eq_idSupport hcross.entropy_reduction (Dist.pure a)]
+    have hV0 : hcross.entropy_reduction.scale_coherence.branch_agg.value_rep.V
+        (Dist.pure a).restrictToSupport
+        (experimentOfChannel (Channel.idChannel :
+          Channel (supportSubtype (Dist.pure a)) (supportSubtype (Dist.pure a)))) = 0 :=
+      V_channel_eq_zero_of_subsingleton F
+        hcross.entropy_reduction.scale_coherence.branch_agg.value_rep
+        (Dist.pure a).restrictToSupport (Dist.restrictToSupport_fullSupport _) Channel.idChannel
+    simp [normalizedValue, hV0]
+
+/- Per-hcross EntropyRegularity, when Hfun = normalizedValue·id (constructed rep). -/
+theorem entropyRegularity_forCross
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hHfunId : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A),
+      hcross.entropy_reduction.Hfun q =
+        normalizedValue hcross.entropy_reduction.scale_coherence q Channel.idChannel)
+    (hnormC : ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O] (P : Channel A O) (q : Dist A), ¬ q.FullSupport →
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      normalizedValue hcross.entropy_reduction.scale_coherence q P =
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          q.restrictToSupport (Channel.restrictToSupport P q)) :
+    EntropyRegularity F hcross.entropy_reduction where
+  H_nonneg := fun q => by
+    rw [hHfunId q]; exact normalizedValue_id_nonneg_forCross hax hcross hnormC q
+  H_singleton := fun a => by
+    rw [hHfunId (Dist.pure a)]; exact normalizedValue_id_pure_zero_forCross hax hcross hnormC a
+
+/- CAPSTONE: MIRep with NO FiniteCardinalSupportBoundaryAssumptions, from wrapCross. -/
+theorem MIRep_of_boundaryComplete
+    (hblock : FiniteHfunBlockEmbeddingInvarianceAssumptions.{u})
+    (hred : FiniteCoarseRevealEntropyReductionAssumptions.{u})
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u})
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross0 : CrossPriorBlockRepresentation F)
+    (hsf : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A) [Nonempty (supportSubtype r)]
+      (_hn : ∃ a : A, 0 < r a) (_hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hb : ¬ r.FullSupport),
+      hcross0.entropy_reduction.scale_coherence.branch_agg.branchCoeff q r =
+        hcross0.entropy_reduction.scale_coherence.scale q /
+          hcross0.entropy_reduction.scale_coherence.scale r.restrictToSupport)
+    (hcoh : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) [Nonempty (supportSubtype q)] (d : Dist (supportSubtype q)),
+      hint.marginalValue F (boundaryCompleteScale hcross0.entropy_reduction.scale_coherence hsf).branch_agg.value_rep q
+        (Channel.actionPushforward d (supportIncludeKernel q)) =
+        hint.marginalValue F (boundaryCompleteScale hcross0.entropy_reduction.scale_coherence hsf).branch_agg.value_rep
+          q.restrictToSupport d) :
+    MIRep F := by
+  set hc := wrapCross hcross0 hsf with hcdef
+  -- Hfun of hc = normalizedValue (wrapped) id  (definitional via EntropyReductionRepresentation_of_scale)
+  have hHfunId : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A),
+      hc.entropy_reduction.Hfun q =
+        normalizedValue hc.entropy_reduction.scale_coherence q Channel.idChannel :=
+    fun q => rfl
+  -- field 1 for hc:
+  have hnormC : ∀ {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O] (P : Channel A O) (q : Dist A), ¬ q.FullSupport →
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      normalizedValue hc.entropy_reduction.scale_coherence q P =
+        normalizedValue hc.entropy_reduction.scale_coherence
+          q.restrictToSupport (Channel.restrictToSupport P q) := by
+    intro A O _ _ _ _ _ P q hqb
+    exact field1_boundaryComplete hint (hcross0.entropy_reduction.scale_coherence) hsf hcoh P q hqb
+  have hreg : EntropyRegularity F hc.entropy_reduction :=
+    entropyRegularity_forCross hax hc hHfunId hnormC
+  -- per-hcross coarse value from the three facts:
+  have hcoarse : ∀ {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+      (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Nonempty (Act k)] [Nonempty ((k : K) × Act k)]
+      (p : Dist K) (q : ∀ k, Dist (Act k)),
+      normalizedValue hc.entropy_reduction.scale_coherence
+          (sigmaDist p q) (coarseRevealChannel Act) = hc.entropy_reduction.Hfun p := by
+    intro K _ _ _ Act _ _ _ _ p q
+    refine coarseVal_forCross F hax hc hreg hnormC ?_ ?_ Act p q
+    · -- field 3 for hc
+      intro K2 _ _ _ Act2 _ _ _ _ p2 q2 hnot2
+      exact field3_restricted_coarse_reveal F hax hc hreg Act2 p2 q2 hnot2
+    · -- Hfun support restriction: Hfun q = Hfun (q|supp), via hHfunId + field1 at id
+      intro A _ _ _ q
+      haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      rw [hHfunId q, hHfunId q.restrictToSupport]
+      rw [show normalizedValue hc.entropy_reduction.scale_coherence q Channel.idChannel =
+            normalizedValue hc.entropy_reduction.scale_coherence
+              q.restrictToSupport (Channel.restrictToSupport Channel.idChannel q) from ?_,
+          normalizedValue_restrict_idChannel_eq_idSupport hc.entropy_reduction q]
+      by_cases hqf : q.FullSupport
+      · exact normalizedValue_support_restrict_fullSupport_of_crossPrior
+          F hax hc Channel.idChannel q hqf
+      · exact hnormC Channel.idChannel q hqf
+  apply MIRep_forCross hblock hred hfad F hax hc hreg
+  intro K _ _ _ Act _ _ _ _ p q
+  exact hcoarse Act p q
+
 end TraceableAgency
