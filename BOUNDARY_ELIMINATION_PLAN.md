@@ -131,3 +131,35 @@ spine and discharge all 3 boundary facts, dropping FiniteCardinalSupportBoundary
 from the final theorem. NOTE: wrapCross changes Hfun (= normalizedValue·id on wrapped scale),
 so the FaddeevEntropyForm/α·Shannon/MIRep chain must be re-derived on wrapCross — a spine
 rebuild, the largest remaining chunk.
+
+---
+## SESSION 5: ALL THREE FIELDS PROVED + capstone MI route (no cardinal-boundary assumption)
+
+LANDED IN SOURCE & PUSHED (commits be6fd91, 7525054):
+- field1_boundaryComplete  (field 1)
+- hfun_eq_normalizedValue_idChannel_of_scale  (field 2, rfl)
+- field3_restricted_coarse_reveal  (field 3, via sigmaSupportEquiv + samePosteriorLaw collapse
+  + normalizedValue_relabelAction_of_crossPrior + full-support coarse lemma)
+- wrapCross, boundaryCompleteScale, coarseVal_forCross, satisfiesFaddeevRecursion_forCross,
+  FaddeevEntropyForm_forCross, MIRep_forCross, entropyRegularity_forCross,
+  MIRep_of_boundaryComplete  — MIRep F with NO FiniteCardinalSupportBoundaryAssumptions,
+  given (hblock, hred) + support_face_scale (from hfaces) + HM marginalValue coherence clause.
+All [propext, Classical.choice, Quot.sound]; full build green (8622).
+
+FINAL MILE remaining to drop hcard from the EXPORTED theorem
+MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions:
+The producers Hfun_blockEmbed_of_fullPreEntropyClosure_minimal and
+coarseReveal_entropyReduction_of_fullPreEntropyClosure_minimal (and
+posteriorLawIntegral_supportRestrict_Hfun_...) currently take hcard, but their proofs use hcard
+ONLY via field 1 (normalizedValueSupportBoundary), field 2 (hfunBoundaryIdentity), field 3
+(restricted_coarse_reveal) + full-support relabel facts — ALL now proved for wrapCross. So:
+  1. reprove Hfun_blockEmbed for wrapCross from field1_boundaryComplete (+ existing relabel facts);
+  2. reprove coarseReveal_entropyReduction for wrapCross from field1/field3 + value_entropy_reduction;
+  3. package as hblock/hred (∀-hcross structures are not needed — feed the per-cross facts into
+     MIRep_of_boundaryComplete after refactoring it to take the two producer facts per-cross,
+     mirroring coarseVal_forCross);
+  4. new exported theorem MIRep_..._withConventions' taking FinalHarmlessConventions WITHOUT
+     support_boundary, building hcross0 = crossPriorBlockRepresentation_of_fullPreEntropyClosure_minimal,
+     hsf = hfaces.support_face_scale_eq, hcoh = hhm coherence clause.
+This is ~150 lines of mechanical dependent-type proof reusing only already-proved facts; no new
+mathematics. The convention's content is fully discharged; this step removes it from the signature.
