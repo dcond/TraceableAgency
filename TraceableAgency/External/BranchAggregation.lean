@@ -957,6 +957,23 @@ structure FinitePosteriorIntegralRepresentationAssumptions.{v} where
       (q : Dist A) (E : FiniteExperimentOn A),
       hV.V q E =
         posteriorLawIntegralExp q E (marginalValue F hV q)
+  /-- **Support-face coherence of the marginal-value test function.**
+      The Herstein--Milnor marginal-value function at a prior `q` agrees, on
+      posteriors supported inside `supp(q)`, with the marginal-value function at
+      the support-face prior `q.restrictToSupport`.  A posterior belief supported
+      on the positive support is the same belief whether read in the ambient
+      action space or on the support face, so the representing test function must
+      agree on it.  This is a genuine coherence property of the true HM functional
+      (which represents the whole order, boundary included), not a boundary
+      convention; it lets boundary support-restriction of the value be proved
+      rather than assumed (see `normalizedValueSupportBoundary_of_boundaryComplete`). -/
+  marginalValue_support_face :
+    ∀ (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F)
+      {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) [Nonempty (supportSubtype q)]
+      (d : Dist (supportSubtype q)),
+      marginalValue F hV q (Channel.actionPushforward d (supportIncludeKernel q)) =
+        marginalValue F hV q.restrictToSupport d
 
 /-- Finite affine linear-part interface for posterior-law values.
 
