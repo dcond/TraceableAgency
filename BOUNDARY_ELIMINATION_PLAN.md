@@ -163,3 +163,23 @@ ONLY via field 1 (normalizedValueSupportBoundary), field 2 (hfunBoundaryIdentity
      hsf = hfaces.support_face_scale_eq, hcoh = hhm coherence clause.
 This is ~150 lines of mechanical dependent-type proof reusing only already-proved facts; no new
 mathematics. The convention's content is fully discharged; this step removes it from the signature.
+
+---
+## SESSION 6: DONE — cardinal-boundary assumption eliminated from an exported MI route
+
+Committed & pushed (5ccb282). The exported theorem
+  MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputs_noCardinal
+derives MIRep F from the pre-entropy face-scale inputs (hfaces, hhm, huniq, haff, hpre) + the
+HM marginal-value support-face coherence clause, with NO FiniteCardinalSupportBoundaryAssumptions
+in its signature (confirmed via #check / #print axioms = [propext, Classical.choice, Quot.sound]).
+
+All three boundary facts are proved theorems and jointly discharge the convention:
+  field1_boundaryComplete, hfun_eq_normalizedValue_idChannel_of_scale, field3_restricted_coarse_reveal.
+The wiring producers (wrapCross, boundaryCompleteScale, *_ofFacts / *_ofCrossFacts, wrapCross_Hfun_
+fullSupport, entropyRegularity_forCross) are all in source, all clean.
+
+Note: the ORIGINAL exported theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions still
+carries support_boundary inside FinalHarmlessConventions (unchanged, still valid). The noCardinal
+route is the boundary-assumption-free replacement; swapping the packaging of the top-level
+`withConventions` wrapper to route through it (dropping support_boundary from FinalHarmlessConventions)
+is a pure repackaging step with no remaining mathematical content.
