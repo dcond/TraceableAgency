@@ -3229,4 +3229,268 @@ theorem field1_boundaryComplete
     rw [hz, zero_div, zero_div]
 
 
+
+
+/-! ## Field 3 (restricted coarse-reveal value) proved via support reindexing -/
+
+noncomputable def sigmaSupportEquiv
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    supportSubtype (sigmaDist p q) ≃
+      Σ (k' : supportSubtype p), supportSubtype (q k'.1) where
+  toFun := fun ⟨⟨k, a⟩, hpos⟩ =>
+    have hp : p k > 0 := by
+      rw [sigmaDist_apply] at hpos
+      rcases (p.nonneg k).lt_or_eq with h | h
+      · exact h
+      · exfalso; rw [← h] at hpos; simp at hpos
+    have hq : (q k) a > 0 := by
+      rw [sigmaDist_apply] at hpos
+      rcases ((q k).nonneg a).lt_or_eq with h | h
+      · exact h
+      · exfalso; rw [← h] at hpos; simp at hpos
+    ⟨⟨k, hp⟩, ⟨a, hq⟩⟩
+  invFun := fun ⟨⟨k, hp⟩, ⟨a, hq⟩⟩ =>
+    ⟨⟨k, a⟩, by rw [sigmaDist_apply]; exact mul_pos hp hq⟩
+  left_inv := by rintro ⟨⟨k, a⟩, hpos⟩; rfl
+  right_inv := by rintro ⟨⟨k, hp⟩, ⟨a, hq⟩⟩; rfl
+
+theorem sigma_restrict_reindex
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    Relabeling.relabelDist (sigmaSupportEquiv Act p q) (sigmaDist p q).restrictToSupport =
+      sigmaDist p.restrictToSupport (fun k' => (q k'.1).restrictToSupport) := by
+  ext y
+  rcases y with ⟨⟨k, hk⟩, ⟨a, ha⟩⟩
+  rw [Relabeling.relabelDist_apply, sigmaDist_apply]
+  simp only [sigmaSupportEquiv, Equiv.coe_fn_symm_mk, Dist.restrictToSupport_apply, sigmaDist_apply]
+
+
+
+theorem normalizedValue_relabelAction_of_crossPrior
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A B O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B]
+    [Fintype O] [DecidableEq O]
+    (eA : A ≃ B) (q : Dist A) (hq : q.FullSupport) (P : Channel A O) :
+    haveI : Nonempty B := ⟨eA (Classical.arbitrary A)⟩
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q) (Relabeling.relabelChannel eA (Equiv.refl O) P) =
+      normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+  haveI : Nonempty B := ⟨eA (Classical.arbitrary A)⟩
+  set P' : Channel B O := Relabeling.relabelChannel eA (Equiv.refl O) P with hP'
+  have hqB : (Relabeling.relabelDist eA q).FullSupport :=
+    Relabeling.relabelDist_fullSupport eA q hq
+  -- A5 both directions between P (on q) and P' (on relabel q)
+  have hq_to_new : F.rel (blockChannel P P') (inlDist q) (inrDist (Relabeling.relabelDist eA q)) := by
+    have h := hax.a5 P q (Relabeling.actionEquivKernel eA) P'
+      (Relabeling.relabelChannel_isBayesPushforwardCompletion eA P q)
+    simpa [P', Relabeling.actionPushforward_equiv] using h
+  have hq_to_old : F.rel (blockChannel P' P) (inlDist (Relabeling.relabelDist eA q)) (inrDist q) := by
+    have h := hax.a5 P' (Relabeling.relabelDist eA q) (Relabeling.actionEquivKernel eA.symm) P
+      (Relabeling.relabelChannel_symm_isBayesPushforwardCompletion eA P q)
+    simpa [P', Relabeling.actionPushforward_equiv, Relabeling.relabelDist_symm] using h
+  -- convert each block comparison to a normalizedValue inequality
+  have hge₁ := (hcross.cross_prior_block_rep q (Relabeling.relabelDist eA q) hq hqB P P').mp hq_to_new
+  have hge₂ := (hcross.cross_prior_block_rep (Relabeling.relabelDist eA q) q hqB hq P' P).mp hq_to_old
+  have e₁ : normalizedValue hcross.entropy_reduction.scale_coherence q P ≥
+      normalizedValue hcross.entropy_reduction.scale_coherence (Relabeling.relabelDist eA q) P' := by
+    simpa [normalizedValue] using hge₁
+  have e₂ : normalizedValue hcross.entropy_reduction.scale_coherence (Relabeling.relabelDist eA q) P' ≥
+      normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+    simpa [normalizedValue] using hge₂
+  exact le_antisymm e₁ e₂
+
+
+/- Target coarse channel on supp(s): reveal the block index in supportSubtype p. -/
+noncomputable def coarseTgt
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    Channel (supportSubtype (sigmaDist p q)) (supportSubtype p) :=
+  fun x =>
+    haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+    Dist.pure ((sigmaSupportEquiv Act p q x).1)
+
+/- coarseTgt is the action-relabel (outcome refl) of coarseReveal over the reindexed Act'. -/
+theorem coarseTgt_eq_relabel
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k)) :
+    haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+    coarseTgt Act p q =
+      Relabeling.relabelChannel (sigmaSupportEquiv Act p q).symm (Equiv.refl (supportSubtype p))
+        (coarseRevealChannel (fun k' : supportSubtype p => supportSubtype (q k'.1))) := by
+  haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+  ext x y
+  simp only [coarseTgt, Relabeling.relabelChannel_apply, Equiv.refl_symm, Equiv.refl_apply,
+    coarseRevealChannel, Equiv.symm_symm, Equiv.apply_symm_apply]
+
+/- Step B (outcome collapse): C|supp and coarseTgt have the same posterior law at s|supp.
+   Both deterministically reveal the block; posteriors are the fibres.  The K-valued reveal
+   has zero marginal off supp(p), so its posterior-law integral matches the supp(p)-valued one. -/
+theorem samePosteriorLaw_coarse_restrict_tgt
+    {K : Type u} [Fintype K] [DecidableEq K]
+    (Act : K → Type u) [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k))
+    [Nonempty (supportSubtype (sigmaDist p q))] :
+    SamePosteriorLawExp (sigmaDist p q).restrictToSupport
+      (experimentOfChannel (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q)))
+      (experimentOfChannel (coarseTgt Act p q)) := by
+  intro φ _
+  rw [posteriorLawIntegralExp_experimentOfChannel, posteriorLawIntegralExp_experimentOfChannel]
+  unfold posteriorLawIntegral
+  classical
+  haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+  -- RHS sum over supportSubtype p equals a sum over K of terms zero off supp(p)
+  rw [← sum_supportSubtype_eq_sum_of_zero p
+        (fun k =>
+          (Channel.outcomeMarginal (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+            (sigmaDist p q).restrictToSupport) k *
+          φ (Channel.posterior (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+            (sigmaDist p q).restrictToSupport k))
+        ?_]
+  · -- Now both are sums over supportSubtype p; match termwise.
+    apply Finset.sum_congr rfl
+    intro k' _
+    have hind : ∀ x : supportSubtype (sigmaDist p q),
+        (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q)) x (k'.1) =
+        (coarseTgt Act p q) x k' := by
+      intro x
+      have hfst : ((sigmaSupportEquiv Act p q x).1).1 = x.1.1 := by
+        rcases x with ⟨⟨j, a⟩, hxpos⟩
+        rfl
+      simp only [coarseTgt, Channel.restrictToSupport_apply, coarseRevealChannel, Dist.pure_apply]
+      by_cases hx : k'.1 = x.1.1
+      · have h2 : (k' = (sigmaSupportEquiv Act p q x).1) := by
+          apply Subtype.ext; rw [hfst]; exact hx
+        rw [if_pos hx, if_pos h2]
+      · have h2 : ¬ (k' = (sigmaSupportEquiv Act p q x).1) := by
+          intro h; apply hx; rw [← hfst]; exact congrArg Subtype.val h
+        rw [if_neg hx, if_neg h2]
+    have hmarg : (Channel.outcomeMarginal
+        (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+        (sigmaDist p q).restrictToSupport) k'.1 =
+        (Channel.outcomeMarginal (coarseTgt Act p q) (sigmaDist p q).restrictToSupport) k' := by
+      rw [Channel.outcomeMarginal_apply, Channel.outcomeMarginal_apply]
+      apply Finset.sum_congr rfl
+      intro x _; rw [hind x]
+    have hpost : (Channel.posterior
+        (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+        (sigmaDist p q).restrictToSupport) k'.1 =
+        (Channel.posterior (coarseTgt Act p q) (sigmaDist p q).restrictToSupport) k' := by
+      by_cases hpos : (Channel.outcomeMarginal (coarseTgt Act p q)
+          (sigmaDist p q).restrictToSupport) k' > 0
+      · have hposC : (Channel.outcomeMarginal
+            (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+            (sigmaDist p q).restrictToSupport) k'.1 > 0 := by rw [hmarg]; exact hpos
+        ext y
+        simp only [Channel.posterior, dif_pos hposC, dif_pos hpos]
+        rw [hind y, hmarg]
+      · have hnegC : ¬ (Channel.outcomeMarginal
+            (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+            (sigmaDist p q).restrictToSupport) k'.1 > 0 := by rw [hmarg]; exact hpos
+        simp only [Channel.posterior, dif_neg hnegC, dif_neg hpos]
+    rw [hmarg, hpost]
+  · -- off-support terms vanish: for p k = 0, outcomeMarginal of restricted coarseReveal at k is 0
+    intro k hk0
+    have hm : (Channel.outcomeMarginal
+        (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q))
+        (sigmaDist p q).restrictToSupport) k = 0 := by
+      rw [Channel.outcomeMarginal_apply]
+      apply Finset.sum_eq_zero
+      intro x _
+      rcases x with ⟨⟨j, a⟩, hx⟩
+      have hjne : j ≠ k := by
+        rintro rfl
+        rw [sigmaDist_apply] at hx
+        have : p j = 0 := hk0
+        rw [this, zero_mul] at hx
+        exact lt_irrefl 0 hx
+      simp only [Channel.restrictToSupport_apply, coarseRevealChannel, Dist.pure_apply]
+      rw [if_neg (by simpa [eq_comm] using hjne), mul_zero]
+    rw [hm, zero_mul]
+
+
+/- normalizedValue respects same posterior law (numerator respects, scale unaffected). -/
+theorem normalizedValue_congr_samePosteriorLaw
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    {A O O' : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype O'] [DecidableEq O']
+    (q : Dist A) (P : Channel A O) (P' : Channel A O')
+    (hsame : SamePosteriorLawExp q (experimentOfChannel P) (experimentOfChannel P')) :
+    normalizedValue hs q P = normalizedValue hs q P' := by
+  unfold normalizedValue
+  rw [hs.branch_agg.value_rep.respects_same_posterior_law q
+    (experimentOfChannel P) (experimentOfChannel P') hsame]
+
+/- FIELD 3: restricted coarse-reveal value equals Hfun of the restricted coarse prior. -/
+theorem field3_restricted_coarse_reveal
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
+    (Act : K → Type u)
+    [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+    [∀ k, Nonempty (Act k)]
+    [Nonempty ((k : K) × Act k)]
+    (p : Dist K) (q : ∀ k, Dist (Act k))
+    (hnot : ¬ (sigmaDist p q).FullSupport) :
+    letI : Nonempty (supportSubtype (sigmaDist p q)) := supportSubtype_nonempty _
+    letI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (sigmaDist p q).restrictToSupport
+        (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q)) =
+      hcross.entropy_reduction.Hfun p.restrictToSupport := by
+  haveI : Nonempty (supportSubtype (sigmaDist p q)) := supportSubtype_nonempty _
+  haveI : Nonempty (supportSubtype p) := supportSubtype_nonempty p
+  set hs := hcross.entropy_reduction.scale_coherence with hsdef
+  set p' : Dist (supportSubtype p) := p.restrictToSupport with hp'
+  set q' : (k' : supportSubtype p) → Dist (supportSubtype (q k'.1)) :=
+    fun k' => (q k'.1).restrictToSupport with hq'
+  haveI : ∀ k' : supportSubtype p, Nonempty (supportSubtype (q k'.1)) :=
+    fun k' => supportSubtype_nonempty _
+  haveI : Nonempty ((k' : supportSubtype p) × supportSubtype (q k'.1)) :=
+    (sigmaSupportEquiv Act p q).nonempty_congr.mp inferInstance
+  -- Step B: collapse the K-outcome to coarseTgt (into supp p)
+  have hstepB : normalizedValue hs (sigmaDist p q).restrictToSupport
+      (Channel.restrictToSupport (coarseRevealChannel Act) (sigmaDist p q)) =
+      normalizedValue hs (sigmaDist p q).restrictToSupport (coarseTgt Act p q) :=
+    normalizedValue_congr_samePosteriorLaw hs _ _ _
+      (samePosteriorLaw_coarse_restrict_tgt Act p q)
+  rw [hstepB]
+  -- coarseTgt = relabelChannel eA.symm (refl) (coarseReveal Act'), s|supp = relabelDist eA.symm (sigmaDist p' q')
+  set eA := (sigmaSupportEquiv Act p q) with heA
+  have hs_eq : (sigmaDist p q).restrictToSupport = Relabeling.relabelDist eA.symm (sigmaDist p' q') := by
+    conv_lhs => rw [← Relabeling.relabelDist_symm eA (sigmaDist p q).restrictToSupport]
+    rw [sigma_restrict_reindex Act p q]
+  have hC_eq : coarseTgt Act p q =
+      Relabeling.relabelChannel eA.symm (Equiv.refl (supportSubtype p))
+        (coarseRevealChannel (fun k' : supportSubtype p => supportSubtype (q k'.1))) :=
+    coarseTgt_eq_relabel Act p q
+  rw [hs_eq, hC_eq]
+  -- action engine transports the normalized value across the reindex relabeling
+  have hp'full : (sigmaDist p' q').FullSupport := by
+    intro x
+    rw [sigmaDist_apply]
+    exact mul_pos (Dist.restrictToSupport_fullSupport p x.1)
+      (Dist.restrictToSupport_fullSupport (q x.1.1) x.2)
+  rw [normalizedValue_relabelAction_of_crossPrior F hax hcross eA.symm (sigmaDist p' q')
+      hp'full
+      (coarseRevealChannel (fun k' : supportSubtype p => supportSubtype (q k'.1)))]
+  -- full-support coarse lemma: normValue (sigmaDist p' q') (coarseReveal Act') = Hfun p'
+  rw [coarseReveal_value_eq_Hfun_of_axioms_fullSupport F hax hcross hreg
+      (fun k' : supportSubtype p => supportSubtype (q k'.1)) p' q'
+      (by
+        -- sigmaDist p' q' is full support (p' and each q' full support)
+        intro x
+        rw [sigmaDist_apply]
+        exact mul_pos (Dist.restrictToSupport_fullSupport p x.1)
+          (Dist.restrictToSupport_fullSupport (q x.1.1) x.2))]
+
 end TraceableAgency
