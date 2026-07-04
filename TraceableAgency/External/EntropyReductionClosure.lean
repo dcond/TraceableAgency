@@ -3068,4 +3068,165 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions
     hconv.support_scale hconv.singleton_slice hconv.product_normalized
     hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
 
+
+/-! ## Boundary-completed scale: eliminating the boundary normalized-value support field
+
+The following machinery proves `FiniteNormalizedValueSupportBoundaryAssumptions`
+(field 1 of `FiniteCardinalSupportBoundaryAssumptions`) rather than assuming it,
+for a boundary-completed scale.  `wrapScale` completes the prior-dependent scale
+to its support-face value at nondegenerate boundary priors (leaving full-support
+and singleton priors untouched); `boundaryCompleteScale` re-proves the four
+`ScaleCoherenceStructure` fields; `wrapCross` transports the cross-prior block
+representation (whose comparison clause is full-support-guarded, where the
+wrapped scale agrees with the original); and `field1_wrapper` /
+`normalizedValueSupportBoundary_of_boundaryComplete` prove the boundary
+normalized-value support restriction from the Herstein--Milnor marginal-value
+support-face coherence clause plus the coherent support-face scale relation. -/
+
+/-- Equivalence `A ≃ supportSubtype q` for a full-support `q`. -/
+noncomputable def fsSupportEquiv {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) (hq : q.FullSupport) : A ≃ supportSubtype q where
+  toFun a := ⟨a, hq a⟩
+  invFun s := s.1
+  left_inv a := rfl
+  right_inv s := by cases s; rfl
+
+theorem restrictToSupport_eq_relabel_fullSupport {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) (hq : q.FullSupport) :
+    q.restrictToSupport = Relabeling.relabelDist (fsSupportEquiv q hq) q := by
+  ext s; rcases s with ⟨a, ha⟩
+  simp [Relabeling.relabelDist, fsSupportEquiv, Dist.restrictToSupport_apply]
+
+open Classical in
+/-- Scale completed to the support-face value at nondegenerate boundary priors. -/
+noncomputable def wrapScale
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) : ℝ :=
+  letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  if (¬ q.FullSupport ∧ ∃ a b : A, a ≠ b ∧ 0 < q a ∧ 0 < q b) then
+    hs.scale q.restrictToSupport
+  else hs.scale q
+
+theorem wrapScale_fullSupport
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hq : q.FullSupport) :
+    wrapScale hs q = hs.scale q := by
+  classical
+  simp only [wrapScale]
+  rw [if_neg (by rintro ⟨hnf, _⟩; exact hnf hq)]
+
+theorem wrapScale_boundary_nondeg
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hnf : ¬ q.FullSupport)
+    (hnd : ∃ a b : A, a ≠ b ∧ 0 < q a ∧ 0 < q b) :
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    wrapScale hs q = hs.scale q.restrictToSupport := by
+  classical
+  simp only [wrapScale]
+  rw [if_pos ⟨hnf, hnd⟩]
+
+theorem wrapScale_singleton
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hnd : ¬ ∃ a b : A, a ≠ b ∧ 0 < q a ∧ 0 < q b) :
+    wrapScale hs q = hs.scale q := by
+  classical
+  simp only [wrapScale]
+  rw [if_neg (by rintro ⟨_, hc⟩; exact hnd hc)]
+
+/-- The boundary-completed scale coherence structure. -/
+noncomputable def boundaryCompleteScale
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    (hsf : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A) [Nonempty (supportSubtype r)]
+      (_hn : ∃ a : A, 0 < r a) (_hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hb : ¬ r.FullSupport),
+      hs.branch_agg.branchCoeff q r = hs.scale q / hs.scale r.restrictToSupport)
+    : ScaleCoherenceStructure F where
+  branch_agg := hs.branch_agg
+  scale := fun {A} _ _ _ q => wrapScale hs q
+  scale_pos := by
+    intro A _ _ _ q hq
+    rw [wrapScale_fullSupport hs q hq]; exact hs.scale_pos q hq
+  scale_universal := by
+    intro A B _ _ _ _ _ _ q r hq hr
+    rw [wrapScale_fullSupport hs q hq, wrapScale_fullSupport hs r hr]
+    exact hs.scale_universal q r hq hr
+  branchCoeff_factorization := by
+    classical
+    intro A O₁ _ _ _ _ _ q hq P₁ o₁ hpos
+    set r := Channel.posterior P₁ q o₁ with hrdef
+    rw [wrapScale_fullSupport hs q hq]
+    by_cases hrfull : r.FullSupport
+    · rw [wrapScale_fullSupport hs r hrfull]
+      exact hs.branchCoeff_factorization q hq P₁ o₁ hpos
+    · by_cases hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b
+      · haveI : Nonempty (supportSubtype r) := supportSubtype_nonempty r
+        obtain ⟨a0, b0, hab0, ha0, hb0⟩ := hnd
+        rw [wrapScale_boundary_nondeg hs r hrfull ⟨a0, b0, hab0, ha0, hb0⟩]
+        exact hsf q hq r ⟨a0, ha0⟩ ⟨a0, b0, hab0, ha0, hb0⟩ hrfull
+      · rw [wrapScale_singleton hs r hnd]
+        exact hs.branchCoeff_factorization q hq P₁ o₁ hpos
+
+/-- Field 1 (boundary normalized-value support restriction) proved for the
+boundary-completed scale. -/
+theorem field1_boundaryComplete
+    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u})
+    {F : PrefFamily.{u}} (hs : ScaleCoherenceStructure F)
+    (hsf : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A) [Nonempty (supportSubtype r)]
+      (_hn : ∃ a : A, 0 < r a) (_hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hb : ¬ r.FullSupport),
+      hs.branch_agg.branchCoeff q r = hs.scale q / hs.scale r.restrictToSupport)
+    (hcoh : ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) [Nonempty (supportSubtype q)] (d : Dist (supportSubtype q)),
+      hint.marginalValue F hs.branch_agg.value_rep q
+        (Channel.actionPushforward d (supportIncludeKernel q)) =
+        hint.marginalValue F hs.branch_agg.value_rep q.restrictToSupport d)
+    {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A] [Fintype O] [DecidableEq O]
+    (P : Channel A O) (q : Dist A) (hqb : ¬ q.FullSupport) :
+    haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    normalizedValue (boundaryCompleteScale hs hsf) q P =
+      normalizedValue (boundaryCompleteScale hs hsf) q.restrictToSupport
+        (Channel.restrictToSupport P q) := by
+  classical
+  haveI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  have hnum : hs.branch_agg.value_rep.V q (experimentOfChannel P) =
+      hs.branch_agg.value_rep.V q.restrictToSupport
+        (experimentOfChannel (Channel.restrictToSupport P q)) := by
+    rw [hint.value_eq_integral F hs.branch_agg.value_rep q (experimentOfChannel P)]
+    rw [hint.value_eq_integral F hs.branch_agg.value_rep q.restrictToSupport
+          (experimentOfChannel (Channel.restrictToSupport P q))]
+    rw [posteriorLawIntegralExp_experimentOfChannel]
+    rw [posteriorLawIntegral_restrictToSupport P q]
+    rw [posteriorLawIntegralExp_experimentOfChannel]
+    unfold posteriorLawIntegral
+    apply Finset.sum_congr rfl
+    intro o _
+    congr 1
+    exact hcoh q (Channel.posterior (Channel.restrictToSupport P q) q.restrictToSupport o)
+  change hs.branch_agg.value_rep.V q (experimentOfChannel P) / wrapScale hs q =
+      hs.branch_agg.value_rep.V q.restrictToSupport
+        (experimentOfChannel (Channel.restrictToSupport P q)) / wrapScale hs q.restrictToSupport
+  rw [hnum]
+  rw [wrapScale_fullSupport hs q.restrictToSupport (Dist.restrictToSupport_fullSupport q)]
+  by_cases hnd : ∃ a b : A, a ≠ b ∧ 0 < q a ∧ 0 < q b
+  · rw [wrapScale_boundary_nondeg hs q hqb hnd]
+  · have hss : Subsingleton (supportSubtype q) := by
+      rw [subsingleton_iff]
+      rintro ⟨a, ha⟩ ⟨b, hb⟩
+      by_contra hne
+      exact hnd ⟨a, b, fun h => hne (Subtype.ext h), ha, hb⟩
+    haveI := hss
+    have hz : hs.branch_agg.value_rep.V q.restrictToSupport
+        (experimentOfChannel (Channel.restrictToSupport P q)) = 0 :=
+      branchValue_channel_eq_zero_of_subsingleton F hs.branch_agg.value_rep
+        q.restrictToSupport (Dist.restrictToSupport_fullSupport q)
+        (Channel.restrictToSupport P q)
+    rw [hz, zero_div, zero_div]
+
+
 end TraceableAgency
