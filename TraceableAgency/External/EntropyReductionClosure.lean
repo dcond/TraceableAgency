@@ -2158,6 +2158,34 @@ theorem cardDefect_pos
   · exact canonBoundary_nondeg n m hle hm2
   · exact canonBoundary_boundary n m hle hmn
 
+/-- The positive support of a relabelled prior is equivalent to the support of
+the original, via the underlying bijection. -/
+noncomputable def relabelSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A]
+    [Fintype B] [DecidableEq B] (e : A ≃ B) (r : Dist A) :
+    supportSubtype (Relabeling.relabelDist e r) ≃ supportSubtype r where
+  toFun b := ⟨e.symm b.1, by
+    have := b.2
+    rw [show (Relabeling.relabelDist e r) b.1 = r (e.symm b.1) from
+      Relabeling.relabelDist_apply e r b.1] at this
+    exact this⟩
+  invFun a := ⟨e a.1, by
+    rw [show (Relabeling.relabelDist e r) (e a.1) = r (e.symm (e a.1)) from
+      Relabeling.relabelDist_apply e r (e a.1), Equiv.symm_apply_apply]
+    exact a.2⟩
+  left_inv b := by apply Subtype.ext; simp
+  right_inv a := by apply Subtype.ext; simp
+
+/-- Support-restriction commutes with relabelling: `(relabel e r)|supp` is the
+relabelling of `r|supp` along the induced support bijection. -/
+theorem restrictToSupport_relabelDist {A B : Type u} [Fintype A] [DecidableEq A]
+    [Fintype B] [DecidableEq B] (e : A ≃ B) (r : Dist A) :
+    (Relabeling.relabelDist e r).restrictToSupport =
+      Relabeling.relabelDist (relabelSupportEquiv e r).symm r.restrictToSupport := by
+  ext b
+  rw [Dist.restrictToSupport_apply, Relabeling.relabelDist_apply,
+    Relabeling.relabelDist_apply, Dist.restrictToSupport_apply]
+  simp [relabelSupportEquiv]
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
