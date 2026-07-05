@@ -1,3 +1,37 @@
+# ✅ Tier C cocycle PROVEN (2026-07-05) — support_scale reduction remains
+
+**`cardDefect_cocycle` is DONE (zero sorries, axioms [propext,Classical.choice,Quot.sound], green 8622):**
+`cardDefect n m · cardDefect m ℓ = cardDefect n ℓ` (2≤ℓ<m<n). This was the last HARD blocker.
+Proved via chaining cardDefect_transport at (n,ℓ)+(n,m) through canonBoundary_nest + supportInclude_nest,
+bridging the m-face by canonBoundary_face_uniform + supp≃canonType relabel (marginalValue_relabel) +
+transport at (m,ℓ), cancelling the A1-nonzero tangent. All helper bricks in source:
+actionPushforward_pure_comp, canonInclKernel_comp, canonBoundary_nest, nestSupportMap,
+supportInclude_nest, cardDefect_transport, relabelDist_eq_actionPushforward, cBface_eq_relabel_uniform,
+canonIncl_eq_supportInclude, push_nest_eq_relabel.
+
+**Also landed:** cardScaleT (t_n := cardDefect n 2), cardDefect_eq_ratio (cardDefect n m = t_n/t_m
+via cocycle), faithful_scale_pos (scale q > 0 all q).
+
+**REMAINING for support_scale (mechanical but Equiv-heavy, ~200 lines):**
+1. `alignEquiv r : A ≃ canonType (card A)` [DEFINED, compiles] sending supp r → first-(card supp).
+   Need `alignEquiv_lt_of_pos` (support maps below m) — friction: Equiv.sumCompl/sumCongr defeq
+   (supportSubtype r vs {a//0<r a}); use `Fintype.equivFinOfCardEq`-style or `change` to align types.
+2. General defect lemma: `boundaryCoeff q r = scale q · cardDefect (card A)(card supp r)` for
+   nondeg full-support q, nondeg boundary r. Route: relabel A≃canonType n via alignEquiv (boundaryCoeff_
+   relabel + scale relabel), giving r' with supp=first-m; q-indep (boundaryCoeff_qIndep) to u_n;
+   within-face r-independence (r'|supp vs uniform, same support subtype ≃, via transport same
+   pushSignedIncl + branchPathCoeff face-ratio) to cB n m; = cardDefect n m.
+3. cardinalGauge q := cardScaleT (card A) / scale q [positive via faithful_scale_pos + t_n>0;
+   relabel-inv (hrel) via scale relabel + card]. hsupport: reduces (compute) to the general defect
+   lemma + cardDefect_eq_ratio. hgaugeRel for covariance producer: cardScaleT(card A)/scale relabel-inv.
+4. Assemble coherentFaceScales_of_FinalHM_positiveGauge with cardinalGauge; new exported theorem
+   dropping support_scale; #print verify.
+
+NO COUNTEREXAMPLE — the result is TRUE; its hardest component (cocycle) is proven. Remaining is
+Equiv-plumbing-heavy assembly.
+
+---
+
 # Tier C cocycle — ALL BRICKS LANDED, only final assembly remains (2026-07-05)
 
 Committed green (8622), axioms clean. Reusable bricks for the defect cocycle now ALL in source:
