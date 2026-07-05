@@ -2089,6 +2089,44 @@ noncomputable def canonBoundarySupportEquiv (n m : ℕ) (hmn : m ≤ n) [NeZero 
   left_inv a := by apply Subtype.ext; apply ULift.ext; apply Fin.ext; simp
   right_inv b := by apply ULift.ext; apply Fin.ext; simp
 
+/-- **Nesting of canonical boundary priors.**  The canonical `ℓ`-point face
+inside the `n`-point set is the pushforward of the canonical `ℓ`-point face
+inside the `m`-point set along the `m ↪ n` inclusion (`ℓ ≤ m ≤ n`).  This is the
+geometric identity underlying the embedding-defect cocycle. -/
+theorem canonBoundary_nest (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) [NeZero l] :
+    canonBoundary.{u} n l (hml.trans hmn) =
+      Channel.actionPushforward (canonBoundary.{u} m l hml) (canonInclKernel n m hmn) := by
+  ext j
+  obtain ⟨jn⟩ := j
+  rw [canonBoundary_apply]
+  show (if (jn:ℕ) < l then (1:ℝ)/l else 0) =
+    ∑ c : canonType.{u} m, (canonBoundary.{u} m l hml) c *
+      (Dist.pure (ULift.up (Fin.castLE hmn c.down)) : Dist (canonType.{u} n)) (ULift.up jn)
+  by_cases hjm : (jn:ℕ) < m
+  · rw [Finset.sum_eq_single (ULift.up (⟨(jn:ℕ), hjm⟩ : Fin m))]
+    · have hpt : (ULift.up.{u} (Fin.castLE hmn ((ULift.up.{u} (⟨(jn:ℕ),hjm⟩ : Fin m)).down))
+            : canonType.{u} n) = (ULift.up.{u} jn : canonType.{u} n) := by
+        apply ULift.ext; apply Fin.ext; simp
+      rw [hpt, Dist.pure_apply_self, mul_one, canonBoundary_apply]
+    · intro c _ hc
+      rw [Dist.pure_apply_ne, mul_zero]
+      intro hcontra
+      apply hc
+      apply ULift.ext; apply Fin.ext
+      have hce : Fin.castLE hmn c.down = jn := ULift.up.inj hcontra.symm
+      have := Fin.ext_iff.mp hce
+      simpa using this
+    · intro h; exact absurd (Finset.mem_univ _) h
+  · rw [if_neg (fun h => hjm (lt_of_lt_of_le h hml))]
+    refine (Finset.sum_eq_zero ?_).symm
+    intro c _
+    rw [Dist.pure_apply_ne, mul_zero]
+    intro hcontra
+    apply hjm
+    have hce : Fin.castLE hmn c.down = jn := ULift.up.inj hcontra.symm
+    rw [← hce, Fin.val_castLE]
+    exact c.down.isLt
+
 /-- The faithful chain scale of the uniform prior on a nondegenerate action type
 is `1`: `scale (u_A) = branchCoeff (u_A) (u_A) = branchPathCoeff (u_A) (u_A) = 1`
 by the full-support tangent-scalar cocycle at `q = r = s = u_A`. -/
