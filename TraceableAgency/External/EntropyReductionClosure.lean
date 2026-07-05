@@ -2284,6 +2284,73 @@ theorem cardDefect_pos
   · exact canonBoundary_nondeg n m hle hm2
   · exact canonBoundary_boundary n m hle hmn
 
+/-- Inclusion of the `ℓ`-face support into the `m`-face support (same ambient
+element), for `ℓ ≤ m ≤ n`. -/
+noncomputable def nestSupportMap (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) [NeZero l] [NeZero m] :
+    supportSubtype (canonBoundary.{u} n l (hml.trans hmn)) →
+    supportSubtype (canonBoundary.{u} n m hmn) :=
+  fun a => ⟨a.1, by
+    obtain ⟨⟨jn⟩, hj⟩ := a
+    show 0 < (canonBoundary n m hmn) (ULift.up jn)
+    rw [canonBoundary_pos]
+    have hjl : ((jn : Fin n) : ℕ) < l := (canonBoundary_pos n l (hml.trans hmn) jn).mp hj
+    exact lt_of_lt_of_le hjl hml⟩
+
+/-- The support inclusion of the `ℓ`-face factors through the `m`-face: pushing a
+belief into the ambient space via the `ℓ`-face inclusion equals first mapping to
+the `m`-face support then including. -/
+theorem supportInclude_nest (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) [NeZero l] [NeZero m]
+    (d : Dist (supportSubtype (canonBoundary.{u} n l (hml.trans hmn)))) :
+    Channel.actionPushforward d (supportIncludeKernel (canonBoundary.{u} n l (hml.trans hmn))) =
+      Channel.actionPushforward
+        (Channel.actionPushforward d (fun a => Dist.pure (nestSupportMap n m l hmn hml a)))
+        (supportIncludeKernel (canonBoundary.{u} n m hmn)) := by
+  show Channel.actionPushforward d
+        (fun a => Dist.pure (a.1 : canonType.{u} n)) =
+      Channel.actionPushforward
+        (Channel.actionPushforward d (fun a => Dist.pure (nestSupportMap n m l hmn hml a)))
+        (fun b => Dist.pure (b.1 : canonType.{u} n))
+  rw [actionPushforward_pure_comp d (nestSupportMap n m l hmn hml) (fun b => (b.1 : canonType.{u} n))]
+  rfl
+
+/-- **Transport equation for the embedding defect.**  For `2 ≤ m < n` and a
+tangent `η` on the `m`-face support, the ambient marginal value of the uniform
+prior, restricted along the face inclusion, equals `cardDefect n m` times the
+intrinsic face marginal value.  (This is the support-face marginal-value
+transport, with `boundaryCoeff` identified as `cardDefect`.) -/
+theorem cardDefect_transport
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (n m : ℕ) [NeZero m] [NeZero n] (hm2 : 2 ≤ m) (hmn : m < n)
+    (η : PosteriorLawSigned (supportSubtype (canonBoundary.{u} n m (le_of_lt hmn))))
+    (hηtan : PosteriorLawTangent η) :
+    η (fun d => (posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          (Dist.uniform (A := canonType.{u} n))
+          (Channel.actionPushforward d
+            (supportIncludeKernel (canonBoundary.{u} n m (le_of_lt hmn))))) =
+      cardDefect hhm hbranchConv hax n m *
+        η ((posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          (canonBoundary.{u} n m (le_of_lt hmn)).restrictToSupport) := by
+  classical
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm
+  have htr := hbranchConv.marginal_value.support_face_marginalValue_scalar
+    F hax hV (Dist.uniform (A := canonType.{u} n)) (canonBoundary.{u} n m (le_of_lt hmn))
+    Dist.uniform_fullSupport
+    (canonBoundary_support_nonempty n m (le_of_lt hmn) (by omega))
+    (canonBoundary_nondeg n m (le_of_lt hmn) hm2)
+    (canonBoundary_boundary n m (le_of_lt hmn) hmn) η hηtan
+  have hcd : cardDefect hhm hbranchConv hax n m =
+      (branchBoundaryFaceScale_of_faithfulAssumptions
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      ).boundaryCoeff (Dist.uniform (A := canonType.{u} n)) (canonBoundary.{u} n m (le_of_lt hmn)) := by
+    rw [cardDefect, dif_pos ⟨hm2, le_of_lt hmn⟩]
+  rw [hcd]
+  exact htr
+
 /-- The positive support of a relabelled prior is equivalent to the support of
 the original, via the underlying bijection. -/
 noncomputable def relabelSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A]
