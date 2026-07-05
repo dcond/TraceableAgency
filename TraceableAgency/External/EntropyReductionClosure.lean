@@ -5208,6 +5208,46 @@ theorem cobGauge_coboundary
   unfold cobGauge
   exact hkey
 
+-- leftCoeff is relabel-invariant in the SECOND argument (via value formula + covariance).
+theorem fs_leftCoeff_relabel_right
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A B B' : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype B'] [DecidableEq B'] [Nonempty B']
+    (q : Dist A) (r : Dist B) (e : B ≃ B') (hq : q.FullSupport) (hr : r.FullSupport)
+    (hAnd : ¬ Subsingleton A) :
+    hpair.leftCoeff hax q (Relabeling.relabelDist e r) = hpair.leftCoeff hax q r := by
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V q
+      (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hAnd
+  have hrq : (Relabeling.relabelDist e r).FullSupport := Relabeling.relabelDist_fullSupport e r hr
+  -- V(q⊗(relabel e r), id_A ⊗ U_B') = leftCoeff q (relabel e r) · V(q,id)
+  have h1 := fs_bilinear_right_uninf hpair hax q (Relabeling.relabelDist e r) hq hrq (Channel.idChannel : Channel A A)
+  -- V(q⊗r, id_A ⊗ U_B) = leftCoeff q r · V(q,id)
+  have h2 := fs_bilinear_right_uninf hpair hax q r hq hr (Channel.idChannel : Channel A A)
+  -- The two LHS values are equal via covariance: relabel (refl_A × e) carries q⊗r to q⊗(relabel e r)
+  -- and id_A ⊗ U_B to id_A ⊗ U_B'.
+  have hcov : hfaces.branch_result.branch_agg.value_rep.V (prodDist q (Relabeling.relabelDist e r))
+        (experimentOfChannel (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B'))) =
+      hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B))) := by
+    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+      ((Equiv.refl A).prodCongr e) ((Equiv.refl A).prodCongr (Equiv.refl PUnit.{u+1}))
+      (prodDist q r) (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B))
+    rw [Relabeling.relabelDist_prodCongr, Relabeling.relabelChannel_prodCongr] at hc
+    -- relabel refl q = q ; relabel e r ; relabel refl id = id ; relabel e-outcome U_B = U_B'
+    rw [show Relabeling.relabelDist (Equiv.refl A) q = q from Relabeling.relabelDist_refl q] at hc
+    rw [show Relabeling.relabelChannel (Equiv.refl A) (Equiv.refl A) (Channel.idChannel : Channel A A)
+          = (Channel.idChannel : Channel A A) from by
+        ext a o; simp [Relabeling.relabelChannel, Channel.idChannel]] at hc
+    rw [show Relabeling.relabelChannel e (Equiv.refl PUnit.{u+1}) (Channel.uninformativeChannelU B)
+          = (Channel.uninformativeChannelU B') from by
+        ext b o; cases o; simp [Relabeling.relabelChannel, Channel.uninformativeChannelU]] at hc
+    exact hc
+  rw [h1, h2] at hcov
+  exact mul_right_cancel₀ hVnz hcov
+
 end FaceScaleProductCocycle
 
 
