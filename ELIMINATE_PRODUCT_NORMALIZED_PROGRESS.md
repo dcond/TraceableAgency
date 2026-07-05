@@ -65,6 +65,15 @@ the nested-inclusion cocycle ARE required — this is the paper's actual argumen
 - `cardDefect n m := boundaryCoeff(u_n)(canonBoundary n m)` (= K_{n,m}, scale factors are 1);
   `cardDefect_pos` (2≤m<n).
 
+**R2b MORE LANDED (green 8612, committed):**
+- Global `instNonemptySupportSubtype` instance (unblocked all `Nonempty (supportSubtype)`
+  synthesis — was the main mechanical blocker).
+- `relabelSupportEquiv`, `restrictToSupport_relabelDist`, `push_relabel_comm` (tangent naturality
+  square for the support inclusion).
+- **`boundaryCoeff_relabel_of_FinalHM`** (the R1-analogue for the boundary transport — the main
+  conceptual risk, now DONE): `boundaryCoeff (relabel e q)(relabel e r) = boundaryCoeff q r`.
+  Combined with `scaleRelabel_of_FinalHM_covariance`, the embedding defect is relabel-invariant.
+
 **R2b REMAINING (each verified-tractable, ~4-5 lemmas each; the two hard pieces):**
 
 (A) **General reduction** `defect(q,r) = cardDefect n m` for arbitrary boundary (q,r) with
