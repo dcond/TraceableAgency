@@ -2650,6 +2650,79 @@ theorem cardDefect_cocycle
       (cardDefect hhm hbranchConv hax n m * cardDefect hhm hbranchConv hax m l) *
         η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) from hfin)]
 
+/-- **The cardinal gauge scale `t_n`.**  `t_n := cardDefect n 2` for `n ≥ 3`,
+`t_2 := 1`.  By the cocycle `cardDefect n m = t_n / t_m`. -/
+noncomputable def cardScaleT
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F) (n : ℕ) : ℝ :=
+  if n = 2 then 1
+  else if 3 ≤ n then cardDefect hhm hbranchConv hax n 2
+  else 1
+
+/-- The embedding defect factors as `cardDefect n m = t_n / t_m` (the cocycle,
+setting `ℓ = 2`). -/
+theorem cardDefect_eq_ratio
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F)
+    (n m : ℕ) [NeZero m] [NeZero n] (hm2 : 2 ≤ m) (hmn : m < n) :
+    cardDefect hhm hbranchConv hax n m =
+      cardScaleT hhm hbranchConv hax n / cardScaleT hhm hbranchConv hax m := by
+  have hn3 : 3 ≤ n := by omega
+  have htn : cardScaleT hhm hbranchConv hax n = cardDefect hhm hbranchConv hax n 2 := by
+    rw [cardScaleT]; rw [if_neg (by omega), if_pos hn3]
+  rcases eq_or_lt_of_le hm2 with hm2eq | hm2lt
+  · subst hm2eq
+    rw [htn]
+    have htm : cardScaleT hhm hbranchConv hax 2 = 1 := by rw [cardScaleT, if_pos rfl]
+    rw [htm, div_one]
+  · have hm3 : 3 ≤ m := by omega
+    haveI : NeZero (2:ℕ) := ⟨by norm_num⟩
+    have hcoc := cardDefect_cocycle hhm hbranchConv hax n m 2 (le_refl 2) hm2lt hmn
+    have htm : cardScaleT hhm hbranchConv hax m = cardDefect hhm hbranchConv hax m 2 := by
+      rw [cardScaleT, if_neg (by omega), if_pos hm3]
+    have hpos : 0 < cardDefect hhm hbranchConv hax m 2 :=
+      cardDefect_pos hhm hbranchConv hax m 2 (by norm_num) hm2lt
+    rw [htn, htm]
+    field_simp
+    linarith [hcoc]
+
+/-- The faithful chain scale is positive for **every** prior (full-support via
+`scale_pos`; boundary/singleton priors have `scale = branchPathCoeff q u = 1`). -/
+theorem faithful_scale_pos
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (q : Dist A) :
+    0 < (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale q := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+  show 0 < (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff q (Dist.uniform (A := A))
+  rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+    ).branch_agg.branchCoeff q (Dist.uniform (A := A)) =
+    branchCoeffFromTangentRepParts hpath
+      (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+      hfaith.singleton_scale q (Dist.uniform (A := A)) from rfl]
+  simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  by_cases hqfs : q.FullSupport
+  · by_cases hnd : ∃ a b : A, a ≠ b ∧ 0 < (Dist.uniform (A := A)) a ∧ 0 < (Dist.uniform (A := A)) b
+    · exact hpath.branchPathCoeff_pos q (Dist.uniform (A := A)) hqfs Dist.uniform_fullSupport hnd
+    · rw [show hpath.branchPathCoeff q (Dist.uniform (A := A)) = 1 from by
+        simp only [hpath, branchPathTangentScalarStructure_of_faithfulAssumptions,
+          branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning,
+          hqfs, Dist.uniform_fullSupport, dif_pos]
+        rw [dif_neg hnd]]
+      exact one_pos
+  · rw [show hpath.branchPathCoeff q (Dist.uniform (A := A)) = 1 from by
+      simp only [hpath, branchPathTangentScalarStructure_of_faithfulAssumptions,
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning]
+      rw [dif_neg hqfs]]
+    exact one_pos
+
 /-- The positive support of a relabelled prior is equivalent to the support of
 the original, via the underlying bijection. -/
 noncomputable def relabelSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A]
