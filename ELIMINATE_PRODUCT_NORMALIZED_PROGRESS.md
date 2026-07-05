@@ -1,3 +1,40 @@
+# Tier C in progress — support_scale via t_n cocycle (2026-07-05)
+
+Confirmed AGAIN: support_scale (raw eq:facescale) genuinely needs the t_n cardinal-gauge cocycle
+(covariance is about bijections; K(ι) is about inclusions — not forced to 1). It feeds wrapCross in
+the boundary-elimination MI spine (line ~4189), so it is load-bearing.
+
+**Exact gauge design (verified sufficient):** `gauge q := t_{card A} / scale q` where
+`t_n := cardDefect n 2`. Then g q·scale q = t_{card A} (cardinal), g(r|supp)·scale(r|supp)=t_m,
+scale(boundary r)=1, so support_scale ⟺ boundaryCoeff(u_n,r)=t_n/t_m, which via q-indep (R2a) +
+boundaryCoeff relabel-inv reduces to cardDefect n m = t_n/t_m = cardDefect n 2 / cardDefect m 2,
+i.e. the COCYCLE cardDefect n m · cardDefect m ℓ = cardDefect n ℓ (ℓ≤m≤n).
+
+**Tier C bricks LANDED (green 8622):**
+- canonBoundary + apply/pos/nondeg/boundary/support_nonempty/supportEquiv (support ≃ canonType m)
+- scale_uniform_eq_one, canonBoundary_face_uniform, canonBoundary_face_scale_eq_one
+- cardDefect n m := boundaryCoeff(u_n)(canonBoundary n m) + cardDefect_pos
+- **canonBoundary_nest**: cB n l = pushforward (cB m l) (canonInclKernel n m) — GEOMETRIC HEART
+- (earlier) boundaryCoeff_qIndep_of_FinalHM, boundaryCoeff_relabel_of_FinalHM, pushSignedIncl+lemmas
+
+**REMAINING (the cocycle — ~150 lines, THE last blocker):**
+`cardDefect n m · cardDefect m ℓ = cardDefect n ℓ`. Recipe:
+- transport at (u_n, cB n ℓ) with tangent η on supp(cB n ℓ) ≃ canonType ℓ (A1-nonzero, ℓ≥2);
+- pushSignedIncl(cB n ℓ) η factors through the m-face via canonBoundary_nest (supp inclusion
+  supp(cB n ℓ)→supp(cB n m) exists: first-ℓ ⊂ first-m);
+- transport at (u_n, cB n m): linPart(u_n)(push...) = cardDefect n m · linPart((cB n m)|supp)(...);
+- (cB n m)|supp = uniform (canonBoundary_face_uniform), pulled to canonType m = u_m;
+- transport at (u_m, cB m ℓ): = cardDefect n m · cardDefect m ℓ · linPart((cB m ℓ)|supp) η;
+- directly = cardDefect n ℓ · linPart((cB n ℓ)|supp) η; cancel A1-nonzero tangent.
+Then: t_n:=cardDefect n 2 (t_2:=1); prove t positive; build gauge q:=t_{card A}/scale q (positive,
+relabel-inv via R1+card); prove hrel (=t_{card A} both sides) + hsupport (=cocycle); assemble
+coherentFaceScales; new exported theorem dropping support_scale.
+
+Also Tier C: singleton_interaction (Step-5 QA singleton arg; nondeg done), current_product_gauge,
+branch.{support_face/boundary_*/singleton_scale}, harmless.pre_entropy family.
+
+---
+
 # ✅ Tier B conventions eliminated (2026-07-05, follow-up)
 
 Beyond `product_normalized`, the following are now ALSO eliminated in the leanest exported route
