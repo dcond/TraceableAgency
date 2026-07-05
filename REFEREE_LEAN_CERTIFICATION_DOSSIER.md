@@ -1,5 +1,28 @@
 # Referee Lean Certification Dossier
 
+> **UPDATE (`support_scale` cross-cardinality convention ELIMINATED).** The raw support-face
+> scale equation `support_scale` (`eq:facescale`, the genuine cross-cardinality embedding-defect
+> content `K(ι) = 1` that the same-cardinality countermodel does *not* refute) has been **removed**
+> from the convention bundle. It is now a **proved theorem** (`cardinalGauge_hsupport`), not an
+> assumption. The new exported theorem `MIRep_of_TraceAxioms_FinalHM_Faddeev_withCardinalGauge`
+> (bundle `FinalConstructedRepresentativeConventionsCardinalGauge`) fixes the internally-defined
+> **cardinal gauge** `g(q) := cardScaleT (card A) = t_{card A}`, where `t_n := cardDefect n 2` is the
+> canonical embedding defect (`boundaryCoeff (u_n) (canonBoundary n 2)`). The face-scale equation
+> then follows from: (i) the **general embedding-defect reduction** `boundaryCoeff q r · scale(r|supp)
+> = scale q · cardDefect (card A) (card supp r)` (`general_defect`), proved by relabelling to the
+> canonical `card A`-element type (`alignEquiv`), within-face value-independence of the scaled defect
+> (`boundaryCoeff_scale_within_face`), and `scale (canonBoundary|supp) = 1`; and (ii) the
+> **embedding-defect cocycle** `cardDefect n m · cardDefect m ℓ = cardDefect n ℓ`
+> (`cardDefect_cocycle`), giving `cardDefect n m = t_n / t_m` (`cardDefect_eq_ratio`). No new axiom or
+> HM clause is used beyond `hm_covariance` (Tier A). Verified via `#print` (incl. `pp.all`):
+> `FiniteSupportFaceScaleAssumptionsFor` is absent from every field type of the
+> `FinalConstructedRepresentativeConventionsCardinalGauge` bundle (5 fields: `branch`,
+> `hm_covariance`, `current_product_gauge`, `singleton_interaction`, `harmless`). Axiom footprint
+> unchanged: `[propext, Classical.choice, Quot.sound]`; full build green (8622 jobs), zero sorries.
+> This closes the last *cross-cardinality* scale convention; the remaining
+> `current_product_gauge`/`singleton_interaction` are the paper's product-representative gauge
+> normalizations (`lem:coherentnorm`), a distinct product-gauge layer.
+
 > **UPDATE (cardinal-boundary assumption eliminated).** Since the original drafting, the
 > `FiniteCardinalSupportBoundaryAssumptions` boundary field has been **removed** from the
 > convention bundle `FinalHarmlessConventions` / `FinalConstructedRepresentativeConventions`.
