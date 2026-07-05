@@ -2895,6 +2895,190 @@ theorem boundaryCoeff_relabel_of_FinalHM
     hTqr'.symm.trans hTqr
   exact mul_right_cancel₀ hnz hcomb
 
+/-! ### Tier-C foundations: alignment equivalence and within-face independence. -/
+
+/-- Alignment equivalence: a bijection `A ≃ canonType (card A)` sending the
+positive support of `r` to the first `card (supp r)` canonical indices.  Used to
+reduce the embedding defect at an arbitrary boundary prior to the canonical
+`cardDefect`. -/
+noncomputable def alignEquiv {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A) :
+    A ≃ canonType.{u} (Fintype.card A) := by
+  classical
+  have hcard : Fintype.card (supportSubtype r) + Fintype.card {a // ¬ (r a > 0)} =
+      Fintype.card A := by
+    rw [← Fintype.card_sum]
+    exact Fintype.card_congr (Equiv.sumCompl (fun a => r a > 0))
+  exact
+    ((Equiv.sumCompl (fun a => r a > 0)).symm.trans
+      ((Fintype.equivFin (supportSubtype r)).sumCongr (Fintype.equivFin {a // ¬ (r a > 0)}))).trans
+      ((finSumFinEquiv).trans ((Fin.castOrderIso hcard).toEquiv.trans Equiv.ulift.symm))
+
+/-- Support elements map below `card (supp r)` under `alignEquiv`. -/
+theorem alignEquiv_lt_of_pos {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A) (a : A)
+    (ha : r a > 0) :
+    ((alignEquiv r a).down : ℕ) < Fintype.card (supportSubtype r) := by
+  classical
+  have hsc : (Equiv.sumCompl (fun x => r x > 0)).symm a = Sum.inl ⟨a, ha⟩ := by
+    rw [Equiv.symm_apply_eq]; rfl
+  have hval : ((alignEquiv r a).down : ℕ) =
+      ((Fintype.equivFin (supportSubtype r) ⟨a, ha⟩ :
+        Fin (Fintype.card (supportSubtype r))) : ℕ) := by
+    simp only [alignEquiv, Equiv.trans_apply, hsc]
+    simp [Fin.castOrderIso]
+    rfl
+  rw [hval]
+  exact (Fintype.equivFin (supportSubtype r) ⟨a, ha⟩).isLt
+
+/-- Non-support elements map at or above `card (supp r)` under `alignEquiv`. -/
+theorem alignEquiv_ge_of_not_pos {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A) (a : A)
+    (ha : ¬ (r a > 0)) :
+    Fintype.card (supportSubtype r) ≤ ((alignEquiv r a).down : ℕ) := by
+  classical
+  have hsc : (Equiv.sumCompl (fun x => r x > 0)).symm a = Sum.inr ⟨a, ha⟩ := by
+    rw [Equiv.symm_apply_eq]; rfl
+  have hval : ((alignEquiv r a).down : ℕ) =
+      Fintype.card (supportSubtype r) +
+        ((Fintype.equivFin {a // ¬ (r a > 0)} ⟨a, ha⟩ :
+          Fin (Fintype.card {a // ¬ (r a > 0)})) : ℕ) := by
+    simp only [alignEquiv, Equiv.trans_apply, hsc]
+    simp [Fin.castOrderIso]
+    rfl
+  rw [hval]; omega
+
+/-- Same-support equivalence between the positive-support subtypes of two priors
+on the same type sharing the same support set. -/
+def sameSupportEquiv {C : Type u} [Fintype C] [DecidableEq C] (ρ σ : Dist C)
+    (h : ∀ c, ρ c > 0 ↔ σ c > 0) : supportSubtype ρ ≃ supportSubtype σ where
+  toFun a := ⟨a.1, (h a.1).mp a.2⟩
+  invFun b := ⟨b.1, (h b.1).mpr b.2⟩
+  left_inv a := by apply Subtype.ext; rfl
+  right_inv b := by apply Subtype.ext; rfl
+
+/-- Inclusion pushforwards agree across a same-support equivalence. -/
+theorem push_sameSupport_comm {C : Type u} [Fintype C] [DecidableEq C] (ρ σ : Dist C)
+    (h : ∀ c, ρ c > 0 ↔ σ c > 0) (d : Dist (supportSubtype ρ)) :
+    Channel.actionPushforward d (supportIncludeKernel ρ) =
+      Channel.actionPushforward (Relabeling.relabelDist (sameSupportEquiv ρ σ h) d)
+        (supportIncludeKernel σ) := by
+  classical
+  ext c
+  have hL : (Channel.actionPushforward d (supportIncludeKernel ρ)) c =
+      if hc : ρ c > 0 then d ⟨c, hc⟩ else 0 :=
+    actionPushforward_supportIncludeKernel_apply ρ d c
+  have hR : (Channel.actionPushforward (Relabeling.relabelDist (sameSupportEquiv ρ σ h) d)
+        (supportIncludeKernel σ)) c =
+      if hc : σ c > 0 then (Relabeling.relabelDist (sameSupportEquiv ρ σ h) d) ⟨c, hc⟩ else 0 :=
+    actionPushforward_supportIncludeKernel_apply σ _ c
+  rw [hL, hR]
+  by_cases hc : ρ c > 0
+  · have hcσ : σ c > 0 := (h c).mp hc
+    rw [dif_pos hc, dif_pos hcσ, Relabeling.relabelDist_apply]
+    congr 1
+  · have hcσ : ¬ σ c > 0 := fun hcσ => hc ((h c).mpr hcσ)
+    rw [dif_neg hc, dif_neg hcσ]
+
+/-- Pullback of a signed posterior law along a `Dist`-relabelling `E : S ≃ T`. -/
+noncomputable def relabelPullback {S T : Type u} [Fintype S] [DecidableEq S] [Nonempty S]
+    [Fintype T] [DecidableEq T] [Nonempty T] (E : S ≃ T)
+    (η : PosteriorLawSigned S) : PosteriorLawSigned T :=
+  fun ψ => η (fun d => ψ (Relabeling.relabelDist E d))
+
+/-- The pullback preserves the atomic-linear witness. -/
+noncomputable def atomicLinear_relabelPullback {S T : Type u}
+    [Fintype S] [DecidableEq S] [Nonempty S] [Fintype T] [DecidableEq T] [Nonempty T]
+    (E : S ≃ T) {η : PosteriorLawSigned S} (hη : PosteriorLawSigned.AtomicLinear η) :
+    PosteriorLawSigned.AtomicLinear (relabelPullback E η) where
+  witness := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    exact {
+      I := hη.witness.I
+      instFintypeI := inferInstance
+      instDecidableEqI := inferInstance
+      weight := hη.witness.weight
+      point := fun i => Relabeling.relabelDist E (hη.witness.point i)
+    }
+  eval_eq := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    funext ψ
+    show (∑ i : hη.witness.I, hη.witness.weight i *
+        ψ (Relabeling.relabelDist E (hη.witness.point i))) =
+      η (fun d => ψ (Relabeling.relabelDist E d))
+    have h := congrFun hη.eval_eq (fun d => ψ (Relabeling.relabelDist E d))
+    rw [AtomicPosteriorSignedLaw.eval_apply] at h
+    exact h
+
+/-- The pullback preserves tangency. -/
+theorem relabelPullback_tangent {S T : Type u}
+    [Fintype S] [DecidableEq S] [Nonempty S] [Fintype T] [DecidableEq T] [Nonempty T]
+    (E : S ≃ T) {η : PosteriorLawSigned S} (htan : PosteriorLawTangent η) :
+    PosteriorLawTangent (relabelPullback E η) := by
+  refine ⟨?_, ?_⟩
+  · show η (fun _ => (1:ℝ)) = 0
+    exact htan.1
+  · intro t
+    show η (fun d => (Relabeling.relabelDist E d) t) = 0
+    have heq : (fun d : Dist S => (Relabeling.relabelDist E d) t) =
+        (fun d : Dist S => d (E.symm t)) := by
+      funext d; rw [Relabeling.relabelDist_apply]
+    rw [heq]; exact htan.2 (E.symm t)
+
+/-- **Face scalar relation.**  For a tangent `η` on the positive support of `r`,
+the intrinsic face marginal value against `mV(r|supp)` is `scale(r|supp)` times
+the value against `mV(uniform)` on the support face. -/
+theorem face_scalar_relation
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {C : Type u} [Fintype C] [DecidableEq C] [Nonempty C] (r : Dist C)
+    [Nonempty (supportSubtype r)]
+    (hrnd : ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < r.restrictToSupport a ∧ 0 < r.restrictToSupport b)
+    (η : PosteriorLawSigned (supportSubtype r))
+    (hηatomic : PosteriorLawSigned.AtomicLinear η)
+    (hηtan : PosteriorLawTangent η) :
+    η ((posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax) r.restrictToSupport) =
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r.restrictToSupport *
+      η ((posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+        (Dist.uniform (A := supportSubtype r))) := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaith_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hint_def
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+    with hpath_def
+  have hrs_fs : (r.restrictToSupport).FullSupport := Dist.restrictToSupport_fullSupport r
+  have hscale_eq : (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).scale_factorization.scale r.restrictToSupport =
+      hpath.branchPathCoeff r.restrictToSupport (Dist.uniform (A := supportSubtype r)) := by
+    show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).branch_agg.branchCoeff r.restrictToSupport (Dist.uniform (A := supportSubtype r)) = _
+    rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff r.restrictToSupport (Dist.uniform (A := supportSubtype r)) =
+      branchCoeffFromTangentRepParts hpath
+        (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+        hfaith.singleton_scale r.restrictToSupport (Dist.uniform (A := supportSubtype r)) from rfl]
+    simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  rw [hscale_eq]
+  have hndU : ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < (Dist.uniform (A := supportSubtype r)) a ∧
+      0 < (Dist.uniform (A := supportSubtype r)) b := by
+    obtain ⟨a, b, hab, _, _⟩ := hrnd
+    exact ⟨a, b, hab, Dist.uniform_fullSupport a, Dist.uniform_fullSupport b⟩
+  have hrel := hpath.linear_part_scalar_relation_on_tangent
+    r.restrictToSupport (Dist.uniform (A := supportSubtype r)) hrs_fs Dist.uniform_fullSupport
+    hndU η hηatomic hηtan
+  show hfaith.linear_part.linearPart F hV r.restrictToSupport η = _
+  rw [hrel]
+  rfl
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
