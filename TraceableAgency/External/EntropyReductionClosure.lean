@@ -4399,6 +4399,49 @@ theorem productLiftScale_cocycle
       rw [mul_assoc]; linarith [hassoc])
   linarith [this]
 
+
+/-- **WLOG certificate for `singleton_interaction` (left factor).**  When the first
+factor `A` is a subsingleton, `V(q,P) = 0`, so the bilinear interaction term
+`κ · V(q,P) · V(r,R)` vanishes for *any* coefficient `κ`.  Hence the product value
+is independent of the interaction coefficient on a subsingleton factor: normalizing
+it to the reference `κ` (as `singleton_interaction` does) changes no observable
+value and is therefore without loss of generality. -/
+theorem interaction_term_indep_of_coeff_subsingleton_left
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport)
+    (hA : Subsingleton A) (P : Channel A O) (R : Channel B Y)
+    (κ κ' : ℝ) :
+    κ * hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel R) =
+      κ' * hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel R) := by
+  rw [V_channel_eq_zero_of_subsingleton F hfaces.branch_result.branch_agg.value_rep q hq P]
+  ring
+
+/-- **WLOG certificate for `singleton_interaction` (right factor).**  Symmetric:
+`V(r,R) = 0` when `B` is a subsingleton. -/
+theorem interaction_term_indep_of_coeff_subsingleton_right
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B) (hr : r.FullSupport)
+    (hB : Subsingleton B) (P : Channel A O) (R : Channel B Y)
+    (κ κ' : ℝ) :
+    κ * hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel R) =
+      κ' * hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel R) := by
+  rw [V_channel_eq_zero_of_subsingleton F hfaces.branch_result.branch_agg.value_rep r hr R]
+  ring
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
