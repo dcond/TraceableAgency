@@ -1808,6 +1808,80 @@ theorem scaleRelabel_of_FinalHM_covariance
       (posteriorIntegralRepresentation_of_FinalHMInterface hhm) hax hV hpath e q
       (Dist.uniform (A := A)) hq Dist.uniform_fullSupport hndU
 
+/-- **R2a: prior-independence of the boundary embedding defect.**
+
+For a fixed boundary posterior `r` and two full-support ambient priors `q, q'`,
+the boundary coefficients satisfy
+`boundaryCoeff q r · branchPathCoeff q' q = boundaryCoeff q' r`.
+Equivalently `boundaryCoeff q r / scale q` is independent of `q` (paper: the
+embedding defect `K(ι)` does not depend on the ambient prior).  The proof uses
+the support-face marginal-value transport (which pins each `boundaryCoeff`), the
+full-support tangent-scalar relation applied to the *pushed* support-face tangent
+(`pushSignedIncl`), and cancellation of the A1-nonzero support-face tangent.  It
+does **not** use the cross-prior block bridge, so the defect is definable
+non-circularly. -/
+theorem boundaryCoeff_qIndep_of_FinalHM
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q q' r : Dist A)
+    (hq : q.FullSupport) (hq' : q'.FullSupport)
+    [Nonempty (supportSubtype r)]
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport) :
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      ).boundaryCoeff q r *
+      (branchPathTangentScalarStructure_of_faithfulAssumptions
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).branchPathCoeff q' q =
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      ).boundaryCoeff q' r := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaith_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+    with hpath_def
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hint_def
+  set hboundary := branchBoundaryFaceScale_of_faithfulAssumptions hfaith with hbdef
+  have hrs_fs : (r.restrictToSupport).FullSupport := Dist.restrictToSupport_fullSupport r
+  have hrs_nd : ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < r.restrictToSupport a ∧ 0 < r.restrictToSupport b := by
+    obtain ⟨a, b, hab, ha, hb⟩ := hrnd
+    refine ⟨⟨a, ha⟩, ⟨b, hb⟩, ?_, ?_, ?_⟩
+    · intro h; exact hab (congrArg Subtype.val h)
+    · rw [Dist.restrictToSupport_apply]; exact ha
+    · rw [Dist.restrictToSupport_apply]; exact hb
+  obtain ⟨η, hηatomic, hηtan, hηnz⟩ :=
+    branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
+      r.restrictToSupport r.restrictToSupport hrs_fs hrs_fs hrs_nd
+  have htrans := hbranchConv.marginal_value.support_face_marginalValue_scalar
+  have hTq := htrans F hax hV q r hq hrn hrnd hrb η hηtan
+  have hTq' := htrans F hax hV q' r hq' hrn hrnd hrb η hηtan
+  have hpush_atomic := atomicLinear_pushSignedIncl r hηatomic
+  have hpush_tan := pushSignedIncl_tangent r hηatomic hηtan
+  have hrel := hpath.linear_part_scalar_relation_on_tangent q' q hq' hq
+    (by obtain ⟨a, b, hab, _, _⟩ := hrnd; exact ⟨a, b, hab, hq a, hq b⟩)
+    (pushSignedIncl r η) hpush_atomic hpush_tan
+  have hLq : hfaith.linear_part.linearPart F hV q (pushSignedIncl r η) =
+      hboundary.boundaryCoeff q r * η (hint.marginalValue F hV r.restrictToSupport) := hTq
+  have hLq' : hfaith.linear_part.linearPart F hV q' (pushSignedIncl r η) =
+      hboundary.boundaryCoeff q' r * η (hint.marginalValue F hV r.restrictToSupport) := hTq'
+  rw [hLq, hLq'] at hrel
+  have hLnz : η (hint.marginalValue F hV r.restrictToSupport) ≠ 0 := hηnz
+  have hstep : hboundary.boundaryCoeff q' r * η (hint.marginalValue F hV r.restrictToSupport) =
+      (hboundary.boundaryCoeff q r * hpath.branchPathCoeff q' q) *
+        η (hint.marginalValue F hV r.restrictToSupport) := by
+    rw [hrel]; ring
+  have hcancel := mul_right_cancel₀ hLnz hstep
+  linarith [hcancel]
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
