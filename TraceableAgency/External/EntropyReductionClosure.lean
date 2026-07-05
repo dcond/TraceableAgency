@@ -2120,6 +2120,44 @@ theorem canonBoundary_face_scale_eq_one
     exact ⟨a, b, hab⟩
   exact scale_uniform_eq_one hhm hbranchConv hax hnd
 
+/-- **The embedding defect `K_{n,m}`** (`2 ≤ m ≤ n`): the boundary coefficient
+from the uniform prior on the `n`-point action set to the canonical `m`-point
+face.  Since both `scale (u_n)` and the face scale are `1`
+(`scale_uniform_eq_one`, `canonBoundary_face_scale_eq_one`), this boundary
+coefficient *is* the paper's embedding defect for the canonical inclusion.  The
+cardinal gauge `t_n` is `cardDefect n 2`. -/
+noncomputable def cardDefect
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (n m : ℕ) : ℝ :=
+  if h : 2 ≤ m ∧ m ≤ n then
+    haveI : NeZero m := ⟨by omega⟩
+    haveI : NeZero n := ⟨by omega⟩
+    haveI : Nonempty (canonType.{u} n) := ⟨ULift.up ⟨0, by omega⟩⟩
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff (Dist.uniform (A := canonType.{u} n)) (canonBoundary.{u} n m h.2)
+  else 1
+
+/-- The embedding defect is positive for `2 ≤ m < n`. -/
+theorem cardDefect_pos
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (n m : ℕ) (hm2 : 2 ≤ m) (hmn : m < n) :
+    0 < cardDefect hhm hbranchConv hax n m := by
+  classical
+  have hle : m ≤ n := le_of_lt hmn
+  rw [cardDefect, dif_pos ⟨hm2, hle⟩]
+  haveI : NeZero m := ⟨by omega⟩
+  haveI : NeZero n := ⟨by omega⟩
+  haveI : Nonempty (canonType.{u} n) := ⟨ULift.up ⟨0, by omega⟩⟩
+  apply (branchBoundaryFaceScale_of_faithfulAssumptions
+    (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)).boundaryCoeff_pos
+  · exact Dist.uniform_fullSupport
+  · exact canonBoundary_support_nonempty n m hle (by omega)
+  · exact canonBoundary_nondeg n m hle hm2
+  · exact canonBoundary_boundary n m hle hmn
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
