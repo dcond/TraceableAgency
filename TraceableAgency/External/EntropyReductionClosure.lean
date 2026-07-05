@@ -4294,6 +4294,111 @@ theorem leftCoeff_eq_productLiftScale
   have hVqId_ne : VqId ≠ 0 := faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hA
   exact (mul_right_cancel₀ hVqId_ne hId).symm
 
+
+/-- **The product-lift scale is a cocycle** (WLOG certificate for the coherent
+normalization `productLiftScale ≡ 1`): for full-support `q,r,s` with
+`¬Subsingleton A`,
+`productLiftScale q (r⊗s) = productLiftScale (q⊗r) s · productLiftScale q r`.
+A cocycle is a coboundary here, so a normalizing gauge exists — the normalization
+`current_product_gauge` is *without loss of generality*.  QA-free: two applications
+of the gauge-free `productLiftScale_spec` reassociated by HM relabel-covariance. -/
+theorem productLiftScale_cocycle
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hcov : ∀ {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B] [Fintype O] [DecidableEq O]
+        [Fintype Y] [DecidableEq Y] (eA : A ≃ B) (eO : O ≃ Y) (q : Dist A) (P : Channel A O),
+        hfaces.branch_result.branch_agg.value_rep.V (Relabeling.relabelDist eA q)
+            (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+          hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P))
+    (hax : TraceAxioms F)
+    {A B C : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    (q : Dist A) (r : Dist B) (s : Dist C)
+    (hq : q.FullSupport) (hr : r.FullSupport) (hs : s.FullSupport)
+    (hA : ¬ Subsingleton A) :
+    productLiftScale hfaces hhm hax q (prodDist r s) =
+      productLiftScale hfaces hhm hax (prodDist q r) s *
+        productLiftScale hfaces hhm hax q r := by
+  classical
+  -- base channel: idChannel on A, V(q, id) ≠ 0
+  have hVqP_ne : hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hA
+  have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
+  have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  -- Abbreviations
+  set Vrep := hfaces.branch_result.branch_agg.value_rep with hVrepdef
+  set P : Channel A A := Channel.idChannel with hPdef
+  -- Step 2 spec instances (each: faceScaleProductLeftSliceValue = productLiftScale · V(q,·))
+  -- LHS: V(q⊗(r⊗s), P ⊗ U_{B×C}) = productLiftScale q (r⊗s) · V(q,P)
+  have hLHS := productLiftScale_spec hfaces hhm hax q (prodDist r s) hq hrs hA P
+  -- inner: V(q⊗r, P ⊗ U_B) = productLiftScale q r · V(q,P)
+  have hInner := productLiftScale_spec hfaces hhm hax q r hq hr hA P
+  -- outer: V((q⊗r)⊗s, (P⊗U_B) ⊗ U_C) = productLiftScale (q⊗r) s · V(q⊗r, P⊗U_B)
+  have hAqr : ¬ Subsingleton (A × B) := by
+    rw [not_subsingleton_iff_nontrivial] at hA ⊢
+    obtain ⟨a, b, hab⟩ := hA
+    exact ⟨(a, Classical.arbitrary B), (b, Classical.arbitrary B), by simp [hab]⟩
+  have hOuter := productLiftScale_spec hfaces hhm hax (prodDist q r) s hqr hs hAqr
+    (leftProductLiftChannel (B := B) P)
+  -- unfold faceScaleProductLeftSliceValue definitionally
+  rw [show faceScaleProductLeftSliceValue hfaces q (prodDist r s)
+      (Channel.uninformativeChannelU (B × C)) P =
+      Vrep.V (prodDist q (prodDist r s))
+        (experimentOfChannel (prodChannel P (Channel.uninformativeChannelU (B × C)))) from rfl] at hLHS
+  rw [show faceScaleProductLeftSliceValue hfaces q r (Channel.uninformativeChannelU B) P =
+      Vrep.V (prodDist q r) (experimentOfChannel (leftProductLiftChannel (B := B) P)) from rfl] at hInner
+  rw [show faceScaleProductLeftSliceValue hfaces (prodDist q r) s
+      (Channel.uninformativeChannelU C) (leftProductLiftChannel (B := B) P) =
+      Vrep.V (prodDist (prodDist q r) s)
+        (experimentOfChannel (prodChannel (leftProductLiftChannel (B := B) P)
+          (Channel.uninformativeChannelU C))) from rfl] at hOuter
+  -- V((q⊗r)⊗s, (P⊗U_B)⊗U_C) = V(q⊗(r⊗s), P⊗U_{B×C}) via associativity relabel + hcov
+  have hassoc : Vrep.V (prodDist (prodDist q r) s)
+        (experimentOfChannel (prodChannel (leftProductLiftChannel (B := B) P)
+          (Channel.uninformativeChannelU C))) =
+      Vrep.V (prodDist q (prodDist r s))
+        (experimentOfChannel (prodChannel P (Channel.uninformativeChannelU (B × C)))) := by
+    -- (i) associativity: V((q⊗r)⊗s, (P⊗U_B)⊗U_C) = V(q⊗(r⊗s), P⊗(U_B⊗U_C))
+    have hkey := hcov (Equiv.prodAssoc A B C) (Equiv.prodAssoc A PUnit.{u+1} PUnit.{u+1})
+      (prodDist (prodDist q r) s)
+      (prodChannel (leftProductLiftChannel (B := B) P) (Channel.uninformativeChannelU C))
+    rw [relabelDist_prodAssoc,
+      show Relabeling.relabelChannel (Equiv.prodAssoc A B C) (Equiv.prodAssoc A PUnit.{u+1} PUnit.{u+1})
+          (prodChannel (leftProductLiftChannel (B := B) P) (Channel.uninformativeChannelU C)) =
+        prodChannel P (prodChannel (Channel.uninformativeChannelU B) (Channel.uninformativeChannelU C)) from by
+        rw [show (prodChannel (leftProductLiftChannel (B := B) P) (Channel.uninformativeChannelU C)) =
+          prodChannel (prodChannel P (Channel.uninformativeChannelU B)) (Channel.uninformativeChannelU C) from rfl,
+          relabelChannel_prodAssoc]] at hkey
+    -- (ii) outcome collapse: V(q⊗(r⊗s), P⊗(U_B⊗U_C)) = V(q⊗(r⊗s), P⊗U_{B×C})
+    have hcollapse := hcov (Equiv.refl (A × B × C))
+      ((Equiv.refl A).prodCongr (Equiv.prodPUnit PUnit.{u+1}))
+      (prodDist q (prodDist r s))
+      (prodChannel P (prodChannel (Channel.uninformativeChannelU B) (Channel.uninformativeChannelU C)))
+    rw [Relabeling.relabelDist_refl,
+      show Relabeling.relabelChannel (Equiv.refl (A × B × C))
+          ((Equiv.refl A).prodCongr (Equiv.prodPUnit PUnit.{u+1}))
+          (prodChannel P (prodChannel (Channel.uninformativeChannelU B) (Channel.uninformativeChannelU C))) =
+        prodChannel P (Channel.uninformativeChannelU (B × C)) from by
+        ext x o
+        obtain ⟨a, b, c⟩ := x
+        obtain ⟨o1, o2⟩ := o
+        simp [Relabeling.relabelChannel, prodChannel_apply_pair, Channel.uninformativeChannelU,
+          Equiv.prodPUnit]] at hcollapse
+    rw [← hkey, hcollapse]
+  -- assemble
+  rw [hOuter, hInner] at hassoc
+  rw [hLHS] at hassoc
+  -- hassoc : productLiftScale (q⊗r) s · (productLiftScale q r · V(q,P)) = productLiftScale q (r⊗s) · V(q,P)
+  have := mul_right_cancel₀ hVqP_ne
+    (show productLiftScale hfaces hhm hax (prodDist q r) s * productLiftScale hfaces hhm hax q r *
+        Vrep.V q (experimentOfChannel P) =
+      productLiftScale hfaces hhm hax q (prodDist r s) * Vrep.V q (experimentOfChannel P) from by
+      rw [mul_assoc]; linarith [hassoc])
+  linarith [this]
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
