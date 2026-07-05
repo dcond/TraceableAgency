@@ -4577,6 +4577,99 @@ theorem scale_pure_prod_eq_one
     branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning]
   rw [dif_neg hnotfull]
 
+
+-- The faithful-structure coordinate-face value: V(pure a⊗r, secondReveal) = V(r, id).
+-- Instantiate first_coordinate_face_value_of_HM with the faithful V + branch.support_face + hm_covariance.
+theorem faithful_first_coord_face_value
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (a : A) (r : Dist B) :
+    (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V
+        (prodDist (Dist.pure a) r) (experimentOfChannel (productSecondRevealChannel (A := A) (B := B))) =
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V r
+        (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+  apply first_coordinate_face_value_of_HM
+    (hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+  · -- support_face_value_transport (branch.support_face clause holds for any hV)
+    intro F' hax' hV' A' O' _ _ _ _ _ r' _ P'
+    exact hbranchConv.support_face.support_face_value_transport F' hax' hV' r' P'
+  · -- covariance
+    intro A' B' O' Y' _ _ _ _ _ _ _ _ _ _ eA eO q' P'
+    exact hcov.V_relabel_eq hax eA eO q' P'
+  · exact hax
+
+/-- **Governing equation for the product scale (QA-free).**  From the faithful
+normalized chain rule at `q⊗r` with first stage = first-coordinate reveal (posterior
+`pure a ⊗ r`, scale `1`, continuation value `V(r,id)`):
+`V(q⊗r,id)/scale(q⊗r) = V(q⊗r,firstReveal)/scale(q⊗r) + V(r,id)`.  Equivalently
+`fullRev(q⊗r) = V(q⊗r,firstReveal) + scale(q⊗r)·V(r,id)`. -/
+theorem product_scale_governing_left
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hAnd : ∃ x y : A, x ≠ y) :
+    let hcnr := BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    branchNormalizedValue hcnr.chain (prodDist q r) (Channel.idChannel : Channel (A × B) (A × B)) =
+      branchNormalizedValue hcnr.chain (prodDist q r) (productFirstRevealChannel (A := A) (B := B)) +
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V r
+          (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+  classical
+  intro hcnr
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hVdef
+  have hprod : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  -- chain rule at q⊗r
+  have hchain := hcnr.normalizedChainRule (prodDist q r) hprod
+    (productFirstRevealChannel (A := A) (B := B))
+    (fun _ => productSecondRevealChannel (A := A) (B := B))
+  rw [productFirstThenSecondReveal_eq_idChannel] at hchain
+  rw [hchain]
+  congr 1
+  -- the sum: Σ_a marginal(a)·nv(posterior a, secondReveal) = V(r,id)
+  rw [outcomeMarginal_productFirstRevealChannel_prodDist]
+  -- each posterior = pure a ⊗ r ; nv = V(pure a⊗r, secondReveal)/scale(pure a⊗r) = V(r,id)/1
+  have hterm : ∀ a : A, branchNormalizedValue hcnr.chain
+      (Channel.posterior (productFirstRevealChannel (A := A) (B := B)) (prodDist q r) a)
+      (productSecondRevealChannel (A := A) (B := B)) =
+      (if 0 < q a then hV.V r (experimentOfChannel (Channel.idChannel : Channel B B)) else
+        branchNormalizedValue hcnr.chain
+          (Channel.posterior (productFirstRevealChannel (A := A) (B := B)) (prodDist q r) a)
+          (productSecondRevealChannel (A := A) (B := B))) := by
+    intro a
+    by_cases ha : 0 < q a
+    · rw [if_pos ha]
+      rw [posterior_productFirstRevealChannel_prodDist_of_pos q r a ha]
+      show hcnr.chain.branch_agg.value_rep.V (prodDist (Dist.pure a) r)
+          (experimentOfChannel (productSecondRevealChannel (A := A) (B := B))) /
+          hcnr.chain.scale (prodDist (Dist.pure a) r) = _
+      rw [show hcnr.chain.branch_agg.value_rep.V = hV.V from rfl]
+      rw [faithful_first_coord_face_value hhm hbranchConv hax hcov a r]
+      rw [show hcnr.chain.scale (prodDist (Dist.pure a) r) = 1 from
+        scale_pure_prod_eq_one hhm hbranchConv hax a r hAnd]
+      rw [div_one]
+    · rw [if_neg ha]
+  -- Σ_a q a · nv(posterior a, secondReveal) = Σ_a q a · V(r,id) = V(r,id)
+  have hsum : (∑ a : A, q a * branchNormalizedValue hcnr.chain
+      (Channel.posterior (productFirstRevealChannel (A := A) (B := B)) (prodDist q r) a)
+      (productSecondRevealChannel (A := A) (B := B))) =
+      hV.V r (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+    rw [show (∑ a : A, q a * branchNormalizedValue hcnr.chain
+        (Channel.posterior (productFirstRevealChannel (A := A) (B := B)) (prodDist q r) a)
+        (productSecondRevealChannel (A := A) (B := B))) =
+        ∑ a : A, q a * hV.V r (experimentOfChannel (Channel.idChannel : Channel B B)) from by
+      apply Finset.sum_congr rfl
+      intro a _
+      by_cases ha : 0 < q a
+      · rw [hterm a, if_pos ha]
+      · have ha0 : q a = 0 := le_antisymm (le_of_not_gt ha) (q.nonneg a)
+        rw [ha0, zero_mul, zero_mul]]
+    rw [← Finset.sum_mul, q.sum_eq_one, one_mul]
+  exact hsum
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
