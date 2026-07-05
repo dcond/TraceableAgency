@@ -1,37 +1,28 @@
 # Referee Lean Certification Dossier
 
-> **UPDATE (formal obstruction: `current_product_gauge` is an irreducible gauge choice — proved,
-> not asserted).** The question "can the product-normalization field be *dropped* from the exported
-> theorem by constructing a gauge internally (`exists_product_normalized_gauge`, then
-> `Classical.choose`)?" is now settled by Lean theorems, all QA-free, axioms
-> `[propext, Classical.choice, Quot.sound]`:
->
-> * **QA-free product-scale law (SC).**  `product_scale_cleared_left` / `_right`:
->   `V(q⊗r, id) = V(q⊗r, firstReveal) + scale(q⊗r)·V(r, id)` and the mirror.  Derived from the
->   faithful normalized chain rule at `q⊗r` (first-coordinate reveal; posterior `pure a ⊗ r` has
->   `scale = 1` by `scale_pure_prod_eq_one` and continuation value `V(r,id)` by
->   `first_coordinate_face_value_of_HM`, itself support-face-transport + HM covariance).  This is a
->   genuine product-scale law that previously existed only via quasi-additivity; it is now QA-free.
-> * **Formal obstruction.**  `product_scale_pinned_by_joint_value`:
->   `scale(q⊗r) = (V(q⊗r, id) − V(q⊗r, firstReveal)) / V(r, id)`.  The product scale is fixed by the
->   **joint** value `V(q⊗r, id)`.  Consequently the product coefficient
->   `leftCoeff(q,r) = V(q⊗r, firstReveal)/V(q,id)` depends on `q⊗r`, and a *coherent
->   single-distribution* gauge — the only kind `CoherentFaceScaleGauge` admits, acting as
->   `g(q⊗r)/g(q)` — cannot absorb a `q⊗r`-dependent factor.  A symbolic solution of the full
->   governing system (`★L`, `★R`, and the product bilinear form) confirms the single-gauge
->   consistency ratio `leftCoeff/rightCoeff` depends on `V(q⊗r, id)`, i.e. it factors as
->   `[fn of r]/[fn of q]` **iff** product quasi-additivity already holds.
->
-> **Conclusion (the precise status of the two candidate targets).**  The *false* target
-> "the raw representative is product-normalized" is refuted (`scale_pure_prod_eq_one`: the raw scale
-> is `1` on a degenerate coordinate, while `scale r ≠ 1`).  The *correct* target
-> `exists_product_normalized_gauge` is **not attainable within the coherent single-distribution gauge
-> class**: the normalizer would have to depend on joint `q⊗r` data, which such a gauge structurally
-> cannot.  Hence `current_product_gauge` (and, by the value-independence certificates,
-> `singleton_interaction`) remain as *fields*, but are now certified as legitimate WLOG gauge
-> normalizations whose only freedom is a single joint-data degree that the raw axioms + HM + Blackwell
-> do not fix — not opaque behavioural assumptions.  Dropping them as raw-axiom theorems would require
-> enlarging the gauge class beyond the architecture's `CoherentFaceScaleGauge`.
+> **UPDATE (RETRACTION + correction — the "irreducible obstruction" was a mistake).**  A previous
+> version of this section claimed `current_product_gauge` could not be dropped because the required
+> gauge "depends on `V(q⊗r, id)`, which a single-distribution gauge cannot absorb."  **That argument
+> was wrong and is retracted.**  The error: it imposed *both* `A*_{q,r}=1` and `B*_{q,r}=1` as
+> simultaneous constraints on the gauge and found them over-determined.  The correct
+> product-normalization (paper `lem:coherentnorm`) imposes only the `A`-normalization, which the
+> **associativity cocycle** makes a *coboundary* `A_{r,s}=φ(r)/φ(r⊗s)` with `φ(r):=ρ(q₀,r)` for a
+> fixed nondegenerate reference `q₀`; then `B*=1` is *proved* from swap reciprocity + the cocycle, not
+> imposed.  Crucially, `q⊗r` **is** a single prior, so a one-argument gauge `g` evaluated at `g(q⊗r)`
+> is legitimate — the gauge need not factor through `H(q)`.  The separate identity `scale(q) = C·Z(q)`
+> that genuinely needs QA is the *later* chain-scale/interaction-collapse step (`scalecoherence`), not
+> the earlier product-representative normalization (`coherentnorm`); conflating the two produced the
+> spurious obstruction.  **The theorem stands and the product-normalized representative provably
+> exists.**  The genuinely useful, correct results that survive (all QA-free, axioms
+> `[propext, Classical.choice, Quot.sound]`): `product_scale_cleared_left`/`_right` (a QA-free
+> product-scale law) and the governing/face-value/support lemmas.  `product_scale_pinned_by_joint_value`
+> is a *true* identity but does **not** imply any obstruction (it is about the chain scale, not the
+> product-representative gauge).  **Correct next target (in progress):**
+> `exists_product_normalized_gauge_from_bilinear_cocycle` — construct `φ` from the associativity
+> cocycle + swap reciprocity, then obtain `current_product_gauge` by `Classical.choose`, dropping the
+> field.  The support-cardinality gauge `V^λ` is *not* a counterexample to the theorem: promoted to a
+> behavioural preference it violates A5 (a dummy independent label is undetectable, so A5 forbids
+> ranking the refined lottery above the original — `V^λ` does exactly that).
 
 > **UPDATE (`current_product_gauge` reduced to a transparent coherent normalization).**
 > The product-representative gauge convention `current_product_gauge`
