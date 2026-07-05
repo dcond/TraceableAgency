@@ -37,6 +37,28 @@ boundary-elimination `marginalValue_support_face` clause.
 - Correctness note confirmed in scratch: `product_normalization_pinning` is false at subsingleton A;
   covariance → `hsel` directly (producer already in source).
 
+## R2 IN PROGRESS — t_n cardinal-gauge construction (user chose full build)
+
+R2 (`support_face_scale`) is provably the cross-cardinality `K(ι)=1` statement — false for the
+raw scale, genuinely needs the `t_n` cardinal-gauge. Landed so far (green 8612):
+- `pushSignedIncl` + `atomicLinear_pushSignedIncl` + `pushSignedIncl_tangent` (tangent-space map
+  `i_ι`; inclusion pushforward preserves atomic-linear + tangent).
+- **`boundaryCoeff_qIndep_of_FinalHM`** (R2a, the make-or-break): the embedding defect
+  `boundaryCoeff q r / scale q` is q-independent, proved WITHOUT the cross-prior bridge
+  (transport + full-support tangent relation on the pushed tangent + A1 cancellation). Confirms
+  `t_n` is constructible non-circularly.
+
+Remaining R2 steps:
+- **R2a'**: r-independence within a fixed support face (`boundaryCoeff q s = boundaryCoeff q r ·
+  branchPathCoeff(r|supp)(s|supp)` for r,s same support) — mirror of q-indep on the face side.
+- **R2b**: defect depends only on `(card A, card supp r)` via R1 relabel-invariance
+  (`branchPathCoeff_relabel_of_marginalValue_relabel`); defect cocycle over inclusion composition;
+  define `t : ℕ → ℝ`, `t_n := K_{n,2}`, positive, `defect n m = t_n / t_m`.
+- **R2c**: `cardinalGauge` (gauge q := t_{card A}); prove `hrel` (R1 + card-invariance) and
+  `hsupport` (`support_face_scale`, i.e. `K̃ = 1` by construction). Assemble the coherent
+  face-scale representative.
+- Then rewiring (below).
+
 ## Remaining (the real work)
 
 The intermediate routes (`…withPositiveGaugePreEntropy`, `…withProductNormalizedSelected…`) all
