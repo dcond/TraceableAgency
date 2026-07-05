@@ -2405,6 +2405,78 @@ noncomputable def coherentFaceScales_of_FinalHM_positiveGauge
       (posteriorValueRepresentation_of_FinalHMInterface hhm hax))
     hgauge hrel hsupport
 
+/-- **Selected relabelling invariance for the positive-gauge representative,
+from the HM covariance clause and gauge relabelling-equivariance.**
+
+The positive-gauge value functional is `gauge q · V_HM q E`.  Under a finite
+relabelling `eA`, `V_HM` is invariant (`FinalHMRelabelCovariance`) and the chosen
+gauge is invariant (`hgaugeRel`, a harmless equivariance normalization on the
+gauge — the same status as the `scale_relabel` field it strengthens), so the
+gauged value is invariant.  This produces the selected relabelling package
+*without* the `product_normalized` pinning convention (which is in fact false at
+subsingleton priors). -/
+theorem finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hgauge : PositiveFaceScaleGauge.{u})
+    (hrel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A) (_hq : q.FullSupport),
+        hgauge.gauge (Relabeling.relabelDist e q) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale (Relabeling.relabelDist e q) =
+          hgauge.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+        [Nonempty (supportSubtype r)]
+        (_hr_nonempty : ∃ a : A, 0 < r a)
+        (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+        (_hr_boundary : ¬ r.FullSupport),
+        (hgauge.gauge q / hgauge.gauge r) *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).branch_agg.branchCoeff q r =
+          (hgauge.gauge q *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale q) /
+            (hgauge.gauge r.restrictToSupport *
+              (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith
+                F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+              ).scale_factorization.scale r.restrictToSupport))
+    (hcov : FinalHMRelabelCovariance hhm)
+    (hgaugeRel :
+      ∀ {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B]
+        (e : A ≃ B) (q : Dist A),
+        hgauge.gauge (Relabeling.relabelDist e q) = hgauge.gauge q) :
+    FiniteSelectedPosteriorValueRelabelingFor
+      (coherentFaceScales_of_FinalHM_positiveGauge hhm hfaith hax hgauge hrel hsupport) where
+  V_relabel_eq := by
+    intro _hax A B O Y _ _ _ _ _ _ _ _ _ _ eA eO q P
+    show hgauge.gauge (Relabeling.relabelDist eA q) *
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V
+          (Relabeling.relabelDist eA q)
+          (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+      hgauge.gauge q *
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q
+          (experimentOfChannel P)
+    rw [hgaugeRel eA q]
+    rw [show (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V
+          (Relabeling.relabelDist eA q)
+          (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q
+          (experimentOfChannel P)
+        from hcov.V_relabel_eq hax eA eO q P]
+
 /-- Product quasi-additivity for a face-scale representative built by the
 positive-gauge branch route. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGauge
