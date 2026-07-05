@@ -1882,6 +1882,57 @@ theorem boundaryCoeff_qIndep_of_FinalHM
   have hcancel := mul_right_cancel₀ hLnz hstep
   linarith [hcancel]
 
+/-- Canonical `n`-element action type in `Type u` (for the cardinal gauge). -/
+abbrev canonType (n : ℕ) : Type u := ULift.{u} (Fin n)
+
+/-- **The cardinal scale `t_n`**: the faithful chain scale of the uniform prior on
+the canonical `n`-element action type.  By R1 (`scaleRelabel_of_FinalHM_covariance`)
+this is exactly the chain scale of the uniform prior on *any* `n`-element type
+(`scale_uniform_eq_cardScale` below), so it depends only on the cardinality `n`.
+Singleton/empty cardinalities are given the harmless value `1`. -/
+noncomputable def cardScale
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (n : ℕ) : ℝ :=
+  if h : n = 0 then 1
+  else
+    haveI : NeZero n := ⟨h⟩
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (Dist.uniform (A := canonType.{u} n))
+
+/-- The chain scale of the uniform prior depends only on the cardinality: it
+equals `cardScale (card A)`.  Immediate from R1 via the equivalence
+`A ≃ canonType (card A)`, which carries the uniform prior to the uniform prior. -/
+theorem scale_uniform_eq_cardScale
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (Dist.uniform (A := A)) =
+      cardScale hhm hbranchConv hax (Fintype.card A) := by
+  classical
+  have hcard0 : Fintype.card A ≠ 0 := Fintype.card_ne_zero
+  rw [cardScale, dif_neg hcard0]
+  haveI : NeZero (Fintype.card A) := ⟨hcard0⟩
+  set e : A ≃ canonType.{u} (Fintype.card A) :=
+    (Fintype.equivFin A).trans Equiv.ulift.symm with he
+  have huni : Relabeling.relabelDist e (Dist.uniform (A := A)) =
+      Dist.uniform (A := canonType.{u} (Fintype.card A)) := by
+    ext b
+    rw [Relabeling.relabelDist_apply, Dist.uniform_apply, Dist.uniform_apply]
+    congr 1
+    simp [canonType]
+  rw [← huni]
+  exact (scaleRelabel_of_FinalHM_covariance hhm hbranchConv hax e
+    (Dist.uniform (A := A)) Dist.uniform_fullSupport).symm
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
