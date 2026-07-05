@@ -3208,6 +3208,179 @@ theorem boundaryCoeff_scale_within_face
     rw [hfρ', hfσ'] at hchain; linarith [hchain]
   exact mul_right_cancel₀ hXnz hexp
 
+/-- The relabelled boundary prior `relabel (alignEquiv r) r` and the canonical
+`m`-face (`m = card supp r`) share the same positive support set. -/
+theorem alignEquiv_relabel_support_eq {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (m : ℕ) (hm : m = Fintype.card (supportSubtype r)) [NeZero m]
+    (hmn : m ≤ Fintype.card A) (c : canonType.{u} (Fintype.card A)) :
+    (Relabeling.relabelDist (alignEquiv r) r) c > 0 ↔ (canonBoundary.{u} (Fintype.card A) m hmn) c > 0 := by
+  classical
+  rw [Relabeling.relabelDist_apply]
+  obtain ⟨j⟩ := c
+  rw [gt_iff_lt, gt_iff_lt, show ({ down := j } : canonType.{u} (Fintype.card A)) = ULift.up j from rfl,
+    canonBoundary_pos]
+  constructor
+  · intro hpos
+    have hlt := alignEquiv_lt_of_pos r ((alignEquiv r).symm (ULift.up j)) hpos
+    rw [Equiv.apply_symm_apply] at hlt
+    change (j : ℕ) < Fintype.card (supportSubtype r) at hlt
+    omega
+  · intro hjm
+    by_contra hnp
+    have hge := alignEquiv_ge_of_not_pos r ((alignEquiv r).symm (ULift.up j)) hnp
+    rw [Equiv.apply_symm_apply] at hge
+    change Fintype.card (supportSubtype r) ≤ (j : ℕ) at hge
+    omega
+
+/-- **Embedding-defect reduction at the uniform ambient prior.**  For the uniform
+prior `u_A` and a boundary posterior `r` with `2 ≤ card supp r < card A`, the
+scaled boundary coefficient equals the canonical `cardDefect`.  Proof: relabel to
+`canonType (card A)` by `alignEquiv r` (uniform ↦ uniform, defect and face scale
+relabel-invariant), whereupon `relabel (alignEquiv r) r` shares the support of the
+canonical face, so within-face independence swaps it for the uniform face whose
+scale is `1`, leaving `bc(u_n, canonBoundary) = cardDefect`. -/
+theorem general_defect_uniform
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A)
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport)
+    (hm2 : 2 ≤ Fintype.card (supportSubtype r))
+    (hmn : Fintype.card (supportSubtype r) < Fintype.card A) :
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff (Dist.uniform (A := A)) r *
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r.restrictToSupport =
+    cardDefect hhm hbranchConv hax (Fintype.card A) (Fintype.card (supportSubtype r)) := by
+  classical
+  set n := Fintype.card A with hndef
+  set m := Fintype.card (supportSubtype r) with hmdef
+  haveI : NeZero m := ⟨by omega⟩
+  haveI : NeZero n := ⟨by omega⟩
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hb := branchBoundaryFaceScale_of_faithfulAssumptions hfaith
+  set e := alignEquiv r with hedef
+  set r' := Relabeling.relabelDist e r with hr'def
+  -- uniform relabels to uniform
+  have huni : Relabeling.relabelDist e (Dist.uniform (A := A)) = Dist.uniform (A := canonType.{u} n) := by
+    ext b
+    rw [Relabeling.relabelDist_apply, Dist.uniform_apply, Dist.uniform_apply]
+    congr 1
+    exact congrArg (Nat.cast) (Fintype.card_congr e)
+  -- Step 1: bc(u_A,r) = bc(u_n, r') via boundaryCoeff_relabel
+  have hbc_rel : hb.boundaryCoeff (Dist.uniform (A := A)) r =
+      hb.boundaryCoeff (Dist.uniform (A := canonType.{u} n)) r' := by
+    rw [← huni]
+    exact (boundaryCoeff_relabel_of_FinalHM hhm hbranchConv hax e (Dist.uniform (A := A)) r
+      Dist.uniform_fullSupport hrn hrnd hrb).symm
+  -- Step 2: scale(r|supp) = scale(r'|supp) via scale-relabel on restrictToSupport_relabelDist
+  have hscale_rel : (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r.restrictToSupport =
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r'.restrictToSupport := by
+    have hface : r'.restrictToSupport =
+        Relabeling.relabelDist (relabelSupportEquiv e r).symm r.restrictToSupport :=
+      restrictToSupport_relabelDist e r
+    rw [hface]
+    exact (scaleRelabel_of_FinalHM_covariance hhm hbranchConv hax (relabelSupportEquiv e r).symm
+      r.restrictToSupport (Dist.restrictToSupport_fullSupport r)).symm
+  rw [hbc_rel, hscale_rel]
+  -- Step 3: r' shares support with cB n m ; within-face independence
+  have hmn' : m ≤ n := le_of_lt hmn
+  have hsupp : ∀ c, r' c > 0 ↔ (canonBoundary.{u} n m hmn') c > 0 :=
+    alignEquiv_relabel_support_eq r m hmdef hmn'
+  -- boundary data for r'
+  have hr'n : ∃ b : canonType.{u} n, 0 < r' b := by
+    obtain ⟨a, ha⟩ := hrn
+    exact ⟨e a, by rw [hr'def, Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact ha⟩
+  have hr'nd : ∃ a b : canonType.{u} n, a ≠ b ∧ 0 < r' a ∧ 0 < r' b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hrnd
+    exact ⟨e a, e b, fun h => hab (e.injective h),
+      by rw [hr'def, Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact ha,
+      by rw [hr'def, Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact hb'⟩
+  have hr'b : ¬ r'.FullSupport := by
+    intro hfs; apply hrb; intro a
+    have := hfs (e a); rwa [hr'def, Relabeling.relabelDist_apply, Equiv.symm_apply_apply] at this
+  -- within-face: bc(u_n,r')·scale(r'|supp) = bc(u_n, cB n m)·scale(cB n m|supp)
+  have hwf := boundaryCoeff_scale_within_face hhm hbranchConv hax
+    (Dist.uniform (A := canonType.{u} n)) r' (canonBoundary.{u} n m hmn')
+    Dist.uniform_fullSupport hsupp hr'n hr'nd hr'b
+  rw [hwf]
+  -- scale(cB n m|supp) = 1, and bc(u_n, cB n m) = cardDefect n m
+  rw [canonBoundary_face_scale_eq_one hhm hbranchConv hax n m hmn' hm2, mul_one]
+  rw [cardDefect, dif_pos ⟨hm2, hmn'⟩]
+
+/-- **General embedding-defect reduction.**  For any full-support ambient prior
+`q` and boundary posterior `r` (with `2 ≤ card supp r < card A`), the scaled
+boundary coefficient is `scale q · cardDefect(card A, card supp r)`. -/
+theorem general_defect
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q r : Dist A) (hq : q.FullSupport)
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport)
+    (hm2 : 2 ≤ Fintype.card (supportSubtype r))
+    (hmn : Fintype.card (supportSubtype r) < Fintype.card A) :
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff q r *
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r.restrictToSupport =
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale q *
+      cardDefect hhm hbranchConv hax (Fintype.card A) (Fintype.card (supportSubtype r)) := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+  set hb := branchBoundaryFaceScale_of_faithfulAssumptions hfaith
+  -- scale q = branchPathCoeff q uniform
+  have hscale_q : (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).scale_factorization.scale q = hpath.branchPathCoeff q (Dist.uniform (A := A)) := by
+    show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).branch_agg.branchCoeff q (Dist.uniform (A := A)) = _
+    rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff q (Dist.uniform (A := A)) =
+      branchCoeffFromTangentRepParts hpath hb hfaith.singleton_scale q (Dist.uniform (A := A))
+      from rfl]
+    simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  -- qIndep:  bc(u_A,r) · bpc(q,u_A) = bc(q,r)
+  have hqi := boundaryCoeff_qIndep_of_FinalHM hhm hbranchConv hax
+    (Dist.uniform (A := A)) q r Dist.uniform_fullSupport hq hrn hrnd hrb
+  -- hqi : hb.boundaryCoeff u_A r * hpath.branchPathCoeff q u_A = hb.boundaryCoeff q r
+  have hbcq : hb.boundaryCoeff q r =
+      hb.boundaryCoeff (Dist.uniform (A := A)) r *
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).scale_factorization.scale q := by
+    rw [hscale_q]; exact hqi.symm
+  rw [hbcq]
+  -- now  bc(u_A,r)·scale q · scale(r|supp) = scale q · cardDefect
+  have hgu := general_defect_uniform hhm hbranchConv hax r hrn hrnd hrb hm2 hmn
+  -- hgu : bc(u_A,r)·scale(r|supp) = cardDefect
+  set s := hb.boundaryCoeff (Dist.uniform (A := A)) r
+  set sq := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).scale_factorization.scale q
+  set srs := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).scale_factorization.scale r.restrictToSupport
+  -- goal: s * sq * srs = sq * cardDefect ; hgu : s * srs = cardDefect
+  have : s * sq * srs = sq * (s * srs) := by ring
+  rw [this, hgu]
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
