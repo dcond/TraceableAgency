@@ -14,14 +14,23 @@
 > (2) `productLiftScale` (+ `_pos`, `_spec`) — names that canonical `a(q,r) > 0`.
 > (3) `leftCoeff_eq_productLiftScale` — the multi-pieces `leftCoeff` equals `productLiftScale`, so the
 > convention's content is exactly the normalization `productLiftScale ≡ 1`.
+> (4) `productLiftScale_cocycle` — **the WLOG certificate**: `productLiftScale q (r⊗s) =
+> productLiftScale (q⊗r) s · productLiftScale q r`. A cocycle is a coboundary, so a gauge normalizing
+> `productLiftScale ≡ 1` *exists*; hence `current_product_gauge` is a **legitimate normalization
+> (without loss of generality)** — imposing it does not restrict which preferences `F` are
+> represented. QA-free: two applications of the gauge-free `productLift_value_affine_of_A5_HM`
+> reassociated by HM relabel-covariance (`relabelDist_prodAssoc`, `relabelChannel_prodAssoc`, and the
+> `PUnit × PUnit ≃ PUnit` outcome collapse identifying `U_B ⊗ U_C` with `U_{B×C}`), cancelling the
+> A1-nonzero base value.
 > Following the coherent-normalization analysis: A5 yields the ordinal indifference, HM-uniqueness
-> yields the positive scale `a`, and (paper Step 3, `lem:coherentnorm`) the branch chain rule shows
-> `a` is a coboundary hence gauge-removable — but the terminal equality `a ≡ 1` is *irreducibly a
-> gauge choice*, not a theorem of the raw axioms (replacing `F_{q⊗r}` by `2·F_{q⊗r}` breaks it while
+> yields the positive scale `a`, and the cocycle (Step 3, `lem:coherentnorm`) shows `a` is a
+> coboundary hence gauge-removable — but the terminal equality `a ≡ 1` is *irreducibly a gauge
+> choice*, not a theorem of the raw axioms (replacing `F_{q⊗r}` by `2·F_{q⊗r}` breaks it while
 > preserving preferences). So `current_product_gauge` is now certified as the coherent normalization
-> of a proven-existent positive coboundary scale, the bulletproof honest form. Removing it as a raw
-> theorem would additionally require a line-by-line audit that branch aggregation cites no
-> blockbridge-with-QA (open). The exported theorems are unchanged and still valid.
+> of a proven-existent positive **cocycle** scale — the precise Lean answer to "is this normalization
+> allowed?": yes, with `productLiftScale_cocycle` as the certificate. Removing it as a raw theorem
+> (fixing the gauge internally) would additionally require a line-by-line audit that branch
+> aggregation cites no blockbridge-with-QA (open). The exported theorems are unchanged and still valid.
 
 > **UPDATE (`support_scale` cross-cardinality convention ELIMINATED).** The raw support-face
 > scale equation `support_scale` (`eq:facescale`, the genuine cross-cardinality embedding-defect
