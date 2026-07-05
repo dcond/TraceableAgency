@@ -5297,6 +5297,137 @@ theorem fs_rightCoeff_relabel_right
   rw [h1, h2, hVe] at hcov
   exact mul_right_cancel₀ hVnz hcov
 
+/-- Support-face coboundary gauge: `ρ(q₀, x.restrictToSupport)`.  Evaluating at the
+support face makes support-restriction invariance definitional. -/
+noncomputable def cobGaugeSF
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (x : Dist A) : ℝ := by
+  classical
+  exact
+    if Subsingleton (supportSubtype x) then 1
+    else
+      hpair.rightCoeff hax faceScaleInteractionReferencePrior x.restrictToSupport /
+        hpair.leftCoeff hax faceScaleInteractionReferencePrior x.restrictToSupport
+
+theorem cobGaugeSF_pos
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (x : Dist A) : 0 < cobGaugeSF hpair hax x := by
+  classical
+  unfold cobGaugeSF
+  by_cases h : Subsingleton (supportSubtype x)
+  · rw [if_pos h]; exact one_pos
+  · rw [if_neg h]
+    have hfs := Dist.restrictToSupport_fullSupport x
+    exact div_pos
+      (hpair.rightCoeff_pos hax faceScaleInteractionReferencePrior x.restrictToSupport
+        faceScaleInteractionReferencePrior_fullSupport hfs)
+      (hpair.leftCoeff_pos hax faceScaleInteractionReferencePrior x.restrictToSupport
+        faceScaleInteractionReferencePrior_fullSupport hfs)
+
+
+/-- For a full-support prior, restriction to support is a relabelling by the
+support inclusion equivalence. -/
+noncomputable def fullSupportRestrictEquiv {A : Type u} [Fintype A] [DecidableEq A]
+    (r : Dist A) (hr : r.FullSupport) : supportSubtype r ≃ A where
+  toFun x := x.1
+  invFun a := ⟨a, hr a⟩
+  left_inv x := by apply Subtype.ext; rfl
+  right_inv a := rfl
+
+theorem restrictToSupport_fullSupport_eq_relabel {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (hr : r.FullSupport) :
+    r.restrictToSupport = Relabeling.relabelDist (fullSupportRestrictEquiv r hr).symm r := by
+  ext x; rw [Dist.restrictToSupport_apply, Relabeling.relabelDist_apply]; rfl
+
+theorem cobGaugeSF_support_restrict
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
+    cobGaugeSF hpair hax r = cobGaugeSF hpair hax r.restrictToSupport := by
+  classical
+  have hnd : ¬ Subsingleton (supportSubtype r) := by
+    obtain ⟨a, b, hab, ha, hb⟩ := hrnd
+    rw [not_subsingleton_iff_nontrivial]
+    exact ⟨⟨a, ha⟩, ⟨b, hb⟩, fun h => hab (congrArg Subtype.val h)⟩
+  have hrsfs : r.restrictToSupport.FullSupport := Dist.restrictToSupport_fullSupport r
+  -- supportSubtype (r|supp) is also nondegenerate (≃ supportSubtype r)
+  have hnd2 : ¬ Subsingleton (supportSubtype r.restrictToSupport) := by
+    rw [not_subsingleton_iff_nontrivial] at hnd ⊢
+    obtain ⟨a, b, hab⟩ := hnd
+    refine ⟨⟨a, by rw [Dist.restrictToSupport_apply]; exact a.2⟩,
+      ⟨b, by rw [Dist.restrictToSupport_apply]; exact b.2⟩, ?_⟩
+    intro h; exact hab (congrArg Subtype.val h)
+  unfold cobGaugeSF
+  rw [if_neg hnd, if_neg hnd2]
+  set rs := r.restrictToSupport with hrsdef
+  -- rs.restrictToSupport = relabel (fullSupportRestrictEquiv rs hrsfs).symm rs
+  rw [restrictToSupport_fullSupport_eq_relabel rs hrsfs]
+  -- ρ(q₀, relabel e rs) = ρ(q₀, rs) via relabel-invariance of left/right coeff in 2nd arg
+  have hnd : ¬ Subsingleton (supportSubtype r) := by
+    obtain ⟨a, b, hab, ha, hb⟩ := hrnd
+    rw [not_subsingleton_iff_nontrivial]
+    exact ⟨⟨a, ha⟩, ⟨b, hb⟩, fun h => hab (congrArg Subtype.val h)⟩
+  rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior rs
+      (fullSupportRestrictEquiv rs hrsfs).symm faceScaleInteractionReferencePrior_fullSupport hrsfs
+      faceScaleInteractionReference_not_subsingleton]
+  rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior rs
+      (fullSupportRestrictEquiv rs hrsfs).symm faceScaleInteractionReferencePrior_fullSupport hrsfs hnd]
+
+
+theorem cobGaugeSF_relabel
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    (e : A ≃ B) (q : Dist A) :
+    cobGaugeSF hpair hax (Relabeling.relabelDist e q) = cobGaugeSF hpair hax q := by
+  classical
+  -- supportSubtype (relabel e q) ≃ supportSubtype q, so subsingleton-ness matches
+  have hequiv : Subsingleton (supportSubtype (Relabeling.relabelDist e q)) ↔ Subsingleton (supportSubtype q) :=
+    Equiv.subsingleton_congr (relabelSupportEquiv e q)
+  unfold cobGaugeSF
+  by_cases hnd : Subsingleton (supportSubtype q)
+  · rw [if_pos (hequiv.mpr hnd), if_pos hnd]
+  · rw [if_neg (fun h => hnd (hequiv.mp h)), if_neg hnd]
+    have hface : (Relabeling.relabelDist e q).restrictToSupport =
+        Relabeling.relabelDist (relabelSupportEquiv e q).symm q.restrictToSupport :=
+      restrictToSupport_relabelDist e q
+    rw [hface]
+    have hqsfs : q.restrictToSupport.FullSupport := Dist.restrictToSupport_fullSupport q
+    rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior
+        q.restrictToSupport (relabelSupportEquiv e q).symm
+        faceScaleInteractionReferencePrior_fullSupport hqsfs
+        faceScaleInteractionReference_not_subsingleton]
+    rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior
+        q.restrictToSupport (relabelSupportEquiv e q).symm
+        faceScaleInteractionReferencePrior_fullSupport hqsfs hnd]
+
+
+/-- On full-support (nondegenerate) priors, `cobGaugeSF` agrees with `cobGauge`. -/
+theorem cobGaugeSF_eq_cobGauge_of_fullSupport
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (hr : r.FullSupport) (hnd : ¬ Subsingleton A) :
+    cobGaugeSF hpair hax r = cobGauge hpair hax r := by
+  have hndsupp : ¬ Subsingleton (supportSubtype r) := by
+    rw [not_subsingleton_iff_nontrivial] at hnd ⊢
+    obtain ⟨a, b, hab⟩ := hnd
+    exact ⟨⟨a, hr a⟩, ⟨b, hr b⟩, fun h => hab (congrArg Subtype.val h)⟩
+  unfold cobGaugeSF cobGauge
+  rw [if_neg hndsupp]
+  -- r|supp = relabel (fullSupportRestrictEquiv r hr).symm r ; ρ relabel-inv
+  rw [restrictToSupport_fullSupport_eq_relabel r hr]
+  rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior r
+      (fullSupportRestrictEquiv r hr).symm faceScaleInteractionReferencePrior_fullSupport hr
+      faceScaleInteractionReference_not_subsingleton]
+  rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior r
+      (fullSupportRestrictEquiv r hr).symm faceScaleInteractionReferencePrior_fullSupport hr hnd]
+
 end FaceScaleProductCocycle
 
 
