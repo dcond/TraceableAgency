@@ -142,6 +142,37 @@ theorem finiteSelectedPosteriorValueRelabeling_of_FinalHM_covariance
       hVeq q (experimentOfChannel P)]
     exact hcov.V_relabel_eq hax eA eO q P
 
+/-- **The singleton-slice affine convention is a theorem** (for every coherent
+face-scale representative).
+
+On a subsingleton first factor `A`, the product left-slice value
+`faceScaleProductLeftSliceValue q r R P = V (q⊗r) (P⊗R)` is `P`-invariant: the
+first-factor observation is uninformative, so `P⊗R` and `U_A⊗R` induce the same
+posterior law (`samePosteriorLawExp_prodChannel_singleton_fst`), and `V` respects
+posterior-law equivalence.  Since also `V q (exp P) = 0` on a subsingleton
+(`V_channel_eq_zero_of_subsingleton`), the affine relation holds with slope `a = 1`
+and intercept the (`P`-independent) value at `U_A`.  This discharges the
+`singleton_slice` convention with no assumption. -/
+theorem finiteFaceScaleSingletonSliceAffine_of_faces
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F) :
+    FiniteFaceScaleSingletonSliceAffineConventionFor hfaces where
+  singleton_left_slice_positive_affine_transform := by
+    intro hax A B Y _ _ _ _ _ _ _ _ q r hq hr hA R
+    refine ⟨1, faceScaleProductLeftSliceValue hfaces q r R (Channel.uninformativeChannelU A),
+      one_pos, ?_⟩
+    intro O _ _ P
+    haveI : Subsingleton A := hA
+    have hVzero : hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) = 0 :=
+      V_channel_eq_zero_of_subsingleton F hfaces.branch_result.branch_agg.value_rep q hq P
+    rw [hVzero, mul_zero, zero_add]
+    show hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel P R)) =
+      hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) R))
+    exact hfaces.branch_result.branch_agg.value_rep.respects_same_posterior_law _ _ _
+      (samePosteriorLawExp_prodChannel_singleton_fst q r P R)
+
 /-- **R1 core: branch tangent-scalar coefficient relabelling covariance.**
 
 The faithful tangent-scalar coefficient `branchPathCoeff` is invariant under
@@ -5207,25 +5238,29 @@ structure FinalConstructedRepresentativeConventionsCovariance
       [Fintype B] [DecidableEq B] [Nonempty B]
       (e : A ≃ B) (q : Dist A),
       gauge.gauge (Relabeling.relabelDist e q) = gauge.gauge q
-  singleton_slice :
-    FiniteFaceScaleSingletonSliceAffineConventionFor
-      (coherentFaceScales_of_FinalHM_positiveGauge
-        hhm
-        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
-          hhm branch)
-        hax gauge scale_relabel support_scale)
   current_product_gauge :
     FiniteFaceScaleProductGaugeConventionFor
       (faceScaleProductPairwiseBilinearity_of_multiPieces
         (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
           (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
             hhm)
-          singleton_slice)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))
         (productInterceptPositiveLinear_of_FinalHM_positiveGauge
           hhm
           (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
             hhm branch)
-          hax gauge scale_relabel support_scale singleton_slice)
+          hax gauge scale_relabel support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))
         (faceScaleProductSlopeAffine_of_selectedRelabeling
           (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
             hhm
@@ -5236,19 +5271,36 @@ structure FinalConstructedRepresentativeConventionsCovariance
             hhm
             (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
               hhm branch)
-            hax gauge scale_relabel support_scale singleton_slice)))
+            hax gauge scale_relabel support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))))
   singleton_interaction :
     FiniteFaceScaleSingletonInteractionConventionFor
       (faceScaleProductPairwiseBilinearity_of_multiPieces
         (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
           (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
             hhm)
-          singleton_slice)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))
         (productInterceptPositiveLinear_of_FinalHM_positiveGauge
           hhm
           (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
             hhm branch)
-          hax gauge scale_relabel support_scale singleton_slice)
+          hax gauge scale_relabel support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))
         (faceScaleProductSlopeAffine_of_selectedRelabeling
           (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
             hhm
@@ -5259,7 +5311,13 @@ structure FinalConstructedRepresentativeConventionsCovariance
             hhm
             (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
               hhm branch)
-            hax gauge scale_relabel support_scale singleton_slice)))
+            hax gauge scale_relabel support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale)))))
   harmless :
     FinalHarmlessConventions
       (coherentFaceScales_of_FinalHM_positiveGauge
@@ -5271,7 +5329,13 @@ structure FinalConstructedRepresentativeConventionsCovariance
         hhm
         (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
           hhm branch)
-        hax gauge scale_relabel support_scale singleton_slice
+        hax gauge scale_relabel support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax gauge scale_relabel support_scale))
         (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
           hhm
           (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -5297,7 +5361,13 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withCovariance
     MIRep F :=
   MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
     hfad hhm hconv.branch hax hconv.gauge hconv.scale_relabel
-    hconv.support_scale hconv.singleton_slice
+    hconv.support_scale
+    (finiteFaceScaleSingletonSliceAffine_of_faces
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm hconv.branch)
+        hax hconv.gauge hconv.scale_relabel hconv.support_scale))
     (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
       hhm
       (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
