@@ -2049,6 +2049,77 @@ noncomputable def canonBoundarySupportEquiv (n m : ℕ) (hmn : m ≤ n) [NeZero 
   left_inv a := by apply Subtype.ext; apply ULift.ext; apply Fin.ext; simp
   right_inv b := by apply ULift.ext; apply Fin.ext; simp
 
+/-- The faithful chain scale of the uniform prior on a nondegenerate action type
+is `1`: `scale (u_A) = branchCoeff (u_A) (u_A) = branchPathCoeff (u_A) (u_A) = 1`
+by the full-support tangent-scalar cocycle at `q = r = s = u_A`. -/
+theorem scale_uniform_eq_one
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A] (hnd : ∃ a b : A, a ≠ b) :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (Dist.uniform (A := A)) = 1 := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+  show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff (Dist.uniform (A := A)) (Dist.uniform (A := A)) = 1
+  rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+    ).branch_agg.branchCoeff (Dist.uniform (A := A)) (Dist.uniform (A := A)) =
+    branchCoeffFromTangentRepParts hpath
+      (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+      hfaith.singleton_scale (Dist.uniform (A := A)) (Dist.uniform (A := A)) from rfl]
+  simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  have hcoc := branchCoeffTangentScalar_cocycle_fullSupport hfaith.linear_part F hax hV hpath
+    (Dist.uniform (A := A)) (Dist.uniform (A := A)) (Dist.uniform (A := A))
+    Dist.uniform_fullSupport Dist.uniform_fullSupport Dist.uniform_fullSupport hnd
+  have hpos : 0 < hpath.branchPathCoeff (Dist.uniform (A := A)) (Dist.uniform (A := A)) := by
+    obtain ⟨a, b, hab⟩ := hnd
+    exact hpath.branchPathCoeff_pos _ _ Dist.uniform_fullSupport Dist.uniform_fullSupport
+      ⟨a, b, hab, Dist.uniform_fullSupport a, Dist.uniform_fullSupport b⟩
+  nlinarith [hcoc, hpos]
+
+/-- The support-face of `canonBoundary n m` carries the uniform prior on its
+`m`-element support (each surviving action has probability `1/m`). -/
+theorem canonBoundary_face_uniform (n m : ℕ) (hmn : m ≤ n) [NeZero m]
+    [Nonempty (supportSubtype (canonBoundary.{u} n m hmn))] :
+    (canonBoundary.{u} n m hmn).restrictToSupport =
+      Dist.uniform (A := supportSubtype (canonBoundary.{u} n m hmn)) := by
+  classical
+  have hcard : Fintype.card (supportSubtype (canonBoundary.{u} n m hmn)) = m := by
+    rw [Fintype.card_congr (canonBoundarySupportEquiv n m hmn)]; simp [canonType]
+  ext a
+  rw [Dist.restrictToSupport_apply, Dist.uniform_apply, hcard]
+  obtain ⟨⟨j⟩, hj⟩ := a
+  rw [canonBoundary_apply]
+  have : (j : ℕ) < m := by
+    have := (canonBoundary_pos n m hmn j).mp (by simpa using hj); simpa using this
+  rw [if_pos this]
+
+/-- The chain scale of the `canonBoundary n m` support-face is `1` (it is the
+uniform prior on an `m ≥ 2`-element type; `scale_uniform_eq_one`). -/
+theorem canonBoundary_face_scale_eq_one
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (n m : ℕ) (hmn : m ≤ n) [NeZero m] (hm2 : 2 ≤ m)
+    [Nonempty (supportSubtype (canonBoundary.{u} n m hmn))] :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (canonBoundary.{u} n m hmn).restrictToSupport = 1 := by
+  rw [canonBoundary_face_uniform n m hmn]
+  have hnd : ∃ a b : supportSubtype (canonBoundary.{u} n m hmn), a ≠ b := by
+    have hcard : Fintype.card (supportSubtype (canonBoundary.{u} n m hmn)) = m := by
+      rw [Fintype.card_congr (canonBoundarySupportEquiv n m hmn)]; simp [canonType]
+    have : 1 < Fintype.card (supportSubtype (canonBoundary.{u} n m hmn)) := by omega
+    obtain ⟨a, b, hab⟩ := Fintype.exists_pair_of_one_lt_card this
+    exact ⟨a, b, hab⟩
+  exact scale_uniform_eq_one hhm hbranchConv hax hnd
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
