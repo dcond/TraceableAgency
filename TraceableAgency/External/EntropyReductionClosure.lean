@@ -2127,6 +2127,54 @@ theorem canonBoundary_nest (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) [NeZero
     rw [← hce, Fin.val_castLE]
     exact c.down.isLt
 
+/-- Deterministic (pure-kernel) pushforward composition: pushing by `pure ∘ f`
+then `pure ∘ g` equals pushing by `pure ∘ (g ∘ f)`. -/
+theorem actionPushforward_pure_comp {A B C : Type u}
+    [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] [Fintype C] [DecidableEq C]
+    (d : Dist A) (f : A → B) (g : B → C) :
+    Channel.actionPushforward (Channel.actionPushforward d (fun a => Dist.pure (f a)))
+        (fun b => Dist.pure (g b)) =
+      Channel.actionPushforward d (fun a => Dist.pure (g (f a))) := by
+  ext c
+  show (∑ b : B, (Channel.actionPushforward d (fun a => Dist.pure (f a))) b *
+        (Dist.pure (g b) : Dist C) c) =
+      ∑ a : A, d a * (Dist.pure (g (f a)) : Dist C) c
+  have hinner : ∀ b : B, (Channel.actionPushforward d (fun a => Dist.pure (f a))) b =
+      ∑ a : A, d a * (Dist.pure (f a) : Dist B) b := fun b => rfl
+  simp only [hinner, Finset.sum_mul]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro a _
+  by_cases hc : c = g (f a)
+  · subst hc
+    rw [Finset.sum_eq_single (f a)]
+    · rw [Dist.pure_apply_self, Dist.pure_apply_self, mul_one, mul_one]
+    · intro b _ hb
+      rw [Dist.pure_apply_ne (f a) b hb, mul_zero, zero_mul]
+    · intro h; exact absurd (Finset.mem_univ _) h
+  · rw [Dist.pure_apply_ne (g (f a)) c hc, mul_zero]
+    apply Finset.sum_eq_zero
+    intro b _
+    by_cases hb : b = f a
+    · subst hb; rw [Dist.pure_apply_ne (g (f a)) c hc, mul_zero]
+    · rw [Dist.pure_apply_ne (f a) b hb, mul_zero, zero_mul]
+
+/-- The canonical inclusion kernels compose: `(m ↪ n) ∘ (ℓ ↪ m) = (ℓ ↪ n)`. -/
+theorem canonInclKernel_comp (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) (d : Dist (canonType.{u} l)) :
+    Channel.actionPushforward
+        (Channel.actionPushforward d (canonInclKernel m l hml)) (canonInclKernel n m hmn) =
+      Channel.actionPushforward d (canonInclKernel n l (hml.trans hmn)) := by
+  have h := actionPushforward_pure_comp (C := canonType.{u} n) d
+    (fun b : canonType.{u} l => ULift.up (Fin.castLE hml b.down))
+    (fun c : canonType.{u} m => ULift.up (Fin.castLE hmn c.down))
+  show Channel.actionPushforward
+      (Channel.actionPushforward d (fun b => Dist.pure (ULift.up (Fin.castLE hml b.down))))
+      (fun c => Dist.pure (ULift.up (Fin.castLE hmn c.down))) = _
+  rw [h]
+  apply congrArg (Channel.actionPushforward d)
+  funext a
+  congr 2
+
 /-- The faithful chain scale of the uniform prior on a nondegenerate action type
 is `1`: `scale (u_A) = branchCoeff (u_A) (u_A) = branchPathCoeff (u_A) (u_A) = 1`
 by the full-support tangent-scalar cocycle at `q = r = s = u_A`. -/
