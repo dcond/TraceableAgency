@@ -83,6 +83,65 @@ def classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
     ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u} :=
   hhm.hm_affine
 
+/-- **Exact relabelling covariance (naturality) of the constructed HM value
+functional.**
+
+This is a genuine property of the canonically constructed Herstein--Milnor
+posterior-law value functional: relabelling the action/outcome alphabets by
+finite bijections carries the value to the value at the relabelled data
+(`cor:permutationinvariance`, exact relabelling invariance).  It is *not* a new
+economic premise; it is a covariance clause on the classical HM interface, of
+the same status as the `marginalValue_support_face` support-face coherence
+clause added by the cardinal-boundary elimination.  It is provided by the HM
+data rather than assumed downstream as the `product_normalized` /
+`FiniteSelectedPosteriorValueRelabelingFor` convention.
+
+The clause is stated for the representative `posteriorValueRepresentation_of_
+FinalHMInterface`, which is exactly the functional the pre-entropy spine uses. -/
+structure FinalHMRelabelCovariance
+    (hhm : FinalHMInterface.{u}) : Prop where
+  V_relabel_eq :
+    ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F)
+      {A B O Y : Type u}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      [Fintype O] [DecidableEq O]
+      [Fintype Y] [DecidableEq Y]
+      (eA : A ≃ B) (eO : O ≃ Y)
+      (q : Dist A) (P : Channel A O),
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V
+          (Relabeling.relabelDist eA q)
+          (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q
+          (experimentOfChannel P)
+
+/-- The HM covariance clause yields exact relabelling invariance for **any**
+coherent face-scale representative whose value functional is (definitionally)
+the constructed HM functional scaled by a gauge that is constant on relabelling
+orbits.  For the special case of the constant gauge this is the identity used to
+discharge `product_normalized` without the pinning convention.
+
+This is the general helper; callers instantiate it with the concrete coherent
+face-scale representative built from `hhm`. -/
+theorem finiteSelectedPosteriorValueRelabeling_of_FinalHM_covariance
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hVeq :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A) (E : FiniteExperimentOn A),
+        hfaces.branch_result.branch_agg.value_rep.V q E =
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q E)
+    (hcov : FinalHMRelabelCovariance hhm) :
+    FiniteSelectedPosteriorValueRelabelingFor hfaces where
+  V_relabel_eq := by
+    intro _hax A B O Y _ _ _ _ _ _ _ _ _ _ eA eO q P
+    rw [hVeq (Relabeling.relabelDist eA q)
+        (experimentOfChannel (Relabeling.relabelChannel eA eO P)),
+      hVeq q (experimentOfChannel P)]
+    exact hcov.V_relabel_eq hax eA eO q P
+
 /--
 **Entropy reduction from interaction collapse.**
 
