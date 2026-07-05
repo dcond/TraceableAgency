@@ -1,3 +1,31 @@
+# Tier C cocycle — ALL BRICKS LANDED, only final assembly remains (2026-07-05)
+
+Committed green (8622), axioms clean. Reusable bricks for the defect cocycle now ALL in source:
+- actionPushforward_pure_comp (deterministic pushforward composition)
+- canonInclKernel_comp (Fin.castLE inclusions compose)
+- canonBoundary_nest (cB n ℓ = pushforward (cB m ℓ) via m↪n)
+- nestSupportMap + supportInclude_nest (ℓ-face support includes through m-face)
+- cardDefect_transport (η(mV(u_n)∘push_{cB n m}) = cardDefect n m · η(mV((cB n m)|supp)))
+- (earlier) canonBoundary_face_uniform/_scale_eq_one, boundaryCoeff_qIndep/_relabel, marginalValue_relabel
+
+**Cocycle assembly (100-150 lines, the ONLY remaining step for support_scale):**
+`cardDefect n m · cardDefect m ℓ = cardDefect n ℓ` (2≤ℓ<m<n). Proof:
+1. A1 nonzero tangent η on supp(cB n ℓ)≃canonType ℓ (nondeg ℓ≥2).
+2. cardDefect_transport at (n,ℓ): η(mV(u_n)∘push_{cB n ℓ}) = cardDefect n ℓ · η(mV((cB n ℓ)|supp)).
+3. supportInclude_nest: push_{cB n ℓ} d = push_{cB n m}(pushforward d (pure∘nestSupportMap)).
+   So LHS = η'(mV(u_n)∘push_{cB n m}) with η' = nest-pushed η.
+4. cardDefect_transport at (n,m) with η': = cardDefect n m · η'(mV((cB n m)|supp)).
+5. Bridge: η'(mV((cB n m)|supp)) = cardDefect m ℓ · η(mV((cB n ℓ)|supp)), via
+   (cB n m)|supp = uniform-on-supp [canonBoundary_face_uniform], relabel supp(cB n m)≃canonType m,
+   boundaryCoeff_relabel + cardDefect_transport at (m,ℓ). [THE delicate 50 lines]
+6. Combine 2,4,5; cancel η(mV((cB n ℓ)|supp))≠0 (A1). ⟹ cocycle.
+
+Then MECHANICAL: t_n := cardDefect n 2 (t_2:=1, need cardDefect 2 2... handle base); gauge
+q:=t_{card A}/scale q (positive; relabel-inv via R1+card); hrel (=t_{card A}); hsupport (=cocycle
++ q-indep + relabel); assemble coherentFaceScales; exported theorem dropping support_scale.
+
+---
+
 # Tier C in progress — support_scale via t_n cocycle (2026-07-05)
 
 Confirmed AGAIN: support_scale (raw eq:facescale) genuinely needs the t_n cardinal-gauge cocycle
