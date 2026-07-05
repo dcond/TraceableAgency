@@ -4849,6 +4849,115 @@ theorem product_scale_governing_right
       rw [hb0, zero_mul, zero_mul]]
   rw [← Finset.sum_mul, r.sum_eq_one, one_mul]
 
+
+/-- **Cleared product-scale identity (left), QA-free.**  Clearing the `scale(q⊗r)`
+denominator in `product_scale_governing_left`:
+`V(q⊗r, id) = V(q⊗r, firstReveal) + scale(q⊗r)·V(r, id)`. -/
+theorem product_scale_cleared_left
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hAnd : ∃ x y : A, x ≠ y) :
+    let hcnr := BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+        (experimentOfChannel (Channel.idChannel : Channel (A × B) (A × B))) =
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+          (experimentOfChannel (productFirstRevealChannel (A := A) (B := B))) +
+        hcnr.scale_factorization.scale (prodDist q r) *
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V r
+            (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+  intro hcnr
+  have hgov := product_scale_governing_left hhm hbranchConv hax hcov q r hq hr hAnd
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hVdef
+  set s := hcnr.scale_factorization.scale (prodDist q r) with hsdef
+  have hspos : 0 < s := faithful_scale_pos hhm hbranchConv hax (prodDist q r)
+  have hsne : s ≠ 0 := ne_of_gt hspos
+  -- branchNormalizedValue hcnr.chain (q⊗r) E = V(q⊗r,E)/s
+  -- hgov : V(id)/s = V(firstReveal)/s + V(r,id)  (branchNormalizedValue = V/s definitionally)
+  have hgov' : hV.V (prodDist q r) (experimentOfChannel (Channel.idChannel : Channel (A × B) (A × B))) / s =
+      hV.V (prodDist q r) (experimentOfChannel (productFirstRevealChannel (A := A) (B := B))) / s +
+        hV.V r (experimentOfChannel (Channel.idChannel : Channel B B)) := hgov
+  have hkey := hgov'
+  field_simp at hkey
+  -- hkey : V(id) = V(firstReveal) + V(r,id)·s   (some arrangement)
+  linarith [hkey]
+
+
+
+/-- **Cleared product-scale identity (right), QA-free.** -/
+theorem product_scale_cleared_right
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hBnd : ∃ x y : B, x ≠ y) :
+    let hcnr := BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+        (experimentOfChannel (productSecondRevealChannel (A := A) (B := B) ▷
+          (fun _ => productFirstRevealChannel (A := A) (B := B)))) =
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+          (experimentOfChannel (productSecondRevealChannel (A := A) (B := B))) +
+        hcnr.scale_factorization.scale (prodDist q r) *
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q
+            (experimentOfChannel (Channel.idChannel : Channel A A)) := by
+  intro hcnr
+  have hgov := product_scale_governing_right hhm hbranchConv hax hcov q r hq hr hBnd
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hVdef
+  set s := hcnr.scale_factorization.scale (prodDist q r) with hsdef
+  have hspos : 0 < s := faithful_scale_pos hhm hbranchConv hax (prodDist q r)
+  have hsne : s ≠ 0 := ne_of_gt hspos
+  have hgov' : hV.V (prodDist q r)
+        (experimentOfChannel (productSecondRevealChannel (A := A) (B := B) ▷
+          (fun _ => productFirstRevealChannel (A := A) (B := B)))) / s =
+      hV.V (prodDist q r) (experimentOfChannel (productSecondRevealChannel (A := A) (B := B))) / s +
+        hV.V q (experimentOfChannel (Channel.idChannel : Channel A A)) := hgov
+  have hkey := hgov'
+  field_simp at hkey
+  linarith [hkey]
+
+
+/-- **Formal obstruction (SC): the product scale is pinned by joint value data.**
+Solving the cleared left identity,
+`scale(q⊗r) = (V(q⊗r,id) − V(q⊗r,firstReveal)) / V(r,id)`  (for `V(r,id) ≠ 0`).
+
+This is the formal reason `current_product_gauge` cannot be dropped by a coherent
+single-distribution gauge: the product scale `scale(q⊗r)` is determined by the
+*joint* value `V(q⊗r,id)` (equivalently the product coefficients depend on `q⊗r`),
+which no gauge `g(q⊗r)/g(q)` factoring through single distributions can absorb.
+Normalizing it therefore requires the joint (product-quasi-additivity) data, i.e. it
+is an irreducible gauge choice, not a raw-axiom consequence. -/
+theorem product_scale_pinned_by_joint_value
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hAnd : ∃ x y : A, x ≠ y)
+    (hVr : (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V r
+      (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0) :
+    let hcnr := BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    hcnr.scale_factorization.scale (prodDist q r) =
+      ((posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+          (experimentOfChannel (Channel.idChannel : Channel (A × B) (A × B))) -
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V (prodDist q r)
+          (experimentOfChannel (productFirstRevealChannel (A := A) (B := B)))) /
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V r
+          (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+  intro hcnr
+  have hcl := product_scale_cleared_left hhm hbranchConv hax hcov q r hq hr hAnd
+  -- hcl : V(id) = V(firstReveal) + s·V(r,id)
+  rw [eq_div_iff hVr]
+  linarith [hcl]
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
