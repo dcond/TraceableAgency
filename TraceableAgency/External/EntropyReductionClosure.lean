@@ -5248,6 +5248,55 @@ theorem fs_leftCoeff_relabel_right
   rw [h1, h2] at hcov
   exact mul_right_cancel₀ hVnz hcov
 
+theorem relabelChannel_id_eq {B B' : Type u} [Fintype B] [DecidableEq B] [Fintype B'] [DecidableEq B'] (e : B ≃ B') :
+    Relabeling.relabelChannel e e (Channel.idChannel : Channel B B) = (Channel.idChannel : Channel B' B') := by
+  ext b o
+  simp only [Relabeling.relabelChannel, Channel.idChannel, Relabeling.relabelDist_apply]
+  simp only [Dist.pure_apply, e.symm.injective.eq_iff]
+
+theorem fs_rightCoeff_relabel_right
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A B B' : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype B'] [DecidableEq B'] [Nonempty B']
+    (q : Dist A) (r : Dist B) (e : B ≃ B') (hq : q.FullSupport) (hr : r.FullSupport)
+    (hBnd : ¬ Subsingleton B) :
+    hpair.rightCoeff hax q (Relabeling.relabelDist e r) = hpair.rightCoeff hax q r := by
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V r
+      (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax r hr hBnd
+  have hrq : (Relabeling.relabelDist e r).FullSupport := Relabeling.relabelDist_fullSupport e r hr
+  have h1 := fs_bilinear_left_uninf hpair hax q (Relabeling.relabelDist e r) hq hrq
+    (Channel.idChannel : Channel B' B')
+  have h2 := fs_bilinear_left_uninf hpair hax q r hq hr (Channel.idChannel : Channel B B)
+  -- V(rel e r, id_B') = V(r, id_B)
+  have hVe : hfaces.branch_result.branch_agg.value_rep.V (Relabeling.relabelDist e r)
+        (experimentOfChannel (Channel.idChannel : Channel B' B')) =
+      hfaces.branch_result.branch_agg.value_rep.V r
+        (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep e e r
+      (Channel.idChannel : Channel B B)
+    rw [relabelChannel_id_eq e] at hc
+    exact hc
+  -- LHS values equal via (refl_A × e) covariance
+  have hcov : hfaces.branch_result.branch_agg.value_rep.V (prodDist q (Relabeling.relabelDist e r))
+        (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B' B'))) =
+      hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B))) := by
+    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+      ((Equiv.refl A).prodCongr e) ((Equiv.refl PUnit.{u+1}).prodCongr e)
+      (prodDist q r) (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B))
+    rw [Relabeling.relabelDist_prodCongr, Relabeling.relabelChannel_prodCongr] at hc
+    rw [show Relabeling.relabelDist (Equiv.refl A) q = q from Relabeling.relabelDist_refl q] at hc
+    rw [show Relabeling.relabelChannel (Equiv.refl A) (Equiv.refl PUnit.{u+1}) (Channel.uninformativeChannelU A)
+          = (Channel.uninformativeChannelU A) from by
+        ext a o; cases o; simp [Relabeling.relabelChannel, Channel.uninformativeChannelU]] at hc
+    rw [relabelChannel_id_eq e] at hc
+    exact hc
+  rw [h1, h2, hVe] at hcov
+  exact mul_right_cancel₀ hVnz hcov
+
 end FaceScaleProductCocycle
 
 
