@@ -5843,6 +5843,39 @@ noncomputable def productQuasiAdditivity_cobGauge
       rw [cobGaugeSF_prodComm hpair hrelV hax q' r']
       rfl
 
+theorem coordinateValueConvention_of_HM
+    (hsupp : ∀ (F' : PrefFamily.{u}) (hax : TraceAxioms F') (hV' : PosteriorValueRepresentation F')
+      {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A] [Fintype O] [DecidableEq O]
+      (r : Dist A) [Nonempty (supportSubtype r)] (P : Channel A O),
+      hV'.V r (experimentOfChannel P) =
+        hV'.V r.restrictToSupport (experimentOfChannel (Channel.restrictToSupport P r)))
+    (hcov : ∀ {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B] [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+        (eA : A ≃ B) (eO : O ≃ Y) (q : Dist A) (P : Channel A O),
+        hfaces.branch_result.branch_agg.value_rep.V (Relabeling.relabelDist eA q)
+            (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+          hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P)) :
+    FiniteCoordinateSupportFaceValueConventionFor hfaces where
+  first_coordinate_face_value := by
+    intro hax A B _ _ _ _ _ _ q r hq hr hA hB a
+    have ha : 0 < q a := hq a
+    rw [posterior_productFirstRevealChannel_prodDist_of_pos q r a ha]
+    -- V(pure a ⊗ r, secondReveal) = V(r, id) = fullRev r
+    rw [show fullRevelationValueForFaceScales hfaces r =
+      hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel (Channel.idChannel : Channel B B))
+      from rfl]
+    exact first_coordinate_face_value_of_HM
+      (hV := hfaces.branch_result.branch_agg.value_rep) hsupp hcov hax a r
+  second_coordinate_face_value := by
+    intro hax A B _ _ _ _ _ _ q r hq hr hA hB b
+    have hb : 0 < r b := hr b
+    rw [posterior_productSecondRevealChannel_prodDist_of_pos q r b hb]
+    rw [show fullRevelationValueForFaceScales hfaces q =
+      hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A))
+      from rfl]
+    exact second_coordinate_face_value_of_HM
+      (hV := hfaces.branch_result.branch_agg.value_rep) hsupp hcov hax q b
+
 end FaceScaleProductCocycle
 
 
