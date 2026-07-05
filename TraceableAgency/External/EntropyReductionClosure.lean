@@ -685,6 +685,75 @@ theorem actionPushforward_supportIncludeKernel_apply
       exact hqa (hca ▸ c.2)
     rw [Dist.pure_apply_ne c.1 a (fun h => hne h.symm), mul_zero]
 
+/-- **Inclusion pushforward of a signed posterior law.**
+
+A signed law on the support face `supportSubtype r` is pushed to the ambient
+action type `A` by precomposing test functions with the support inclusion.  This
+is the tangent-space map `i_ι` in the paper's face-scale argument. -/
+noncomputable def pushSignedIncl {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (η : PosteriorLawSigned (supportSubtype r)) : PosteriorLawSigned A :=
+  fun φ => η (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r)))
+
+/-- The inclusion pushforward preserves the atomic-linear witness: push each
+atom's point along the support inclusion. -/
+noncomputable def atomicLinear_pushSignedIncl {A : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    {η : PosteriorLawSigned (supportSubtype r)}
+    (hη : PosteriorLawSigned.AtomicLinear η) :
+    PosteriorLawSigned.AtomicLinear (pushSignedIncl r η) where
+  witness := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    exact {
+      I := hη.witness.I
+      instFintypeI := inferInstance
+      instDecidableEqI := inferInstance
+      weight := hη.witness.weight
+      point := fun i => Channel.actionPushforward (hη.witness.point i) (supportIncludeKernel r)
+    }
+  eval_eq := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    funext φ
+    show (∑ i : hη.witness.I, hη.witness.weight i *
+        φ (Channel.actionPushforward (hη.witness.point i) (supportIncludeKernel r))) =
+      η (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r)))
+    have h := congrFun hη.eval_eq
+      (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r)))
+    rw [AtomicPosteriorSignedLaw.eval_apply] at h
+    exact h
+
+/-- The inclusion pushforward preserves tangency (zero mass, zero barycentre). -/
+theorem pushSignedIncl_tangent {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    {η : PosteriorLawSigned (supportSubtype r)}
+    (hη : PosteriorLawSigned.AtomicLinear η)
+    (htan : PosteriorLawTangent η) :
+    PosteriorLawTangent (pushSignedIncl r η) := by
+  refine ⟨?_, ?_⟩
+  · show η (fun _ => (1:ℝ)) = 0
+    exact htan.1
+  · intro a
+    show η (fun d => (Channel.actionPushforward d (supportIncludeKernel r)) a) = 0
+    by_cases ha : r a > 0
+    · have heq :
+          (fun d : Dist (supportSubtype r) =>
+            (Channel.actionPushforward d (supportIncludeKernel r)) a) =
+          (fun d : Dist (supportSubtype r) => d ⟨a, ha⟩) := by
+        funext d; rw [actionPushforward_supportIncludeKernel_apply, dif_pos ha]
+      rw [heq]; exact htan.2 ⟨a, ha⟩
+    · have heq :
+          (fun d : Dist (supportSubtype r) =>
+            (Channel.actionPushforward d (supportIncludeKernel r)) a) =
+          (fun _ => (0:ℝ)) := by
+        funext d; rw [actionPushforward_supportIncludeKernel_apply, dif_neg ha]
+      rw [heq]
+      have h := congrFun hη.eval_eq (fun _ => (0:ℝ))
+      rw [AtomicPosteriorSignedLaw.eval_apply] at h
+      rw [← h]; simp
+
 /-- The support of a support-included distribution is equivalent to the
 distribution's intrinsic positive support. -/
 noncomputable def supportIncludePushforwardSupportEquiv
