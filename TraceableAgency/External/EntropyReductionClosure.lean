@@ -2218,6 +2218,118 @@ theorem push_relabel_comm {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A
   · have hesymm : ¬ r (e.symm b) > 0 := by rw [← Relabeling.relabelDist_apply e r b]; exact hb
     rw [dif_neg hb, dif_neg hesymm]
 
+
+/-! ### Relabel-invariance of the boundary embedding coefficient (R1 for the face). -/
+
+noncomputable def relabelTangent {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (e : A ≃ B) (r : Dist A)
+    [Nonempty (supportSubtype r)] [Nonempty (supportSubtype (Relabeling.relabelDist e r))]
+    (η : PosteriorLawSigned (supportSubtype r)) :
+    PosteriorLawSigned (supportSubtype (Relabeling.relabelDist e r)) :=
+  fun ψ => η (fun d => ψ (Relabeling.relabelDist (relabelSupportEquiv e r).symm d))
+
+theorem boundaryCoeff_relabel_of_FinalHM
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (e : A ≃ B) (q r : Dist A)
+    (hq : q.FullSupport)
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport) :
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff (Relabeling.relabelDist e q) (Relabeling.relabelDist e r) =
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff q r := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaith_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hint_def
+  set hb := branchBoundaryFaceScale_of_faithfulAssumptions hfaith with hbdef
+  have hrqn : (Relabeling.relabelDist e q).FullSupport := Relabeling.relabelDist_fullSupport e q hq
+  have hrbn : ¬ (Relabeling.relabelDist e r).FullSupport := by
+    intro hfs; apply hrb; intro a
+    have := hfs (e a); rwa [Relabeling.relabelDist_apply, Equiv.symm_apply_apply] at this
+  have hrnn : ∃ b : B, 0 < (Relabeling.relabelDist e r) b := by
+    obtain ⟨a, ha⟩ := hrn
+    exact ⟨e a, by rw [Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact ha⟩
+  have hrndn : ∃ a b : B, a ≠ b ∧ 0 < (Relabeling.relabelDist e r) a ∧ 0 < (Relabeling.relabelDist e r) b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hrnd
+    exact ⟨e a, e b, fun h => hab (e.injective h),
+      by rw [Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact ha,
+      by rw [Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact hb'⟩
+  have hrs_fs : (r.restrictToSupport).FullSupport := Dist.restrictToSupport_fullSupport r
+  have hrs_nd : ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < r.restrictToSupport a ∧ 0 < r.restrictToSupport b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hrnd
+    exact ⟨⟨a, ha⟩, ⟨b, hb'⟩, by intro h; exact hab (congrArg Subtype.val h),
+      by rw [Dist.restrictToSupport_apply]; exact ha, by rw [Dist.restrictToSupport_apply]; exact hb'⟩
+  obtain ⟨η, hηatomic, hηtan, hηnz⟩ :=
+    branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
+      r.restrictToSupport r.restrictToSupport hrs_fs hrs_fs hrs_nd
+  have hTqr := hbranchConv.marginal_value.support_face_marginalValue_scalar
+    F hax hV q r hq hrn hrnd hrb η hηtan
+  set η' : PosteriorLawSigned (supportSubtype (Relabeling.relabelDist e r)) := relabelTangent e r η with hη'def
+  have hη'tan : PosteriorLawTangent η' := by
+    refine ⟨hηtan.1, ?_⟩
+    intro a
+    show η (fun d => (Relabeling.relabelDist (relabelSupportEquiv e r).symm d) a) = 0
+    have : (fun d : Dist (supportSubtype r) =>
+        (Relabeling.relabelDist (relabelSupportEquiv e r).symm d) a) =
+        (fun d : Dist (supportSubtype r) => d ((relabelSupportEquiv e r) a)) := by
+      funext d; rw [Relabeling.relabelDist_apply, Equiv.symm_symm]
+    rw [this]; exact hηtan.2 _
+  have hTqr' := hbranchConv.marginal_value.support_face_marginalValue_scalar
+    F hax hV (Relabeling.relabelDist e q) (Relabeling.relabelDist e r) hrqn hrnn hrndn hrbn η' hη'tan
+  have hLHS : η' (fun d' => hint.marginalValue F hV (Relabeling.relabelDist e q)
+        (Channel.actionPushforward d' (supportIncludeKernel (Relabeling.relabelDist e r)))) =
+      η (fun d => hint.marginalValue F hV q
+        (Channel.actionPushforward d (supportIncludeKernel r))) := by
+    show η (fun d => hint.marginalValue F hV (Relabeling.relabelDist e q)
+        (Channel.actionPushforward (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)
+          (supportIncludeKernel (Relabeling.relabelDist e r)))) = _
+    congr 1
+    funext d
+    have hpc := push_relabel_comm e r d
+    calc hint.marginalValue F hV (Relabeling.relabelDist e q)
+          (Channel.actionPushforward (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)
+            (supportIncludeKernel (Relabeling.relabelDist e r)))
+        = hint.marginalValue F hV (Relabeling.relabelDist e q)
+          (Relabeling.relabelDist e (Channel.actionPushforward d (supportIncludeKernel r))) :=
+            congrArg (hint.marginalValue F hV (Relabeling.relabelDist e q)) hpc
+      _ = hint.marginalValue F hV q (Channel.actionPushforward d (supportIncludeKernel r)) :=
+            hint.marginalValue_relabel F hV e q _
+  have hRHS : η' (hint.marginalValue F hV (Relabeling.relabelDist e r).restrictToSupport) =
+      η (hint.marginalValue F hV r.restrictToSupport) := by
+    show η (fun d => (hint.marginalValue F hV (Relabeling.relabelDist e r).restrictToSupport)
+        (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)) = _
+    congr 1
+    funext d
+    have hface : (Relabeling.relabelDist e r).restrictToSupport =
+        Relabeling.relabelDist (relabelSupportEquiv e r).symm r.restrictToSupport :=
+      restrictToSupport_relabelDist e r
+    have hmv := hint.marginalValue_relabel F hV (relabelSupportEquiv e r).symm r.restrictToSupport d
+    -- hmv : mV(relabel eq.symm (r|supp))(relabel eq.symm d) = mV(r|supp) d
+    rw [← hmv]
+    congr 1
+  rw [hLHS, hRHS] at hTqr'
+  have hnz : η (hint.marginalValue F hV r.restrictToSupport) ≠ 0 := hηnz
+  -- hTqr'  : bc (relabel q)(relabel r) · η(mV(r|supp)) = ... wait it equals the LHS transport = η(...)
+  -- both hTqr and hTqr' now equal η(fun d => mV q (push_r d)); so their boundaryCoeff·L are equal
+  -- hTqr' : η(fun d => mV q (push_r d)) = bc(relabel q)(relabel r)·η(mV(r|supp))
+  -- hTqr  : η(fun d => mV q (push_r d)) = bc q r·η(mV(r|supp))
+  have hcomb : (branchBoundaryFaceScale_of_faithfulAssumptions hfaith).boundaryCoeff
+        (Relabeling.relabelDist e q) (Relabeling.relabelDist e r) * η (hint.marginalValue F hV r.restrictToSupport) =
+      (branchBoundaryFaceScale_of_faithfulAssumptions hfaith).boundaryCoeff q r *
+        η (hint.marginalValue F hV r.restrictToSupport) :=
+    hTqr'.symm.trans hTqr
+  exact mul_right_cancel₀ hnz hcomb
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
