@@ -1,3 +1,25 @@
+# ✅ product_normalized ELIMINATED (2026-07-05)
+
+`MIRep_of_TraceAxioms_FinalHM_Faddeev_withCovariance` + `FinalConstructedRepresentativeConventionsCovariance`
+drop `product_normalized` (and subfields `FiniteSelectedActionbaseScalarFor` /
+`FiniteSelectedPermutationInvariancePinningFor`) entirely. `hsel` is derived from
+`hm_covariance` (HM relabel-covariance clause) + `gauge_relabel` (gauge equivariance) via
+`finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance`. Verified absent via
+`#print`/`pp.all`; axioms `[propext, Classical.choice, Quot.sound]`; build green 8622.
+
+**The `t_n` cardinal-gauge cocycle construction was NOT needed** — the gauged value functional
+`gauge q · V_HM q E` inherits relabel-invariance directly from HM covariance + gauge equivariance,
+so the `c=1` pinning was never required as a convention. (The extensive `t_n`/`canonBoundary`/
+`cardDefect` machinery built earlier remains in source as reusable, green, but is unused by the
+covariance route; it would only be needed to *also* internalize `support_scale`/`gauge`.)
+
+Remaining named conventions (retained as harmless normalizations, NOT the circular pinning):
+`gauge`/`scale_relabel`/`support_scale` (equivariance; internalizing needs the t_n route),
+`current_product_gauge`/`singleton_interaction`/`singleton_slice` (product-gauge normalizations;
+`singleton_slice` is independently dischargeable via a bounded SamePosteriorLaw lemma — not done).
+
+---
+
 # Eliminating the product/gauge conventions — progress & plan
 
 Branch: `eliminate-product-normalized-covariance`. Goal (per user): **all conventions proved or
