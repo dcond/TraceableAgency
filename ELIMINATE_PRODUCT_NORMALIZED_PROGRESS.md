@@ -26,6 +26,17 @@ boundary-elimination `marginalValue_support_face` clause.
   factorization).
 - Gateway fact `relabelDist e (Dist.uniform) = Dist.uniform` — proved (`Fintype.card_congr e`).
 
+## R1 DONE (committed, green 8612, axioms unchanged)
+
+- `abd168f` covariance clause + producer; `<hash>` marginalValue_relabel field;
+  `branchPathCoeff_relabel_of_marginalValue_relabel` (R1 core, hardest step);
+  `scaleRelabel_of_FinalHM_covariance` (raw chain-scale relabel invariance).
+- Key defeq used: `(faithful bundle).linear_part = finiteAffineLinearPartAssumptions_of_
+  integralRepresentation (posteriorIntegralRepresentation_of_FinalHMInterface hhm)` by `rfl`,
+  so R1 core applies to the bundle with no cast.
+- Correctness note confirmed in scratch: `product_normalization_pinning` is false at subsingleton A;
+  covariance → `hsel` directly (producer already in source).
+
 ## Remaining (the real work)
 
 The intermediate routes (`…withPositiveGaugePreEntropy`, `…withProductNormalizedSelected…`) all
