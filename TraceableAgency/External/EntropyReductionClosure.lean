@@ -2351,6 +2351,305 @@ theorem cardDefect_transport
   rw [hcd]
   exact htr
 
+theorem relabelDist_eq_actionPushforward {A B : Type u} [Fintype A] [DecidableEq A]
+    [Fintype B] [DecidableEq B] (e : A ≃ B) (q : Dist A) :
+    relabelDist e q = Channel.actionPushforward q (fun a => Dist.pure (e a)) := by
+  ext b
+  rw [relabelDist_apply]
+  show q (e.symm b) = ∑ a : A, q a * (Dist.pure (e a) : Dist B) b
+  rw [Finset.sum_eq_single (e.symm b)]
+  · rw [Equiv.apply_symm_apply, Dist.pure_apply_self, mul_one]
+  · intro a _ ha
+    rw [Dist.pure_apply_ne (e a) b, mul_zero]
+    intro hcontra; apply ha; rw [hcontra, Equiv.symm_apply_apply]
+  · intro h; exact absurd (Finset.mem_univ _) h
+
+theorem cBface_eq_relabel_uniform (n m : ℕ) (hmn : m ≤ n) [NeZero m] :
+    haveI : Nonempty (supportSubtype (canonBoundary.{u} n m hmn)) := supportSubtype_nonempty _
+    (canonBoundary.{u} n m hmn).restrictToSupport =
+      relabelDist (canonBoundarySupportEquiv n m hmn).symm (Dist.uniform (A := canonType.{u} m)) := by
+  haveI : Nonempty (supportSubtype (canonBoundary.{u} n m hmn)) := supportSubtype_nonempty _
+  rw [canonBoundary_face_uniform n m hmn]
+  ext a
+  rw [Dist.uniform_apply, relabelDist_apply, Dist.uniform_apply]
+  congr 1
+  rw [Fintype.card_congr (canonBoundarySupportEquiv n m hmn)]
+
+-- push d along pure∘nestMap = relabel e.symm (push (push d along pure∘equiv_nl) along canonIncl)
+theorem push_nest_eq_relabel (n m l : ℕ) (hmn : m ≤ n) (hml : l ≤ m) [NeZero l] [NeZero m]
+    (d : Dist (supportSubtype (canonBoundary.{u} n l (hml.trans hmn)))) :
+    Channel.actionPushforward d (fun a => Dist.pure (nestSupportMap n m l hmn hml a)) =
+      relabelDist (canonBoundarySupportEquiv n m hmn).symm
+        (Channel.actionPushforward
+          (Channel.actionPushforward d
+            (fun a => Dist.pure (canonBoundarySupportEquiv n l (hml.trans hmn) a)))
+          (canonInclKernel m l hml)) := by
+  rw [relabelDist_eq_actionPushforward]
+  show Channel.actionPushforward d (fun a => Dist.pure (nestSupportMap n m l hmn hml a)) =
+    Channel.actionPushforward
+      (Channel.actionPushforward
+        (Channel.actionPushforward d (fun a => Dist.pure (canonBoundarySupportEquiv n l (hml.trans hmn) a)))
+        (fun b => Dist.pure (ULift.up (Fin.castLE hml b.down))))
+      (fun c => Dist.pure ((canonBoundarySupportEquiv n m hmn).symm c))
+  rw [actionPushforward_pure_comp _ (fun a => canonBoundarySupportEquiv n l (hml.trans hmn) a)
+    (fun b => ULift.up (Fin.castLE hml b.down))]
+  rw [actionPushforward_pure_comp _ (fun a => ULift.up (Fin.castLE hml (canonBoundarySupportEquiv n l (hml.trans hmn) a).down))
+    (fun c => (canonBoundarySupportEquiv n m hmn).symm c)]
+  apply congrArg (Channel.actionPushforward d)
+  funext a
+  congr 1
+
+
+theorem canonIncl_eq_supportInclude (m l : ℕ) (hml : l ≤ m) [NeZero l] [NeZero m]
+    (x : Dist (canonType.{u} l)) :
+    haveI : Nonempty (supportSubtype (canonBoundary.{u} m l hml)) := supportSubtype_nonempty _
+    Channel.actionPushforward x (canonInclKernel m l hml) =
+      Channel.actionPushforward
+        (Channel.actionPushforward x
+          (fun b => Dist.pure ((canonBoundarySupportEquiv m l hml).symm b)))
+        (supportIncludeKernel (canonBoundary.{u} m l hml)) := by
+  haveI : Nonempty (supportSubtype (canonBoundary.{u} m l hml)) := supportSubtype_nonempty _
+  show Channel.actionPushforward x (fun b => Dist.pure (ULift.up (Fin.castLE hml b.down))) =
+    Channel.actionPushforward
+      (Channel.actionPushforward x (fun b => Dist.pure ((canonBoundarySupportEquiv m l hml).symm b)))
+      (fun a => Dist.pure (a.1 : canonType.{u} m))
+  rw [actionPushforward_pure_comp x (fun b => (canonBoundarySupportEquiv m l hml).symm b)
+    (fun a => (a.1 : canonType.{u} m))]
+  apply congrArg (Channel.actionPushforward x)
+  funext b
+  congr 1
+
+/-- **The embedding-defect cocycle.** -/
+theorem cardDefect_cocycle
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    (n m l : ℕ) [NeZero l] [NeZero m] [NeZero n]
+    (hl2 : 2 ≤ l) (hlm : l < m) (hmn : m < n) :
+    cardDefect hhm hbranchConv hax n m * cardDefect hhm hbranchConv hax m l =
+      cardDefect hhm hbranchConv hax n l := by
+  classical
+  have hle_ml : l ≤ m := le_of_lt hlm
+  have hle_mn : m ≤ n := le_of_lt hmn
+  have hle_ln : l ≤ n := hle_ml.trans hle_mn
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hVdef
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hintdef
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaithdef
+  haveI : Nonempty (supportSubtype (canonBoundary.{u} n l hle_ln)) := supportSubtype_nonempty _
+  haveI : Nonempty (supportSubtype (canonBoundary.{u} n m hle_mn)) := supportSubtype_nonempty _
+  -- A1 nonzero tangent η on supp(cB n l)
+  have hfaceNL_fs : ((canonBoundary.{u} n l hle_ln).restrictToSupport).FullSupport :=
+    Dist.restrictToSupport_fullSupport _
+  have hfaceNL_nd : ∃ a b : supportSubtype (canonBoundary.{u} n l hle_ln), a ≠ b ∧
+      0 < (canonBoundary.{u} n l hle_ln).restrictToSupport a ∧
+      0 < (canonBoundary.{u} n l hle_ln).restrictToSupport b := by
+    have hcard : Fintype.card (supportSubtype (canonBoundary.{u} n l hle_ln)) = l := by
+      rw [Fintype.card_congr (canonBoundarySupportEquiv n l hle_ln)]; simp [canonType]
+    obtain ⟨a, b, hab⟩ := Fintype.exists_pair_of_one_lt_card (by omega : 1 < Fintype.card (supportSubtype (canonBoundary.{u} n l hle_ln)))
+    exact ⟨a, b, hab, hfaceNL_fs a, hfaceNL_fs b⟩
+  obtain ⟨η, hηatomic, hηtan, hηnz⟩ :=
+    branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
+      (canonBoundary.{u} n l hle_ln).restrictToSupport (canonBoundary.{u} n l hle_ln).restrictToSupport
+      hfaceNL_fs hfaceNL_fs hfaceNL_nd
+  -- hηnz : linPart faceNL η ≠ 0, i.e. η(mV faceNL) ≠ 0
+  have hηnz' : η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) ≠ 0 := hηnz
+  -- Transport at (n, l):
+  have hT_nl := cardDefect_transport hhm hbranchConv hax n l hl2 (lt_of_lt_of_le hlm hle_mn) η hηtan
+  -- The nest-pushed tangent η'' on supp(cB n m)
+  set η'' : PosteriorLawSigned (supportSubtype (canonBoundary.{u} n m hle_mn)) :=
+    (fun ψ => η (fun d => ψ (Channel.actionPushforward d
+      (fun a => Dist.pure (nestSupportMap n m l hle_mn hle_ml a))))) with hη''def
+  have hη''tan : PosteriorLawTangent η'' := by
+    refine ⟨?_, ?_⟩
+    · show η (fun d => (1:ℝ)) = 0; exact hηtan.1
+    · intro a
+      show η (fun d => (Channel.actionPushforward d
+        (fun a' => Dist.pure (nestSupportMap n m l hle_mn hle_ml a'))) a) = 0
+      by_cases hex : ∃ a'₀ : supportSubtype (canonBoundary.{u} n l hle_ln),
+          nestSupportMap n m l hle_mn hle_ml a'₀ = a
+      · obtain ⟨a'₀, ha'₀⟩ := hex
+        have hfn : (fun d : Dist (supportSubtype (canonBoundary.{u} n l hle_ln)) =>
+            (Channel.actionPushforward d
+              (fun a' => Dist.pure (nestSupportMap n m l hle_mn hle_ml a'))) a) =
+            (fun d => d a'₀) := by
+          funext d
+          show (∑ a' : supportSubtype (canonBoundary.{u} n l hle_ln),
+            d a' * (Dist.pure (nestSupportMap n m l hle_mn hle_ml a') : Dist _) a) = d a'₀
+          rw [Finset.sum_eq_single a'₀]
+          · rw [ha'₀, Dist.pure_apply_self, mul_one]
+          · intro b _ hb
+            rw [Dist.pure_apply_ne, mul_zero]
+            intro hc
+            apply hb
+            -- nestMap b = a = nestMap a'₀, and nestMap preserves .1, so b = a'₀
+            have hb1 : (nestSupportMap n m l hle_mn hle_ml b).1 = a.1 := by rw [← hc]
+            have ha1 : (nestSupportMap n m l hle_mn hle_ml a'₀).1 = a.1 := by rw [ha'₀]
+            apply Subtype.ext
+            have : (b.1 : canonType.{u} n) = a'₀.1 := by
+              have := hb1.trans ha1.symm
+              simpa [nestSupportMap] using this
+            exact this
+          · intro h; exact absurd (Finset.mem_univ _) h
+        rw [hfn]; exact hηtan.2 a'₀
+      · have hfn : (fun d : Dist (supportSubtype (canonBoundary.{u} n l hle_ln)) =>
+            (Channel.actionPushforward d
+              (fun a' => Dist.pure (nestSupportMap n m l hle_mn hle_ml a'))) a) =
+            (fun _ => (0:ℝ)) := by
+          funext d
+          show (∑ a' : supportSubtype (canonBoundary.{u} n l hle_ln),
+            d a' * (Dist.pure (nestSupportMap n m l hle_mn hle_ml a') : Dist _) a) = 0
+          apply Finset.sum_eq_zero
+          intro a' _
+          rw [Dist.pure_apply_ne, mul_zero]
+          intro hc; exact hex ⟨a', hc.symm⟩
+        rw [hfn]
+        have := hηtan.1
+        -- η(fun _ => 0) = 0: use η is atomicLinear ⟹ η 0 = 0
+        have h0 := congrFun hηatomic.eval_eq (fun _ => (0:ℝ))
+        rw [AtomicPosteriorSignedLaw.eval_apply] at h0
+        rw [← h0]; simp
+-- LHS link via supportInclude_nest: η(mV(u_n)∘push_{cB n l}) = η''(mV(u_n)∘push_{cB n m})
+  have hLHS_link :
+      η (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} n))
+            (Channel.actionPushforward d (supportIncludeKernel (canonBoundary.{u} n l hle_ln)))) =
+      η'' (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} n))
+            (Channel.actionPushforward d (supportIncludeKernel (canonBoundary.{u} n m hle_mn)))) := by
+    rw [hη''def]
+    congr 1
+    funext d
+    rw [supportInclude_nest n m l hle_mn hle_ml d]
+  have h2m : 2 ≤ m := le_of_lt (lt_of_le_of_lt hl2 hlm)
+  have hT_nm := cardDefect_transport hhm hbranchConv hax n m h2m hmn η'' hη''tan
+  -- Combine hT_nl, hLHS_link, hT_nm:
+  --   cardDefect n l · η(mV faceNL) = LHS_nl = LHS_nm(via link) = cardDefect n m · η''(mV faceNM)
+  have hchain1 : cardDefect hhm hbranchConv hax n l *
+      η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) =
+      cardDefect hhm hbranchConv hax n m *
+      η'' (hint.marginalValue F hV (canonBoundary.{u} n m hle_mn).restrictToSupport) := by
+    rw [← hT_nl, hLHS_link, hT_nm]
+  -- Bridge: η''(mV faceNM) = cardDefect m l · η(mV faceNL)
+-- Bridge: η''(mV faceNM) = cardDefect m l · η(mV faceNL)
+  have hbridge :
+      η'' (hint.marginalValue F hV (canonBoundary.{u} n m hle_mn).restrictToSupport) =
+      cardDefect hhm hbranchConv hax m l *
+      η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) := by
+    -- η''(mV faceNM) = η(fun d => mV faceNM (push d along pure∘nestMap))   [def of η'']
+    show η (fun d => hint.marginalValue F hV (canonBoundary.{u} n m hle_mn).restrictToSupport
+        (Channel.actionPushforward d
+          (fun a => Dist.pure (nestSupportMap n m l hle_mn hle_ml a)))) = _
+    -- push_nest_eq_relabel : push d along pure∘nestMap = relabel e.symm (push (e_nl·d) along canonIncl)
+    -- and faceNM = relabel e.symm u_m ; use marginalValue_relabel to convert to mV u_m (push (e_nl·d) along canonIncl)
+    have hstep : ∀ d : Dist (supportSubtype (canonBoundary.{u} n l hle_ln)),
+        hint.marginalValue F hV (canonBoundary.{u} n m hle_mn).restrictToSupport
+          (Channel.actionPushforward d
+            (fun a => Dist.pure (nestSupportMap n m l hle_mn hle_ml a))) =
+        hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward
+            (Channel.actionPushforward d
+              (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))
+            (canonInclKernel m l hle_ml)) := by
+      intro d
+      rw [push_nest_eq_relabel n m l hle_mn hle_ml d, cBface_eq_relabel_uniform n m hle_mn]
+      exact hint.marginalValue_relabel F hV (canonBoundarySupportEquiv n m hle_mn).symm
+          (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward
+            (Channel.actionPushforward d
+              (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))
+            (canonInclKernel m l hle_ml))
+    rw [show (fun d => hint.marginalValue F hV (canonBoundary.{u} n m hle_mn).restrictToSupport
+          (Channel.actionPushforward d
+            (fun a => Dist.pure (nestSupportMap n m l hle_mn hle_ml a)))) =
+        (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward
+            (Channel.actionPushforward d
+              (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))
+            (canonInclKernel m l hle_ml))) from funext hstep]
+    -- Now this is η(fun d => mV u_m (push (e_nl·d) along canonIncl)).
+    -- = (e_nl-pushed η)(fun d' => mV u_m (push d' along canonIncl)) — a transport at (m,l).
+    -- Define the pushed tangent ζ on supp(cB m l), reindexing d ↦ e_nl·d then supp.
+-- φ : supp(cB n l) ≃ supp(cB m l), the composite equiv (both faces ≃ canonType l)
+    set φ : supportSubtype (canonBoundary.{u} n l hle_ln) ≃ supportSubtype (canonBoundary.{u} m l hle_ml) :=
+      (canonBoundarySupportEquiv n l hle_ln).trans (canonBoundarySupportEquiv m l hle_ml).symm with hφdef
+    haveI : Nonempty (supportSubtype (canonBoundary.{u} m l hle_ml)) := supportSubtype_nonempty _
+    -- reindex: push (e_nl·d) along canonIncl m l = push (relabel φ d) along supportInclude(cB m l)
+    have hreindex : ∀ d : Dist (supportSubtype (canonBoundary.{u} n l hle_ln)),
+        Channel.actionPushforward
+          (Channel.actionPushforward d (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))
+          (canonInclKernel m l hle_ml) =
+        Channel.actionPushforward (relabelDist φ d)
+          (supportIncludeKernel (canonBoundary.{u} m l hle_ml)) := by
+      intro d
+      rw [canonIncl_eq_supportInclude m l hle_ml
+        (Channel.actionPushforward d (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))]
+      congr 1
+      rw [relabelDist_eq_actionPushforward]
+      rw [actionPushforward_pure_comp d (fun a => canonBoundarySupportEquiv n l hle_ln a)
+        (fun b => (canonBoundarySupportEquiv m l hle_ml).symm b)]
+      apply congrArg (Channel.actionPushforward d)
+      funext a
+      rfl
+    -- η(fun d => mV u_m (push (e_nl·d) along canonIncl)) = η(fun d => mV u_m (push (relabel φ d) along supportInclude(cB m l)))
+    rw [show (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward
+            (Channel.actionPushforward d
+              (fun a => Dist.pure (canonBoundarySupportEquiv n l hle_ln a)))
+            (canonInclKernel m l hle_ml))) =
+        (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward (relabelDist φ d)
+            (supportIncludeKernel (canonBoundary.{u} m l hle_ml)))) from
+      funext (fun d => by rw [hreindex d])]
+    -- this equals ζ(fun d' => mV u_m (push d' along supportInclude(cB m l))) with ζ = relabel-transported η
+    set ζ : PosteriorLawSigned (supportSubtype (canonBoundary.{u} m l hle_ml)) :=
+      (fun ψ => η (fun d => ψ (relabelDist φ d))) with hζdef
+    have hζtan : PosteriorLawTangent ζ := by
+      refine ⟨?_, ?_⟩
+      · show η (fun d => (1:ℝ)) = 0; exact hηtan.1
+      · intro a
+        show η (fun d => (relabelDist φ d) a) = 0
+        have : (fun d : Dist (supportSubtype (canonBoundary.{u} n l hle_ln)) => (relabelDist φ d) a) =
+            (fun d => d (φ.symm a)) := by funext d; rw [relabelDist_apply]
+        rw [this]; exact hηtan.2 _
+    -- transport at (m,l) with ζ
+    have hT_ml := cardDefect_transport hhm hbranchConv hax m l hl2 hlm ζ hζtan
+    -- LHS of hT_ml IS our expression (ζ unfolded)
+    have hLHS_eq : η (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward (relabelDist φ d)
+            (supportIncludeKernel (canonBoundary.{u} m l hle_ml)))) =
+        ζ (fun d' => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
+          (Channel.actionPushforward d' (supportIncludeKernel (canonBoundary.{u} m l hle_ml)))) := rfl
+    rw [hLHS_eq, hT_ml]
+    -- goal: cardDefect m l · ζ(mV faceML) = cardDefect m l · η(mV faceNL). Need ζ(mV faceML)=η(mV faceNL).
+    congr 1
+    -- ζ(mV faceML) = η(fun d => mV faceML (relabel φ d)) = η(mV faceNL)
+    show η (fun d => hint.marginalValue F hV (canonBoundary.{u} m l hle_ml).restrictToSupport
+        (relabelDist φ d)) = η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport)
+    congr 1
+    funext d
+    -- faceML = relabel φ faceNL ; mV(relabel φ faceNL)(relabel φ d) = mV faceNL d
+    have hfaceML_rel : (canonBoundary.{u} m l hle_ml).restrictToSupport =
+        relabelDist φ (canonBoundary.{u} n l hle_ln).restrictToSupport := by
+      rw [canonBoundary_face_uniform m l hle_ml, canonBoundary_face_uniform n l hle_ln]
+      ext a
+      rw [Dist.uniform_apply, relabelDist_apply, Dist.uniform_apply]
+      congr 1
+      rw [Fintype.card_congr (canonBoundarySupportEquiv m l hle_ml),
+        Fintype.card_congr (canonBoundarySupportEquiv n l hle_ln)]
+    rw [hfaceML_rel]
+    exact hint.marginalValue_relabel F hV φ (canonBoundary.{u} n l hle_ln).restrictToSupport d
+  -- final cancellation
+  have hfin : cardDefect hhm hbranchConv hax n l *
+      η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) =
+      (cardDefect hhm hbranchConv hax n m * cardDefect hhm hbranchConv hax m l) *
+      η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) := by
+    rw [hchain1, hbridge]; ring
+  have := mul_right_cancel₀ hηnz' (by linarith [hfin] : _ )
+  linarith [hfin, mul_right_cancel₀ hηnz'
+    (show cardDefect hhm hbranchConv hax n l *
+        η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) =
+      (cardDefect hhm hbranchConv hax n m * cardDefect hhm hbranchConv hax m l) *
+        η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) from hfin)]
+
 /-- The positive support of a relabelled prior is equivalent to the support of
 the original, via the underlying bijection. -/
 noncomputable def relabelSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A]
