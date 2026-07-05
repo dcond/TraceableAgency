@@ -4442,6 +4442,141 @@ theorem interaction_term_indep_of_coeff_subsingleton_right
   rw [V_channel_eq_zero_of_subsingleton F hfaces.branch_result.branch_agg.value_rep r hr R]
   ring
 
+
+/-- Support of `pure a ⊗ r` ≃ support of `r` (the first coordinate is pinned to `a`). -/
+def pureProdSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (a : A) (r : Dist B) :
+    supportSubtype (prodDist (Dist.pure a) r) ≃ supportSubtype r where
+  toFun x := ⟨x.1.2, by
+    rcases x with ⟨⟨a', b⟩, hab⟩
+    rw [prodDist_apply_pair] at hab
+    -- hab : pure a a' * r b > 0 ; so r b > 0
+    by_contra hb
+    have hb0 : r b = 0 := le_antisymm (le_of_not_gt hb) (r.nonneg b)
+    rw [hb0, mul_zero] at hab
+    exact lt_irrefl 0 hab⟩
+  invFun b := ⟨(a, b.1), by
+    rw [prodDist_apply_pair, Dist.pure_apply_self]; simpa using b.2⟩
+  left_inv x := by
+    rcases x with ⟨⟨a', b⟩, hab⟩
+    apply Subtype.ext
+    rw [prodDist_apply_pair] at hab
+    have ha' : a' = a := by
+      by_contra h
+      rw [Dist.pure_apply_ne _ _ h, zero_mul] at hab
+      exact lt_irrefl 0 hab
+    subst ha'; rfl
+  right_inv b := by apply Subtype.ext; rfl
+
+-- restrictToSupport of pure a ⊗ r  =  relabel (E.symm) of (r|supp)
+theorem restrict_pureProd {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (a : A) (r : Dist B) :
+    (prodDist (Dist.pure a) r).restrictToSupport =
+      Relabeling.relabelDist (pureProdSupportEquiv a r).symm r.restrictToSupport := by
+  ext x
+  rw [Dist.restrictToSupport_apply, Relabeling.relabelDist_apply, Dist.restrictToSupport_apply]
+  rcases x with ⟨⟨a', b⟩, hab⟩
+  rw [prodDist_apply_pair] at hab ⊢
+  have ha' : a' = a := by
+    by_contra h
+    rw [Dist.pure_apply_ne _ _ h, zero_mul] at hab
+    exact lt_irrefl 0 hab
+  subst ha'
+  rw [Dist.pure_apply_self, one_mul]
+  congr 1
+
+theorem restrictChannel_pureProd_secondReveal {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    (a : A) (r : Dist B) :
+    Channel.restrictToSupport (productSecondRevealChannel (A := A) (B := B)) (prodDist (Dist.pure a) r) =
+      Relabeling.relabelChannel (pureProdSupportEquiv a r).symm (Equiv.refl B)
+        (Channel.restrictToSupport (Channel.idChannel : Channel B B) r) := by
+  ext x y
+  rcases x with ⟨⟨a', b⟩, hab⟩
+  simp only [Channel.restrictToSupport, productSecondRevealChannel,
+    Relabeling.relabelChannel_apply, Equiv.symm_symm, Channel.idChannel]
+  rfl
+
+/-- **Bottom lemma (first coordinate face value), QA-free.**  Appending a degenerate
+point-mass first coordinate does not change the full-revelation value:
+`V(pure a ⊗ r, secondReveal) = V(r, id_B)`.  Proof: support-face value transport on
+both sides (support of `pure a ⊗ r` is `{a}×supp r`), bridged by relabel-covariance
+along `pureProdSupportEquiv`. -/
+theorem first_coordinate_face_value_of_HM
+    {F : PrefFamily.{u}} (hV : PosteriorValueRepresentation F)
+    (hsupp : ∀ (F' : PrefFamily.{u}) (hax : TraceAxioms F') (hV' : PosteriorValueRepresentation F')
+      {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A] [Fintype O] [DecidableEq O]
+      (r : Dist A) [Nonempty (supportSubtype r)] (P : Channel A O),
+      hV'.V r (experimentOfChannel P) =
+        hV'.V r.restrictToSupport (experimentOfChannel (Channel.restrictToSupport P r)))
+    (hcov : ∀ {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B] [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+        (eA : A ≃ B) (eO : O ≃ Y) (q : Dist A) (P : Channel A O),
+        hV.V (Relabeling.relabelDist eA q) (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+          hV.V q (experimentOfChannel P))
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (a : A) (r : Dist B) :
+    hV.V (prodDist (Dist.pure a) r) (experimentOfChannel (productSecondRevealChannel (A := A) (B := B))) =
+      hV.V r (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+  classical
+  haveI : Nonempty (supportSubtype (prodDist (Dist.pure a) r)) :=
+    ⟨(pureProdSupportEquiv a r).symm (Classical.arbitrary (supportSubtype r))⟩
+  -- LHS support-face transport
+  rw [hsupp F hax hV (prodDist (Dist.pure a) r) (productSecondRevealChannel (A := A) (B := B))]
+  -- rewrite restricted dist + channel
+  rw [restrict_pureProd a r, restrictChannel_pureProd_secondReveal a r]
+  -- covariance: V(relabel E.symm (r|supp), relabelChannel E.symm refl (id|supp)) = V(r|supp, id|supp)
+  rw [hcov (pureProdSupportEquiv a r).symm (Equiv.refl B) r.restrictToSupport
+    (Channel.restrictToSupport (Channel.idChannel : Channel B B) r)]
+  -- RHS support-face transport (backwards)
+  rw [hsupp F hax hV r (Channel.idChannel : Channel B B)]
+
+/-- **The chain scale of `pure a ⊗ r` is `1`** (it is a boundary prior — not full
+support — so `branchPathCoeff` returns its `1` default).  Together with the value
+lemma this shows the raw `scale` does NOT satisfy `scale(pure a⊗r)=scale r` (that is
+an irreducible coherent-gauge normalization, false pre-gauge). -/
+theorem scale_pure_prod_eq_one
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (a : A) (r : Dist B) (hAnd : ∃ x y : A, x ≠ y) :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (prodDist (Dist.pure a) r) = 1 := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+  -- scale = branchCoeff · uniform = branchCoeffFromTangentRepParts, uniform full support ⟹ branchPathCoeff
+  show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff (prodDist (Dist.pure a) r) (Dist.uniform (A := A × B)) = 1
+  rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+    ).branch_agg.branchCoeff (prodDist (Dist.pure a) r) (Dist.uniform (A := A × B)) =
+    branchCoeffFromTangentRepParts hpath
+      (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+      hfaith.singleton_scale (prodDist (Dist.pure a) r) (Dist.uniform (A := A × B)) from rfl]
+  simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  -- now branchPathCoeff (pure a⊗r) uniform ; pure a⊗r NOT full support ⟹ 1
+  have hnotfull : ¬ (prodDist (Dist.pure a) r).FullSupport := by
+    obtain ⟨x, y, hxy⟩ := hAnd
+    intro hfs
+    -- pure a assigns 0 to some element ≠ a
+    have : (prodDist (Dist.pure a) r) (if a = x then (y, Classical.arbitrary B) else (x, Classical.arbitrary B)) > 0 := hfs _
+    rw [prodDist_apply_pair] at this
+    by_cases hax2 : a = x
+    · simp only [if_pos hax2] at this
+      rw [Dist.pure_apply_ne _ _ (by rw [← hax2] at hxy; exact fun h => hxy h.symm), zero_mul] at this
+      exact lt_irrefl 0 this
+    · simp only [if_neg hax2] at this
+      rw [Dist.pure_apply_ne _ _ (fun h => hax2 h.symm), zero_mul] at this
+      exact lt_irrefl 0 this
+  show hpath.branchPathCoeff (prodDist (Dist.pure a) r) (Dist.uniform (A := A × B)) = 1
+  simp only [hpath, branchPathTangentScalarStructure_of_faithfulAssumptions,
+    branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning]
+  rw [dif_neg hnotfull]
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
