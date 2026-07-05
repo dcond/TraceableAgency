@@ -2186,6 +2186,38 @@ theorem restrictToSupport_relabelDist {A B : Type u} [Fintype A] [DecidableEq A]
     Relabeling.relabelDist_apply, Dist.restrictToSupport_apply]
   simp [relabelSupportEquiv]
 
+/-- The inclusion pushforward commutes with relabelling: pushing the
+relabel-transported support-face distribution into `relabel e r` equals
+relabelling the pushforward into `r`.  (The tangent-space naturality square for
+the support inclusion.) -/
+theorem push_relabel_comm {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (e : A ≃ B) (r : Dist A)
+    [Nonempty (supportSubtype r)] [Nonempty (supportSubtype (Relabeling.relabelDist e r))]
+    (d : Dist (supportSubtype r)) :
+    Channel.actionPushforward
+        (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)
+        (supportIncludeKernel (Relabeling.relabelDist e r)) =
+      Relabeling.relabelDist e (Channel.actionPushforward d (supportIncludeKernel r)) := by
+  ext b
+  have hL : (Channel.actionPushforward (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)
+      (supportIncludeKernel (Relabeling.relabelDist e r))) b =
+      if h : (Relabeling.relabelDist e r) b > 0 then
+        (Relabeling.relabelDist (relabelSupportEquiv e r).symm d) ⟨b, h⟩ else 0 :=
+    actionPushforward_supportIncludeKernel_apply (Relabeling.relabelDist e r) _ b
+  have hR : (Channel.actionPushforward d (supportIncludeKernel r)) (e.symm b) =
+      if h : r (e.symm b) > 0 then d ⟨e.symm b, h⟩ else 0 :=
+    actionPushforward_supportIncludeKernel_apply r d (e.symm b)
+  rw [show (Relabeling.relabelDist e (Channel.actionPushforward d (supportIncludeKernel r))) b =
+      (Channel.actionPushforward d (supportIncludeKernel r)) (e.symm b) from
+      Relabeling.relabelDist_apply e _ b]
+  rw [hL, hR]
+  by_cases hb : (Relabeling.relabelDist e r) b > 0
+  · have hesymm : r (e.symm b) > 0 := by rw [← Relabeling.relabelDist_apply e r b]; exact hb
+    rw [dif_pos hb, dif_pos hesymm, Relabeling.relabelDist_apply]
+    congr 1
+  · have hesymm : ¬ r (e.symm b) > 0 := by rw [← Relabeling.relabelDist_apply e r b]; exact hb
+    rw [dif_neg hb, dif_neg hesymm]
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
