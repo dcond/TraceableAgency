@@ -1,5 +1,28 @@
 # Referee Lean Certification Dossier
 
+> **UPDATE (`current_product_gauge` reduced to a transparent coherent normalization).**
+> The product-representative gauge convention `current_product_gauge`
+> (`FiniteFaceScaleProductGaugeConventionFor`, fields `current_leftCoeff_normalized`,
+> `current_rightCoeff_normalized`, i.e. `leftCoeff = rightCoeff = 1`) has been reduced from an
+> opaque assumption to the **coherent gauge choice `productLiftScale ≡ 1` of a proven-positive
+> scale**. Three new **theorems** (axioms `[propext, Classical.choice, Quot.sound]`, green):
+> (1) `productLift_value_affine_of_A5_HM` — *gauge-free*: for full-support `q,r` (`¬Subsingleton A`)
+> there is `a(q,r) > 0` with `V(q⊗r, P⊗U_B) = a·V(q,P)` for all `P`. Uses ONLY A5/A8 block-transfer
+> (ordinal same-order, no quasi-additivity), HM public-mixture affinity, A1 nonconstancy, and the
+> *in-Lean-proved* Herstein–Milnor affine-utility uniqueness
+> (`classicalFiniteAffineUtilityUniquenessAssumptions`); the intercept is `0` by zero-normalisation.
+> (2) `productLiftScale` (+ `_pos`, `_spec`) — names that canonical `a(q,r) > 0`.
+> (3) `leftCoeff_eq_productLiftScale` — the multi-pieces `leftCoeff` equals `productLiftScale`, so the
+> convention's content is exactly the normalization `productLiftScale ≡ 1`.
+> Following the coherent-normalization analysis: A5 yields the ordinal indifference, HM-uniqueness
+> yields the positive scale `a`, and (paper Step 3, `lem:coherentnorm`) the branch chain rule shows
+> `a` is a coboundary hence gauge-removable — but the terminal equality `a ≡ 1` is *irreducibly a
+> gauge choice*, not a theorem of the raw axioms (replacing `F_{q⊗r}` by `2·F_{q⊗r}` breaks it while
+> preserving preferences). So `current_product_gauge` is now certified as the coherent normalization
+> of a proven-existent positive coboundary scale, the bulletproof honest form. Removing it as a raw
+> theorem would additionally require a line-by-line audit that branch aggregation cites no
+> blockbridge-with-QA (open). The exported theorems are unchanged and still valid.
+
 > **UPDATE (`support_scale` cross-cardinality convention ELIMINATED).** The raw support-face
 > scale equation `support_scale` (`eq:facescale`, the genuine cross-cardinality embedding-defect
 > content `K(ι) = 1` that the same-cardinality countermodel does *not* refute) has been **removed**
