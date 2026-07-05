@@ -48,8 +48,33 @@ raw scale, genuinely needs the `t_n` cardinal-gauge. Landed so far (green 8612):
   (transport + full-support tangent relation on the pushed tangent + A1 cancellation). Confirms
   `t_n` is constructible non-circularly.
 
-Landed brick: `canonType n := ULift (Fin n)`; `cardScale` (t_n) := scale of uniform on canonType n;
-`scale_uniform_eq_cardScale`: scale(u_A) = cardScale(card A) via R1.
+Landed brick: `canonType n := ULift (Fin n)`; `scale_uniform_eq_cardScale`: scale(u_A) depends
+only on card A.
+
+**CORRECTION (this session):** `cardScale` (scale of uniform-self) is DEGENERATE = 1 for all n≥2
+(`scale(u_A) = branchPathCoeff(u_A)(u_A) = 1` by the full-support cocycle q=r=s=u_A). So it is NOT
+the cardinal gauge `t_n`. Verified NO gauge shortcut exists (`g := 1/scale` collapses to the false
+`boundaryCoeff q r = scale q`). The genuine `t_n = K_{n,2}` cross-cardinality embedding defect and
+the nested-inclusion cocycle ARE required — this is the paper's actual argument.
+
+**Corrected R2b build (canonBoundary via pushforward — compiles):**
+```
+canonInclKernel n m (hmn : m ≤ n) : ActionKernel (canonType m) (canonType n) :=
+  fun a => Dist.pure (ULift.up (Fin.castLE hmn a.down))
+canonBoundary n m hmn [NeZero m] : Dist (canonType n) :=
+  actionPushforward (uniform (canonType m)) (canonInclKernel n m hmn)   -- uniform on first m of n
+```
+Needed properties of canonBoundary (each a real lemma): support = image of canonType m;
+`supportSubtype (canonBoundary n m) ≃ canonType m`; its `restrictToSupport = uniform (canonType m)`;
+nondegenerate (m≥2); boundary (m<n). Then:
+- `defect n m := boundaryCoeff (u_{canonType n}) (canonBoundary n m) · scale((canonBoundary n m)|supp)`
+  (a concrete ℝ; `= boundaryCoeff · cardScale-of-face`).
+- **cardinality-well-defined**: arbitrary (q,r) with card A=n, card supp r=m reduces to
+  `defect n m` via q-indep (R2a) + defect relabel-invariance + r-indep on the face.
+- **nested cocycle** `defect n m · defect m ℓ = defect n ℓ` (canonType ℓ ⊂ canonType m ⊂ canonType n
+  via castLE composition; `pushSignedIncl` composes): the hard lemma.
+- `t_n := defect n 2` (with `defect 2 2 = 1`); `defect n m = t_n / t_m` from the cocycle.
+- gauge `q ↦ 1 / t_{card A}` (relabel-invariant since card-only); `hsupport` follows.
 
 **Precise remaining `hsupport` reduction (worked out, turn-key):**
 The cardinal gauge is `gauge q := 1 / cardScale (card A)` (prior-independent, cardinality-only,
