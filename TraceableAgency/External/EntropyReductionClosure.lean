@@ -4234,6 +4234,66 @@ theorem productLiftScale_spec
   rw [productLiftScale, dif_pos h]
   exact (Classical.choose_spec (productLift_value_affine_of_A5_HM hfaces hhm hax q r hq hr hA)).2 P
 
+
+/-- **Transparency identity: the product left-coefficient IS the proven-positive
+`productLiftScale`.**  The multi-pieces `leftCoeff` — whose normalization to `1` is
+exactly the `current_leftCoeff_normalized` field of `current_product_gauge` — equals
+`productLiftScale q r` (`> 0`).  Hence `current_product_gauge` is transparently the
+coherent gauge choice `productLiftScale ≡ 1`, a normalization of a value that A5/A8 +
+HM-uniqueness *prove* exists and is positive; it is not an opaque assumption. -/
+theorem leftCoeff_eq_productLiftScale
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    {hslice : FiniteFaceScaleProductLeftSliceAffineAssumptionsFor hfaces}
+    (hslope : FiniteFaceScaleProductSliceSlopeAssumptionsFor hslice)
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hA : ¬ Subsingleton A) :
+    hslope.leftCoeff hax q r = productLiftScale hfaces hhm hax q r := by
+  classical
+  -- leftSliceSlope(q,r,U_B) = leftCoeff (since V(r,U_B)=0)
+  have hVrU : hfaces.branch_result.branch_agg.value_rep.V r
+      (experimentOfChannel (Channel.uninformativeChannelU B)) = 0 :=
+    hfaces.branch_result.branch_agg.value_rep.zero_normalized r hr
+  have hslopeU : hslice.leftSliceSlope hax q r (Channel.uninformativeChannelU B) =
+      hslope.leftCoeff hax q r := by
+    rw [hslope.leftSliceSlope_value hax q r hq hr hA (Channel.uninformativeChannelU B), hVrU,
+      mul_zero, add_zero]
+  -- left_slice_affine at U_B and id: faceScaleProductLeftSliceValue = leftSliceSlope·V(q,·)+intercept
+  -- Use two channels with different base values: idChannel and U_A.
+  -- Step 2 spec at id and U_A
+  have hspecId := productLiftScale_spec hfaces hhm hax q r hq hr hA Channel.idChannel
+  have hspecU := productLiftScale_spec hfaces hhm hax q r hq hr hA (Channel.uninformativeChannelU A)
+  -- left_slice_affine at id and U_A (R := U_B)
+  have haffId := hslice.left_slice_affine hax q r hq hr Channel.idChannel (Channel.uninformativeChannelU B)
+  have haffU := hslice.left_slice_affine hax q r hq hr (Channel.uninformativeChannelU A) (Channel.uninformativeChannelU B)
+  -- faceScaleProductLeftSliceValue hfaces q r R P = V(q⊗r, prodChannel P R) by def
+  -- so hspec* LHS = haff* LHS. Combine.
+  set VqId := hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel Channel.idChannel) with hVqId
+  set VqU := hfaces.branch_result.branch_agg.value_rep.V q
+    (experimentOfChannel (Channel.uninformativeChannelU A)) with hVqU
+  set ic := hslice.leftSliceIntercept hax q r (Channel.uninformativeChannelU B) with hic
+  set lc := hslope.leftCoeff hax q r with hlc
+  set pls := productLiftScale hfaces hhm hax q r with hpls
+  -- rewrite haff via hslopeU: leftSliceSlope U_B = lc
+  rw [hslopeU] at haffId haffU
+  -- hspecId : faceScaleProductLeftSliceValue .. Channel.idChannel = pls * VqId
+  -- haffId  : V(q⊗r, prodChannel id U_B) = lc * VqId + ic   [LHS defeq faceScaleProductLeftSliceValue]
+  have hId : pls * VqId = lc * VqId + ic := by
+    rw [← hspecId]; exact haffId
+  have hU0 : VqU = 0 := hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq
+  have hU : pls * VqU = lc * VqU + ic := by
+    rw [← hspecU]; exact haffU
+  rw [hU0, mul_zero, mul_zero, zero_add] at hU
+  -- hU : 0 = ic ; so ic = 0
+  rw [← hU, add_zero] at hId
+  -- hId : pls * VqId = lc * VqId
+  have hVqId_ne : VqId ≠ 0 := faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hA
+  exact (mul_right_cancel₀ hVqId_ne hId).symm
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
