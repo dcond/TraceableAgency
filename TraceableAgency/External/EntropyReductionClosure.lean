@@ -4071,6 +4071,116 @@ theorem faceScaleProductSlopeAffine_of_selectedRelabeling
       linear_combination key
     exact hgoal
 
+/-- Posterior-law integral of the doubly-uninformative product experiment is the
+prior evaluation (single outcome, posterior = prior). -/
+theorem prodChannel_uninformativeU_uninformativeU_posteriorLawIntegral
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (q : Dist A) (r : Dist B)
+    (φ : Dist (A × B) → ℝ) :
+    posteriorLawIntegral (prodDist q r)
+      (prodChannel (Channel.uninformativeChannelU A) (Channel.uninformativeChannelU B)) φ =
+      φ (prodDist q r) := by
+  have hmarg : ∀ u : PUnit.{u+1} × PUnit.{u+1},
+      Channel.outcomeMarginal (prodChannel (Channel.uninformativeChannelU A)
+        (Channel.uninformativeChannelU B)) (prodDist q r) u = 1 := by
+    intro u
+    have h1 : ∀ x : A × B, (prodChannel (Channel.uninformativeChannelU A)
+        (Channel.uninformativeChannelU B) x).prob u = 1 := by
+      intro x; obtain ⟨o1, o2⟩ := u
+      simp [prodChannel_apply, Channel.uninformativeChannelU]
+    simp only [Channel.outcomeMarginal_apply, h1, mul_one]
+    exact (prodDist q r).sum_eq_one
+  have hpost : ∀ u : PUnit.{u+1} × PUnit.{u+1},
+      Channel.posterior (prodChannel (Channel.uninformativeChannelU A)
+        (Channel.uninformativeChannelU B)) (prodDist q r) u = prodDist q r := by
+    intro u
+    ext x
+    rw [Channel.posterior, dif_pos (by rw [hmarg u]; norm_num)]
+    show (prodDist q r).prob x *
+        (prodChannel (Channel.uninformativeChannelU A) (Channel.uninformativeChannelU B) x).prob u /
+        (Channel.outcomeMarginal (prodChannel (Channel.uninformativeChannelU A)
+          (Channel.uninformativeChannelU B)) (prodDist q r)).prob u = (prodDist q r).prob x
+    have h1 : (prodChannel (Channel.uninformativeChannelU A)
+        (Channel.uninformativeChannelU B) x).prob u = 1 := by
+      obtain ⟨o1, o2⟩ := u
+      simp [prodChannel_apply, Channel.uninformativeChannelU]
+    rw [h1, mul_one, hmarg u, div_one]
+  unfold posteriorLawIntegral
+  rw [Finset.sum_eq_single (PUnit.unit, PUnit.unit)]
+  · rw [hmarg, hpost]; ring
+  · intro u _ hne; exact absurd (by obtain ⟨⟨⟩,⟨⟩⟩ := u; rfl) hne
+  · intro h; exact absurd (Finset.mem_univ _) h
+
+theorem productLift_value_affine_of_A5_HM
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hA : ¬ Subsingleton A) :
+    ∃ a : ℝ, 0 < a ∧ ∀ {O : Type u} [Fintype O] [DecidableEq O] (P : Channel A O),
+      faceScaleProductLeftSliceValue hfaces q r (Channel.uninformativeChannelU B) P =
+        a * hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) := by
+  classical
+  have hcoord := faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces
+  have hbaseA := faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces
+  have hsame := (faceScaleProductLeftSliceSameOrder_of_A8 hfaces).left_slice_same_order
+  have hzeroB : hfaces.branch_result.branch_agg.value_rep.V q
+      (experimentOfChannel (Channel.uninformativeChannelU A)) = 0 :=
+    hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq
+  obtain ⟨a, b, ha_pos, haffine⟩ :=
+    classicalFiniteAffineUtilityUniquenessAssumptions.positive_affine_transform
+      (A := A)
+      (fun {O} _ _ P => hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P))
+      (fun {O} _ _ P => faceScaleProductLeftSliceValue hfaces q r (Channel.uninformativeChannelU B) P)
+      (by
+        intro O Z _ _ _ _ t ht0 ht1 P Q
+        exact hbaseA.base_value_publicMix_affine hax q hq t ht0 ht1 P Q)
+      (by
+        intro O Z _ _ _ _ t ht0 ht1 P Q
+        exact hcoord.left_slice_publicMix_affine hax q r hq hr
+          (Channel.uninformativeChannelU B) t ht0 ht1 P Q)
+      (by
+        show hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel Channel.idChannel) ≠
+          hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.uninformativeChannelU A))
+        rw [hzeroB]; exact faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hA)
+      (by
+        intro O _ _ P Q
+        exact hsame hax q r hq hr (Channel.uninformativeChannelU B) P Q)
+  -- haffine : ∀ P, target P = a * base P + b.  Pin b=0 at P = U_A.
+  refine ⟨a, ha_pos, ?_⟩
+  intro O _ _ P
+  have hb0 : b = 0 := by
+    have hU := haffine (Channel.uninformativeChannelU A)
+    -- target U_A = faceScaleProductLeftSliceValue hfaces q r U_B U_A = V(q⊗r, U_A ⊗ U_B)
+    -- base U_A = V(q, U_A) = 0
+    rw [hzeroB, mul_zero, zero_add] at hU
+    -- hU : faceScaleProductLeftSliceValue ... (U_A) = b ; and LHS = V(q⊗r, U_A⊗U_B) = 0 (zero_normalized at q⊗r? U_A⊗U_B ~ U_{A×B})
+    have hprodfs : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+    have hUAB : faceScaleProductLeftSliceValue hfaces q r
+        (Channel.uninformativeChannelU B) (Channel.uninformativeChannelU A) = 0 := by
+      show hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A)
+          (Channel.uninformativeChannelU B))) = 0
+      -- V(q⊗r, U_A⊗U_B): its posterior law equals that of U_{A×B}, so V = 0.
+      have hsame2 : SamePosteriorLawExp (prodDist q r)
+          (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A)
+            (Channel.uninformativeChannelU B)))
+          (experimentOfChannel (Channel.uninformativeChannelU (A × B))) := by
+        intro φ _hcont
+        rw [posteriorLawIntegralExp_experimentOfChannel,
+          posteriorLawIntegralExp_uninformativeChannelU_eq_prior]
+        exact prodChannel_uninformativeU_uninformativeU_posteriorLawIntegral q r φ
+      rw [hfaces.branch_result.branch_agg.value_rep.respects_same_posterior_law _ _ _ hsame2]
+      exact hfaces.branch_result.branch_agg.value_rep.zero_normalized (prodDist q r) hprodfs
+    rw [hUAB] at hU
+    exact hU.symm
+  have h := haffine (O := O) P
+  rw [hb0, add_zero] at h
+  exact h
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
