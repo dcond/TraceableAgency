@@ -3079,6 +3079,135 @@ theorem face_scalar_relation
   rw [hrel]
   rfl
 
+/-- **Within-face independence of the scaled embedding defect.**  For two boundary
+priors `ρ, σ` on the same type with the *same positive support set*, the products
+`boundaryCoeff q · scale (·|supp)` agree.  Hence `boundaryCoeff q r · scale (r|supp)`
+depends on `r` only through its support set, not its within-face values.  Proof:
+the support-face marginal-value transport pins each `boundaryCoeff` against a
+tangent; the same-support inclusion pushforward identifies the two ambient
+transports; the face scalar relation converts each intrinsic face value to a
+common uniform value scaled by `scale (·|supp)`; cancel the shared nonzero tangent
+value. -/
+theorem boundaryCoeff_scale_within_face
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {C : Type u} [Fintype C] [DecidableEq C] [Nonempty C]
+    (q ρ σ : Dist C) (hq : q.FullSupport)
+    (hsupp : ∀ c, ρ c > 0 ↔ σ c > 0)
+    (hρn : ∃ a : C, 0 < ρ a)
+    (hρnd : ∃ a b : C, a ≠ b ∧ 0 < ρ a ∧ 0 < ρ b)
+    (hρb : ¬ ρ.FullSupport) :
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff q ρ *
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale ρ.restrictToSupport =
+    (branchBoundaryFaceScale_of_faithfulAssumptions
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+    ).boundaryCoeff q σ *
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+        F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale σ.restrictToSupport := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaith_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hint_def
+  set hb := branchBoundaryFaceScale_of_faithfulAssumptions hfaith with hbdef
+  -- σ boundary data from same-support
+  have hσn : ∃ a : C, 0 < σ a := by obtain ⟨a, ha⟩ := hρn; exact ⟨a, (hsupp a).mp ha⟩
+  have hσnd : ∃ a b : C, a ≠ b ∧ 0 < σ a ∧ 0 < σ b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hρnd; exact ⟨a, b, hab, (hsupp a).mp ha, (hsupp b).mp hb'⟩
+  have hσb : ¬ σ.FullSupport := by
+    intro hfs; apply hρb; intro c; exact (hsupp c).mpr (hfs c)
+  -- face nondegeneracy
+  have hρs_nd : ∃ a b : supportSubtype ρ, a ≠ b ∧
+      0 < ρ.restrictToSupport a ∧ 0 < ρ.restrictToSupport b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hρnd
+    exact ⟨⟨a, ha⟩, ⟨b, hb'⟩, by intro h; exact hab (congrArg Subtype.val h),
+      by rw [Dist.restrictToSupport_apply]; exact ha, by rw [Dist.restrictToSupport_apply]; exact hb'⟩
+  -- tangent η on suppSub ρ nonzero on mV(ρ|supp)
+  obtain ⟨η, hηatomic, hηtan, hηnz⟩ :=
+    branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
+      ρ.restrictToSupport ρ.restrictToSupport (Dist.restrictToSupport_fullSupport ρ)
+      (Dist.restrictToSupport_fullSupport ρ) hρs_nd
+  -- transport at ρ:  η(fun d => mV q (push_ρ d)) = bc q ρ · η(mV ρ|supp)
+  have hTρ := hbranchConv.marginal_value.support_face_marginalValue_scalar
+    F hax hV q ρ hq hρn hρnd hρb η hηtan
+  -- E : suppSub ρ ≃ suppSub σ
+  set E := sameSupportEquiv ρ σ hsupp with hEdef
+  -- transported tangent η' on suppSub σ (pullback along E⁻¹? no: relabelPullback E)
+  set η' : PosteriorLawSigned (supportSubtype σ) := relabelPullback E η with hη'def
+  have hη'atomic : PosteriorLawSigned.AtomicLinear η' := atomicLinear_relabelPullback E hηatomic
+  have hη'tan : PosteriorLawTangent η' := relabelPullback_tangent E hηtan
+  -- transport at σ:  η'(fun d' => mV q (push_σ d')) = bc q σ · η'(mV σ|supp)
+  have hTσ := hbranchConv.marginal_value.support_face_marginalValue_scalar
+    F hax hV q σ hq hσn hσnd hσb η' hη'tan
+  -- LHS equality via push_sameSupport_comm:  η'(fun d' => mV q (push_σ d')) = η(fun d => mV q (push_ρ d))
+  have hLHS : η' (fun d' => hint.marginalValue F hV q
+        (Channel.actionPushforward d' (supportIncludeKernel σ))) =
+      η (fun d => hint.marginalValue F hV q
+        (Channel.actionPushforward d (supportIncludeKernel ρ))) := by
+    show η (fun d => hint.marginalValue F hV q
+        (Channel.actionPushforward (Relabeling.relabelDist E d) (supportIncludeKernel σ))) = _
+    congr 1
+    funext d
+    have := push_sameSupport_comm ρ σ hsupp d
+    rw [← this]
+  -- face scalar relation for ρ and σ
+  have hfρ := face_scalar_relation hhm hbranchConv hax ρ hρs_nd η hηatomic hηtan
+  have hσs_nd : ∃ a b : supportSubtype σ, a ≠ b ∧
+      0 < σ.restrictToSupport a ∧ 0 < σ.restrictToSupport b := by
+    obtain ⟨a, b, hab, ha, hb'⟩ := hσnd
+    exact ⟨⟨a, ha⟩, ⟨b, hb'⟩, by intro h; exact hab (congrArg Subtype.val h),
+      by rw [Dist.restrictToSupport_apply]; exact ha, by rw [Dist.restrictToSupport_apply]; exact hb'⟩
+  have hfσ := face_scalar_relation hhm hbranchConv hax σ hσs_nd η' hη'atomic hη'tan
+  -- η'(mV uniform_σ) = η(mV uniform_ρ) via marginalValue_relabel + uniform preservation
+  have huniσ : Relabeling.relabelDist E (Dist.uniform (A := supportSubtype ρ)) =
+      Dist.uniform (A := supportSubtype σ) := by
+    ext b
+    rw [Relabeling.relabelDist_apply, Dist.uniform_apply, Dist.uniform_apply, Fintype.card_congr E]
+  have huninz : η' (hint.marginalValue F hV (Dist.uniform (A := supportSubtype σ))) =
+      η (hint.marginalValue F hV (Dist.uniform (A := supportSubtype ρ))) := by
+    show η (fun d => hint.marginalValue F hV (Dist.uniform (A := supportSubtype σ))
+        (Relabeling.relabelDist E d)) = _
+    congr 1
+    funext d
+    rw [← huniσ]
+    exact hint.marginalValue_relabel F hV E (Dist.uniform (A := supportSubtype ρ)) d
+  -- assemble:  bc q ρ · η(mV ρ|supp) = η(push_ρ) = η'(push_σ) = bc q σ · η'(mV σ|supp)
+  -- align defeq: transport boundaryCoeff = hb.boundaryCoeff
+  have hTρ' : η (fun d => hint.marginalValue F hV q
+        (Channel.actionPushforward d (supportIncludeKernel ρ))) =
+      hb.boundaryCoeff q ρ * η (hint.marginalValue F hV ρ.restrictToSupport) := hTρ
+  have hTσ' : η' (fun d' => hint.marginalValue F hV q
+        (Channel.actionPushforward d' (supportIncludeKernel σ))) =
+      hb.boundaryCoeff q σ * η' (hint.marginalValue F hV σ.restrictToSupport) := hTσ
+  have hchain : hb.boundaryCoeff q ρ * η (hint.marginalValue F hV ρ.restrictToSupport) =
+      hb.boundaryCoeff q σ * η' (hint.marginalValue F hV σ.restrictToSupport) := by
+    rw [← hTρ', ← hLHS, hTσ']
+  set X := η (hint.marginalValue F hV (Dist.uniform (A := supportSubtype ρ))) with hXdef
+  set sρ := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).scale_factorization.scale ρ.restrictToSupport with hsρdef
+  set sσ := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).scale_factorization.scale σ.restrictToSupport with hsσdef
+  -- hfρ : η(mV ρ|supp) = sρ · X ; hfσ : η'(mV σ|supp) = sσ · η'(mVuni_σ) ; huninz : η'(mVuni_σ)=X
+  have hfρ' : η (hint.marginalValue F hV ρ.restrictToSupport) = sρ * X := hfρ
+  have hfσ' : η' (hint.marginalValue F hV σ.restrictToSupport) = sσ * X := by
+    rw [hfσ, huninz]
+  have hXnz : X ≠ 0 := by
+    intro hX0
+    apply hηnz
+    rw [show hfaith.linear_part.linearPart F hV ρ.restrictToSupport η =
+      η (hint.marginalValue F hV ρ.restrictToSupport) from rfl, hfρ', hX0, mul_zero]
+  have hexp : hb.boundaryCoeff q ρ * sρ * X = hb.boundaryCoeff q σ * sσ * X := by
+    rw [hfρ', hfσ'] at hchain; linarith [hchain]
+  exact mul_right_cancel₀ hXnz hexp
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
