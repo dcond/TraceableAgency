@@ -1885,11 +1885,19 @@ theorem boundaryCoeff_qIndep_of_FinalHM
 /-- Canonical `n`-element action type in `Type u` (for the cardinal gauge). -/
 abbrev canonType (n : ℕ) : Type u := ULift.{u} (Fin n)
 
-/-- **The cardinal scale `t_n`**: the faithful chain scale of the uniform prior on
-the canonical `n`-element action type.  By R1 (`scaleRelabel_of_FinalHM_covariance`)
-this is exactly the chain scale of the uniform prior on *any* `n`-element type
-(`scale_uniform_eq_cardScale` below), so it depends only on the cardinality `n`.
-Singleton/empty cardinalities are given the harmless value `1`. -/
+/-- The faithful chain scale of the uniform prior on the canonical `n`-element
+action type.  By R1 (`scaleRelabel_of_FinalHM_covariance`) it equals the chain
+scale of the uniform prior on *any* `n`-element type (`scale_uniform_eq_cardScale`
+below), so it depends only on `n`.
+
+**Caveat (not the cardinal gauge `t_n`).**  This value is in fact `1` for every
+nondegenerate `n` (`scale (u_A) = branchCoeff (u_A) (u_A) = branchPathCoeff (u_A)
+(u_A) = 1` by the full-support cocycle at `q = r = s = u_A`).  So it is a true but
+degenerate quantity and is **not** the paper's cardinal gauge `t_n = K_{n,2}`,
+which is a genuine cross-cardinality embedding defect.  The real `t_n` is defined
+from `boundaryCoeff` on a canonical boundary prior (see the R2b plan in
+`ELIMINATE_PRODUCT_NORMALIZED_PROGRESS.md`); `cardScale` is retained only as the
+`scale (u_A)`-value bookkeeping lemma. -/
 noncomputable def cardScale
     {F : PrefFamily.{u}}
     (hhm : FinalHMInterface.{u})
