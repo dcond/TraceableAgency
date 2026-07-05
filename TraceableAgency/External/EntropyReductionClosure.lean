@@ -2990,7 +2990,7 @@ noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormaliz
         (coherentFaceScales_of_FinalHM_positiveGauge
           hhm hfaith hax hgauge hrel hsupport))
     (hnorm :
-      FiniteProductNormalizedSelectedRepresentativesFor
+      FiniteSelectedPosteriorValueRelabelingFor
         (coherentFaceScales_of_FinalHM_positiveGauge
           hhm hfaith hax hgauge hrel hsupport))
     (hcurrentGauge :
@@ -3003,8 +3003,7 @@ noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormaliz
           (productInterceptPositiveLinear_of_FinalHM_positiveGauge
             hhm hfaith hax hgauge hrel hsupport hsingleSlice)
           (faceScaleProductSlopeAffine_of_selectedRelabeling
-            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-              hnorm)
+            hnorm
             (productInterceptPositiveLinear_of_FinalHM_positiveGauge
               hhm hfaith hax hgauge hrel hsupport hsingleSlice))))
     (hsingleInteraction :
@@ -3017,8 +3016,7 @@ noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormaliz
           (productInterceptPositiveLinear_of_FinalHM_positiveGauge
             hhm hfaith hax hgauge hrel hsupport hsingleSlice)
           (faceScaleProductSlopeAffine_of_selectedRelabeling
-            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-              hnorm)
+            hnorm
             (productInterceptPositiveLinear_of_FinalHM_positiveGauge
               hhm hfaith hax hgauge hrel hsupport hsingleSlice)))) :
     FiniteProductQuasiAdditivityForFaceScales
@@ -3027,16 +3025,14 @@ noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormaliz
   productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
     hhm hfaith hax hgauge hrel hsupport hsingleSlice
     (faceScaleProductSlopeAffine_of_selectedRelabeling
-      (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-        hnorm)
+      hnorm
       (productInterceptPositiveLinear_of_FinalHM_positiveGauge
         hhm hfaith hax hgauge hrel hsupport hsingleSlice))
     hcurrentGauge
     (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
       (coherentFaceScales_of_FinalHM_positiveGauge
         hhm hfaith hax hgauge hrel hsupport)
-      (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-        hnorm))
+      hnorm)
     hsingleInteraction
 
 /-- Product-normalised coherent face scales obtained by applying the selected
@@ -4921,7 +4917,7 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepres
             hhm hbranchConv)
           hax hgauge hrel hsupport))
     (hnorm :
-      FiniteProductNormalizedSelectedRepresentativesFor
+      FiniteSelectedPosteriorValueRelabelingFor
         (coherentFaceScales_of_FinalHM_positiveGauge
           hhm
           (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -4940,8 +4936,7 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepres
               hhm hbranchConv)
             hax hgauge hrel hsupport hsingleSlice)
           (faceScaleProductSlopeAffine_of_selectedRelabeling
-            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-              hnorm)
+            hnorm
             (productInterceptPositiveLinear_of_FinalHM_positiveGauge
               hhm
               (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -4960,8 +4955,7 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepres
               hhm hbranchConv)
             hax hgauge hrel hsupport hsingleSlice)
           (faceScaleProductSlopeAffine_of_selectedRelabeling
-            (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
-              hnorm)
+            hnorm
             (productInterceptPositiveLinear_of_FinalHM_positiveGauge
               hhm
               (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -5119,7 +5113,9 @@ structure FinalConstructedRepresentativeConventions
         (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
           hhm branch)
         hax gauge scale_relabel support_scale singleton_slice
-        product_normalized current_product_gauge singleton_interaction)
+        (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+          product_normalized)
+        current_product_gauge singleton_interaction)
 
 /-- Clean final route through the constructed product-normalised representative.
 
@@ -5137,7 +5133,9 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions
     MIRep F :=
   MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
     hfad hhm hconv.branch hax hconv.gauge hconv.scale_relabel
-    hconv.support_scale hconv.singleton_slice hconv.product_normalized
+    hconv.support_scale hconv.singleton_slice
+    (finiteSelectedPosteriorValueRelabeling_of_productNormalizedRepresentatives
+      hconv.product_normalized)
     hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
 
 
