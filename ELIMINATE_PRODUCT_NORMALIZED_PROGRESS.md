@@ -57,6 +57,36 @@ the cardinal gauge `t_n`. Verified NO gauge shortcut exists (`g := 1/scale` coll
 `boundaryCoeff q r = scale q`). The genuine `t_n = K_{n,2}` cross-cardinality embedding defect and
 the nested-inclusion cocycle ARE required — this is the paper's actual argument.
 
+**R2b LANDED so far (all green 8612, committed):**
+- `canonInclKernel`, `canonBoundary n m`, `canonBoundary_apply/pos/support_nonempty/nondeg/boundary`,
+  `canonBoundarySupportEquiv` (supp ≃ canonType m).
+- `scale_uniform_eq_one` (scale(u_A)=1 via cocycle), `canonBoundary_face_uniform` (face = uniform on
+  m-support), `canonBoundary_face_scale_eq_one` (face scale = 1 for m≥2).
+- `cardDefect n m := boundaryCoeff(u_n)(canonBoundary n m)` (= K_{n,m}, scale factors are 1);
+  `cardDefect_pos` (2≤m<n).
+
+**R2b REMAINING (each verified-tractable, ~4-5 lemmas each; the two hard pieces):**
+
+(A) **General reduction** `defect(q,r) = cardDefect n m` for arbitrary boundary (q,r) with
+    card A = n, card supp r = m (2≤m<n), where `defect(q,r) := boundaryCoeff q r · scale(r|supp)/scale q`:
+    - via R2a (q-indep) reduce to q = u_n (scale(u_n)=1);
+    - **defect relabel-invariance** (R1-analogue): boundaryCoeff(relabel e q)(relabel e r)=boundaryCoeff q r
+      using marginalValue_relabel + supportSubtype(relabel e r)≃supportSubtype r;
+    - **r-independence on a fixed support face** (transport at same pushed tangent +
+      branchPathCoeff(r|supp)(s|supp)); combine to reduce arbitrary r to canonBoundary n m
+      (relabel A≃canonType n carrying supp r to first-m).
+
+(B) **Cocycle** `cardDefect n m · cardDefect m ℓ = cardDefect n ℓ` (2≤ℓ<m<n) ⟹ define
+    `t_n := cardDefect n 2` (with cardDefect 2 2 handled), `cardDefect n m = t_n/t_m`:
+    - `canonInclKernel n m ∘ canonInclKernel m ℓ = canonInclKernel n ℓ` (Fin.castLE_comp);
+    - chain the marginalValue transport at (u_n, cB n m) [with an m-face tangent that is the push
+      of an ℓ-tangent] and at (u_m, cB m ℓ), bridging `u_n restricted to the m-face = u_m` (both
+      uniform on m elements, up to the support equiv — R1 relabel);
+    - the two transport scalars multiply to the (u_n, cB n ℓ) scalar; cancel a nonzero ℓ-tangent (A1).
+
+Then **R2c**: gauge `q ↦ 1 / cardDefect (card A) 2` (relabel-invariant, positive);
+`hrel` via R1; `hsupport` via (A)+(B); assemble `coherentFaceScales_of_FinalHM_positiveGauge`.
+
 **Corrected R2b build (canonBoundary via pushforward — compiles):**
 ```
 canonInclKernel n m (hmn : m ≤ n) : ActionKernel (canonType m) (canonType n) :=
