@@ -142,6 +142,14 @@ theorem finiteSelectedPosteriorValueRelabeling_of_FinalHM_covariance
       hVeq q (experimentOfChannel P)]
     exact hcov.V_relabel_eq hax eA eO q P
 
+/-- The trivial (constant `1`) positive face-scale gauge.  Choosing this gauge
+makes the gauge-equivariance conventions (`gauge_relabel`) hold by `rfl` and
+reduces the gauged `scale_relabel`/`support_scale` obligations to their raw
+(ungauged) forms. -/
+noncomputable def constGaugeOne : PositiveFaceScaleGauge.{u} where
+  gauge := fun _ => 1
+  gauge_pos := fun _ => one_pos
+
 /-- **The singleton-slice affine convention is a theorem** (for every coherent
 face-scale representative).
 
@@ -153,6 +161,7 @@ posterior-law equivalence.  Since also `V q (exp P) = 0` on a subsingleton
 (`V_channel_eq_zero_of_subsingleton`), the affine relation holds with slope `a = 1`
 and intercept the (`P`-independent) value at `U_A`.  This discharges the
 `singleton_slice` convention with no assumption. -/
+
 theorem finiteFaceScaleSingletonSliceAffine_of_faces
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) :
@@ -5374,6 +5383,284 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withCovariance
         hhm hconv.branch)
       hax hconv.gauge hconv.scale_relabel hconv.support_scale
       hconv.hm_covariance hconv.gauge_relabel)
+    hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
+
+
+/-- **Const-gauge covariance conventions: `gauge`, `scale_relabel`, and
+`gauge_relabel` are eliminated by fixing the trivial gauge `constGaugeOne`.**
+
+This bundle refines `FinalConstructedRepresentativeConventionsCovariance` by
+choosing the constant gauge `fun _ => 1`.  Then:
+* `gauge` is no longer a caller field (fixed to `constGaugeOne`);
+* `gauge_relabel` holds by `rfl` (constant gauge);
+* `scale_relabel` holds by `scaleRelabel_of_FinalHM_covariance` (R1: raw chain
+  scale relabel-invariance from the HM covariance clause).
+Only `support_scale` (the raw face-scale equation `eq:facescale`) remains as a
+scale field; it is the genuine cross-cardinality content (the `t_n` target). -/
+structure FinalConstructedRepresentativeConventionsConstGauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  branch : FinalFaithfulBranchConventions hhm
+  support_scale :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A) (_hq : q.FullSupport) (r : Dist A)
+      [Nonempty (supportSubtype r)]
+      (_hr_nonempty : ∃ a : A, 0 < r a)
+      (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+      (_hr_boundary : ¬ r.FullSupport),
+      (constGaugeOne.gauge q / constGaugeOne.gauge r) *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).branch_agg.branchCoeff q r =
+        (constGaugeOne.gauge q *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm branch)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale q) /
+          (constGaugeOne.gauge r.restrictToSupport *
+            (BranchAggregationCocycleNormalizedChainRule_of_faithful
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+                hhm branch)
+              F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+            ).scale_factorization.scale r.restrictToSupport)
+  hm_covariance : FinalHMRelabelCovariance hhm
+  current_product_gauge :
+    FiniteFaceScaleProductGaugeConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale hm_covariance
+            (fun {A B} _ _ _ _ _ _ _ _ => rfl))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))))
+  singleton_interaction :
+    FiniteFaceScaleSingletonInteractionConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale hm_covariance
+            (fun {A B} _ _ _ _ _ _ _ _ => rfl))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)))))
+  harmless :
+    FinalHarmlessConventions
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale)
+      (productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale))
+        (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax constGaugeOne
+        (fun {A B} _ _ _ _ _ _ e q hq => by
+          show (1:ℝ) * _ = (1:ℝ) * _
+          rw [one_mul, one_mul]
+          exact scaleRelabel_of_FinalHM_covariance hhm branch hax e q hq)
+        support_scale hm_covariance
+            (fun {A B} _ _ _ _ _ _ _ _ => rfl))
+        current_product_gauge singleton_interaction)
+
+/-- **Exported MI route with `product_normalized` eliminated.**
+
+Identical to `MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions` except that
+the exact-relabelling *pinning* convention `product_normalized`
+(`FiniteProductNormalizedSelectedRepresentativesFor`) is gone: the selected
+relabelling package is derived from the HM relabel-covariance clause and gauge
+equivariance carried by `FinalConstructedRepresentativeConventionsConstGauge`.
+`#print` confirms `FiniteProductNormalizedSelectedRepresentativesFor` is absent
+from the convention structure this theorem depends on. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConstGauge
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hconv : FinalConstructedRepresentativeConventionsConstGauge hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
+    hfad hhm hconv.branch hax constGaugeOne
+    (fun {A B} _ _ _ _ _ _ e q hq => by
+      show (1:ℝ) * _ = (1:ℝ) * _
+      rw [one_mul, one_mul]
+      exact scaleRelabel_of_FinalHM_covariance hhm hconv.branch hax e q hq)
+    hconv.support_scale
+    (finiteFaceScaleSingletonSliceAffine_of_faces
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm hconv.branch)
+        hax constGaugeOne
+      (fun {A B} _ _ _ _ _ _ e q hq => by
+        show (1:ℝ) * _ = (1:ℝ) * _
+        rw [one_mul, one_mul]
+        exact scaleRelabel_of_FinalHM_covariance hhm hconv.branch hax e q hq)
+      hconv.support_scale))
+    (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+      hhm
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+        hhm hconv.branch)
+      hax constGaugeOne
+      (fun {A B} _ _ _ _ _ _ e q hq => by
+        show (1:ℝ) * _ = (1:ℝ) * _
+        rw [one_mul, one_mul]
+        exact scaleRelabel_of_FinalHM_covariance hhm hconv.branch hax e q hq)
+      hconv.support_scale
+      hconv.hm_covariance (fun {A B} _ _ _ _ _ _ _ _ => rfl))
     hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
 
 
