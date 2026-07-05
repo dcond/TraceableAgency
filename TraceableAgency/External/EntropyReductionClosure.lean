@@ -4958,6 +4958,188 @@ theorem product_scale_pinned_by_joint_value
   rw [eq_div_iff hVr]
   linarith [hcl]
 
+section FaceScaleProductCocycle
+variable {F : PrefFamily.{u}} {hfaces : CoherentRelabelingFaceScalesStructure F}
+
+theorem fs_bilinear_right_uninf
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A B O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport) (P : Channel A O) :
+    hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel P (Channel.uninformativeChannelU B))) =
+      hpair.leftCoeff hax q r *
+        hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) := by
+  rw [hpair.product_pair_bilinear hax q r hq hr P (Channel.uninformativeChannelU B)]
+  rw [hfaces.branch_result.branch_agg.value_rep.zero_normalized r hr]; ring
+
+theorem fs_bilinear_left_uninf
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A B Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport) (R : Channel B Y) :
+    hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+        (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) R)) =
+      hpair.rightCoeff hax q r *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel R) := by
+  rw [hpair.product_pair_bilinear hax q r hq hr (Channel.uninformativeChannelU A) R]
+  rw [hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq]; ring
+
+theorem fs_coeff_assoc_A
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A B C : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    (q : Dist A) (r : Dist B) (s : Dist C)
+    (hq : q.FullSupport) (hr : r.FullSupport) (hs : s.FullSupport)
+    (hAnd : ¬ Subsingleton A) :
+    hpair.leftCoeff hax (prodDist q r) s * hpair.leftCoeff hax q r =
+      hpair.leftCoeff hax q (prodDist r s) := by
+  have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V q
+      (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hAnd
+  have hli := fs_bilinear_right_uninf hpair hax q r hq hr (Channel.idChannel : Channel A A)
+  have hrz : hfaces.branch_result.branch_agg.value_rep.V (prodDist r s)
+      (experimentOfChannel (prodChannel (Channel.uninformativeChannelU B)
+        (Channel.uninformativeChannelU C))) = 0 :=
+    V_prod_uninformative_uninformative_eq_zero F hfaces.branch_result.branch_agg.value_rep r s hr hs
+  have hval := htriple.triple_value_assoc hax q r s hq hr hs
+    (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B)
+    (Channel.uninformativeChannelU C)
+  rw [hpair.product_pair_bilinear hax (prodDist q r) s hqr hs
+      (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B))
+      (Channel.uninformativeChannelU C)] at hval
+  rw [hpair.product_pair_bilinear hax q (prodDist r s) hq hrs
+      (Channel.idChannel : Channel A A)
+      (prodChannel (Channel.uninformativeChannelU B) (Channel.uninformativeChannelU C))] at hval
+  rw [hli, hfaces.branch_result.branch_agg.value_rep.zero_normalized s hs, hrz] at hval
+  have hval2 : hpair.leftCoeff hax (prodDist q r) s * hpair.leftCoeff hax q r *
+        hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A)) =
+      hpair.leftCoeff hax q (prodDist r s) *
+        hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A)) := by
+    nlinarith [hval]
+  exact mul_right_cancel₀ hVnz hval2
+
+
+theorem fs_coeff_assoc_mixed
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A B C : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    (q : Dist A) (r : Dist B) (s : Dist C)
+    (hq : q.FullSupport) (hr : r.FullSupport) (hs : s.FullSupport)
+    (hBnd : ¬ Subsingleton B) :
+    hpair.leftCoeff hax (prodDist q r) s * hpair.rightCoeff hax q r =
+      hpair.rightCoeff hax q (prodDist r s) * hpair.leftCoeff hax r s := by
+  have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V r
+      (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax r hr hBnd
+  have hli := fs_bilinear_left_uninf hpair hax q r hq hr (Channel.idChannel : Channel B B)
+  have hri := fs_bilinear_right_uninf hpair hax r s hr hs (Channel.idChannel : Channel B B)
+  have hval := htriple.triple_value_assoc hax q r s hq hr hs
+    (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B)
+    (Channel.uninformativeChannelU C)
+  rw [hpair.product_pair_bilinear hax (prodDist q r) s hqr hs
+      (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B))
+      (Channel.uninformativeChannelU C)] at hval
+  rw [hpair.product_pair_bilinear hax q (prodDist r s) hq hrs
+      (Channel.uninformativeChannelU A)
+      (prodChannel (Channel.idChannel : Channel B B) (Channel.uninformativeChannelU C))] at hval
+  rw [hli, hri, hfaces.branch_result.branch_agg.value_rep.zero_normalized s hs,
+      hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq] at hval
+  have hval2 : hpair.leftCoeff hax (prodDist q r) s * hpair.rightCoeff hax q r *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel (Channel.idChannel : Channel B B)) =
+      (hpair.rightCoeff hax q (prodDist r s) * hpair.leftCoeff hax r s) *
+        hfaces.branch_result.branch_agg.value_rep.V r (experimentOfChannel (Channel.idChannel : Channel B B)) := by
+    nlinarith [hval]
+  exact mul_right_cancel₀ hVnz hval2
+
+theorem fs_coeff_assoc_B
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A B C : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    (q : Dist A) (r : Dist B) (s : Dist C)
+    (hq : q.FullSupport) (hr : r.FullSupport) (hs : s.FullSupport)
+    (hCnd : ¬ Subsingleton C) :
+    hpair.rightCoeff hax (prodDist q r) s =
+      hpair.rightCoeff hax q (prodDist r s) * hpair.rightCoeff hax r s := by
+  have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V s
+      (experimentOfChannel (Channel.idChannel : Channel C C)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax s hs hCnd
+  have hlz : hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
+      (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A)
+        (Channel.uninformativeChannelU B))) = 0 :=
+    V_prod_uninformative_uninformative_eq_zero F hfaces.branch_result.branch_agg.value_rep q r hq hr
+  have hri := fs_bilinear_left_uninf hpair hax r s hr hs (Channel.idChannel : Channel C C)
+  have hval := htriple.triple_value_assoc hax q r s hq hr hs
+    (Channel.uninformativeChannelU A) (Channel.uninformativeChannelU B)
+    (Channel.idChannel : Channel C C)
+  rw [hpair.product_pair_bilinear hax (prodDist q r) s hqr hs
+      (prodChannel (Channel.uninformativeChannelU A) (Channel.uninformativeChannelU B))
+      (Channel.idChannel : Channel C C)] at hval
+  rw [hpair.product_pair_bilinear hax q (prodDist r s) hq hrs
+      (Channel.uninformativeChannelU A)
+      (prodChannel (Channel.uninformativeChannelU B) (Channel.idChannel : Channel C C))] at hval
+  rw [hlz, hri, hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq] at hval
+  have hval2 : hpair.rightCoeff hax (prodDist q r) s *
+        hfaces.branch_result.branch_agg.value_rep.V s (experimentOfChannel (Channel.idChannel : Channel C C)) =
+      (hpair.rightCoeff hax q (prodDist r s) * hpair.rightCoeff hax r s) *
+        hfaces.branch_result.branch_agg.value_rep.V s (experimentOfChannel (Channel.idChannel : Channel C C)) := by
+    nlinarith [hval]
+  exact mul_right_cancel₀ hVnz hval2
+
+
+/-- Face-scale swap: `A_{q,r} = B_{r,q}` (nondegenerate first coordinate). -/
+theorem fs_leftCoeff_eq_swapped_rightCoeff
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hAnd : ¬ Subsingleton A) :
+    hpair.leftCoeff hax q r = hpair.rightCoeff hax r q := by
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V q
+      (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hAnd
+  have hval := faceScaleProduct_value_swap_eq_of_value_relabeling hrelV hax hfaces
+    q r (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B)
+  rw [fs_bilinear_right_uninf hpair hax q r hq hr (Channel.idChannel : Channel A A)] at hval
+  rw [fs_bilinear_left_uninf hpair hax r q hr hq (Channel.idChannel : Channel A A)] at hval
+  exact mul_right_cancel₀ hVnz (by simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
+
+/-- Face-scale swap: `B_{q,r} = A_{r,q}` (nondegenerate second coordinate). -/
+theorem fs_rightCoeff_eq_swapped_leftCoeff
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hax : TraceAxioms F) {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hBnd : ¬ Subsingleton B) :
+    hpair.rightCoeff hax q r = hpair.leftCoeff hax r q := by
+  have hVnz : hfaces.branch_result.branch_agg.value_rep.V r
+      (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0 :=
+    faceScale_idChannel_value_ne_zero_of_A1 hfaces hax r hr hBnd
+  have hval := faceScaleProduct_value_swap_eq_of_value_relabeling hrelV hax hfaces
+    q r (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B)
+  rw [fs_bilinear_left_uninf hpair hax q r hq hr (Channel.idChannel : Channel B B)] at hval
+  rw [fs_bilinear_right_uninf hpair hax r q hr hq (Channel.idChannel : Channel B B)] at hval
+  exact mul_right_cancel₀ hVnz (by simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
+
+end FaceScaleProductCocycle
+
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
