@@ -48,15 +48,37 @@ raw scale, genuinely needs the `t_n` cardinal-gauge. Landed so far (green 8612):
   (transport + full-support tangent relation on the pushed tangent + A1 cancellation). Confirms
   `t_n` is constructible non-circularly.
 
-Remaining R2 steps:
-- **R2a'**: r-independence within a fixed support face (`boundaryCoeff q s = boundaryCoeff q r ·
-  branchPathCoeff(r|supp)(s|supp)` for r,s same support) — mirror of q-indep on the face side.
-- **R2b**: defect depends only on `(card A, card supp r)` via R1 relabel-invariance
-  (`branchPathCoeff_relabel_of_marginalValue_relabel`); defect cocycle over inclusion composition;
-  define `t : ℕ → ℝ`, `t_n := K_{n,2}`, positive, `defect n m = t_n / t_m`.
-- **R2c**: `cardinalGauge` (gauge q := t_{card A}); prove `hrel` (R1 + card-invariance) and
-  `hsupport` (`support_face_scale`, i.e. `K̃ = 1` by construction). Assemble the coherent
-  face-scale representative.
+Landed brick: `canonType n := ULift (Fin n)`; `cardScale` (t_n) := scale of uniform on canonType n;
+`scale_uniform_eq_cardScale`: scale(u_A) = cardScale(card A) via R1.
+
+**Precise remaining `hsupport` reduction (worked out, turn-key):**
+The cardinal gauge is `gauge q := 1 / cardScale (card A)` (prior-independent, cardinality-only,
+positive). With it, the positive-gauge `hsupport` obligation
+`(gauge q/gauge r)·branchCoeff q r = (gauge q·scale q)/(gauge(r|supp)·scale(r|supp))`
+simplifies (gauge q = gauge r = 1/cardScale n since q,r same type A; gauge(r|supp)=1/cardScale m,
+m=card supp r) to:
+  `boundaryCoeff q r = (scale q · cardScale m) / (scale(r|supp) · cardScale n)`, n=card A.
+By R2a (q-independence) it suffices at `q = u_A` (where scale(u_A)=cardScale n by
+`scale_uniform_eq_cardScale`), reducing to the **R2b-core**:
+  `boundaryCoeff (u_A) r · scale(r|supp) = cardScale m`   (m = card supp r).
+
+Remaining lemmas for R2b-core:
+- **defect relabel-invariance** (R1-analogue for the boundary transport): using
+  `marginalValue_relabel` + supportSubtype(relabel e r) ≃ supportSubtype r, show
+  `boundaryCoeff (relabel e q)(relabel e r) = boundaryCoeff q r` (and scale(r|supp) transports).
+  ⟹ defect depends only on support-*shape* up to relabel.
+- **r-independence** on a fixed support face B: for r,s with the same supportSubtype,
+  transport gives `boundaryCoeff q r · linearPart(r|supp)η = boundaryCoeff q s · linearPart(s|supp)η`
+  (same pushed tangent), and `linearPart(r|supp)η = branchPathCoeff(r|supp)(s|supp)·linearPart(s|supp)η`,
+  so `boundaryCoeff q r = boundaryCoeff q s · branchPathCoeff(s|supp)(r|supp)`. Combined with
+  `scale(r|supp)=branchPathCoeff... scale(s|supp)` this makes the defect r-independent.
+- **reduce to canonical**: relabel `A ≃ canonType n` and pick canonical `r` whose support-face is
+  `canonType m` with `r|supp = u_{canonType m}`; then `scale(r|supp)=cardScale m` and the defect
+  `boundaryCoeff(u_A) r · scale(r|supp)/cardScale n` evaluates; use q,r-indep + relabel to conclude
+  it equals `cardScale m/cardScale n`, giving R2b-core. (This is where the paper's `K(ι)` becomes
+  `cardScale`-ratio; the "cocycle" is absorbed into `cardScale` being a single scale value.)
+- **R2c**: assemble `cardinalGauge`, prove `hrel` (R1) + `hsupport` (above); build the coherent
+  face-scale representative `coherentFaceScales_of_FinalHM_positiveGauge hhm ... cardinalGauge`.
 - Then rewiring (below).
 
 ## Remaining (the real work)
