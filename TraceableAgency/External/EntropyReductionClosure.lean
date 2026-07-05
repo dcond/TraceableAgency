@@ -4181,6 +4181,59 @@ theorem productLift_value_affine_of_A5_HM
   rw [hb0, add_zero] at h
   exact h
 
+/-- The canonical positive product-lift scale `a(q,r)` from
+`productLift_value_affine_of_A5_HM`: the unique positive real with
+`V(q⊗r, P⊗U_B) = a · V(q,P)` for all `P` (full-support `q,r`, `¬Subsingleton A`).
+Defaults to `1` in the degenerate cases. -/
+noncomputable def productLiftScale
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) : ℝ := by
+  classical
+  exact
+    if h : q.FullSupport ∧ r.FullSupport ∧ ¬ Subsingleton A then
+      Classical.choose (productLift_value_affine_of_A5_HM hfaces hhm hax q r h.1 h.2.1 h.2.2)
+    else 1
+
+theorem productLiftScale_pos
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) :
+    0 < productLiftScale hfaces hhm hax q r := by
+  classical
+  unfold productLiftScale
+  by_cases h : q.FullSupport ∧ r.FullSupport ∧ ¬ Subsingleton A
+  · rw [dif_pos h]
+    exact (Classical.choose_spec (productLift_value_affine_of_A5_HM hfaces hhm hax q r h.1 h.2.1 h.2.2)).1
+  · rw [dif_neg h]; exact one_pos
+
+/-- Characterization: `V(q⊗r, P⊗U_B) = productLiftScale · V(q,P)`. -/
+theorem productLiftScale_spec
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hA : ¬ Subsingleton A)
+    {O : Type u} [Fintype O] [DecidableEq O] (P : Channel A O) :
+    faceScaleProductLeftSliceValue hfaces q r (Channel.uninformativeChannelU B) P =
+      productLiftScale hfaces hhm hax q r *
+        hfaces.branch_result.branch_agg.value_rep.V q (experimentOfChannel P) := by
+  classical
+  have h : q.FullSupport ∧ r.FullSupport ∧ ¬ Subsingleton A := ⟨hq, hr, hA⟩
+  rw [productLiftScale, dif_pos h]
+  exact (Classical.choose_spec (productLift_value_affine_of_A5_HM hfaces hhm hax q r hq hr hA)).2 P
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
