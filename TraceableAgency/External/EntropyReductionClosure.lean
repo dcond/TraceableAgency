@@ -1941,6 +1941,114 @@ theorem scale_uniform_eq_cardScale
   exact (scaleRelabel_of_FinalHM_covariance hhm hbranchConv hax e
     (Dist.uniform (A := A)) Dist.uniform_fullSupport).symm
 
+/-! ### Canonical boundary priors for the cardinal-gauge (`t_n`) construction
+
+`canonBoundary n m` is the uniform prior on the first `m` actions of the canonical
+`n`-element type — the paper's canonical `m`-point face inside an `n`-point action
+set.  The embedding defect `K_{n,m}` is read off from the boundary coefficient at
+`(u_n, canonBoundary n m)`; the cocycle over nested faces yields `t_n`. -/
+
+/-- Inclusion kernel `canonType m → canonType n` (m ≤ n) via `Fin.castLE`. -/
+noncomputable def canonInclKernel (n m : ℕ) (hmn : m ≤ n) :
+    Channel.ActionKernel (canonType.{u} m) (canonType.{u} n) :=
+  fun a => Dist.pure (ULift.up (Fin.castLE hmn a.down))
+
+/-- Canonical `m`-point boundary prior inside the `n`-point action set: the
+uniform prior on `canonType m` pushed forward along the inclusion. -/
+noncomputable def canonBoundary (n m : ℕ) (hmn : m ≤ n) [NeZero m] :
+    Dist (canonType.{u} n) :=
+  Channel.actionPushforward (Dist.uniform (A := canonType.{u} m)) (canonInclKernel n m hmn)
+
+theorem canonBoundary_apply (n m : ℕ) (hmn : m ≤ n) [NeZero m] (j : Fin n) :
+    (canonBoundary.{u} n m hmn) (ULift.up j) =
+      if (j : ℕ) < m then (1 : ℝ) / m else 0 := by
+  classical
+  have hcard : Fintype.card (canonType.{u} m) = m := by simp [canonType]
+  unfold canonBoundary canonInclKernel Channel.actionPushforward
+  show (∑ a : canonType.{u} m, (Dist.uniform (A := canonType.{u} m)) a *
+      (Dist.pure (ULift.up (Fin.castLE hmn a.down)) : Dist (canonType.{u} n)) (ULift.up j)) = _
+  have hterm : ∀ a : canonType.{u} m,
+      (Dist.pure (ULift.up (Fin.castLE hmn a.down)) : Dist (canonType.{u} n)) (ULift.up j) =
+        if (a.down : ℕ) = (j : ℕ) then (1:ℝ) else 0 := by
+    intro a
+    by_cases h : (a.down : ℕ) = (j : ℕ)
+    · rw [if_pos h]
+      have : (ULift.up (Fin.castLE hmn a.down) : canonType.{u} n) = ULift.up j := by
+        apply ULift.ext; apply Fin.ext; rw [Fin.val_castLE]; exact h
+      rw [this, Dist.pure_apply_self]
+    · rw [if_neg h, Dist.pure_apply_ne]
+      intro hc
+      apply h
+      have : Fin.castLE hmn a.down = j := ULift.up.inj hc.symm
+      rw [← Fin.val_castLE (h := hmn), this]
+  simp only [hterm, Dist.uniform_apply, hcard, mul_ite, mul_one, mul_zero]
+  by_cases hj : (j : ℕ) < m
+  · rw [if_pos hj]
+    rw [Finset.sum_eq_single (ULift.up (⟨(j:ℕ), hj⟩ : Fin m))]
+    · rw [if_pos rfl]
+    · intro b _ hb
+      rw [if_neg]
+      intro hc
+      apply hb
+      apply ULift.ext; apply Fin.ext; simpa using hc
+    · intro hne; exact absurd (Finset.mem_univ _) hne
+  · rw [if_neg hj]
+    apply Finset.sum_eq_zero
+    intro a _
+    rw [if_neg]
+    intro hc; exact hj (hc ▸ a.down.isLt)
+
+theorem canonBoundary_pos (n m : ℕ) (hmn : m ≤ n) [NeZero m] (j : Fin n) :
+    0 < (canonBoundary.{u} n m hmn) (ULift.up j) ↔ (j : ℕ) < m := by
+  rw [canonBoundary_apply]
+  have hm : 0 < m := Nat.pos_of_ne_zero (NeZero.ne m)
+  split
+  · rename_i h; constructor
+    · intro _; assumption
+    · intro _
+      have : (0:ℝ) < (m:ℝ) := by exact_mod_cast hm
+      positivity
+  · rename_i h; constructor
+    · intro hc; exact absurd hc (lt_irrefl 0)
+    · intro hc; exact absurd hc h
+
+theorem canonBoundary_support_nonempty (n m : ℕ) (hmn : m ≤ n) [NeZero m] (hn : 0 < n) :
+    ∃ a : canonType.{u} n, 0 < (canonBoundary.{u} n m hmn) a := by
+  have hm : 0 < m := Nat.pos_of_ne_zero (NeZero.ne m)
+  exact ⟨ULift.up ⟨0, hn⟩, (canonBoundary_pos n m hmn ⟨0, hn⟩).mpr hm⟩
+
+theorem canonBoundary_nondeg (n m : ℕ) (hmn : m ≤ n) [NeZero m] (hm2 : 2 ≤ m) :
+    ∃ a b : canonType.{u} n, a ≠ b ∧
+      0 < (canonBoundary.{u} n m hmn) a ∧ 0 < (canonBoundary.{u} n m hmn) b := by
+  have h0 : (0:ℕ) < n := lt_of_lt_of_le (by omega) hmn
+  have h1 : (1:ℕ) < n := lt_of_lt_of_le hm2 hmn
+  refine ⟨ULift.up ⟨0, h0⟩, ULift.up ⟨1, h1⟩, ?_, ?_, ?_⟩
+  · intro h
+    rw [ULift.up.injEq] at h
+    have : (0:ℕ) = 1 := Fin.val_eq_of_eq h
+    exact absurd this (by norm_num)
+  · exact (canonBoundary_pos n m hmn ⟨0, h0⟩).mpr (by show (0:ℕ) < m; omega)
+  · exact (canonBoundary_pos n m hmn ⟨1, h1⟩).mpr (by show (1:ℕ) < m; omega)
+
+theorem canonBoundary_boundary (n m : ℕ) (hmn : m ≤ n) [NeZero m] (hmlt : m < n) :
+    ¬ (canonBoundary.{u} n m hmn).FullSupport := by
+  intro hfs
+  have := hfs (ULift.up ⟨m, hmlt⟩)
+  rw [canonBoundary_apply] at this
+  simp at this
+
+/-- The positive support of `canonBoundary n m` is the canonical `m`-element type. -/
+noncomputable def canonBoundarySupportEquiv (n m : ℕ) (hmn : m ≤ n) [NeZero m] :
+    supportSubtype (canonBoundary.{u} n m hmn) ≃ canonType.{u} m where
+  toFun a := ULift.up ⟨(a.1.down : ℕ), by
+    have := (canonBoundary_pos n m hmn a.1.down).mp (by simpa using a.2)
+    simpa using this⟩
+  invFun b := ⟨ULift.up (Fin.castLE hmn b.down), by
+    show 0 < (canonBoundary n m hmn) (ULift.up (Fin.castLE hmn b.down))
+    rw [canonBoundary_pos]; simpa using b.down.isLt⟩
+  left_inv a := by apply Subtype.ext; apply ULift.ext; apply Fin.ext; simp
+  right_inv b := by apply ULift.ext; apply Fin.ext; simp
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
