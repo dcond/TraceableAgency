@@ -1658,6 +1658,87 @@ noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_conventionBund
     hconv.marginal_value hconv.boundary_scale
     hconv.singleton_scale_factorization
 
+/-- **R1: raw chain-scale relabelling invariance from the HM covariance clause.**
+
+The faithful branch chain scale is `scale q = branchCoeff q u_A` (the branch
+coefficient to the uniform prior).  Relabelling carries `u_A` to `u_B`
+(`Fintype.card_congr`), the full-support branch coefficient equals the tangent
+scalar `branchPathCoeff`, and `branchPathCoeff` is relabel-invariant
+(`branchPathCoeff_relabel_of_marginalValue_relabel`).  On a subsingleton action
+type both coefficients are the degenerate value `1`.  This discharges the raw
+form of the `scale_relabel` gauge convention (under the constant gauge). -/
+theorem scaleRelabel_of_FinalHM_covariance
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (e : A ≃ B) (q : Dist A) (hq : q.FullSupport) :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (Relabeling.relabelDist e q) =
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale q := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+    with hfaith_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+    with hpath_def
+  have hscale_eq : ∀ (C : Type u) [Fintype C] [DecidableEq C] [Nonempty C] (s : Dist C),
+      (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).scale_factorization.scale s =
+      hpath.branchPathCoeff s (Dist.uniform (A := C)) := by
+    intro C _ _ _ s
+    show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+        ).branch_agg.branchCoeff s (Dist.uniform (A := C)) = _
+    rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff s (Dist.uniform (A := C)) =
+      branchCoeffFromTangentRepParts hpath
+        (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+        hfaith.singleton_scale s (Dist.uniform (A := C)) from rfl]
+    simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  rw [hscale_eq B (Relabeling.relabelDist e q), hscale_eq A q]
+  have huni : Relabeling.relabelDist e (Dist.uniform (A := A)) = Dist.uniform (A := B) := by
+    ext b
+    rw [Relabeling.relabelDist_apply, Dist.uniform_apply, Dist.uniform_apply, Fintype.card_congr e]
+  by_cases hA : Subsingleton A
+  · have hqfsB : (Relabeling.relabelDist e q).FullSupport :=
+      Relabeling.relabelDist_fullSupport e q hq
+    have h1A : hpath.branchPathCoeff q (Dist.uniform (A := A)) = 1 := by
+      have hnn : ¬ ∃ a b : A, a ≠ b ∧ 0 < (Dist.uniform (A := A)) a ∧
+          0 < (Dist.uniform (A := A)) b := by
+        rintro ⟨a, b, hab, _, _⟩; exact hab (Subsingleton.elim a b)
+      rw [hpath_def]
+      simp only [branchPathTangentScalarStructure_of_faithfulAssumptions,
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning,
+        hq, Dist.uniform_fullSupport, dif_pos]
+      rw [dif_neg hnn]
+    have h1B : hpath.branchPathCoeff (Relabeling.relabelDist e q) (Dist.uniform (A := B)) = 1 := by
+      have hnn : ¬ ∃ a b : B, a ≠ b ∧ 0 < (Dist.uniform (A := B)) a ∧
+          0 < (Dist.uniform (A := B)) b := by
+        haveI : Subsingleton B := Equiv.subsingleton e.symm
+        rintro ⟨a, b, hab, _, _⟩; exact hab (Subsingleton.elim a b)
+      rw [hpath_def]
+      simp only [branchPathTangentScalarStructure_of_faithfulAssumptions,
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning,
+        hqfsB, Dist.uniform_fullSupport, dif_pos]
+      rw [dif_neg hnn]
+    rw [h1B, h1A]
+  · have hndU : ∃ a b : A, a ≠ b ∧ 0 < (Dist.uniform (A := A)) a ∧
+        0 < (Dist.uniform (A := A)) b := by
+      rw [not_subsingleton_iff_nontrivial] at hA
+      obtain ⟨a, b, hab⟩ := hA
+      exact ⟨a, b, hab, Dist.uniform_fullSupport a, Dist.uniform_fullSupport b⟩
+    rw [← huni]
+    exact branchPathCoeff_relabel_of_marginalValue_relabel
+      (posteriorIntegralRepresentation_of_FinalHMInterface hhm) hax hV hpath e q
+      (Dist.uniform (A := A)) hq Dist.uniform_fullSupport hndU
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
