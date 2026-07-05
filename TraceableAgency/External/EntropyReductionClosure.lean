@@ -4670,6 +4670,185 @@ theorem product_scale_governing_left
     rw [← Finset.sum_mul, q.sum_eq_one, one_mul]
   exact hsum
 
+
+/-- Support of `q ⊗ pure b` ≃ support of `q`. -/
+def prodPureSupportEquiv {A B : Type u} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (q : Dist A) (b : B) :
+    supportSubtype (prodDist q (Dist.pure b)) ≃ supportSubtype q where
+  toFun x := ⟨x.1.1, by
+    rcases x with ⟨⟨a, b'⟩, hab⟩
+    rw [prodDist_apply_pair] at hab
+    by_contra ha
+    have ha0 : q a = 0 := le_antisymm (le_of_not_gt ha) (q.nonneg a)
+    rw [ha0, zero_mul] at hab; exact lt_irrefl 0 hab⟩
+  invFun a := ⟨(a.1, b), by
+    rw [prodDist_apply_pair, Dist.pure_apply_self, mul_one]; exact a.2⟩
+  left_inv x := by
+    rcases x with ⟨⟨a, b'⟩, hab⟩
+    apply Subtype.ext
+    rw [prodDist_apply_pair] at hab
+    have hb' : b' = b := by
+      by_contra h
+      rw [Dist.pure_apply_ne _ _ h, mul_zero] at hab
+      exact lt_irrefl 0 hab
+    subst hb'; rfl
+  right_inv a := by apply Subtype.ext; rfl
+
+theorem restrict_prodPure {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (q : Dist A) (b : B) :
+    (prodDist q (Dist.pure b)).restrictToSupport =
+      Relabeling.relabelDist (prodPureSupportEquiv q b).symm q.restrictToSupport := by
+  ext x
+  rw [Dist.restrictToSupport_apply, Relabeling.relabelDist_apply, Dist.restrictToSupport_apply]
+  rcases x with ⟨⟨a, b'⟩, hab⟩
+  rw [prodDist_apply_pair] at hab ⊢
+  have hb' : b' = b := by
+    by_contra h
+    rw [Dist.pure_apply_ne _ _ h, mul_zero] at hab
+    exact lt_irrefl 0 hab
+  subst hb'
+  rw [Dist.pure_apply_self, mul_one]
+  congr 1
+
+theorem restrictChannel_prodPure_firstReveal {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (b : B) :
+    Channel.restrictToSupport (productFirstRevealChannel (A := A) (B := B)) (prodDist q (Dist.pure b)) =
+      Relabeling.relabelChannel (prodPureSupportEquiv q b).symm (Equiv.refl A)
+        (Channel.restrictToSupport (Channel.idChannel : Channel A A) q) := by
+  ext x y
+  rcases x with ⟨⟨a, b'⟩, hab⟩
+  simp only [Channel.restrictToSupport, productFirstRevealChannel,
+    Relabeling.relabelChannel_apply, Equiv.symm_symm, Channel.idChannel]
+  rfl
+
+
+theorem second_coordinate_face_value_of_HM
+    {F : PrefFamily.{u}} (hV : PosteriorValueRepresentation F)
+    (hsupp : ∀ (F' : PrefFamily.{u}) (hax : TraceAxioms F') (hV' : PosteriorValueRepresentation F')
+      {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A] [Fintype O] [DecidableEq O]
+      (r : Dist A) [Nonempty (supportSubtype r)] (P : Channel A O),
+      hV'.V r (experimentOfChannel P) =
+        hV'.V r.restrictToSupport (experimentOfChannel (Channel.restrictToSupport P r)))
+    (hcov : ∀ {A B O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        [Fintype B] [DecidableEq B] [Nonempty B] [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+        (eA : A ≃ B) (eO : O ≃ Y) (q : Dist A) (P : Channel A O),
+        hV.V (Relabeling.relabelDist eA q) (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+          hV.V q (experimentOfChannel P))
+    (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (b : B) :
+    hV.V (prodDist q (Dist.pure b)) (experimentOfChannel (productFirstRevealChannel (A := A) (B := B))) =
+      hV.V q (experimentOfChannel (Channel.idChannel : Channel A A)) := by
+  classical
+  haveI : Nonempty (supportSubtype (prodDist q (Dist.pure b))) :=
+    ⟨(prodPureSupportEquiv q b).symm (Classical.arbitrary (supportSubtype q))⟩
+  rw [hsupp F hax hV (prodDist q (Dist.pure b)) (productFirstRevealChannel (A := A) (B := B))]
+  rw [restrict_prodPure q b, restrictChannel_prodPure_firstReveal q b]
+  rw [hcov (prodPureSupportEquiv q b).symm (Equiv.refl A) q.restrictToSupport
+    (Channel.restrictToSupport (Channel.idChannel : Channel A A) q)]
+  rw [hsupp F hax hV q (Channel.idChannel : Channel A A)]
+
+
+theorem scale_prod_pure_eq_one
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (q : Dist A) (b : B) (hBnd : ∃ x y : B, x ≠ y) :
+    (BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    ).scale_factorization.scale (prodDist q (Dist.pure b)) = 1 := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax
+  set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax hV
+  show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+      ).branch_agg.branchCoeff (prodDist q (Dist.pure b)) (Dist.uniform (A := A × B)) = 1
+  rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax hV
+    ).branch_agg.branchCoeff (prodDist q (Dist.pure b)) (Dist.uniform (A := A × B)) =
+    branchCoeffFromTangentRepParts hpath
+      (branchBoundaryFaceScale_of_faithfulAssumptions hfaith)
+      hfaith.singleton_scale (prodDist q (Dist.pure b)) (Dist.uniform (A := A × B)) from rfl]
+  simp only [branchCoeffFromTangentRepParts, Dist.uniform_fullSupport, dif_pos]
+  have hnotfull : ¬ (prodDist q (Dist.pure b)).FullSupport := by
+    obtain ⟨x, y, hxy⟩ := hBnd
+    intro hfs
+    have := hfs (Classical.arbitrary A, if b = x then y else x)
+    rw [prodDist_apply_pair] at this
+    by_cases hbx : b = x
+    · simp only [if_pos hbx] at this
+      rw [Dist.pure_apply_ne _ _ (by rw [← hbx] at hxy; exact fun h => hxy h.symm), mul_zero] at this
+      exact lt_irrefl 0 this
+    · simp only [if_neg hbx] at this
+      rw [Dist.pure_apply_ne _ _ (fun h => hbx h.symm), mul_zero] at this
+      exact lt_irrefl 0 this
+  show hpath.branchPathCoeff (prodDist q (Dist.pure b)) (Dist.uniform (A := A × B)) = 1
+  simp only [hpath, branchPathTangentScalarStructure_of_faithfulAssumptions,
+    branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning]
+  rw [dif_neg hnotfull]
+
+
+theorem product_scale_governing_right
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u}) (hbranchConv : FinalFaithfulBranchConventions hhm)
+    (hax : TraceAxioms F) (hcov : FinalHMRelabelCovariance hhm)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
+    (hBnd : ∃ x y : B, x ≠ y) :
+    let hcnr := BranchAggregationCocycleNormalizedChainRule_of_faithful
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+      F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    branchNormalizedValue hcnr.chain (prodDist q r)
+        (productSecondRevealChannel (A := A) (B := B) ▷
+          (fun _ => productFirstRevealChannel (A := A) (B := B))) =
+      branchNormalizedValue hcnr.chain (prodDist q r) (productSecondRevealChannel (A := A) (B := B)) +
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax).V q
+          (experimentOfChannel (Channel.idChannel : Channel A A)) := by
+  classical
+  intro hcnr
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hVdef
+  have hprod : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
+  have hchain := hcnr.normalizedChainRule (prodDist q r) hprod
+    (productSecondRevealChannel (A := A) (B := B))
+    (fun _ => productFirstRevealChannel (A := A) (B := B))
+  rw [hchain]
+  congr 1
+  rw [outcomeMarginal_productSecondRevealChannel_prodDist]
+  have hterm : ∀ b : B, branchNormalizedValue hcnr.chain
+      (Channel.posterior (productSecondRevealChannel (A := A) (B := B)) (prodDist q r) b)
+      (productFirstRevealChannel (A := A) (B := B)) =
+      (if 0 < r b then hV.V q (experimentOfChannel (Channel.idChannel : Channel A A)) else
+        branchNormalizedValue hcnr.chain
+          (Channel.posterior (productSecondRevealChannel (A := A) (B := B)) (prodDist q r) b)
+          (productFirstRevealChannel (A := A) (B := B))) := by
+    intro b
+    by_cases hb : 0 < r b
+    · rw [if_pos hb, posterior_productSecondRevealChannel_prodDist_of_pos q r b hb]
+      show hcnr.chain.branch_agg.value_rep.V (prodDist q (Dist.pure b))
+          (experimentOfChannel (productFirstRevealChannel (A := A) (B := B))) /
+          hcnr.chain.scale (prodDist q (Dist.pure b)) = _
+      rw [show hcnr.chain.branch_agg.value_rep.V = hV.V from rfl]
+      rw [second_coordinate_face_value_of_HM (hV := hV)
+        (fun F' hax' hV' A' O' _ _ _ _ _ r' _ P' =>
+          hbranchConv.support_face.support_face_value_transport F' hax' hV' r' P')
+        (fun {A' B' O' Y'} _ _ _ _ _ _ _ _ _ _ eA eO q' P' => hcov.V_relabel_eq hax eA eO q' P')
+        hax q b]
+      rw [show hcnr.chain.scale (prodDist q (Dist.pure b)) = 1 from
+        scale_prod_pure_eq_one hhm hbranchConv hax q b hBnd, div_one]
+    · rw [if_neg hb]
+  rw [show (∑ b : B, r b * branchNormalizedValue hcnr.chain
+      (Channel.posterior (productSecondRevealChannel (A := A) (B := B)) (prodDist q r) b)
+      (productFirstRevealChannel (A := A) (B := B))) =
+      ∑ b : B, r b * hV.V q (experimentOfChannel (Channel.idChannel : Channel A A)) from by
+    apply Finset.sum_congr rfl
+    intro b _
+    by_cases hb : 0 < r b
+    · rw [hterm b, if_pos hb]
+    · have hb0 : r b = 0 := le_antisymm (le_of_not_gt hb) (r.nonneg b)
+      rw [hb0, zero_mul, zero_mul]]
+  rw [← Finset.sum_mul, r.sum_eq_one, one_mul]
+
 /-- Product quasi-additivity for a positive-gauge representative with the
 intercept positive-linearity field discharged internally. -/
 noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductData_internalIntercept
