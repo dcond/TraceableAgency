@@ -15,6 +15,20 @@
 > `[propext, Classical.choice, Quot.sound]`.
 
 
+> **UPDATE (product/gauge conventions — in progress: proved, not assumed).** A feasibility
+> probe (`PROBE_PRODUCT_NORMALIZED_FEASIBILITY.md`) established that the `product_normalized`
+> pinning (`c = 1`) is *provably independent* of the axioms + the bare HM interface (a
+> type-dependent rescaling of the value functional is a valid representative with `c ≠ 1`), yet
+> is a genuine property of the *canonical* HM functional. The paper's own `t_n` cardinal-gauge
+> construction targets a **cross-cardinality** object and does **not** discharge the
+> **same-cardinality** pinning, so that route is abandoned. Instead the pinning and the whole
+> coherent-gauge family (`gauge`/`scale_relabel`/`support_scale`, `current_product_gauge`,
+> `singleton_interaction`) are being discharged from a single **exact-relabel-covariance
+> (naturality) clause on the HM classical interface** — the same epistemic move (and template)
+> as the accepted `marginalValue_support_face` boundary-elimination clause. Any text below that
+> classifies these as `…_CHOICE`/`…_NORMALIZATION` conventions is being superseded by proved
+> theorems; this note tracks that work.
+
 **Subject:** Final Lean theorem `TraceableAgency.MIRep_of_TraceAxioms_FinalHM_Faddeev_withConventions`
 **Paper:** `empowerment_v5(1).tex`, Theorem 1 ("Mutual-information characterisation", `thm:main`, TeX lines 767–800)
 **Lean project:** `/Users/u1970555/daniele-workspace/TraceableAgency`
