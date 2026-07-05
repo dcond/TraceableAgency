@@ -974,6 +974,26 @@ structure FinitePosteriorIntegralRepresentationAssumptions.{v} where
       (d : Dist (supportSubtype q)),
       marginalValue F hV q (Channel.actionPushforward d (supportIncludeKernel q)) =
         marginalValue F hV q.restrictToSupport d
+  /-- **Exact relabelling covariance (naturality) of the marginal-value test
+      function.**
+      The Herstein--Milnor marginal-value function is natural in finite action
+      relabellings: relabelling the alphabet by a bijection `eA : A ≃ B` carries
+      the representing test function to the test function at the relabelled prior,
+      evaluated at the relabelled posterior belief.  A posterior belief is the
+      same belief whether its actions are named in `A` or in `B`, so the
+      representing test function must agree under the renaming.  This is a genuine
+      coherence property of the true HM functional (`cor:permutationinvariance`,
+      the value-level exact relabelling invariance), not a convention; it lets the
+      chain-scale relabelling invariance and the selected-representative value
+      relabelling be proved rather than assumed. -/
+  marginalValue_relabel :
+    ∀ (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F)
+      {A B : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (eA : A ≃ B) (q : Dist A) (d : Dist A),
+      marginalValue F hV (Relabeling.relabelDist eA q)
+          (Relabeling.relabelDist eA d) =
+        marginalValue F hV q d
 
 /-- Finite affine linear-part interface for posterior-law values.
 
