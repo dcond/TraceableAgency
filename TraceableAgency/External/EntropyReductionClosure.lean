@@ -5137,6 +5137,77 @@ theorem fs_rightCoeff_eq_swapped_leftCoeff
   rw [fs_bilinear_right_uninf hpair hax r q hr hq (Channel.idChannel : Channel B B)] at hval
   exact mul_right_cancel₀ hVnz (by simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
 
+/-- Coboundary gauge value: `φ(x) := ρ(q₀, x) = B(q₀,x)/A(q₀,x)` for the fixed
+2-point reference prior `q₀`. -/
+noncomputable def cobGauge
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (x : Dist A) : ℝ :=
+  hpair.rightCoeff hax faceScaleInteractionReferencePrior x /
+    hpair.leftCoeff hax faceScaleInteractionReferencePrior x
+
+theorem cobGauge_pos
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (x : Dist A) (hx : x.FullSupport) : 0 < cobGauge hpair hax x := by
+  unfold cobGauge
+  exact div_pos
+    (hpair.rightCoeff_pos hax faceScaleInteractionReferencePrior x
+      faceScaleInteractionReferencePrior_fullSupport hx)
+    (hpair.leftCoeff_pos hax faceScaleInteractionReferencePrior x
+      faceScaleInteractionReferencePrior_fullSupport hx)
+
+
+/-- **Coboundary identity.**  `A(r,s) = φ(r)/φ(r⊗s)` where `φ := cobGauge`.  This is
+the cocycle-integrability that makes the linear coefficient a coboundary; it is the
+crux of the product-gauge normalization.  Proof: apply `coeff_assoc_A` and
+`coeff_assoc_mixed` with first coordinate `= q₀` (reference), then solve. -/
+theorem cobGauge_coboundary
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
+    (hax : TraceAxioms F) {B C : Type u}
+    [Fintype B] [DecidableEq B] [Nonempty B] [Fintype C] [DecidableEq C] [Nonempty C]
+    (r : Dist B) (s : Dist C) (hr : r.FullSupport) (hs : s.FullSupport) (hrnd : ¬ Subsingleton B) :
+    hpair.leftCoeff hax r s =
+      cobGauge hpair hax r / cobGauge hpair hax (prodDist r s) := by
+  set q₀ := faceScaleInteractionReferencePrior with hq₀def
+  have hq₀ : q₀.FullSupport := faceScaleInteractionReferencePrior_fullSupport
+  have hq₀nd : ¬ Subsingleton faceScaleInteractionReferenceType :=
+    faceScaleInteractionReference_not_subsingleton
+  have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
+  -- positivity of the four coefficients we divide by
+  have hAqr : 0 < hpair.leftCoeff hax q₀ r := hpair.leftCoeff_pos hax q₀ r hq₀ hr
+  have hArs : 0 < hpair.leftCoeff hax q₀ (prodDist r s) := hpair.leftCoeff_pos hax q₀ (prodDist r s) hq₀ hrs
+  have hBqr : 0 < hpair.rightCoeff hax q₀ r := hpair.rightCoeff_pos hax q₀ r hq₀ hr
+  have hBrs : 0 < hpair.rightCoeff hax q₀ (prodDist r s) := hpair.rightCoeff_pos hax q₀ (prodDist r s) hq₀ hrs
+  -- cocycle (ii): A(q₀⊗r,s)·A(q₀,r)=A(q₀,r⊗s)
+  have hii := fs_coeff_assoc_A hpair htriple hax q₀ r s hq₀ hr hs hq₀nd
+  -- cocycle (i, mixed): A(q₀⊗r,s)·B(q₀,r)=B(q₀,r⊗s)·A(r,s)
+  have hi := fs_coeff_assoc_mixed hpair htriple hax q₀ r s hq₀ hr hs hrnd
+  -- Let X:=A(q₀⊗r,s). hii: X·A(q₀,r)=A(q₀,r⊗s); hi: X·B(q₀,r)=B(q₀,r⊗s)·A(r,s).
+  -- ⟹ X=A(q₀,r⊗s)/A(q₀,r), then A(r,s)=X·B(q₀,r)/B(q₀,r⊗s)=[A(q₀,r⊗s)·B(q₀,r)]/[A(q₀,r)·B(q₀,r⊗s)].
+  -- φ(r)/φ(r⊗s) = [B(q₀,r)/A(q₀,r)]/[B(q₀,r⊗s)/A(q₀,r⊗s)] = [B(q₀,r)·A(q₀,r⊗s)]/[A(q₀,r)·B(q₀,r⊗s)]. Same.
+  -- First derive the pure cross-multiplied identity, then convert to the division form.
+  have hAqr' : hpair.leftCoeff hax q₀ r ≠ 0 := ne_of_gt hAqr
+  have hArs' : hpair.leftCoeff hax q₀ (prodDist r s) ≠ 0 := ne_of_gt hArs
+  have hBrs' : hpair.rightCoeff hax q₀ (prodDist r s) ≠ 0 := ne_of_gt hBrs
+  -- cross-multiplied target: A(r,s)·A(q₀,r)·B(q₀,r⊗s) = B(q₀,r)·A(q₀,r⊗s)
+  have hcross : hpair.leftCoeff hax r s * hpair.leftCoeff hax q₀ r *
+      hpair.rightCoeff hax q₀ (prodDist r s) =
+      hpair.rightCoeff hax q₀ r * hpair.leftCoeff hax q₀ (prodDist r s) := by
+    nlinarith [hii, hi, hAqr, hArs, hBqr, hBrs]
+  -- Prove the division identity by rewriting both cobGauge's and clearing denominators manually.
+  have hkey : hpair.leftCoeff hax r s =
+      (hpair.rightCoeff hax q₀ r / hpair.leftCoeff hax q₀ r) /
+        (hpair.rightCoeff hax q₀ (prodDist r s) / hpair.leftCoeff hax q₀ (prodDist r s)) := by
+    rw [div_div_div_comm, div_div_div_comm]
+    rw [eq_div_iff (by positivity)]
+    -- goal: A(r,s) · (A(q₀,r⊗s)·A(q₀,r)... ) — clear via field then linear_combination
+    field_simp
+    nlinarith [hcross, hAqr, hArs, hBqr, hBrs, mul_pos hAqr hBrs, mul_pos hArs hBqr]
+  unfold cobGauge
+  exact hkey
+
 end FaceScaleProductCocycle
 
 
