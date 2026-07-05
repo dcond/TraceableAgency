@@ -1,3 +1,33 @@
+# ✅ Tier B conventions eliminated (2026-07-05, follow-up)
+
+Beyond `product_normalized`, the following are now ALSO eliminated in the leanest exported route
+`MIRep_of_TraceAxioms_FinalHM_Faddeev_withConstGauge` (bundle
+`FinalConstructedRepresentativeConventionsConstGauge`), all green 8622, axioms
+[propext, Classical.choice, Quot.sound]:
+
+- `singleton_slice` — PROVED as a theorem `finiteFaceScaleSingletonSliceAffine_of_faces` (no
+  assumption): subsingleton first factor ⇒ product left-slice value P-invariant
+  (samePosteriorLawExp_prodChannel_singleton_fst) + V=0.
+- `gauge`, `scale_relabel`, `gauge_relabel` — eliminated by fixing the trivial gauge
+  `constGaugeOne (fun _ => 1)`: gauge_relabel is rfl, scale_relabel is
+  scaleRelabel_of_FinalHM_covariance (R1).
+
+Convention structure now: `branch, support_scale, hm_covariance, current_product_gauge,
+singleton_interaction, harmless` (was 9 fields in the original product-normalized bundle).
+
+Classification of what remains:
+- **Tier A (genuine external classical HM interface — accepted boundary):** `hm_covariance`
+  (FinalHMRelabelCovariance), `branch.marginal_value` (FiniteSupportFaceMarginalValueTransportConvention
+  — flagged in-source as "definite mathematical content, not a convention").
+- **Tier C (genuinely need the t_n cardinal-gauge / Step-5 singleton construction):**
+  `support_scale` (raw eq:facescale), `singleton_interaction` (pins a Classical.choose interaction
+  coeff on subsingletons — needs paper Step-5 QA singleton argument; nondegenerate case already
+  proved via faceScaleProductInteractionAssociativity), `current_product_gauge` (product-gauge A=B=1
+  normalization), and `branch.{support_face,boundary_coeff,boundary_scale,singleton_scale,...}` +
+  `harmless.pre_entropy` (the support-face representative/scale family = the coherent-gauge choice).
+
+---
+
 # ✅ product_normalized ELIMINATED (2026-07-05)
 
 `MIRep_of_TraceAxioms_FinalHM_Faddeev_withCovariance` + `FinalConstructedRepresentativeConventionsCovariance`
