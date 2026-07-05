@@ -142,6 +142,135 @@ theorem finiteSelectedPosteriorValueRelabeling_of_FinalHM_covariance
       hVeq q (experimentOfChannel P)]
     exact hcov.V_relabel_eq hax eA eO q P
 
+/-- **R1 core: branch tangent-scalar coefficient relabelling covariance.**
+
+The faithful tangent-scalar coefficient `branchPathCoeff` is invariant under
+finite action relabellings, derived from the marginal-value relabel naturality
+clause on the integral representation.  The argument transports the identity/
+no-information tangent on the reached posterior across the relabelling: its
+`linearPart` is a value difference (`value_difference`), the posterior-law
+integral is relabel-covariant (`posteriorLawIntegral_relabelChannel`), and the
+representing test function is relabel-natural (`marginalValue_relabel`), so the
+scalar relation `linearPart q η = branchPathCoeff q r · linearPart r η`
+transports and the nonzero tangent (A1) cancels. -/
+theorem branchPathCoeff_relabel_of_marginalValue_relabel
+    {F : PrefFamily.{u}}
+    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u})
+    (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    (hpath : BranchPathTangentScalarStructure F hV
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint))
+    {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (eA : A ≃ B) (q r : Dist A)
+    (hq : q.FullSupport) (hr : r.FullSupport)
+    (hnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
+    hpath.branchPathCoeff (Relabeling.relabelDist eA q) (Relabeling.relabelDist eA r) =
+      hpath.branchPathCoeff q r := by
+  classical
+  have hqB : (Relabeling.relabelDist eA q).FullSupport :=
+    Relabeling.relabelDist_fullSupport eA q hq
+  have hrB : (Relabeling.relabelDist eA r).FullSupport :=
+    Relabeling.relabelDist_fullSupport eA r hr
+  have hndB : ∃ a b : B, a ≠ b ∧ 0 < (Relabeling.relabelDist eA r) a ∧
+      0 < (Relabeling.relabelDist eA r) b := by
+    rcases hnd with ⟨a, b, hab, ha, hb⟩
+    exact ⟨eA a, eA b, fun h => hab (eA.injective h),
+      by rw [Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact ha,
+      by rw [Relabeling.relabelDist_apply, Equiv.symm_apply_apply]; exact hb⟩
+  have hnotsubA : ¬ Subsingleton A := not_subsingleton_of_dist_nondegenerate _ hnd
+  set idA : Channel A A := Channel.idChannel
+  set UA : Channel A PUnit.{u+1} := Channel.uninformativeChannelU A
+  set idB : Channel B B := Channel.idChannel
+  set UB : Channel B PUnit.{u+1} := Channel.uninformativeChannelU B
+  set ηA : PosteriorLawSigned A :=
+    posteriorLawDifferenceExp r (experimentOfChannel idA) (experimentOfChannel UA) with hηA_def
+  set ηB : PosteriorLawSigned B :=
+    posteriorLawDifferenceExp (Relabeling.relabelDist eA r)
+      (experimentOfChannel idB) (experimentOfChannel UB) with hηB_def
+  have hηA_atomic : PosteriorLawSigned.AtomicLinear ηA :=
+    posteriorLawDifferenceExp_atomicLinear _ _ _
+  have hηA_tan : PosteriorLawTangent ηA := posteriorLawDifferenceExp_tangent _ _ _
+  have hηB_atomic : PosteriorLawSigned.AtomicLinear ηB :=
+    posteriorLawDifferenceExp_atomicLinear _ _ _
+  have hηB_tan : PosteriorLawTangent ηB := posteriorLawDifferenceExp_tangent _ _ _
+  have hidA : Relabeling.relabelChannel eA eA (Channel.idChannel : Channel A A) = idB := by
+    funext b; ext b'
+    rw [Relabeling.relabelChannel_apply]; simp only [idB, Channel.idChannel]
+    by_cases hbb : b' = b
+    · subst hbb; rw [Dist.pure_apply_self, Dist.pure_apply_self]
+    · rw [Dist.pure_apply_ne (eA.symm b) (eA.symm b') (fun h => hbb (eA.symm.injective h)),
+        Dist.pure_apply_ne b b' hbb]
+  have hUA : Relabeling.relabelChannel eA (Equiv.refl PUnit.{u+1})
+      (Channel.uninformativeChannelU A) = UB :=
+    relabelChannel_uninformative_action eA
+  have transport : ∀ (s : Dist A),
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV
+          (Relabeling.relabelDist eA s) ηB =
+        (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV s ηA := by
+    intro s
+    show ηB (hint.marginalValue F hV (Relabeling.relabelDist eA s)) =
+      ηA (hint.marginalValue F hV s)
+    simp only [hηB_def, hηA_def, posteriorLawDifferenceExp,
+      posteriorLawIntegralExp_experimentOfChannel]
+    have t1 :
+        posteriorLawIntegral (Relabeling.relabelDist eA r)
+            (Relabeling.relabelChannel eA eA (Channel.idChannel : Channel A A))
+            (hint.marginalValue F hV (Relabeling.relabelDist eA s)) =
+          posteriorLawIntegral r (Channel.idChannel : Channel A A)
+            (hint.marginalValue F hV s) :=
+      (posteriorLawIntegral_relabelChannel eA eA r (Channel.idChannel : Channel A A)
+        (hint.marginalValue F hV (Relabeling.relabelDist eA s))).trans
+        (by refine congrArg _ ?_; funext d; exact hint.marginalValue_relabel F hV eA s d)
+    have t2 :
+        posteriorLawIntegral (Relabeling.relabelDist eA r)
+            (Relabeling.relabelChannel eA (Equiv.refl PUnit.{u+1})
+              (Channel.uninformativeChannelU A))
+            (hint.marginalValue F hV (Relabeling.relabelDist eA s)) =
+          posteriorLawIntegral r (Channel.uninformativeChannelU A)
+            (hint.marginalValue F hV s) :=
+      (posteriorLawIntegral_relabelChannel eA (Equiv.refl PUnit.{u+1}) r
+        (Channel.uninformativeChannelU A)
+        (hint.marginalValue F hV (Relabeling.relabelDist eA s))).trans
+        (by refine congrArg _ ?_; funext d; exact hint.marginalValue_relabel F hV eA s d)
+    rw [hidA] at t1
+    rw [hUA] at t2
+    rw [t1, t2]
+  have hLA_r :
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV r ηA =
+        hV.V r (experimentOfChannel idA) - hV.V r (experimentOfChannel UA) := by
+    show ηA (hint.marginalValue F hV r) = _
+    rw [hint.value_eq_integral F hV r (experimentOfChannel idA),
+        hint.value_eq_integral F hV r (experimentOfChannel UA)]
+    simp only [hηA_def, posteriorLawDifferenceExp, posteriorLawIntegralExp_experimentOfChannel]
+  have hstrict := branch_id_uninformativeU_experiment_strict_of_A1 F hax r hr hnotsubA
+  have hVne : hV.V r (experimentOfChannel idA) ≠ hV.V r (experimentOfChannel UA) :=
+    branch_value_ne_of_strict_experiment_pref F hV r hr _ _ hstrict.1 hstrict.2
+  have hT3 :
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV r ηA ≠ 0 := by
+    rw [hLA_r]; exact sub_ne_zero.mpr hVne
+  have relA := hpath.linear_part_scalar_relation_on_tangent q r hq hr hnd ηA hηA_atomic hηA_tan
+  have relB := hpath.linear_part_scalar_relation_on_tangent
+    (Relabeling.relabelDist eA q) (Relabeling.relabelDist eA r) hqB hrB hndB ηB hηB_atomic hηB_tan
+  have hT1 :
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV
+          (Relabeling.relabelDist eA q) ηB =
+        (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV q ηA :=
+    transport q
+  have hT2 :
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV
+          (Relabeling.relabelDist eA r) ηB =
+        (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV r ηA :=
+    transport r
+  rw [hT1, hT2, relA] at relB
+  have hEq : hpath.branchPathCoeff (Relabeling.relabelDist eA q) (Relabeling.relabelDist eA r) *
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV r ηA =
+      hpath.branchPathCoeff q r *
+      (finiteAffineLinearPartAssumptions_of_integralRepresentation hint).linearPart F hV r ηA := by
+    linarith [relA, relB]
+  exact mul_right_cancel₀ hT3 hEq
+
 /--
 **Entropy reduction from interaction collapse.**
 
