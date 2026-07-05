@@ -3381,6 +3381,169 @@ theorem general_defect
   have : s * sq * srs = sq * (s * srs) := by ring
   rw [this, hgu]
 
+/-- At least two positive-support actions when `r` is nondegenerate. -/
+theorem two_le_card_supp {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
+    2 ≤ Fintype.card (supportSubtype r) := by
+  classical
+  obtain ⟨a, b, hab, ha, hb⟩ := hrnd
+  have : 1 < Fintype.card (supportSubtype r) :=
+    Fintype.one_lt_card_iff.mpr ⟨⟨a, ha⟩, ⟨b, hb⟩, fun h => hab (congrArg Subtype.val h)⟩
+  omega
+
+/-- A boundary prior has strictly fewer support actions than the ambient set. -/
+theorem card_supp_lt {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A)
+    (hrb : ¬ r.FullSupport) :
+    Fintype.card (supportSubtype r) < Fintype.card A := by
+  classical
+  have hex : ∃ a : A, ¬ (r a > 0) := by
+    by_contra hall
+    exact hrb (fun a => not_not.mp (fun hna => hall ⟨a, hna⟩))
+  obtain ⟨a, ha⟩ := hex
+  exact Fintype.card_subtype_lt (p := fun x => r x > 0) ha
+
+/-- The support face of a support-restricted prior has the same cardinality as
+the original support. -/
+theorem card_supp_restrict {A : Type u} [Fintype A] [DecidableEq A] (r : Dist A) :
+    Fintype.card (supportSubtype (r.restrictToSupport)) = Fintype.card (supportSubtype r) := by
+  apply Fintype.card_congr
+  refine ⟨fun a => ⟨a.1.1, a.1.2⟩, fun b => ⟨⟨b.1, b.2⟩,
+    by show r.restrictToSupport ⟨b.1, b.2⟩ > 0; rw [Dist.restrictToSupport_apply]; exact b.2⟩,
+    fun a => by apply Subtype.ext; apply Subtype.ext; rfl, fun b => by apply Subtype.ext; rfl⟩
+
+/-- The cardinal gauge scale is positive for every `n`. -/
+theorem cardScaleT_pos
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F) (n : ℕ) :
+    0 < cardScaleT hhm hbranchConv hax n := by
+  rw [cardScaleT]
+  by_cases h2 : n = 2
+  · rw [if_pos h2]; exact one_pos
+  · rw [if_neg h2]
+    by_cases h3 : 3 ≤ n
+    · rw [if_pos h3]
+      exact cardDefect_pos hhm hbranchConv hax n 2 (le_refl 2) (by omega)
+    · rw [if_neg h3]; exact one_pos
+
+/-- **The cardinal gauge.**  `g(q) := cardScaleT (card A) = t_{card A}` — a positive
+constant depending only on the cardinality of the action set.  It is internally
+defined from the embedding defect (`cardDefect n 2`), not an external convention.
+With this gauge the raw face-scale equation `support_scale` becomes provable from
+the general embedding-defect reduction and the cocycle `cardDefect n m = t_n/t_m`. -/
+noncomputable def cardinalGauge
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F) :
+    PositiveFaceScaleGauge.{u} where
+  gauge := fun {A} _ _ _ _ => cardScaleT hhm hbranchConv hax (Fintype.card A)
+  gauge_pos := fun {A} _ _ _ _ => cardScaleT_pos hhm hbranchConv hax (Fintype.card A)
+
+/-- The cardinal gauge is relabelling-invariant (depends only on cardinality). -/
+theorem cardinalGauge_gaugeRel
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (e : A ≃ B) (q : Dist A) :
+    (cardinalGauge hhm hbranchConv hax).gauge (Relabeling.relabelDist e q) =
+      (cardinalGauge hhm hbranchConv hax).gauge q := by
+  show cardScaleT hhm hbranchConv hax (Fintype.card B) =
+    cardScaleT hhm hbranchConv hax (Fintype.card A)
+  rw [Fintype.card_congr e.symm]
+
+/-- The cardinal-gauge scale-relabelling equation (`hrel`): the gauged scale is
+relabelling-invariant.  `g` is cardinality-only and the raw chain scale is
+relabel-invariant (R1). -/
+theorem cardinalGauge_hrel
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F)
+    {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B] (e : A ≃ B) (q : Dist A) (hq : q.FullSupport) :
+    (cardinalGauge hhm hbranchConv hax).gauge (Relabeling.relabelDist e q) *
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+          F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+        ).scale_factorization.scale (Relabeling.relabelDist e q) =
+      (cardinalGauge hhm hbranchConv hax).gauge q *
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+          F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+        ).scale_factorization.scale q := by
+  rw [cardinalGauge_gaugeRel hhm hbranchConv hax e q,
+    scaleRelabel_of_FinalHM_covariance hhm hbranchConv hax e q hq]
+
+/-- **The cardinal-gauge support-face equation (`hsupport`).**  With the cardinal
+gauge, the raw face-scale equation holds: `(g q / g r)·branchCoeff q r =
+(g q·scale q)/(g(r|supp)·scale(r|supp))`.  Proof: `g q = g r = t_n` cancel on the
+left; `branchCoeff q r = boundaryCoeff q r`; the general embedding-defect reduction
+gives `boundaryCoeff q r·scale(r|supp) = scale q·cardDefect n m`; and the cocycle
+`cardDefect n m = t_n / t_m` with `t_m = g(r|supp)` closes it. -/
+theorem cardinalGauge_hsupport
+    {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hbranchConv : FinalFaithfulBranchConventions hhm) (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hq : q.FullSupport) (r : Dist A)
+    [Nonempty (supportSubtype r)]
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport) :
+    ((cardinalGauge hhm hbranchConv hax).gauge q /
+        (cardinalGauge hhm hbranchConv hax).gauge r) *
+        (BranchAggregationCocycleNormalizedChainRule_of_faithful
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+          F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+        ).branch_agg.branchCoeff q r =
+      ((cardinalGauge hhm hbranchConv hax).gauge q *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).scale_factorization.scale q) /
+        ((cardinalGauge hhm hbranchConv hax).gauge r.restrictToSupport *
+          (BranchAggregationCocycleNormalizedChainRule_of_faithful
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
+            F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+          ).scale_factorization.scale r.restrictToSupport) := by
+  classical
+  set hfaith := faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv
+  set hb := branchBoundaryFaceScale_of_faithfulAssumptions hfaith
+  set n := Fintype.card A with hndef
+  set m := Fintype.card (supportSubtype r) with hmdef
+  haveI : NeZero m := ⟨by have := two_le_card_supp r hrnd; omega⟩
+  haveI : NeZero n := ⟨Fintype.card_ne_zero⟩
+  have hm2 : 2 ≤ m := two_le_card_supp r hrnd
+  have hmn : m < n := card_supp_lt r hrb
+  simp only [cardinalGauge, card_supp_restrict r]
+  have hbcq : (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).branch_agg.branchCoeff q r = hb.boundaryCoeff q r := by
+    set hpath := branchPathTangentScalarStructure_of_faithfulAssumptions hfaith F hax
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+    rw [show (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+        (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).branch_agg.branchCoeff q r =
+      branchCoeffFromTangentRepParts hpath hb hfaith.singleton_scale q r from rfl]
+    unfold branchCoeffFromTangentRepParts
+    rw [dif_neg hrb, dif_pos hrnd]
+  rw [hbcq]
+  have hgd := general_defect hhm hbranchConv hax q r hq hrn hrnd hrb hm2 hmn
+  have hratio := cardDefect_eq_ratio hhm hbranchConv hax n m hm2 hmn
+  have htn := cardScaleT_pos hhm hbranchConv hax n
+  have htm := cardScaleT_pos hhm hbranchConv hax m
+  have hscq := faithful_scale_pos hhm hbranchConv hax q
+  have hscrs := faithful_scale_pos hhm hbranchConv hax r.restrictToSupport
+  set bc := hb.boundaryCoeff q r
+  set sq := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax)).scale_factorization.scale q
+  set srs := (BranchAggregationCocycleNormalizedChainRule_of_faithful hfaith F hax
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
+      ).scale_factorization.scale r.restrictToSupport
+  set tn := cardScaleT hhm hbranchConv hax n
+  set tm := cardScaleT hhm hbranchConv hax m
+  rw [hratio] at hgd
+  rw [div_self (ne_of_gt htn), one_mul]
+  rw [eq_div_iff (by positivity)]
+  have hcalc : bc * (tm * srs) = tm * (bc * srs) := by ring
+  rw [hcalc, hgd]
+  field_simp
+
 /-- Raw coherent face scales from the data-carrying HM interface and the
 faithful branch/coherent scale components.
 
