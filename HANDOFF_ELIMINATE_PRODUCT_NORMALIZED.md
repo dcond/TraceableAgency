@@ -216,3 +216,50 @@ as an irreducible construction/normalization rather than an opaque assumption.
   `[propext, Classical.choice, Quot.sound]`.
 - Watch the forward-reference trap: new producers must be defined *before* the theorems that use
   them (the boundary work required relocating a 1100-line block for this reason).
+
+---
+
+## Coherent-gauge family folds in here (investigation result)
+
+A separate round investigated whether the **gauge / singleton / support-face** convention fields of
+`FinalConstructedRepresentativeConventions` were independent "easy existence lemmas." They are **not**
+— they are the paper's coherent-gauge normalization and are discharged by the **same** cardinal-gauge
+(`t_n`) construction targeted above. They should be eliminated **together with `product_normalized`**,
+not piecemeal. Six fields fold in:
+
+- `gauge : PositiveFaceScaleGauge`, `scale_relabel`, `support_scale` — **load-bearing gauge family.**
+  A constant gauge `fun _ => 1` reduces `scale_relabel` to raw relabel-invariance
+  `scale (relabel e q) = scale q` and `support_scale` to the raw `restrictToSupport` factorization
+  `branchCoeff q r = scale q / scale (r|supp)`. Neither raw fact is proved; they exist only as assumed
+  interfaces (`FiniteChainScaleRelabelingAssumptionsFor` ScaleCoherence.lean:829,
+  `FiniteSupportFaceScaleAssumptionsFor` :846). Supplying them IS the `t_n` normalization.
+- `current_product_gauge` (`leftCoeff = 1`, `rightCoeff = 1`) and `singleton_interaction`
+  (`interactionCoeff = reference κ` on singleton factors) — **verdict (C): constraints on the free
+  data fields** of `FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor` (ScaleCoherence.lean:2831,
+  fields `leftCoeff`/`rightCoeff`/`interactionCoeff`), realizable only by re-gauging representatives
+  (i.e. by the cardinal-gauge construction), never provable for a fixed representative.
+- `singleton_slice` (`FiniteFaceScaleSingletonSliceAffineConventionFor`, ScaleCoherence.lean:1777) —
+  **verdict (B): independently dischargeable via a bounded lemma.** On subsingleton first factor `A`,
+  `V q (exp P) = 0` (`branchValue_channel_eq_zero_of_subsingleton`, BranchAggregation.lean:4642), so the
+  target `∃ a>0 b, ∀P, faceScaleProductLeftSliceValue … R P = a·V q(exp P)+b` reduces to: the product
+  left-slice value `faceScaleProductLeftSliceValue` (ScaleCoherence.lean:1687, `= V (prodDist q r)
+  (prodChannel P R)`) is **`P`-invariant** on a subsingleton first factor. This is a genuine but bounded
+  `SamePosteriorLaw` lemma (one-action first factor ⇒ the `P`-observation is uninformative), in the
+  spirit of `V_eq_zero_of_subsingleton_outcome` (ScaleCoherence.lean:2101). Discharge with `a = 1`,
+  `b = faceScaleProductLeftSliceValue … R (uninformativeChannelU A)`. A future session may land this
+  sub-lemma early, but it removes no exported field on its own (threaded with the gauge family).
+
+### Exact file:line hooks for the consolidated construction
+- `coherentFaceScales_of_FinalHM_positiveGauge` — EntropyReductionClosure.lean:1505 (consumes
+  `gauge`/`scale_relabel`/`support_scale` as `hgauge`/`hrel`/`hsupport`).
+- `CoherentRelabelingFaceScales_of_positiveGaugeBranch` — ScaleCoherence.lean:1174 (the gauge-transform
+  assembler; the `t_n` construction should produce its `hrel`/`hsupport` obligations by construction).
+- `FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor` — ScaleCoherence.lean:2831 (free
+  `leftCoeff`/`rightCoeff`/`interactionCoeff` that the gauge choice pins to 1 / reference κ).
+- `FiniteFaceScaleSingletonSliceAffineConventionFor` — ScaleCoherence.lean:1777 (the (B) sub-lemma).
+
+Net: the future `product_normalized` session should aim to remove all of
+`FiniteProductNormalizedSelectedRepresentativesFor`, `FiniteFaceScaleProductGaugeConventionFor`,
+`FiniteFaceScaleSingletonInteractionConventionFor`, `FiniteFaceScaleSingletonSliceAffineConventionFor`,
+and the `gauge`/`scale_relabel`/`support_scale` fields in one cardinal-gauge construction, then verify
+via `#print` they are absent from every convention structure the exported theorem depends on.
