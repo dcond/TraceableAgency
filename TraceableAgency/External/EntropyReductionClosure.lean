@@ -6838,4 +6838,195 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withConstGauge
     hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
 
 
+
+/-- **Cardinal-gauge conventions: `support_scale` eliminated.**
+
+This bundle refines `FinalConstructedRepresentativeConventionsConstGauge` by
+choosing the internally-defined cardinal gauge `cardinalGauge` (`g q :=
+cardScaleT (card A) = t_{card A}`) instead of the trivial constant gauge.  With
+this gauge the raw face-scale equation is a *theorem* (`cardinalGauge_hsupport`,
+from the general embedding-defect reduction and the cocycle `cardDefect n m =
+t_n/t_m`), so it is no longer a caller field.  The only remaining scale content is
+the HM covariance clause (Tier A) and the branch/product/singleton faithfulness
+data; `support_scale` (`FiniteSupportFaceScaleAssumptionsFor`) is absent. -/
+structure FinalConstructedRepresentativeConventionsCardinalGauge
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  branch : FinalFaithfulBranchConventions hhm
+  hm_covariance : FinalHMRelabelCovariance hhm
+  current_product_gauge :
+    FiniteFaceScaleProductGaugeConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax) hm_covariance
+            (cardinalGauge_gaugeRel hhm branch hax))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))))
+  singleton_interaction :
+    FiniteFaceScaleSingletonInteractionConventionFor
+      (faceScaleProductPairwiseBilinearity_of_multiPieces
+        (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+          (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface
+            hhm)
+          (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))
+        (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))
+        (faceScaleProductSlopeAffine_of_selectedRelabeling
+          (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax) hm_covariance
+            (cardinalGauge_gaugeRel hhm branch hax))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))))))
+  harmless :
+    FinalHarmlessConventions
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax))
+      (productQuasiAdditivity_of_FinalHM_positiveGaugeProductNormalizedSelected
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)
+        (finiteFaceScaleSingletonSliceAffine_of_faces
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+              hhm branch)
+            hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax)))
+        (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+            hhm branch)
+          hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (cardinalGauge_hsupport hhm branch hax) hm_covariance
+            (cardinalGauge_gaugeRel hhm branch hax))
+        current_product_gauge singleton_interaction)
+
+
+/-- **Exported MI route with both `product_normalized` and `support_scale`
+eliminated.**  Uses the cardinal gauge; the face-scale equation is discharged by
+`cardinalGauge_hsupport`.  `#print` confirms `FiniteSupportFaceScaleAssumptionsFor`
+is absent from the convention structure this theorem depends on. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_withCardinalGauge
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hconv : FinalConstructedRepresentativeConventionsCardinalGauge hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_withProductNormalizedSelectedRepresentatives
+    hfad hhm hconv.branch hax (cardinalGauge hhm hconv.branch hax)
+    (cardinalGauge_hrel hhm hconv.branch hax)
+    (cardinalGauge_hsupport hhm hconv.branch hax)
+    (finiteFaceScaleSingletonSliceAffine_of_faces
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm hconv.branch)
+        hax (cardinalGauge hhm hconv.branch hax)
+      (cardinalGauge_hrel hhm hconv.branch hax)
+      (cardinalGauge_hsupport hhm hconv.branch hax)))
+    (finiteSelectedPosteriorValueRelabeling_of_FinalHM_positiveGauge_covariance
+      hhm
+      (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+        hhm hconv.branch)
+      hax (cardinalGauge hhm hconv.branch hax)
+      (cardinalGauge_hrel hhm hconv.branch hax)
+      (cardinalGauge_hsupport hhm hconv.branch hax)
+      hconv.hm_covariance (cardinalGauge_gaugeRel hhm hconv.branch hax))
+    hconv.current_product_gauge hconv.singleton_interaction hconv.harmless
+
 end TraceableAgency
