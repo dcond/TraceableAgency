@@ -5876,6 +5876,37 @@ theorem coordinateValueConvention_of_HM
     exact second_coordinate_face_value_of_HM
       (hV := hfaces.branch_result.branch_agg.value_rep) hsupp hcov hax q b
 
+/-- Value-side pre-entropy conventions (derivable from HM before universal-scale collapse). -/
+structure PreEntropyValueConventions (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
+  coordinate_value : FiniteCoordinateSupportFaceValueConventionFor hfaces
+  block_value : FiniteBlockSupportFaceValueConventionFor hfaces
+
+/-- Scale-side pre-entropy conventions (universal-scale representative choice). -/
+structure PreEntropyScaleConventions (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
+  coordinate_scale : FiniteCoordinateSupportFaceScaleConventionFor hfaces
+  block_scale : FiniteBlockSupportFaceScaleConventionFor hfaces
+  universal_singleton : FiniteUniversalScaleSingletonConventionFor hfaces
+
+/-- Reference/Z normalization. -/
+structure PreEntropyReferenceConventions (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces) : Prop where
+  reference_z : FiniteProductReferenceZNormalizationFor hfaces hprod
+
+/-- Compatibility wrapper: reassemble the monolithic bundle from the split parts. -/
+theorem preEntropyRepresentativeGaugeConventions_of_parts
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (hval : PreEntropyValueConventions hfaces)
+    (hscale : PreEntropyScaleConventions hfaces)
+    (href : PreEntropyReferenceConventions hfaces hprod) :
+    PreEntropyRepresentativeGaugeConventions hfaces hprod where
+  coordinate_value := hval.coordinate_value
+  coordinate_scale := hscale.coordinate_scale
+  block_value := hval.block_value
+  block_scale := hscale.block_scale
+  reference_z := href.reference_z
+  universal_singleton := hscale.universal_singleton
+
 end FaceScaleProductCocycle
 
 
