@@ -794,6 +794,34 @@ theorem pushSignedIncl_tangent {A : Type u} [Fintype A] [DecidableEq A] [Nonempt
       rw [AtomicPosteriorSignedLaw.eval_apply] at h
       rw [← h]; simp
 
+/-- Precomposition of an atomic-linear law by an arbitrary map on distributions
+is atomic-linear: push each atom's point along the map. -/
+noncomputable def atomicLinear_precompose {S T : Type u}
+    [Fintype S] [DecidableEq S] [Nonempty S] [Fintype T] [DecidableEq T] [Nonempty T]
+    (g : Dist S → Dist T) {η : PosteriorLawSigned S}
+    (hη : PosteriorLawSigned.AtomicLinear η) :
+    PosteriorLawSigned.AtomicLinear
+      (fun ψ : Dist T → ℝ => η (fun d => ψ (g d))) where
+  witness := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    exact {
+      I := hη.witness.I
+      instFintypeI := inferInstance
+      instDecidableEqI := inferInstance
+      weight := hη.witness.weight
+      point := fun i => g (hη.witness.point i)
+    }
+  eval_eq := by
+    letI : Fintype hη.witness.I := hη.witness.instFintypeI
+    letI : DecidableEq hη.witness.I := hη.witness.instDecidableEqI
+    funext ψ
+    show (∑ i : hη.witness.I, hη.witness.weight i * ψ (g (hη.witness.point i))) =
+      η (fun d => ψ (g d))
+    have h := congrFun hη.eval_eq (fun d => ψ (g d))
+    rw [AtomicPosteriorSignedLaw.eval_apply] at h
+    exact h
+
 /-- The support of a support-included distribution is equivalent to the
 distribution's intrinsic positive support. -/
 noncomputable def supportIncludePushforwardSupportEquiv
@@ -1796,6 +1824,1003 @@ noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_conventionBund
     hconv.marginal_value hconv.boundary_scale
     hconv.singleton_scale_factorization
 
+
+/-! ## Boundary block-comparison lift (support face → ambient boundary prior)
+
+`boundary_block_lift` transports a block preference comparison from the
+full-support face `supp(r)` to the ambient boundary prior `r`, via support
+restriction on `A ⊕ A`, a bijective action relabel, and an A4 outcome garbling
+(extra outcome slots carry zero posterior mass).  Boundary analogue of
+`block_rel_of_channel_value_ge`. -/
+
+noncomputable def inlSupportEquiv {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) : supportSubtype (inlDist r : Dist (A ⊕ A)) ≃ supportSubtype r where
+  toFun := fun x => by rcases x with ⟨ab, hab⟩; cases ab with
+    | inl a => exact ⟨a, hab⟩
+    | inr a => exact absurd hab (by simp [inlDist])
+  invFun := fun y => ⟨Sum.inl y.1, y.2⟩
+  left_inv := by rintro ⟨ab, hab⟩; cases ab with
+    | inl a => rfl
+    | inr a => exact absurd hab (by simp [inlDist])
+  right_inv := by rintro ⟨a, ha⟩; rfl
+noncomputable def inrSupportEquiv {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) : supportSubtype (inrDist r : Dist (A ⊕ A)) ≃ supportSubtype r where
+  toFun := fun x => by rcases x with ⟨ab, hab⟩; cases ab with
+    | inl a => exact absurd hab (by simp [inrDist])
+    | inr a => exact ⟨a, hab⟩
+  invFun := fun y => ⟨Sum.inr y.1, y.2⟩
+  left_inv := by rintro ⟨ab, hab⟩; cases ab with
+    | inl a => exact absurd hab (by simp [inrDist])
+    | inr a => rfl
+  right_inv := by rintro ⟨a, ha⟩; rfl
+
+theorem inlSupportEquiv_symm_apply {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (y : supportSubtype r) :
+    (inlSupportEquiv r).symm y = ⟨Sum.inl y.1, y.2⟩ := rfl
+
+theorem inrSupportEquiv_symm_apply {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (y : supportSubtype r) :
+    (inrSupportEquiv r).symm y = ⟨Sum.inr y.1, y.2⟩ := rfl
+
+/-! ## Prior relabelling identities -/
+
+section Priors
+variable {A B C D : Type u}
+
+theorem relabelDist_sumCongr_inlDist
+    [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    [Fintype C] [DecidableEq C] [Fintype D] [DecidableEq D]
+    (e1 : A ≃ C) (e2 : B ≃ D) (d : Dist A) :
+    Relabeling.relabelDist (Equiv.sumCongr e1 e2) (inlDist d : Dist (A ⊕ B)) =
+      (inlDist (Relabeling.relabelDist e1 d) : Dist (C ⊕ D)) := by
+  ext x
+  cases x with
+  | inl c => simp [Relabeling.relabelDist, inlDist, Equiv.sumCongr]
+  | inr d => simp [Relabeling.relabelDist, inlDist, Equiv.sumCongr]
+
+theorem relabelDist_sumCongr_inrDist
+    [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    [Fintype C] [DecidableEq C] [Fintype D] [DecidableEq D]
+    (e1 : A ≃ C) (e2 : B ≃ D) (d : Dist B) :
+    Relabeling.relabelDist (Equiv.sumCongr e1 e2) (inrDist d : Dist (A ⊕ B)) =
+      (inrDist (Relabeling.relabelDist e2 d) : Dist (C ⊕ D)) := by
+  ext x
+  cases x with
+  | inl c => simp [Relabeling.relabelDist, inrDist, Equiv.sumCongr]
+  | inr d => simp [Relabeling.relabelDist, inrDist, Equiv.sumCongr]
+end Priors
+
+theorem relabel_inlSupportEquiv_restrict {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) :
+    Relabeling.relabelDist (inlSupportEquiv r) ((inlDist r).restrictToSupport) =
+      r.restrictToSupport := by
+  ext y
+  rw [Relabeling.relabelDist_apply, inlSupportEquiv_symm_apply]
+  simp [Dist.restrictToSupport, inlDist]
+
+theorem relabel_inrSupportEquiv_restrict {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) :
+    Relabeling.relabelDist (inrSupportEquiv r) ((inrDist r).restrictToSupport) =
+      r.restrictToSupport := by
+  ext y
+  rw [Relabeling.relabelDist_apply, inrSupportEquiv_symm_apply]
+  simp [Dist.restrictToSupport, inrDist]
+
+/-! ## Outcome embedding / collapse kernels -/
+
+section Kernels
+variable {O Y : Type u} [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+
+noncomputable def embedLeftKernel : Channel O (O ⊕ Y) := fun o => Dist.pure (Sum.inl o)
+noncomputable def embedRightKernel : Channel Y (O ⊕ Y) := fun y => Dist.pure (Sum.inr y)
+noncomputable def collapseLeftKernel [Nonempty O] : Channel (O ⊕ Y) O :=
+  fun oy => match oy with
+    | Sum.inl o => Dist.pure o
+    | Sum.inr _ => Dist.pure (Classical.arbitrary O)
+noncomputable def collapseRightKernel [Nonempty Y] : Channel (O ⊕ Y) Y :=
+  fun oy => match oy with
+    | Sum.inl _ => Dist.pure (Classical.arbitrary Y)
+    | Sum.inr y => Dist.pure y
+
+/-- Embedding left outcomes then collapsing recovers the original channel. -/
+theorem postprocess_embedLeft_collapseLeft {A : Type u} [Fintype A] [DecidableEq A] [Nonempty O]
+    (R : Channel A O) :
+    Channel.postprocess (Channel.postprocess R (embedLeftKernel (Y := Y))) collapseLeftKernel = R := by
+  funext a
+  apply Dist.ext
+  intro o
+  show (∑ w : O ⊕ Y, (Channel.postprocess R embedLeftKernel) a w * collapseLeftKernel w o) = R a o
+  have step : ∀ w : O ⊕ Y, (Channel.postprocess R (embedLeftKernel (Y := Y))) a w
+      = (match w with | Sum.inl o' => R a o' | Sum.inr _ => 0) := by
+    intro w
+    show (∑ o' : O, R a o' * embedLeftKernel o' w) = _
+    cases w with
+    | inl v =>
+      rw [Fintype.sum_eq_single v]
+      · simp [embedLeftKernel]
+      · intro o'' ho''
+        rw [embedLeftKernel, Dist.pure_apply_ne _ _ (fun h => ho'' (Sum.inl.inj h).symm), mul_zero]
+    | inr v =>
+      apply Finset.sum_eq_zero
+      intro o' _
+      rw [embedLeftKernel, Dist.pure_apply_ne _ _ (by simp), mul_zero]
+  rw [Fintype.sum_congr _ _ (fun w => by rw [step w])]
+  rw [Fintype.sum_sum_type]
+  simp only [collapseLeftKernel]
+  rw [Fintype.sum_eq_single o]
+  · simp
+  · intro o'' ho''
+    rw [Dist.pure_apply_ne _ _ (fun h => ho'' h.symm), mul_zero]
+
+/-- Embedding right outcomes then collapsing recovers the original channel. -/
+theorem postprocess_embedRight_collapseRight {A : Type u} [Fintype A] [DecidableEq A] [Nonempty Y]
+    (R : Channel A Y) :
+    Channel.postprocess (Channel.postprocess R (embedRightKernel (O := O))) collapseRightKernel = R := by
+  funext a
+  apply Dist.ext
+  intro y
+  show (∑ w : O ⊕ Y, (Channel.postprocess R embedRightKernel) a w * collapseRightKernel w y) = R a y
+  have step : ∀ w : O ⊕ Y, (Channel.postprocess R (embedRightKernel (O := O))) a w
+      = (match w with | Sum.inl _ => 0 | Sum.inr y' => R a y') := by
+    intro w
+    show (∑ y' : Y, R a y' * embedRightKernel y' w) = _
+    cases w with
+    | inl v =>
+      apply Finset.sum_eq_zero
+      intro y' _
+      rw [embedRightKernel, Dist.pure_apply_ne _ _ (by simp), mul_zero]
+    | inr v =>
+      rw [Fintype.sum_eq_single v]
+      · simp [embedRightKernel]
+      · intro y'' hy''
+        rw [embedRightKernel, Dist.pure_apply_ne _ _ (fun h => hy'' (Sum.inr.inj h).symm), mul_zero]
+  rw [Fintype.sum_congr _ _ (fun w => by rw [step w])]
+  rw [Fintype.sum_sum_type]
+  simp only [collapseRightKernel]
+  rw [Fintype.sum_eq_single y]
+  · simp
+  · intro y'' hy''
+    rw [Dist.pure_apply_ne _ _ (fun h => hy'' h.symm), mul_zero]
+
+end Kernels
+
+/-! ## Boundary block channel equals a block of embedded face channels -/
+
+theorem relabel_boundaryBlock_eq_embeddedFace
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (r : Dist A) (P : Channel A O) (Q : Channel A Y) :
+    Relabeling.relabelChannel (Equiv.sumCongr (inlSupportEquiv r) (inrSupportEquiv r))
+        (Equiv.refl ((O ⊕ Y) ⊕ (O ⊕ Y)))
+        (blockChannel ((blockChannel P Q).restrictToSupport (inlDist r))
+          ((blockChannel P Q).restrictToSupport (inrDist r)))
+      =
+      blockChannel (Channel.postprocess (Channel.restrictToSupport P r) embedLeftKernel)
+        (Channel.postprocess (Channel.restrictToSupport Q r) embedRightKernel) := by
+  funext b
+  cases b with
+  | inl s =>
+    apply Dist.ext
+    intro w
+    cases w with
+    | inl v =>
+      show (blockChannel P Q) (Sum.inl s.1) v
+        = ∑ o : O, P s.1 o * (embedLeftKernel o v)
+      cases v with
+      | inl o' =>
+        simp only [embedLeftKernel]
+        rw [Fintype.sum_eq_single o']
+        · simp [blockChannel]
+        · intro o'' ho''
+          rw [Dist.pure_apply_ne _ _ (fun h => ho'' (Sum.inl.inj h).symm), mul_zero]
+      | inr y' =>
+        simp only [embedLeftKernel, blockChannel]
+        symm
+        apply Finset.sum_eq_zero
+        intro o _
+        simp [Dist.pure_apply_ne]
+    | inr v =>
+      show (0 : ℝ) = 0
+      rfl
+  | inr s =>
+    apply Dist.ext
+    intro w
+    cases w with
+    | inl v =>
+      show (0 : ℝ) = 0
+      rfl
+    | inr v =>
+      show (blockChannel P Q) (Sum.inr s.1) v
+        = ∑ y : Y, Q s.1 y * (embedRightKernel y v)
+      cases v with
+      | inl o' =>
+        simp only [embedRightKernel, blockChannel]
+        symm
+        apply Finset.sum_eq_zero
+        intro y _
+        simp [Dist.pure_apply_ne]
+      | inr y' =>
+        simp only [embedRightKernel]
+        rw [Fintype.sum_eq_single y']
+        · simp [blockChannel]
+        · intro y'' hy''
+          rw [Dist.pure_apply_ne _ _ (fun h => hy'' (Sum.inr.inj h).symm), mul_zero]
+
+/-! ## Main theorem -/
+
+theorem boundary_block_lift
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (P : Channel A O) (Q : Channel A Y)
+    (hface : F.rel (blockChannel (Channel.restrictToSupport P r) (Channel.restrictToSupport Q r))
+      (inlDist r.restrictToSupport) (inrDist r.restrictToSupport)) :
+    F.rel (blockChannel P Q) (inlDist r) (inrDist r) := by
+  classical
+  -- Nonempty O, Nonempty Y from a support element.
+  obtain ⟨s0⟩ := (inferInstance : Nonempty (supportSubtype r))
+  haveI hNO : Nonempty O := Relabeling.nonempty_of_dist (P s0.1)
+  haveI hNY : Nonempty Y := Relabeling.nonempty_of_dist (Q s0.1)
+  -- Step 0: support restriction reduces to the boundary restricted block comparison.
+  rw [preference_support_restriction_of_axioms F hax (blockChannel P Q) (inlDist r) (inrDist r)]
+  -- Step 1: action-relabel the boundary block channel to the support of `r`.
+  set eA : (supportSubtype (inlDist r : Dist (A ⊕ A))) ⊕ (supportSubtype (inrDist r : Dist (A ⊕ A)))
+      ≃ supportSubtype r ⊕ supportSubtype r :=
+    Equiv.sumCongr (inlSupportEquiv r) (inrSupportEquiv r) with heA
+  rw [relabel_rel_action_of_axioms F hax eA
+        (blockChannel ((blockChannel P Q).restrictToSupport (inlDist r))
+          ((blockChannel P Q).restrictToSupport (inrDist r)))
+        (inlDist (inlDist r).restrictToSupport)
+        (inrDist (inrDist r).restrictToSupport)]
+  -- Rewrite the relabelled channel and priors (matching the goal's `eA`).
+  have hC : Relabeling.relabelChannel eA (Equiv.refl ((O ⊕ Y) ⊕ (O ⊕ Y)))
+        (blockChannel ((blockChannel P Q).restrictToSupport (inlDist r))
+          ((blockChannel P Q).restrictToSupport (inrDist r)))
+      = blockChannel (Channel.postprocess (Channel.restrictToSupport P r) (embedLeftKernel (Y := Y)))
+          (Channel.postprocess (Channel.restrictToSupport Q r) (embedRightKernel (O := O))) := by
+    rw [heA]; exact relabel_boundaryBlock_eq_embeddedFace r P Q
+  have hpl : Relabeling.relabelDist eA (inlDist (inlDist r).restrictToSupport)
+      = (inlDist r.restrictToSupport : Dist (supportSubtype r ⊕ supportSubtype r)) := by
+    rw [heA, relabelDist_sumCongr_inlDist, relabel_inlSupportEquiv_restrict]
+  have hpr : Relabeling.relabelDist eA (inrDist (inrDist r).restrictToSupport)
+      = (inrDist r.restrictToSupport : Dist (supportSubtype r ⊕ supportSubtype r)) := by
+    rw [heA, relabelDist_sumCongr_inrDist, relabel_inrSupportEquiv_restrict]
+  -- Step 2: replace embedded face channels by the face channels via A4 garbling.
+  set Ps : Channel (supportSubtype r) O := Channel.restrictToSupport P r with hPs
+  set Qs : Channel (supportSubtype r) Y := Channel.restrictToSupport Q r with hQs
+  set rs : Dist (supportSubtype r) := r.restrictToSupport with hrs
+  have hleft_to_new :
+      F.rel (blockChannel Ps (Channel.postprocess Ps (embedLeftKernel (Y := Y)))) (inlDist rs) (inrDist rs) :=
+    hax.a4 Ps (embedLeftKernel (Y := Y)) rs
+  have hleft_to_old :
+      F.rel (blockChannel (Channel.postprocess Ps (embedLeftKernel (Y := Y))) Ps) (inlDist rs) (inrDist rs) := by
+    have h := hax.a4 (Channel.postprocess Ps (embedLeftKernel (Y := Y))) collapseLeftKernel rs
+    rwa [postprocess_embedLeft_collapseLeft Ps] at h
+  have hright_to_new :
+      F.rel (blockChannel Qs (Channel.postprocess Qs (embedRightKernel (O := O)))) (inlDist rs) (inrDist rs) :=
+    hax.a4 Qs (embedRightKernel (O := O)) rs
+  have hright_to_old :
+      F.rel (blockChannel (Channel.postprocess Qs (embedRightKernel (O := O))) Qs) (inlDist rs) (inrDist rs) := by
+    have h := hax.a4 (Channel.postprocess Qs (embedRightKernel (O := O))) collapseRightKernel rs
+    rwa [postprocess_embedRight_collapseRight Qs] at h
+  have hgoal :
+      F.rel (blockChannel (Channel.postprocess Ps (embedLeftKernel (Y := Y)))
+          (Channel.postprocess Qs (embedRightKernel (O := O)))) (inlDist rs) (inrDist rs) :=
+    (blackwell_pairwise_block_replacement_from_weak_equiv F hax
+      Ps (Channel.postprocess Ps (embedLeftKernel (Y := Y)))
+      Qs (Channel.postprocess Qs (embedRightKernel (O := O)))
+      rs rs rs rs
+      hleft_to_new hleft_to_old hright_to_new hright_to_old).mp hface
+  -- Transport hgoal back to the relabelled form via hC, hpl, hpr.
+  rw [← hC, ← hpl, ← hpr] at hgoal
+  exact hgoal
+
+
+#print axioms TraceableAgency.boundary_block_lift
+
+/-- **Boundary block-comparison IFF.**  The whole `boundary_block_lift` chain
+(support restriction, action relabelling, Blackwell block replacement) is an
+equivalence, so the ambient boundary block comparison is equivalent to the
+support-face block comparison in BOTH directions. -/
+theorem boundary_block_lift_iff
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (P : Channel A O) (Q : Channel A Y) :
+    F.rel (blockChannel P Q) (inlDist r) (inrDist r) ↔
+      F.rel (blockChannel (Channel.restrictToSupport P r) (Channel.restrictToSupport Q r))
+        (inlDist r.restrictToSupport) (inrDist r.restrictToSupport) := by
+  classical
+  obtain ⟨s0⟩ := (inferInstance : Nonempty (supportSubtype r))
+  haveI hNO : Nonempty O := Relabeling.nonempty_of_dist (P s0.1)
+  haveI hNY : Nonempty Y := Relabeling.nonempty_of_dist (Q s0.1)
+  set eA : (supportSubtype (inlDist r : Dist (A ⊕ A))) ⊕ (supportSubtype (inrDist r : Dist (A ⊕ A)))
+      ≃ supportSubtype r ⊕ supportSubtype r :=
+    Equiv.sumCongr (inlSupportEquiv r) (inrSupportEquiv r) with heA
+  have hC : Relabeling.relabelChannel eA (Equiv.refl ((O ⊕ Y) ⊕ (O ⊕ Y)))
+        (blockChannel ((blockChannel P Q).restrictToSupport (inlDist r))
+          ((blockChannel P Q).restrictToSupport (inrDist r)))
+      = blockChannel (Channel.postprocess (Channel.restrictToSupport P r) (embedLeftKernel (Y := Y)))
+          (Channel.postprocess (Channel.restrictToSupport Q r) (embedRightKernel (O := O))) := by
+    rw [heA]; exact relabel_boundaryBlock_eq_embeddedFace r P Q
+  have hpl : Relabeling.relabelDist eA (inlDist (inlDist r).restrictToSupport)
+      = (inlDist r.restrictToSupport : Dist (supportSubtype r ⊕ supportSubtype r)) := by
+    rw [heA, relabelDist_sumCongr_inlDist, relabel_inlSupportEquiv_restrict]
+  have hpr : Relabeling.relabelDist eA (inrDist (inrDist r).restrictToSupport)
+      = (inrDist r.restrictToSupport : Dist (supportSubtype r ⊕ supportSubtype r)) := by
+    rw [heA, relabelDist_sumCongr_inrDist, relabel_inrSupportEquiv_restrict]
+  set Ps : Channel (supportSubtype r) O := Channel.restrictToSupport P r with hPs
+  set Qs : Channel (supportSubtype r) Y := Channel.restrictToSupport Q r with hQs
+  set rs : Dist (supportSubtype r) := r.restrictToSupport with hrs
+  have hleft_to_new :
+      F.rel (blockChannel Ps (Channel.postprocess Ps (embedLeftKernel (Y := Y)))) (inlDist rs) (inrDist rs) :=
+    hax.a4 Ps (embedLeftKernel (Y := Y)) rs
+  have hleft_to_old :
+      F.rel (blockChannel (Channel.postprocess Ps (embedLeftKernel (Y := Y))) Ps) (inlDist rs) (inrDist rs) := by
+    have h := hax.a4 (Channel.postprocess Ps (embedLeftKernel (Y := Y))) collapseLeftKernel rs
+    rwa [postprocess_embedLeft_collapseLeft Ps] at h
+  have hright_to_new :
+      F.rel (blockChannel Qs (Channel.postprocess Qs (embedRightKernel (O := O)))) (inlDist rs) (inrDist rs) :=
+    hax.a4 Qs (embedRightKernel (O := O)) rs
+  have hright_to_old :
+      F.rel (blockChannel (Channel.postprocess Qs (embedRightKernel (O := O))) Qs) (inlDist rs) (inrDist rs) := by
+    have h := hax.a4 (Channel.postprocess Qs (embedRightKernel (O := O))) collapseRightKernel rs
+    rwa [postprocess_embedRight_collapseRight Qs] at h
+  have hbw :
+      F.rel (blockChannel Ps Qs) (inlDist rs) (inrDist rs)
+      ↔ F.rel (blockChannel (Channel.postprocess Ps (embedLeftKernel (Y := Y)))
+          (Channel.postprocess Qs (embedRightKernel (O := O)))) (inlDist rs) (inrDist rs) :=
+    blackwell_pairwise_block_replacement_from_weak_equiv F hax
+      Ps (Channel.postprocess Ps (embedLeftKernel (Y := Y)))
+      Qs (Channel.postprocess Qs (embedRightKernel (O := O)))
+      rs rs rs rs
+      hleft_to_new hleft_to_old hright_to_new hright_to_old
+  have step1 := preference_support_restriction_of_axioms F hax (blockChannel P Q) (inlDist r) (inrDist r)
+  have step2 := relabel_rel_action_of_axioms F hax eA
+        (blockChannel ((blockChannel P Q).restrictToSupport (inlDist r))
+          ((blockChannel P Q).restrictToSupport (inrDist r)))
+        (inlDist (inlDist r).restrictToSupport)
+        (inrDist (inrDist r).restrictToSupport)
+  constructor
+  · intro hamb
+    have hrel := step2.mp (step1.mp hamb)
+    apply hbw.mpr
+    rw [← hC, ← hpl, ← hpr]
+    exact hrel
+  · intro hface
+    have h := hbw.mp hface
+    rw [← hC, ← hpl, ← hpr] at h
+    exact step1.mpr (step2.mpr h)
+
+/-- **STRICT boundary block-comparison lift.**  A strict support-face block
+comparison lifts to a strict ambient boundary block comparison.  The weak part
+uses `boundary_block_lift_iff`; the "not reversed" part descends the hypothetical
+reversal back to the face via block-swap and the iff, contradicting the strict
+face hypothesis. -/
+theorem boundary_block_lift_strict
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (P : Channel A O) (Q : Channel A Y)
+    (hface_strict : F.strictRel (blockChannel (Channel.restrictToSupport P r) (Channel.restrictToSupport Q r))
+      (inlDist r.restrictToSupport) (inrDist r.restrictToSupport)) :
+    F.strictRel (blockChannel P Q) (inlDist r) (inrDist r) := by
+  obtain ⟨hface_rel, hface_nrev⟩ := hface_strict
+  refine ⟨(boundary_block_lift_iff F hax r P Q).mpr hface_rel, ?_⟩
+  intro hrev
+  have hQP : F.rel (blockChannel Q P) (inlDist r) (inrDist r) :=
+    (Relabeling.block_swap_rel_of_axioms F hax P Q r r).mp hrev
+  have hface_QP : F.rel (blockChannel (Channel.restrictToSupport Q r) (Channel.restrictToSupport P r))
+      (inlDist r.restrictToSupport) (inrDist r.restrictToSupport) :=
+    (boundary_block_lift_iff F hax r Q P).mp hQP
+  have hface_rev : F.rel (blockChannel (Channel.restrictToSupport P r) (Channel.restrictToSupport Q r))
+      (inrDist r.restrictToSupport) (inlDist r.restrictToSupport) :=
+    (Relabeling.block_swap_rel_of_axioms F hax (Channel.restrictToSupport P r)
+      (Channel.restrictToSupport Q r) r.restrictToSupport r.restrictToSupport).mpr hface_QP
+  exact hface_nrev hface_rev
+
+/-! ## Phase 4: boundary marginal-value transport core (proved from the strict
+boundary block lift).  These build the atomic-linear boundary sign-agreement and
+the per-representative boundary scalar. -/
+
+noncomputable def extendFace {A Z : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype Z] [DecidableEq Z]
+    (r : Dist A) (Q : Channel (supportSubtype r) Z) (ζ : Dist Z) : Channel A Z :=
+  fun a => if h : 0 < r a then Q ⟨a, h⟩ else ζ
+
+theorem restrictToSupport_extendFace {A Z : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype Z] [DecidableEq Z]
+    (r : Dist A) (Q : Channel (supportSubtype r) Z) (ζ : Dist Z) :
+    Channel.restrictToSupport (extendFace r Q ζ) r = Q := by
+  funext a
+  rw [Channel.restrictToSupport_apply]
+  show extendFace r Q ζ a.1 = Q a
+  unfold extendFace
+  rw [dif_pos a.2]; congr
+
+theorem exists_domination_of_fullSupport
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q r : Dist A) (hq : q.FullSupport) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ a : A, ε * r a ≤ q a := by
+  classical
+  have hpos : ∀ a : A, 0 < q a := hq
+  obtain ⟨a0, -, ha0min⟩ := Finset.exists_min_image Finset.univ (fun a => q a) ⟨Classical.arbitrary A, Finset.mem_univ _⟩
+  refine ⟨q a0, hpos a0, ?_⟩
+  intro a
+  have hqa0_le : q a0 ≤ q a := ha0min a (Finset.mem_univ a)
+  have hra_le_one : r a ≤ 1 := by
+    have := r.sum_eq_one
+    have hle : r a ≤ ∑ b : A, r b := Finset.single_le_sum (fun b _ => r.nonneg b) (Finset.mem_univ a)
+    rw [this] at hle; exact hle
+  calc q a0 * r a ≤ q a0 * 1 := by
+        apply mul_le_mul_of_nonneg_left hra_le_one (le_of_lt (hpos a0))
+    _ = q a0 := by ring
+    _ ≤ q a := hqa0_le
+
+theorem posteriorLawDifference_extendFace_pushforward
+    {A Z : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype Z] [DecidableEq Z]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (Pf Rf : Channel (supportSubtype r) Z) (ζ : Dist Z)
+    (φ : Dist A → ℝ) :
+    posteriorLawDifferenceExp r.restrictToSupport
+        (experimentOfChannel Pf) (experimentOfChannel Rf)
+        (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r))) =
+      posteriorLawDifferenceExp r
+        (experimentOfChannel (extendFace r Pf ζ)) (experimentOfChannel (extendFace r Rf ζ)) φ := by
+  unfold posteriorLawDifferenceExp
+  rw [posteriorLawIntegralExp_experimentOfChannel, posteriorLawIntegralExp_experimentOfChannel,
+    posteriorLawIntegralExp_experimentOfChannel, posteriorLawIntegralExp_experimentOfChannel]
+  have hP := posteriorLawIntegral_restrictToSupport (extendFace r Pf ζ) r φ
+  have hR := posteriorLawIntegral_restrictToSupport (extendFace r Rf ζ) r φ
+  rw [restrictToSupport_extendFace r Pf ζ] at hP
+  rw [restrictToSupport_extendFace r Rf ζ] at hR
+  rw [hP, hR]
+
+-- Boundary feasible-difference variants (block comparison given directly).
+theorem branch_feasible_difference_pos_of_branch_block_strict
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O₁] [DecidableEq O₁]
+    (q : Dist A) (hq : q.FullSupport)
+    (P₁ : Channel A O₁) (target : O₁)
+    (hpos : BranchPositive P₁ q target)
+    (O₂ : O₁ → Type u)
+    [∀ o, Fintype (O₂ o)] [∀ o, DecidableEq (O₂ o)]
+    (Q R : ∀ o, Channel A (O₂ o))
+    (hsame : ∀ o, o ≠ target → Q o = R o)
+    (htarget_weak :
+      F.rel (blockChannel (Q target) (R target))
+        (inlDist (branchPosterior P₁ q target)) (inrDist (branchPosterior P₁ q target)))
+    (htarget_strict :
+      F.strictRel (blockChannel (Q target) (R target))
+        (inlDist (branchPosterior P₁ q target)) (inrDist (branchPosterior P₁ q target))) :
+    0 < hlin.linearPart F hV q
+      (posteriorLawDifferenceExp q
+        (experimentOfChannel (seqComposeDep P₁ O₂ Q))
+        (experimentOfChannel (seqComposeDep P₁ O₂ R))) := by
+  have hagg_strict :
+      F.strictRel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R)) (inlDist q) (inrDist q) :=
+    A7_strict_one_branch_of_strict F hax O₂ q P₁ Q R target hpos hsame htarget_weak htarget_strict
+  have hagg_gt :
+      hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ R)) <
+        hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ Q)) := by
+    have hpref : ExperimentPairPref F
+        (experimentOfChannel (seqComposeDep P₁ O₂ Q))
+        (experimentOfChannel (seqComposeDep P₁ O₂ R)) q q := by
+      change F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R)) (inlDist q) (inrDist q)
+      exact hagg_strict.1
+    have hge := (hV.represents_block_comparisons q hq _ _).mp hpref
+    by_contra hnot_gt
+    have hge_rev := le_of_not_gt hnot_gt
+    have hpref_rev : ExperimentPairPref F
+        (experimentOfChannel (seqComposeDep P₁ O₂ R))
+        (experimentOfChannel (seqComposeDep P₁ O₂ Q)) q q :=
+      (hV.represents_block_comparisons q hq _ _).mpr hge_rev
+    have hrel_rev : F.rel (blockChannel (seqComposeDep P₁ O₂ R) (seqComposeDep P₁ O₂ Q)) (inlDist q) (inrDist q) :=
+      hpref_rev
+    have hrel_rev_same : F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R)) (inrDist q) (inlDist q) :=
+      (Relabeling.block_swap_rel_of_axioms F hax (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R) q q).mpr hrel_rev
+    exact hagg_strict.2 hrel_rev_same
+  exact (linearPart_difference_pos_iff_value_gt hlin F hV q
+    (experimentOfChannel (seqComposeDep P₁ O₂ Q)) (experimentOfChannel (seqComposeDep P₁ O₂ R))).mpr hagg_gt
+
+theorem branch_feasible_difference_zero_of_branch_block_weak
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O₁] [DecidableEq O₁]
+    (q : Dist A) (hq : q.FullSupport)
+    (P₁ : Channel A O₁) (target : O₁)
+    (O₂ : O₁ → Type u)
+    [∀ o, Fintype (O₂ o)] [∀ o, DecidableEq (O₂ o)]
+    (Q R : ∀ o, Channel A (O₂ o))
+    (hsame : ∀ o, o ≠ target → Q o = R o)
+    (htarget_QR :
+      F.rel (blockChannel (Q target) (R target))
+        (inlDist (branchPosterior P₁ q target)) (inrDist (branchPosterior P₁ q target)))
+    (htarget_RQ :
+      F.rel (blockChannel (R target) (Q target))
+        (inlDist (branchPosterior P₁ q target)) (inrDist (branchPosterior P₁ q target))) :
+    hlin.linearPart F hV q
+      (posteriorLawDifferenceExp q
+        (experimentOfChannel (seqComposeDep P₁ O₂ Q))
+        (experimentOfChannel (seqComposeDep P₁ O₂ R))) = 0 := by
+  have hagg_QR : F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R)) (inlDist q) (inrDist q) :=
+    A7_weak_one_branch_of_rel F hax O₂ q P₁ Q R target hsame htarget_QR
+  have hagg_RQ : F.rel (blockChannel (seqComposeDep P₁ O₂ R) (seqComposeDep P₁ O₂ Q)) (inlDist q) (inrDist q) :=
+    A7_weak_one_branch_of_rel F hax O₂ q P₁ R Q target (fun o ho => (hsame o ho).symm) htarget_RQ
+  have hpref_QR : ExperimentPairPref F
+      (experimentOfChannel (seqComposeDep P₁ O₂ Q))
+      (experimentOfChannel (seqComposeDep P₁ O₂ R)) q q := by
+    change F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R)) (inlDist q) (inrDist q)
+    exact hagg_QR
+  have hpref_RQ : ExperimentPairPref F
+      (experimentOfChannel (seqComposeDep P₁ O₂ R))
+      (experimentOfChannel (seqComposeDep P₁ O₂ Q)) q q := by
+    change F.rel (blockChannel (seqComposeDep P₁ O₂ R) (seqComposeDep P₁ O₂ Q)) (inlDist q) (inrDist q)
+    exact hagg_RQ
+  have hge_QR := (hV.represents_block_comparisons q hq _ _).mp hpref_QR
+  have hge_RQ := (hV.represents_block_comparisons q hq _ _).mp hpref_RQ
+  have hagg_eq : hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ Q)) =
+      hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ R)) := le_antisymm hge_RQ hge_QR
+  exact (linearPart_difference_zero_iff_value_eq hlin F hV q
+    (experimentOfChannel (seqComposeDep P₁ O₂ Q)) (experimentOfChannel (seqComposeDep P₁ O₂ R))).mpr hagg_eq
+
+-- THE boundary forward-zero.
+theorem boundary_branch_tangent_forward_zero_of_A1
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q r : Dist A) (hq : q.FullSupport)
+    [Nonempty (supportSubtype r)]
+    (σ : PosteriorLawSigned (supportSubtype r))
+    (hσatomic : PosteriorLawSigned.AtomicLinear σ)
+    (hσtan : PosteriorLawTangent σ)
+    (hσne : σ ≠ ((fun _ => 0) : PosteriorLawSigned (supportSubtype r))) :
+    (0 < hlin.linearPart F hV r.restrictToSupport σ →
+      0 < hlin.linearPart F hV q (pushSignedIncl r σ)) ∧
+    (hlin.linearPart F hV r.restrictToSupport σ = 0 →
+      hlin.linearPart F hV q (pushSignedIncl r σ) = 0) := by
+  classical
+  set rs : Dist (supportSubtype r) := r.restrictToSupport with hrs
+  have hrs_fs : rs.FullSupport := Dist.restrictToSupport_fullSupport r
+  obtain ⟨t, ht, Z, hZ, hZdec, hreal⟩ :=
+    commonOutcomeAtomicLinearTangentRealization_of_atomicLinearSpanning
+      (atomicLinearTangentSpanning_of_atomic finiteAtomicPosteriorTangentSpanning)
+      rs hrs_fs σ hσatomic hσtan hσne
+  letI : Fintype Z := hZ
+  letI : DecidableEq Z := hZdec
+  obtain ⟨Pf, Rf, hσeval⟩ := hreal
+  haveI hNZ : Nonempty Z := Relabeling.nonempty_of_dist (Pf (Classical.arbitrary (supportSubtype r)))
+  let ζ : Dist Z := Pf (Classical.arbitrary (supportSubtype r))
+  let Pe : Channel A Z := extendFace r Pf ζ
+  let Re : Channel A Z := extendFace r Rf ζ
+  let ambientDiff : PosteriorLawSigned A :=
+    posteriorLawDifferenceExp r (experimentOfChannel Pe) (experimentOfChannel Re)
+  -- pushSignedIncl r σ = SMul t ambientDiff.
+  have hpush_eq : pushSignedIncl r σ = posteriorLawSignedSMul t ambientDiff := by
+    funext φ
+    show σ (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r))) = _
+    rw [hσeval (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r)))]
+    show t * posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)
+        (fun d => φ (Channel.actionPushforward d (supportIncludeKernel r))) = _
+    rw [posteriorLawDifference_extendFace_pushforward r Pf Rf ζ φ]
+    rfl
+  have hL1 :
+      hlin.linearPart F hV q (pushSignedIncl r σ) =
+        t * hlin.linearPart F hV q ambientDiff := by
+    rw [hpush_eq, hlin.linearPart_smul]
+  -- L2 σ = t * linearPart rs (facediff Pf Rf).
+  have hσeq : σ = posteriorLawSignedSMul t
+      (posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)) := by
+    funext φ; rw [hσeval φ]; rfl
+  have hL2 :
+      hlin.linearPart F hV rs σ =
+        t * hlin.linearPart F hV rs
+          (posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)) := by
+    rw [hσeq, hlin.linearPart_smul]
+  -- Reach r as a branch of full-support q.
+  obtain ⟨ε, hε_pos, hdom⟩ := exists_domination_of_fullSupport q r hq
+  let P₁ : Channel A (ULift.{u} Bool) := binaryReachChannel q r ε (le_of_lt hε_pos) hdom
+  have hbrpos : BranchPositive P₁ q (ULift.up true) := by
+    show (Channel.outcomeMarginal P₁ q) (ULift.up true) > 0
+    rw [outcomeMarginal_binaryReachChannel_true q r ε (le_of_lt hε_pos) hdom]; exact hε_pos
+  have hbrpost : branchPosterior P₁ q (ULift.up true) = r :=
+    branchPosterior_binaryReachChannel_true q r ε hε_pos hdom
+  let O₂ : ULift.{u} Bool → Type u := fun _ => Z
+  let QQ : ∀ o, Channel A (O₂ o) := fun o => if o = ULift.up true then Pe else Pe
+  let RR : ∀ o, Channel A (O₂ o) := fun o => if o = ULift.up true then Re else Pe
+  have hsame : ∀ o, o ≠ ULift.up true → QQ o = RR o := by
+    intro o ho; simp [QQ, RR, ho]
+  have hQtarget : QQ (ULift.up true) = Pe := by simp [QQ]
+  have hRtarget : RR (ULift.up true) = Re := by simp [RR]
+  set m : ℝ := (Channel.outcomeMarginal P₁ q) (ULift.up true) with hm
+  have hm_pos : 0 < m := hbrpos
+  -- seqDiff = SMul m ambientDiff (as functions), so linearPart q seqDiff = m * linearPart q ambientDiff.
+  have hseq_eq :
+      posteriorLawDifferenceExp q
+          (experimentOfChannel (seqComposeDep P₁ O₂ QQ))
+          (experimentOfChannel (seqComposeDep P₁ O₂ RR)) =
+        posteriorLawSignedSMul m ambientDiff := by
+    funext φ
+    have h := posteriorLawDifference_seqComposeDep_one_branch q P₁ O₂ QQ RR (ULift.up true) hsame φ
+    rw [h]
+    show m * posteriorLawDifferenceExp (branchPosterior P₁ q (ULift.up true))
+        (experimentOfChannel (QQ (ULift.up true))) (experimentOfChannel (RR (ULift.up true))) φ = _
+    rw [hQtarget, hRtarget, hbrpost]
+    rfl
+  have hLseq :
+      hlin.linearPart F hV q
+        (posteriorLawDifferenceExp q
+          (experimentOfChannel (seqComposeDep P₁ O₂ QQ))
+          (experimentOfChannel (seqComposeDep P₁ O₂ RR))) =
+        m * hlin.linearPart F hV q ambientDiff := by
+    rw [hseq_eq, hlin.linearPart_smul]
+  refine ⟨?_, ?_⟩
+  · -- forward positivity
+    intro hpos
+    have hface_pos : 0 < hlin.linearPart F hV rs
+        (posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)) := by
+      rw [hL2] at hpos
+      by_contra hle
+      have : hlin.linearPart F hV rs
+          (posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)) ≤ 0 :=
+        le_of_not_gt hle
+      nlinarith [hpos, ht]
+    have hface_gap : hV.V rs (experimentOfChannel Rf) < hV.V rs (experimentOfChannel Pf) :=
+      (linearPart_difference_pos_iff_value_gt hlin F hV rs
+        (experimentOfChannel Pf) (experimentOfChannel Rf)).mp hface_pos
+    have hstrict_face : F.strictRel (blockChannel Pf Rf) (inlDist rs) (inrDist rs) :=
+      block_strictRel_of_channel_value_gt F hax hV rs hrs_fs Pf Rf hface_gap
+    have hstrict_r : F.strictRel (blockChannel Pe Re) (inlDist r) (inrDist r) := by
+      apply boundary_block_lift_strict F hax r Pe Re
+      show F.strictRel (blockChannel (Channel.restrictToSupport Pe r) (Channel.restrictToSupport Re r))
+        (inlDist rs) (inrDist rs)
+      rw [show Channel.restrictToSupport Pe r = Pf from restrictToSupport_extendFace r Pf ζ,
+        show Channel.restrictToSupport Re r = Rf from restrictToSupport_extendFace r Rf ζ]
+      exact hstrict_face
+    -- assemble strict/weak block at branchPosterior form.
+    have htarget_strict : F.strictRel (blockChannel (QQ (ULift.up true)) (RR (ULift.up true)))
+        (inlDist (branchPosterior P₁ q (ULift.up true))) (inrDist (branchPosterior P₁ q (ULift.up true))) := by
+      rw [hQtarget, hRtarget, hbrpost]; exact hstrict_r
+    have htarget_weak : F.rel (blockChannel (QQ (ULift.up true)) (RR (ULift.up true)))
+        (inlDist (branchPosterior P₁ q (ULift.up true))) (inrDist (branchPosterior P₁ q (ULift.up true))) :=
+      htarget_strict.1
+    have hseq_pos := branch_feasible_difference_pos_of_branch_block_strict hlin F hax hV q hq
+      P₁ (ULift.up true) hbrpos O₂ QQ RR hsame htarget_weak htarget_strict
+    rw [hLseq] at hseq_pos
+    have hamb_pos : 0 < hlin.linearPart F hV q ambientDiff := by
+      by_contra hle
+      have : hlin.linearPart F hV q ambientDiff ≤ 0 := le_of_not_gt hle
+      nlinarith [hseq_pos, hm_pos]
+    rw [hL1]; exact mul_pos ht hamb_pos
+  · -- zero case
+    intro hzero
+    have hface_zero : hlin.linearPart F hV rs
+        (posteriorLawDifferenceExp rs (experimentOfChannel Pf) (experimentOfChannel Rf)) = 0 := by
+      rw [hL2] at hzero
+      rcases mul_eq_zero.mp hzero with h | h
+      · exact absurd h (ne_of_gt ht)
+      · exact h
+    have hface_eq : hV.V rs (experimentOfChannel Pf) = hV.V rs (experimentOfChannel Rf) :=
+      (linearPart_difference_zero_iff_value_eq hlin F hV rs
+        (experimentOfChannel Pf) (experimentOfChannel Rf)).mp hface_zero
+    have hweak_PR_face : F.rel (blockChannel Pf Rf) (inlDist rs) (inrDist rs) :=
+      block_rel_of_channel_value_ge F hV rs hrs_fs Pf Rf (by rw [hface_eq])
+    have hweak_RP_face : F.rel (blockChannel Rf Pf) (inlDist rs) (inrDist rs) :=
+      block_rel_of_channel_value_ge F hV rs hrs_fs Rf Pf (by rw [hface_eq])
+    have hweak_PR_r : F.rel (blockChannel Pe Re) (inlDist r) (inrDist r) := by
+      apply boundary_block_lift F hax r Pe Re
+      rw [show Channel.restrictToSupport Pe r = Pf from restrictToSupport_extendFace r Pf ζ,
+        show Channel.restrictToSupport Re r = Rf from restrictToSupport_extendFace r Rf ζ]
+      exact hweak_PR_face
+    have hweak_RP_r : F.rel (blockChannel Re Pe) (inlDist r) (inrDist r) := by
+      apply boundary_block_lift F hax r Re Pe
+      rw [show Channel.restrictToSupport Re r = Rf from restrictToSupport_extendFace r Rf ζ,
+        show Channel.restrictToSupport Pe r = Pf from restrictToSupport_extendFace r Pf ζ]
+      exact hweak_RP_face
+    have htarget_QR : F.rel (blockChannel (QQ (ULift.up true)) (RR (ULift.up true)))
+        (inlDist (branchPosterior P₁ q (ULift.up true))) (inrDist (branchPosterior P₁ q (ULift.up true))) := by
+      rw [hQtarget, hRtarget, hbrpost]; exact hweak_PR_r
+    have htarget_RQ : F.rel (blockChannel (RR (ULift.up true)) (QQ (ULift.up true)))
+        (inlDist (branchPosterior P₁ q (ULift.up true))) (inrDist (branchPosterior P₁ q (ULift.up true))) := by
+      rw [hQtarget, hRtarget, hbrpost]; exact hweak_RP_r
+    have hseq_zero := branch_feasible_difference_zero_of_branch_block_weak hlin F hax hV q hq
+      P₁ (ULift.up true) O₂ QQ RR hsame htarget_QR htarget_RQ
+    rw [hLseq] at hseq_zero
+    have hamb_zero : hlin.linearPart F hV q ambientDiff = 0 := by
+      rcases mul_eq_zero.mp hseq_zero with h | h
+      · exact absurd h (ne_of_gt hm_pos)
+      · exact h
+    rw [hL1, hamb_zero, mul_zero]
+
+
+
+
+
+-- pushSignedIncl algebra.
+theorem pushSignedIncl_add {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (σ τ : PosteriorLawSigned (supportSubtype r)) :
+    pushSignedIncl r (posteriorLawSignedAdd σ τ) =
+      posteriorLawSignedAdd (pushSignedIncl r σ) (pushSignedIncl r τ) := by
+  funext φ; rfl
+
+theorem pushSignedIncl_smul {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) [Nonempty (supportSubtype r)]
+    (c : ℝ) (σ : PosteriorLawSigned (supportSubtype r)) :
+    pushSignedIncl r (posteriorLawSignedSMul c σ) =
+      posteriorLawSignedSMul c (pushSignedIncl r σ) := by
+  funext φ; rfl
+
+-- β-scalar for boundary r: for atomic-linear tangents σ on supportSubtype r,
+--   linearPart q (pushSignedIncl r σ) = β * linearPart r.restrictToSupport σ.
+theorem boundary_atomicLinear_tangent_scalar_of_A1
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q r : Dist A) (hq : q.FullSupport)
+    [Nonempty (supportSubtype r)]
+    (hr_nondegenerate : ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < r.restrictToSupport a ∧ 0 < r.restrictToSupport b) :
+    ∃ β : ℝ, 0 < β ∧
+      ∀ (σ : PosteriorLawSigned (supportSubtype r)),
+        PosteriorLawSigned.AtomicLinear σ → PosteriorLawTangent σ →
+        hlin.linearPart F hV q (pushSignedIncl r σ) =
+          β * hlin.linearPart F hV r.restrictToSupport σ := by
+  classical
+  set rs : Dist (supportSubtype r) := r.restrictToSupport with hrs
+  have hrs_fs : rs.FullSupport := Dist.restrictToSupport_fullSupport r
+  -- L1, L2 as functionals.
+  let L1 : PosteriorLawSigned (supportSubtype r) → ℝ :=
+    fun σ => hlin.linearPart F hV q (pushSignedIncl r σ)
+  let L2 : PosteriorLawSigned (supportSubtype r) → ℝ :=
+    fun σ => hlin.linearPart F hV rs σ
+  have hL1add : ∀ σ τ, L1 (posteriorLawSignedAdd σ τ) = L1 σ + L1 τ := by
+    intro σ τ; show hlin.linearPart F hV q (pushSignedIncl r (posteriorLawSignedAdd σ τ)) = _
+    rw [pushSignedIncl_add, hlin.linearPart_add]
+  have hL1smul : ∀ c σ, L1 (posteriorLawSignedSMul c σ) = c * L1 σ := by
+    intro c σ; show hlin.linearPart F hV q (pushSignedIncl r (posteriorLawSignedSMul c σ)) = _
+    rw [pushSignedIncl_smul, hlin.linearPart_smul]
+  have hL2add : ∀ σ τ, L2 (posteriorLawSignedAdd σ τ) = L2 σ + L2 τ := by
+    intro σ τ; exact hlin.linearPart_add F hV rs σ τ
+  have hL2smul : ∀ c σ, L2 (posteriorLawSignedSMul c σ) = c * L2 σ := by
+    intro c σ; exact hlin.linearPart_smul F hV rs c σ
+  -- forward-zero for atomic-linear tangents.
+  have hforward :
+      ∀ (σ : PosteriorLawSigned (supportSubtype r)),
+        PosteriorLawSigned.AtomicLinear σ → PosteriorLawTangent σ →
+        σ ≠ ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) →
+        (0 < L2 σ → 0 < L1 σ) ∧ (L2 σ = 0 → L1 σ = 0) :=
+    fun σ hatom htan hne =>
+      boundary_branch_tangent_forward_zero_of_A1 hlin F hax hV q r hq σ hatom htan hne
+  -- sign agreement (both directions via negation).
+  have hsign :
+      ∀ (σ : PosteriorLawSigned (supportSubtype r)),
+        PosteriorLawSigned.AtomicLinear σ → PosteriorLawTangent σ →
+        σ ≠ ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) →
+        (0 < L1 σ ↔ 0 < L2 σ) ∧ (L1 σ = 0 ↔ L2 σ = 0) := by
+    intro σ hatom htan hne
+    have hfwd := hforward σ hatom htan hne
+    let negσ := posteriorLawSignedSMul (-1) σ
+    have hneg_atom := PosteriorLawSigned.AtomicLinear.smul (-1) hatom
+    have hneg_tan := PosteriorLawTangent_smul (-1) htan
+    have hneg_ne := posteriorLawSignedSMul_neg_ne_zero hne
+    have hfwd_neg := hforward negσ hneg_atom hneg_tan hneg_ne
+    have hq_neg : L1 negσ = -L1 σ := by rw [show L1 negσ = L1 (posteriorLawSignedSMul (-1) σ) from rfl, hL1smul]; ring
+    have hr_neg : L2 negσ = -L2 σ := by rw [show L2 negσ = L2 (posteriorLawSignedSMul (-1) σ) from rfl, hL2smul]; ring
+    constructor
+    · constructor
+      · intro hqpos
+        by_contra hrnot
+        have hrle := le_of_not_gt hrnot
+        by_cases hrzero : L2 σ = 0
+        · linarith [hfwd.2 hrzero]
+        · have hrlt : L2 σ < 0 := lt_of_le_of_ne hrle hrzero
+          have hrnegpos : 0 < L2 negσ := by rw [hr_neg]; linarith
+          linarith [hfwd_neg.1 hrnegpos, hq_neg]
+      · intro hrpos; exact hfwd.1 hrpos
+    · constructor
+      · intro hqzero
+        by_contra hrne
+        rcases lt_or_gt_of_ne hrne with hrlt | hrpos
+        · have hrnegpos : 0 < L2 negσ := by rw [hr_neg]; linarith
+          linarith [hfwd_neg.1 hrnegpos, hq_neg]
+        · linarith [hfwd.1 hrpos]
+      · exact hfwd.2
+  -- nonzero atomic-linear tangent witness on the full-support face rs.
+  rcases branch_linear_part_nonzero_atomicLinear_tangent_of_A1
+      hlin F hax hV rs rs hrs_fs hrs_fs hr_nondegenerate with
+    ⟨x0, hx0_atom, hx0_tan, hx0_nz⟩
+  have hx0_ne : x0 ≠ ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) := by
+    intro hx0_eq; exact hx0_nz (by rw [hx0_eq]; exact linearPart_zero hlin F hV rs)
+  let x : PosteriorLawSigned (supportSubtype r) :=
+    if 0 < L2 x0 then x0 else posteriorLawSignedSMul (-1) x0
+  have hx_atom : PosteriorLawSigned.AtomicLinear x := by
+    dsimp only [x]; split_ifs
+    · exact hx0_atom
+    · exact PosteriorLawSigned.AtomicLinear.smul (-1) hx0_atom
+  have hx_tan : PosteriorLawTangent x := by
+    dsimp only [x]; split_ifs
+    · exact hx0_tan
+    · exact PosteriorLawTangent_smul (-1) hx0_tan
+  have hx_ne : x ≠ ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) := by
+    dsimp only [x]; split_ifs
+    · exact hx0_ne
+    · exact posteriorLawSignedSMul_neg_ne_zero hx0_ne
+  have hx_L2_pos : 0 < L2 x := by
+    dsimp only [x]; split_ifs with hpos
+    · exact hpos
+    · have hle : L2 x0 ≤ 0 := le_of_not_gt hpos
+      have hlt : L2 x0 < 0 := lt_of_le_of_ne hle hx0_nz
+      show 0 < L2 (posteriorLawSignedSMul (-1) x0)
+      rw [hL2smul]; linarith
+  have hx_L2_ne : L2 x ≠ 0 := ne_of_gt hx_L2_pos
+  have hx_L1_pos : 0 < L1 x := (hsign x hx_atom hx_tan hx_ne).1.mpr hx_L2_pos
+  let β : ℝ := L1 x / L2 x
+  have hβ_pos : 0 < β := div_pos hx_L1_pos hx_L2_pos
+  refine ⟨β, hβ_pos, ?_⟩
+  intro y hy_atom hy_tan
+  by_cases hy_ne : y = ((fun _ => 0) : PosteriorLawSigned (supportSubtype r))
+  · show L1 y = β * L2 y
+    rw [hy_ne]
+    show hlin.linearPart F hV q (pushSignedIncl r ((fun _ => 0))) = β * hlin.linearPart F hV rs (fun _ => 0)
+    rw [show pushSignedIncl r ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) =
+        ((fun _ => 0) : PosteriorLawSigned A) from by funext φ; rfl]
+    rw [linearPart_zero hlin F hV q, linearPart_zero hlin F hV rs]; ring
+  · let c : ℝ := -(L2 y / L2 x)
+    let z : PosteriorLawSigned (supportSubtype r) :=
+      posteriorLawSignedAdd y (posteriorLawSignedSMul c x)
+    have hz_atom : PosteriorLawSigned.AtomicLinear z :=
+      PosteriorLawSigned.AtomicLinear.add hy_atom (PosteriorLawSigned.AtomicLinear.smul c hx_atom)
+    have hz_tan : PosteriorLawTangent z :=
+      PosteriorLawTangent_add hy_tan (PosteriorLawTangent_smul c hx_tan)
+    have hz_L2 : L2 z = 0 := by
+      show L2 (posteriorLawSignedAdd y (posteriorLawSignedSMul c x)) = 0
+      rw [hL2add, hL2smul]
+      show L2 y + c * L2 x = 0
+      have : c = -(L2 y / L2 x) := rfl
+      have hdiv := div_mul_cancel₀ (L2 y) hx_L2_ne
+      rw [this]; field_simp; ring
+    have hz_L1 : L1 z = 0 := by
+      by_cases hz_ne : z = ((fun _ => 0) : PosteriorLawSigned (supportSubtype r))
+      · show L1 z = 0
+        rw [hz_ne]
+        show hlin.linearPart F hV q (pushSignedIncl r ((fun _ => 0))) = 0
+        rw [show pushSignedIncl r ((fun _ => 0) : PosteriorLawSigned (supportSubtype r)) =
+            ((fun _ => 0) : PosteriorLawSigned A) from by funext φ; rfl]
+        exact linearPart_zero hlin F hV q
+      · exact (hsign z hz_atom hz_tan hz_ne).2.mpr hz_L2
+    have hz_L1_expand : L1 z = L1 y + c * L1 x := by
+      show L1 (posteriorLawSignedAdd y (posteriorLawSignedSMul c x)) = _
+      rw [hL1add, hL1smul]
+    show L1 y = β * L2 y
+    have hLqy : L1 y = -c * L1 x := by linarith [hz_L1, hz_L1_expand]
+    have hc_expand : c = -(L2 y / L2 x) := rfl
+    have hβ_eq : β = L1 x / L2 x := rfl
+    rw [hLqy, hc_expand, hβ_eq]; field_simp
+
+/-- Face nondegeneracy from ambient nondegeneracy. -/
+theorem faceNondeg_of_ambientNondeg {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
+    ∃ a b : supportSubtype r, a ≠ b ∧
+      0 < r.restrictToSupport a ∧ 0 < r.restrictToSupport b := by
+  obtain ⟨a, b, hab, ha, hb⟩ := hrnd
+  exact ⟨⟨a, ha⟩, ⟨b, hb⟩, by intro hh; exact hab (congrArg Subtype.val hh),
+    by rw [Dist.restrictToSupport_apply]; exact ha,
+    by rw [Dist.restrictToSupport_apply]; exact hb⟩
+
+/-- Support nonemptiness from ambient nondegeneracy. -/
+theorem nonempty_support_of_nondeg {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (r : Dist A) (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
+    Nonempty (supportSubtype r) := by
+  obtain ⟨a, _, _, ha, _⟩ := hrnd; exact ⟨⟨a, ha⟩⟩
+
+/-- **Boundary coefficient scale from the FinalHM interface at a fixed `(F, hax)`.**
+
+The positive boundary coefficient `β(q,r)` is `Classical.choose` of the boundary
+tangent scalar `boundary_atomicLinear_tangent_scalar_of_A1` at the canonical HM
+value representative `posteriorValueRepresentation_of_FinalHMInterface hhm hax`.
+Off the boundary-nondegenerate domain it falls back to `1`.  This is a genuine
+convention *value* (not a new assumption): it is the ratio of ambient to
+support-face linear parts, which the strict boundary block lift makes positive. -/
+noncomputable def boundaryCoeffForHM
+    (hhm : FinalHMInterface.{u}) {F : PrefFamily.{u}} (hax : TraceAxioms F) :
+    FiniteBoundaryCoefficientScaleConventionAssumptions.{u} where
+  boundaryCoeff := fun {A} _ _ _ q r => by
+    classical
+    exact
+      if h : q.FullSupport ∧ (∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) ∧ ¬ r.FullSupport then
+        haveI : Nonempty (supportSubtype r) := nonempty_support_of_nondeg r h.2.1
+        Classical.choose (boundary_atomicLinear_tangent_scalar_of_A1
+          (affineLinearPart_of_FinalHMInterface hhm) F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax) q r h.1
+          (faceNondeg_of_ambientNondeg r h.2.1))
+      else 1
+  boundaryCoeff_pos := by
+    intro A _ _ _ q r hq hrn hrnd hrb
+    classical
+    have hcond : q.FullSupport ∧ (∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) ∧ ¬ r.FullSupport :=
+      ⟨hq, hrnd, hrb⟩
+    show (if h : q.FullSupport ∧ (∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) ∧ ¬ r.FullSupport then
+        haveI : Nonempty (supportSubtype r) := nonempty_support_of_nondeg r h.2.1
+        Classical.choose (boundary_atomicLinear_tangent_scalar_of_A1
+          (affineLinearPart_of_FinalHMInterface hhm) F hax
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax) q r h.1
+          (faceNondeg_of_ambientNondeg r h.2.1))
+      else 1) > 0
+    rw [dif_pos hcond]
+    haveI : Nonempty (supportSubtype r) := nonempty_support_of_nondeg r hcond.2.1
+    exact (Classical.choose_spec (boundary_atomicLinear_tangent_scalar_of_A1
+      (affineLinearPart_of_FinalHMInterface hhm) F hax
+      (posteriorValueRepresentation_of_FinalHMInterface hhm hax) q r hcond.1
+      (faceNondeg_of_ambientNondeg r hcond.2.1))).1
+
+/-- **Boundary marginal-value transport at the canonical HM representative.**
+
+For the canonical value representative of `(F, hax)`, the ambient marginal test
+function restricted along the support-face inclusion agrees, up to the chosen
+positive boundary coefficient `boundaryCoeffForHM`, with the intrinsic
+support-face marginal test function, on every atomic-linear tangent `σ`.  This is
+exactly the `support_face_marginalValue_scalar` field body specialised to
+`hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax`.  It is proved
+(not assumed) from `boundary_atomicLinear_tangent_scalar_of_A1`. -/
+theorem marginalValueTransport_canonical
+    (hhm : FinalHMInterface.{u}) {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q r : Dist A) (hq : q.FullSupport)
+    [Nonempty (supportSubtype r)]
+    (hrn : ∃ a : A, 0 < r a)
+    (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b)
+    (hrb : ¬ r.FullSupport)
+    (σ : PosteriorLawSigned (supportSubtype r))
+    (hσtan : PosteriorLawTangent σ)
+    (hσatom : PosteriorLawSigned.AtomicLinear σ) :
+    σ (fun d => (posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax) q
+          (Channel.actionPushforward d (supportIncludeKernel r))) =
+      (boundaryCoeffForHM hhm hax).boundaryCoeff q r *
+        σ ((posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
+          (posteriorValueRepresentation_of_FinalHMInterface hhm hax) r.restrictToSupport) := by
+  classical
+  set hlin := affineLinearPart_of_FinalHMInterface hhm with hlin_def
+  set hV := posteriorValueRepresentation_of_FinalHMInterface hhm hax with hV_def
+  set hint := posteriorIntegralRepresentation_of_FinalHMInterface hhm with hint_def
+  have hcond : q.FullSupport ∧ (∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) ∧ ¬ r.FullSupport :=
+    ⟨hq, hrnd, hrb⟩
+  have hbc : (boundaryCoeffForHM hhm hax).boundaryCoeff q r =
+      Classical.choose (boundary_atomicLinear_tangent_scalar_of_A1 hlin F hax hV q r hq
+        (faceNondeg_of_ambientNondeg r hrnd)) := by
+    show (if h : q.FullSupport ∧ (∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) ∧ ¬ r.FullSupport then
+        haveI : Nonempty (supportSubtype r) := nonempty_support_of_nondeg r h.2.1
+        Classical.choose (boundary_atomicLinear_tangent_scalar_of_A1 hlin F hax hV q r h.1
+          (faceNondeg_of_ambientNondeg r h.2.1))
+      else 1) = _
+    rw [dif_pos hcond]
+  have hβspec := Classical.choose_spec
+    (boundary_atomicLinear_tangent_scalar_of_A1 hlin F hax hV q r hq
+      (faceNondeg_of_ambientNondeg r hrnd))
+  have hkey := hβspec.2 σ hσatom hσtan
+  rw [hbc]
+  have hL1 : hlin.linearPart F hV q (pushSignedIncl r σ) =
+      σ (fun d => hint.marginalValue F hV q
+        (Channel.actionPushforward d (supportIncludeKernel r))) := rfl
+  have hL2 : hlin.linearPart F hV r.restrictToSupport σ =
+      σ (hint.marginalValue F hV r.restrictToSupport) := rfl
+  rw [← hL1, ← hL2]
+  exact hkey
+
+
+
 /-- **`support_face` PROVED from the HM integral representation.**
 
 The support-face representative convention `V r E = V (r|supp) (E|supp)` follows
@@ -2089,8 +3114,8 @@ theorem boundaryCoeff_qIndep_of_FinalHM
     branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
       r.restrictToSupport r.restrictToSupport hrs_fs hrs_fs hrs_nd
   have htrans := hbranchConv.marginal_value.support_face_marginalValue_scalar
-  have hTq := htrans F hax hV q r hq hrn hrnd hrb η hηtan
-  have hTq' := htrans F hax hV q' r hq' hrn hrnd hrb η hηtan
+  have hTq := htrans F hax hV q r hq hrn hrnd hrb η hηtan hηatomic
+  have hTq' := htrans F hax hV q' r hq' hrn hrnd hrb η hηtan hηatomic
   have hpush_atomic := atomicLinear_pushSignedIncl r hηatomic
   have hpush_tan := pushSignedIncl_tangent r hηatomic hηtan
   have hrel := hpath.linear_part_scalar_relation_on_tangent q' q hq' hq
@@ -2511,7 +3536,8 @@ theorem cardDefect_transport
     (hax : TraceAxioms F)
     (n m : ℕ) [NeZero m] [NeZero n] (hm2 : 2 ≤ m) (hmn : m < n)
     (η : PosteriorLawSigned (supportSubtype (canonBoundary.{u} n m (le_of_lt hmn))))
-    (hηtan : PosteriorLawTangent η) :
+    (hηtan : PosteriorLawTangent η)
+    (hηatom : PosteriorLawSigned.AtomicLinear η) :
     η (fun d => (posteriorIntegralRepresentation_of_FinalHMInterface hhm).marginalValue F
           (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
           (Dist.uniform (A := canonType.{u} n))
@@ -2529,7 +3555,7 @@ theorem cardDefect_transport
     Dist.uniform_fullSupport
     (canonBoundary_support_nonempty n m (le_of_lt hmn) (by omega))
     (canonBoundary_nondeg n m (le_of_lt hmn) hm2)
-    (canonBoundary_boundary n m (le_of_lt hmn) hmn) η hηtan
+    (canonBoundary_boundary n m (le_of_lt hmn) hmn) η hηtan hηatom
   have hcd : cardDefect hhm hbranchConv hax n m =
       (branchBoundaryFaceScale_of_faithfulAssumptions
         (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm hbranchConv)
@@ -2642,7 +3668,7 @@ theorem cardDefect_cocycle
   -- hηnz : linPart faceNL η ≠ 0, i.e. η(mV faceNL) ≠ 0
   have hηnz' : η (hint.marginalValue F hV (canonBoundary.{u} n l hle_ln).restrictToSupport) ≠ 0 := hηnz
   -- Transport at (n, l):
-  have hT_nl := cardDefect_transport hhm hbranchConv hax n l hl2 (lt_of_lt_of_le hlm hle_mn) η hηtan
+  have hT_nl := cardDefect_transport hhm hbranchConv hax n l hl2 (lt_of_lt_of_le hlm hle_mn) η hηtan hηatomic
   -- The nest-pushed tangent η'' on supp(cB n m)
   set η'' : PosteriorLawSigned (supportSubtype (canonBoundary.{u} n m hle_mn)) :=
     (fun ψ => η (fun d => ψ (Channel.actionPushforward d
@@ -2707,7 +3733,12 @@ theorem cardDefect_cocycle
     funext d
     rw [supportInclude_nest n m l hle_mn hle_ml d]
   have h2m : 2 ≤ m := le_of_lt (lt_of_le_of_lt hl2 hlm)
-  have hT_nm := cardDefect_transport hhm hbranchConv hax n m h2m hmn η'' hη''tan
+  have hη''atom : PosteriorLawSigned.AtomicLinear η'' := by
+    rw [hη''def]
+    exact atomicLinear_precompose
+      (fun d => Channel.actionPushforward d
+        (fun a => Dist.pure (nestSupportMap n m l hle_mn hle_ml a))) hηatomic
+  have hT_nm := cardDefect_transport hhm hbranchConv hax n m h2m hmn η'' hη''tan hη''atom
   -- Combine hT_nl, hLHS_link, hT_nm:
   --   cardDefect n l · η(mV faceNL) = LHS_nl = LHS_nm(via link) = cardDefect n m · η''(mV faceNM)
   have hchain1 : cardDefect hhm hbranchConv hax n l *
@@ -2798,7 +3829,10 @@ theorem cardDefect_cocycle
             (fun d => d (φ.symm a)) := by funext d; rw [relabelDist_apply]
         rw [this]; exact hηtan.2 _
     -- transport at (m,l) with ζ
-    have hT_ml := cardDefect_transport hhm hbranchConv hax m l hl2 hlm ζ hζtan
+    have hζatom : PosteriorLawSigned.AtomicLinear ζ := by
+      rw [hζdef]
+      exact atomicLinear_precompose (fun d => relabelDist φ d) hηatomic
+    have hT_ml := cardDefect_transport hhm hbranchConv hax m l hl2 hlm ζ hζtan hζatom
     -- LHS of hT_ml IS our expression (ζ unfolded)
     have hLHS_eq : η (fun d => hint.marginalValue F hV (Dist.uniform (A := canonType.{u} m))
           (Channel.actionPushforward (relabelDist φ d)
@@ -3025,7 +4059,7 @@ theorem boundaryCoeff_relabel_of_FinalHM
     branch_linear_part_nonzero_atomicLinear_tangent_of_A1 hfaith.linear_part F hax hV
       r.restrictToSupport r.restrictToSupport hrs_fs hrs_fs hrs_nd
   have hTqr := hbranchConv.marginal_value.support_face_marginalValue_scalar
-    F hax hV q r hq hrn hrnd hrb η hηtan
+    F hax hV q r hq hrn hrnd hrb η hηtan hηatomic
   set η' : PosteriorLawSigned (supportSubtype (Relabeling.relabelDist e r)) := relabelTangent e r η with hη'def
   have hη'tan : PosteriorLawTangent η' := by
     refine ⟨hηtan.1, ?_⟩
@@ -3036,8 +4070,14 @@ theorem boundaryCoeff_relabel_of_FinalHM
         (fun d : Dist (supportSubtype r) => d ((relabelSupportEquiv e r) a)) := by
       funext d; rw [Relabeling.relabelDist_apply, Equiv.symm_symm]
     rw [this]; exact hηtan.2 _
+  have hη'atom : PosteriorLawSigned.AtomicLinear η' := by
+    rw [hη'def]
+    show PosteriorLawSigned.AtomicLinear
+      (fun ψ => η (fun d => ψ (Relabeling.relabelDist (relabelSupportEquiv e r).symm d)))
+    exact atomicLinear_precompose
+      (fun d => Relabeling.relabelDist (relabelSupportEquiv e r).symm d) hηatomic
   have hTqr' := hbranchConv.marginal_value.support_face_marginalValue_scalar
-    F hax hV (Relabeling.relabelDist e q) (Relabeling.relabelDist e r) hrqn hrnn hrndn hrbn η' hη'tan
+    F hax hV (Relabeling.relabelDist e q) (Relabeling.relabelDist e r) hrqn hrnn hrndn hrbn η' hη'tan hη'atom
   have hLHS : η' (fun d' => hint.marginalValue F hV (Relabeling.relabelDist e q)
         (Channel.actionPushforward d' (supportIncludeKernel (Relabeling.relabelDist e r)))) =
       η (fun d => hint.marginalValue F hV q
@@ -3324,7 +4364,7 @@ theorem boundaryCoeff_scale_within_face
       (Dist.restrictToSupport_fullSupport ρ) hρs_nd
   -- transport at ρ:  η(fun d => mV q (push_ρ d)) = bc q ρ · η(mV ρ|supp)
   have hTρ := hbranchConv.marginal_value.support_face_marginalValue_scalar
-    F hax hV q ρ hq hρn hρnd hρb η hηtan
+    F hax hV q ρ hq hρn hρnd hρb η hηtan hηatomic
   -- E : suppSub ρ ≃ suppSub σ
   set E := sameSupportEquiv ρ σ hsupp with hEdef
   -- transported tangent η' on suppSub σ (pullback along E⁻¹? no: relabelPullback E)
@@ -3333,7 +4373,7 @@ theorem boundaryCoeff_scale_within_face
   have hη'tan : PosteriorLawTangent η' := relabelPullback_tangent E hηtan
   -- transport at σ:  η'(fun d' => mV q (push_σ d')) = bc q σ · η'(mV σ|supp)
   have hTσ := hbranchConv.marginal_value.support_face_marginalValue_scalar
-    F hax hV q σ hq hσn hσnd hσb η' hη'tan
+    F hax hV q σ hq hσn hσnd hσb η' hη'tan hη'atomic
   -- LHS equality via push_sameSupport_comm:  η'(fun d' => mV q (push_σ d')) = η(fun d => mV q (push_ρ d))
   have hLHS : η' (fun d' => hint.marginalValue F hV q
         (Channel.actionPushforward d' (supportIncludeKernel σ))) =

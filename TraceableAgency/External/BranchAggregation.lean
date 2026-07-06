@@ -4767,6 +4767,7 @@ structure FiniteBranchBoundaryCoefficientTransportAssumptions.{v}
       (_hr_boundary : ¬ r.FullSupport)
       (η : PosteriorLawSigned (supportSubtype r)),
       PosteriorLawTangent η →
+      PosteriorLawSigned.AtomicLinear η →
       hlin.linearPart F hV q
           (fun φ => η (fun d =>
             φ (Channel.actionPushforward d (supportIncludeKernel r)))) =
@@ -4807,6 +4808,7 @@ structure FiniteBoundaryLinearPartTransportAssumptions.{v}
       (_hr_boundary : ¬ r.FullSupport)
       (η : PosteriorLawSigned (supportSubtype r)),
       PosteriorLawTangent η →
+      PosteriorLawSigned.AtomicLinear η →
       hlin.linearPart F hV q
           (fun φ => η (fun d =>
             φ (Channel.actionPushforward d (supportIncludeKernel r)))) =
@@ -4837,6 +4839,7 @@ structure FiniteSupportFaceMarginalValueTransportConvention.{v}
       (_hr_boundary : ¬ r.FullSupport)
       (η : PosteriorLawSigned (supportSubtype r)),
       PosteriorLawTangent η →
+      PosteriorLawSigned.AtomicLinear η →
       η (fun d =>
         hint.marginalValue F hV q
           (Channel.actionPushforward d (supportIncludeKernel r))) =
@@ -4855,9 +4858,9 @@ theorem boundaryLinearPartTransport_of_integralRepresentation
       (finiteAffineLinearPartAssumptions_of_integralRepresentation hint)
       hboundary where
   boundary_linear_part_scalar := by
-    intro F hax hV A _ _ _ q r hq _ hnonempty hnondeg hboundary' η hη
+    intro F hax hV A _ _ _ q r hq _ hnonempty hnondeg hboundary' η hη hηatom
     exact htransport.support_face_marginalValue_scalar
-      F hax hV q r hq hnonempty hnondeg hboundary' η hη
+      F hax hV q r hq hnonempty hnondeg hboundary' η hη hηatom
 
 /-- Repackage support-face linear-part transport as the historical boundary
 coefficient transport interface. -/
@@ -5031,7 +5034,7 @@ theorem branchFormulaBoundarySummandFor_of_value_and_coefficient_transport
         (by simpa [r] using hr_nonempty)
         (by simpa [r] using hr_nondegenerate)
         (by simpa [r] using hr_boundary)
-        η hηtan
+        η hηtan (posteriorLawDifferenceExp_atomicLinear _ _ _)
     have hface_linear :
         hlin.linearPart F hV r.restrictToSupport η =
           hV.V r.restrictToSupport
