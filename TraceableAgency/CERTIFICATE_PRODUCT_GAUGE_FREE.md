@@ -287,3 +287,62 @@ Updated honest claim for this route: **product-gauge-free, boundary-support-free
 support-scale-free, and value-relabel-free, modulo the pre-entropy representative
 conventions** (`harmless.pre_entropy`), which remain the sole substantive residual
 alongside `branch`.
+
+---
+
+## 8. `singleton_slice` ELIMINATED (proved for every coherent representative)
+
+The `singleton_slice` component of `harmless`
+(`FiniteFaceScaleSingletonSliceAffineConventionFor`) is a **theorem** for every
+coherent face-scale representative — `finiteFaceScaleSingletonSliceAffine_of_faces`,
+which takes only `hfaces` and no further hypothesis.  On a subsingleton first
+factor the product left-slice value `V(q⊗r, P⊗R)` is `P`-invariant (the
+first-factor observation is uninformative, so `P⊗R` and `U_A⊗R` induce the same
+posterior law, `samePosteriorLawExp_prodChannel_singleton_fst`, and `V` respects
+posterior-law equivalence) and the base value `V(q, P)` is zero
+(`V_channel_eq_zero_of_subsingleton`), so the affine relation holds with slope
+`a = 1` and the `P`-independent intercept.
+
+Deliverables:
+
+* **Slimmer harmless bundle** `FinalHarmlessConventionsWithoutSingletonSlice`
+  carrying only `pre_entropy`, with the reconstruction theorem
+  `finalHarmlessConventions_of_withoutSingletonSlice` (supplies
+  `singleton_slice := finiteFaceScaleSingletonSliceAffine_of_faces _`).
+
+* **Exported theorem and bundle:**
+
+```
+#check @MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonConventions
+
+MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonConventions :
+  ClassicalFaddeevTheoremAssumptions →
+    ∀ {F : PrefFamily} (hhm : FinalHMInterface) (hax : TraceAxioms F)
+      (hres : ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice hhm hax),
+      MIRep F
+
+#print axioms …
+  depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+Fields of `ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice`:
+
+| Field                    | Status |
+| ------------------------ | ------ |
+| `branch`                 | present |
+| `pre_entropy`            | present |
+| `gauge`                  | **REMOVED** (fixed to `cardinalGauge`) |
+| `scale_relabel`          | **REMOVED** (proved: `cardinalGauge_hrel`) |
+| `support_scale`          | **REMOVED** (proved: `cardinalGauge_hsupport`) |
+| `selected_value_relabel` | **REMOVED** (proved: `selectedValueRelabel_of_cardinalGauge`) |
+| `singleton_slice`        | **REMOVED** (proved: `finiteFaceScaleSingletonSliceAffine_of_faces`) |
+
+Verified: the `.harmless`/`.singleton_slice` projections do not exist on the new
+bundle (unknown-constant error), and `FiniteFaceScaleSingletonSliceAffineConventionFor`
+has **0** occurrences in the fully-elaborated bundle.
+
+The residual bundle now carries only **`branch`** and **`pre_entropy`**.  Honest
+claim: **product-gauge-free, boundary-support-free, support-scale-free,
+value-relabel-free, and singleton-slice-free, modulo the pre-entropy
+representative conventions (`pre_entropy`) and the faithful-branch representative
+choice (`branch`).**

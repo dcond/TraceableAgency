@@ -1523,6 +1523,35 @@ structure FinalHarmlessConventions
   pre_entropy :
     PreEntropyRepresentativeGaugeConventions hfaces hprod
 
+/-- **Harmless conventions with the singleton-slice field eliminated.**
+
+The `singleton_slice` field of `FinalHarmlessConventions`
+(`FiniteFaceScaleSingletonSliceAffineConventionFor`) is a **theorem** for every
+coherent face-scale representative (`finiteFaceScaleSingletonSliceAffine_of_faces`):
+on a subsingleton first factor the product left-slice value is `P`-invariant (the
+first-factor observation is uninformative, so `P⊗R` and `U_A⊗R` induce the same
+posterior law) and the base value is zero, so the affine relation holds with
+slope `1` and the (`P`-independent) intercept.  Hence it need not be assumed.
+This bundle carries only the genuine residual `pre_entropy`. -/
+structure FinalHarmlessConventionsWithoutSingletonSlice
+    {F : PrefFamily.{u}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F)
+    (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces) : Prop where
+  pre_entropy :
+    PreEntropyRepresentativeGaugeConventions hfaces hprod
+
+/-- The singleton-slice field is discharged by
+`finiteFaceScaleSingletonSliceAffine_of_faces`, so the full harmless bundle is
+reconstructed from the slimmer one carrying only `pre_entropy`. -/
+theorem finalHarmlessConventions_of_withoutSingletonSlice
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (h : FinalHarmlessConventionsWithoutSingletonSlice hfaces hprod) :
+    FinalHarmlessConventions hfaces hprod where
+  singleton_slice := finiteFaceScaleSingletonSliceAffine_of_faces hfaces
+  pre_entropy := h.pre_entropy
+
 /-- Affine linear-part package supplied by the HM component of the final
 interface. -/
 noncomputable def affineLinearPart_of_FinalHMInterface
@@ -8041,6 +8070,155 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportOrValueRelabelConve
     { branch := hres.branch
       selected_value_relabel := selectedValueRelabel_of_cardinalGauge hhm hres.branch hax
       harmless := hres.harmless }
+
+/-- **Residual conventions with product gauge, support scale, value relabelling,
+AND singleton slice all eliminated.**
+
+Extends `ResidualConventionsWithoutProductGaugeOrSupportScaleOrValueRelabel` by
+discharging the `singleton_slice` component of `harmless`: it is a theorem
+(`finiteFaceScaleSingletonSliceAffine_of_faces`), so only `pre_entropy` remains.
+The bundle therefore carries only `branch` and `pre_entropy`. -/
+structure ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  branch : FinalFaithfulBranchConventions hhm
+  pre_entropy :
+    PreEntropyRepresentativeGaugeConventions
+      ((coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+          hax (cardinalGauge hhm branch hax)
+          (cardinalGauge_hrel hhm branch hax)
+          (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+            cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)).gaugeTransform
+        (cobCoherentGauge
+          (faceScaleProductPairwiseBilinearity_of_multiPieces
+            (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+              (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+              hax (cardinalGauge hhm branch hax)
+              (cardinalGauge_hrel hhm branch hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+            (faceScaleProductSlopeAffine_of_selectedRelabeling
+              (selectedValueRelabel_of_cardinalGauge hhm branch hax)
+              (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+                (finiteFaceScaleSingletonSliceAffine_of_faces
+                  (coherentFaceScales_of_FinalHM_positiveGauge
+                    hhm
+                    (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                    hax (cardinalGauge hhm branch hax)
+                    (cardinalGauge_hrel hhm branch hax)
+                    (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                      cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))))
+          (selectedValueRelabel_of_cardinalGauge hhm branch hax) hax))
+      (productQuasiAdditivity_cobGauge
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+            hax (cardinalGauge hhm branch hax)
+            (cardinalGauge_hrel hhm branch hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (selectedValueRelabel_of_cardinalGauge hhm branch hax)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+              hax (cardinalGauge hhm branch hax)
+              (cardinalGauge_hrel hhm branch hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))))
+        (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+            hax (cardinalGauge hhm branch hax)
+            (cardinalGauge_hrel hhm branch hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))
+          (selectedValueRelabel_of_cardinalGauge hhm branch hax))
+        (selectedValueRelabel_of_cardinalGauge hhm branch hax) hax)
+
+/-- **Top-level MI theorem with product gauge, support scale, value relabelling,
+AND singleton slice all eliminated.**
+
+The residual bundle carries only `branch` and `pre_entropy`.  The gauge is fixed
+to `cardinalGauge`; `scale_relabel`/`support_scale` are theorems; selected value
+relabelling is a theorem; and `singleton_slice` is the theorem
+`finiteFaceScaleSingletonSliceAffine_of_faces`.
+
+Sole remaining residual interface: `pre_entropy`
+(`PreEntropyRepresentativeGaugeConventions`).  Honest claim: **product-gauge-free,
+boundary-support-free, support-scale-free, value-relabel-free, and
+singleton-slice-free, modulo the pre-entropy representative conventions.** -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonConventions
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hres :
+      ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice
+        hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportOrValueRelabelConventions
+    hfad hhm hax
+    { branch := hres.branch
+      harmless :=
+        finalHarmlessConventions_of_withoutSingletonSlice
+          { pre_entropy := hres.pre_entropy } }
 
 /-- Final MI route through an explicitly constructed product-normalised
 face-scale representative.
