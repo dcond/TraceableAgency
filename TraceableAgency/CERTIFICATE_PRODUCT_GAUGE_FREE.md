@@ -167,3 +167,58 @@ interaction collapse, scale identities are collapse inputs. No input to
 interaction collapse is derived from the output of interaction collapse. In
 particular, `value_relabel` is a value-level coherence clause consumed *before*
 collapse; it is not obtained from the universal-scale output.
+
+---
+
+## 6. `support_scale` ELIMINATED (proved, not weakened or blocked)
+
+A further route removes the `support_scale` residual entirely by fixing the
+positive face-scale gauge to the **cardinal gauge** `cardinalGauge` (the
+cardinality-indexed scale `t_n := cardDefect n 2`).  For that gauge the raw
+face-scale equation `eq:facescale` — the whole content of the `support_scale`
+field — is a **theorem** (`cardinalGauge_hsupport`), and so is the scale
+relabel-equivariance (`cardinalGauge_hrel`).
+
+Exported theorem and bundle:
+
+```
+#check @MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductOrSupportScaleConventions
+
+MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductOrSupportScaleConventions :
+  ClassicalFaddeevTheoremAssumptions →
+    ∀ {F : PrefFamily} (hhm : FinalHMInterface) (hax : TraceAxioms F)
+      (hres : ResidualConventionsWithoutProductGaugeOrSupportScale hhm hax),
+      MIRep F
+
+#print axioms …
+  depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+Fields of `ResidualConventionsWithoutProductGaugeOrSupportScale` (verified by
+projection existence/absence and `#print` with `pp.all`):
+
+| Field                    | Status |
+| ------------------------ | ------ |
+| `branch`                 | present |
+| `selected_value_relabel` | present (per-representative relabelling, reduces to scalar pinning `c = 1`) |
+| `harmless`               | present (`singleton_slice` + `pre_entropy`) |
+| `gauge`                  | **REMOVED** (fixed to `cardinalGauge`) |
+| `scale_relabel`          | **REMOVED** (proved: `cardinalGauge_hrel`) |
+| `support_scale`          | **REMOVED** (proved: `cardinalGauge_hsupport`) |
+
+The `.support_scale` and `.gauge` projections do not exist on the new bundle
+(unknown-constant error), and `FiniteSupportFaceScaleAssumptionsFor` has **0**
+occurrences in the fully-elaborated bundle.
+
+How `support_scale` is discharged (`cardinalGauge_hsupport`): with the cardinal
+gauge `g q = g r = t_n` cancel on the left; `branchCoeff q r = boundaryCoeff q r`;
+the general embedding-defect reduction (`general_defect`) gives
+`boundaryCoeff q r · scale(r|supp) = scale q · cardDefect n m`; and the cocycle
+`cardDefect n m = t_n / t_m` (`cardDefect_eq_ratio`) with `t_m = g(r|supp)`
+closes the equation.  This uses support restriction, the embedding/boundary
+extension defect, gauge positivity (`cardScaleT_pos`), and relabelling-support
+equivariance — i.e. **Option 1** of the target.
+
+Updated honest claim for this route: **product-gauge-free, boundary-support-free,
+and raw-face-scale-free (`support_scale` discharged by the cardinal gauge),
+modulo residual per-representative relabelling and pre-entropy conventions.**

@@ -7660,6 +7660,173 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductConventions
     (hsel := hres.selected_value_relabel)
     hres.harmless
 
+/-- **Residual conventions for the product-gauge-free AND support-scale-free
+top-level route.**
+
+This bundle fixes the positive face-scale gauge to the *cardinal gauge*
+`cardinalGauge` (the cardinality-indexed scale `t_n`), for which the raw
+face-scale equation (`eq:facescale`, the `support_scale` field of
+`ResidualConventionsWithoutProductGauge`) and the scale relabel-equivariance
+(`scale_relabel`) are **theorems** (`cardinalGauge_hsupport`,
+`cardinalGauge_hrel`), not assumptions.
+
+Compared with `ResidualConventionsWithoutProductGauge`, the fields `gauge`,
+`scale_relabel`, and `support_scale` are therefore all **removed**.  The
+remaining fields are `branch`, `selected_value_relabel`, and `harmless` (for the
+cardinal-gauge representative). -/
+structure ResidualConventionsWithoutProductGaugeOrSupportScale
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  branch : FinalFaithfulBranchConventions hhm
+  selected_value_relabel :
+    FiniteSelectedPosteriorValueRelabelingFor
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+        hax (cardinalGauge hhm branch hax)
+        (cardinalGauge_hrel hhm branch hax)
+        (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+          cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))
+  harmless :
+    FinalHarmlessConventions
+      ((coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+          hax (cardinalGauge hhm branch hax)
+          (cardinalGauge_hrel hhm branch hax)
+          (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+            cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)).gaugeTransform
+        (cobCoherentGauge
+          (faceScaleProductPairwiseBilinearity_of_multiPieces
+            (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+              (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+              hax (cardinalGauge hhm branch hax)
+              (cardinalGauge_hrel hhm branch hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+            (faceScaleProductSlopeAffine_of_selectedRelabeling
+              selected_value_relabel
+              (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+                (finiteFaceScaleSingletonSliceAffine_of_faces
+                  (coherentFaceScales_of_FinalHM_positiveGauge
+                    hhm
+                    (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                    hax (cardinalGauge hhm branch hax)
+                    (cardinalGauge_hrel hhm branch hax)
+                    (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                      cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))))
+          selected_value_relabel hax))
+      (productQuasiAdditivity_cobGauge
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+            hax (cardinalGauge hhm branch hax)
+            (cardinalGauge_hrel hhm branch hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                hax (cardinalGauge hhm branch hax)
+                (cardinalGauge_hrel hhm branch hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            selected_value_relabel
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+              hax (cardinalGauge hhm branch hax)
+              (cardinalGauge_hrel hhm branch hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+                  hax (cardinalGauge hhm branch hax)
+                  (cardinalGauge_hrel hhm branch hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))))))
+        (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm branch)
+            hax (cardinalGauge hhm branch hax)
+            (cardinalGauge_hrel hhm branch hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm branch hax q hq r hrn hrnd hrb))
+          selected_value_relabel)
+        selected_value_relabel hax)
+
+/-- **Top-level product-gauge-free AND support-scale-free final MI theorem.**
+
+Extends `MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductConventions` by fixing the
+positive gauge to `cardinalGauge`, for which the raw face-scale equation
+(`support_scale`) and the scale relabel-equivariance (`scale_relabel`) are proved
+(`cardinalGauge_hsupport`, `cardinalGauge_hrel`).  The residual bundle therefore
+drops the `gauge`, `scale_relabel`, and `support_scale` fields entirely.
+
+Remaining residual interfaces: `selected_value_relabel` (per-representative
+relabelling, reduces to the scalar pinning `c = 1`) and `harmless.pre_entropy`.
+The honest claim is: **product-gauge-free, boundary-support-free, and
+raw-face-scale-free (`support_scale` discharged by the cardinal gauge), modulo
+residual per-representative relabelling and pre-entropy conventions.** -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductOrSupportScaleConventions
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hres : ResidualConventionsWithoutProductGaugeOrSupportScale hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductConventions
+    hfad hhm hax
+    { branch := hres.branch
+      gauge := cardinalGauge hhm hres.branch hax
+      scale_relabel := cardinalGauge_hrel hhm hres.branch hax
+      support_scale := fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+        cardinalGauge_hsupport hhm hres.branch hax q hq r hrn hrnd hrb
+      selected_value_relabel := hres.selected_value_relabel
+      harmless := hres.harmless }
+
 /-- Final MI route through an explicitly constructed product-normalised
 face-scale representative.
 
