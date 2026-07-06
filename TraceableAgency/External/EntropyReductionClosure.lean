@@ -2879,41 +2879,47 @@ noncomputable def branchSingletonScaleConvention_of_integralRepresentation
     exact branchValue_channel_eq_zero_of_subsingleton F hV r.restrictToSupport
       (Dist.restrictToSupport_fullSupport r) (Channel.restrictToSupport P r)
 
-/-- **Minimal branch residual: the boundary-transport core (4 fields).**
+/-- **Minimal branch residual: the boundary-transport core (3 fields).**
 
-`FinalFaithfulBranchConventions` has six fields; two of them (`support_face`,
-`singleton_scale`) are theorems of the HM integral representation
-(`supportFaceRepresentativeConvention_of_integralRepresentation`,
-`branchSingletonScaleConvention_of_integralRepresentation`) and are dropped here.
-The four remaining fields are exactly the coupled boundary-transport data:
+`FinalFaithfulBranchConventions` has six fields; three of them are now
+discharged: `support_face` and `singleton_scale` are theorems of the HM integral
+representation (`supportFaceRepresentativeConvention_of_integralRepresentation`,
+`branchSingletonScaleConvention_of_integralRepresentation`), and the
+positive boundary-coefficient choice `boundary_coeff` is fixed to the canonical
+`boundaryCoeffForHM hhm hax` (the `Classical.choose` of the proved boundary
+tangent scalar `boundary_atomicLinear_tangent_scalar_of_A1` at the canonical HM
+value representative of `(F, hax)`).  The three remaining fields are exactly the
+coupled boundary-transport data:
 
-* `boundary_coeff` — the positive boundary-coefficient choice
-  (`FiniteBoundaryCoefficientScaleConventionAssumptions`), a representative choice;
 * `marginal_value` — the marginal-value transport equation
-  `η(φ_q ∘ incl) = boundaryCoeff · η(φ_{r|supp})` (the boundary linear-part
-  transport; genuine mathematical content of the true HM functional, not a
-  convention — see `FiniteBoundaryLinearPartTransportAssumptions`);
+  `η(φ_q ∘ incl) = boundaryCoeff · η(φ_{r|supp})` for the fixed
+  `boundaryCoeffForHM hhm hax` (the boundary linear-part transport; genuine
+  mathematical content of the true HM functional, not a convention — see
+  `FiniteBoundaryLinearPartTransportAssumptions`).  This is a `∀hV` field; the
+  canonical transport lemma `marginalValueTransport_canonical` proves it only at
+  the canonical `hV`, so it cannot be discharged here (β varies with `hV`);
 * `boundary_scale`, `singleton_scale_factorization` — the boundary/singleton
   scale-factorization equations `branchCoeff = scale q / scale(post)` coupling the
-  chosen coefficients to the derived cocycle scale.
+  fixed boundary coefficient to the derived cocycle scale.
 
-This is strictly smaller than `FinalFaithfulBranchConventions` (4 fields vs 6). -/
-structure MinimalBranchResidual (hhm : FinalHMInterface.{u}) where
-  boundary_coeff : FiniteBoundaryCoefficientScaleConventionAssumptions.{u}
+This is strictly smaller than `FinalFaithfulBranchConventions` (3 fields vs 6). -/
+structure MinimalBranchResidual {F : PrefFamily.{u}} (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
   marginal_value :
     FiniteSupportFaceMarginalValueTransportConvention
       (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
-      (boundaryFaceScale_of_coefficientScaleConvention boundary_coeff)
+      (boundaryFaceScale_of_coefficientScaleConvention (boundaryCoeffForHM hhm hax))
   boundary_scale :
-    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    ∀ (F : PrefFamily.{u}) (hax' : TraceAxioms F)
       (hV : PosteriorValueRepresentation F),
       let hlin := affineLinearPart_of_FinalHMInterface hhm
       let hpath :=
         branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
           hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
           (atomicLinearTangentSpanning_of_atomic
-            finiteAtomicPosteriorTangentSpanning) F hax hV
-      let hboundary := boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+            finiteAtomicPosteriorTangentSpanning) F hax' hV
+      let hboundary :=
+        boundaryFaceScale_of_coefficientScaleConvention (boundaryCoeffForHM hhm hax)
       let hvalue :=
         boundaryValueTransport_of_supportFaceRepresentativeConvention
           (supportFaceRepresentativeConvention_of_integralRepresentation
@@ -2924,25 +2930,26 @@ structure MinimalBranchResidual (hhm : FinalHMInterface.{u}) where
             hhm hboundary marginal_value)
       FiniteBranchScaleFactorizationBoundaryTransportAssumptions
         (faithfulBranchAggregationStructure_of_components
-          F hax hV hlin hpath hboundary
+          F hax' hV hlin hpath hboundary
           (branchSingletonScaleConvention_of_integralRepresentation
             (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
           hvalue hcoeff)
         (faithfulBranchFullSupportScale_of_components
-          F hax hV hlin hpath hboundary
+          F hax' hV hlin hpath hboundary
           (branchSingletonScaleConvention_of_integralRepresentation
             (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
           hvalue hcoeff)
   singleton_scale_factorization :
-    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    ∀ (F : PrefFamily.{u}) (hax' : TraceAxioms F)
       (hV : PosteriorValueRepresentation F),
       let hlin := affineLinearPart_of_FinalHMInterface hhm
       let hpath :=
         branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
           hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
           (atomicLinearTangentSpanning_of_atomic
-            finiteAtomicPosteriorTangentSpanning) F hax hV
-      let hboundary := boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+            finiteAtomicPosteriorTangentSpanning) F hax' hV
+      let hboundary :=
+        boundaryFaceScale_of_coefficientScaleConvention (boundaryCoeffForHM hhm hax)
       let hvalue :=
         boundaryValueTransport_of_supportFaceRepresentativeConvention
           (supportFaceRepresentativeConvention_of_integralRepresentation
@@ -2953,25 +2960,27 @@ structure MinimalBranchResidual (hhm : FinalHMInterface.{u}) where
             hhm hboundary marginal_value)
       FiniteBranchScaleFactorizationSingletonConvention
         (faithfulBranchAggregationStructure_of_components
-          F hax hV hlin hpath hboundary
+          F hax' hV hlin hpath hboundary
           (branchSingletonScaleConvention_of_integralRepresentation
             (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
           hvalue hcoeff)
         (faithfulBranchFullSupportScale_of_components
-          F hax hV hlin hpath hboundary
+          F hax' hV hlin hpath hboundary
           (branchSingletonScaleConvention_of_integralRepresentation
             (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
           hvalue hcoeff)
 
 /-- Rebuild the full six-field `FinalFaithfulBranchConventions` from the
-four-field `MinimalBranchResidual`, supplying the two proved fields. -/
+three-field `MinimalBranchResidual`, supplying `support_face`, `singleton_scale`
+(proved) and `boundary_coeff := boundaryCoeffForHM hhm hax` (canonical). -/
 noncomputable def finalFaithfulBranchConventions_of_minimal
-    {hhm : FinalHMInterface.{u}} (h : MinimalBranchResidual hhm) :
+    {F : PrefFamily.{u}} {hhm : FinalHMInterface.{u}} {hax : TraceAxioms F}
+    (h : MinimalBranchResidual hhm hax) :
     FinalFaithfulBranchConventions hhm where
   support_face :=
     supportFaceRepresentativeConvention_of_integralRepresentation
       (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
-  boundary_coeff := h.boundary_coeff
+  boundary_coeff := boundaryCoeffForHM hhm hax
   singleton_scale :=
     branchSingletonScaleConvention_of_integralRepresentation
       (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
@@ -9418,20 +9427,21 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonCon
         finalHarmlessConventions_of_withoutSingletonSlice
           { pre_entropy := hres.pre_entropy } }
 
-/-- **Residual with `branch` reduced to its 4-field boundary-transport core.**
+/-- **Residual with `branch` reduced to its 3-field boundary-transport core.**
 
 Same as `ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice`
 except the six-field `branch : FinalFaithfulBranchConventions hhm` is replaced by
-the strictly smaller four-field `minimal : MinimalBranchResidual hhm` (the
-`support_face` and `singleton_scale` fields are proved, not assumed).  The full
-`branch` bundle is reconstructed internally by
+the strictly smaller three-field `minimal : MinimalBranchResidual hhm hax` (the
+`support_face` and `singleton_scale` fields are proved, not assumed, and
+`boundary_coeff` is fixed to the canonical `boundaryCoeffForHM hhm hax`).  The
+full `branch` bundle is reconstructed internally by
 `finalFaithfulBranchConventions_of_minimal`.  Residual content: `minimal`
-(4 boundary-transport fields) and `pre_entropy`. -/
+(3 boundary-transport fields) and `pre_entropy`. -/
 structure ResidualMinimalBranchAndPreEntropy
     {F : PrefFamily.{u}}
     (hhm : FinalHMInterface.{u})
     (hax : TraceAxioms F) where
-  minimal : MinimalBranchResidual hhm
+  minimal : MinimalBranchResidual hhm hax
   pre_entropy :
     PreEntropyRepresentativeGaugeConventions
       ((coherentFaceScales_of_FinalHM_positiveGauge
@@ -9541,16 +9551,17 @@ structure ResidualMinimalBranchAndPreEntropy
           (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax))
         (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax) hax)
 
-/-- **Top-level MI theorem: residual is only the 4-field minimal branch core plus
+/-- **Top-level MI theorem: residual is only the 3-field minimal branch core plus
 `pre_entropy`.**
 
-`branch` has been reduced from six fields to the four-field
+`branch` has been reduced from six fields to the three-field
 `MinimalBranchResidual` (boundary-transport core); `support_face` and
 `singleton_scale` are discharged by
 `supportFaceRepresentativeConvention_of_integralRepresentation` and
-`branchSingletonScaleConvention_of_integralRepresentation`.  All product-gauge,
+`branchSingletonScaleConvention_of_integralRepresentation`, and `boundary_coeff`
+is fixed to the canonical `boundaryCoeffForHM hhm hax`.  All product-gauge,
 support-scale, value-relabelling, and singleton-slice conventions remain
-eliminated.  Residual: `minimal` (4 fields) + `pre_entropy`. -/
+eliminated.  Residual: `minimal` (3 fields) + `pre_entropy`. -/
 theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_onlyMinimalBranchAndPreEntropy
     (hfad : ClassicalFaddeevTheoremAssumptions.{u})
     {F : PrefFamily.{u}}
