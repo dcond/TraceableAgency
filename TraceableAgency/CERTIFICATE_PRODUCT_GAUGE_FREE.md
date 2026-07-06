@@ -222,3 +222,68 @@ equivariance — i.e. **Option 1** of the target.
 Updated honest claim for this route: **product-gauge-free, boundary-support-free,
 and raw-face-scale-free (`support_scale` discharged by the cardinal gauge),
 modulo residual per-representative relabelling and pre-entropy conventions.**
+
+---
+
+## 7. `selected_value_relabel` ELIMINATED (proved outright, no gauge, no pinning)
+
+The relabelling residual is removed entirely.  The key fact is that the
+posterior-value functional has an **integral representation**
+(`FinitePosteriorIntegralRepresentationAssumptions`):
+`V q E = ∫ marginalValue q  d(posterior law of (q, E))` (`value_eq_integral`),
+and its representing test function is **relabel-natural**
+(`marginalValue_relabel`: `marginalValue (relabel q) (relabel d) = marginalValue q d`).
+Since the posterior-law integral is relabel-covariant
+(`posteriorLawIntegral_relabelChannel`), these compose to
+
+```
+V (relabel q) (relabel E) = V q E          (V_relabel_eq_of_integralRepresentation)
+```
+
+outright — the value-level relabelling scalar is `1`, with **no gauge, no product
+quasi-additivity, and no scalar-pinning assumption**.  (This is the cleanest form
+of the earlier `finitePosteriorValueRelabeling_blockedOn_pinning` reduction: the
+pinning obligation `c = 1` is discharged by the HM interface's own
+`marginalValue_relabel` naturality clause, which was already present for the
+`support_scale` (R1) elimination.)
+
+For the cardinal-gauge coherent representative the value functional is
+`g(q) · V_HM q E` with `g = cardinalGauge` cardinality-only (relabel-invariant,
+`cardinalGauge_gaugeRel`); the gauge factors cancel under a bijection (same
+cardinality) and `V_HM` is invariant, so `selectedValueRelabel_of_cardinalGauge`
+proves `FiniteSelectedPosteriorValueRelabelingFor` for that representative.
+
+Exported theorem and bundle:
+
+```
+#check @MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportOrValueRelabelConventions
+
+MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportOrValueRelabelConventions :
+  ClassicalFaddeevTheoremAssumptions →
+    ∀ {F : PrefFamily} (hhm : FinalHMInterface) (hax : TraceAxioms F)
+      (hres : ResidualConventionsWithoutProductGaugeOrSupportScaleOrValueRelabel hhm hax),
+      MIRep F
+
+#print axioms …
+  depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+Fields of `ResidualConventionsWithoutProductGaugeOrSupportScaleOrValueRelabel`:
+
+| Field                    | Status |
+| ------------------------ | ------ |
+| `branch`                 | present |
+| `harmless`               | present (`singleton_slice` + `pre_entropy`) |
+| `gauge`                  | **REMOVED** (fixed to `cardinalGauge`) |
+| `scale_relabel`          | **REMOVED** (proved: `cardinalGauge_hrel`) |
+| `support_scale`          | **REMOVED** (proved: `cardinalGauge_hsupport`) |
+| `selected_value_relabel` | **REMOVED** (proved: `selectedValueRelabel_of_cardinalGauge`) |
+
+Verified: the `.selected_value_relabel` projection does not exist on the new
+bundle (unknown-constant error), and `FiniteSelectedPosteriorValueRelabelingFor`
+has **0** occurrences in the fully-elaborated bundle.
+
+Updated honest claim for this route: **product-gauge-free, boundary-support-free,
+support-scale-free, and value-relabel-free, modulo the pre-entropy representative
+conventions** (`harmless.pre_entropy`), which remain the sole substantive residual
+alongside `branch`.
