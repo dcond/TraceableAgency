@@ -5104,7 +5104,7 @@ theorem fs_coeff_assoc_B
 /-- Face-scale swap: `A_{q,r} = B_{r,q}` (nondegenerate first coordinate). -/
 theorem fs_leftCoeff_eq_swapped_rightCoeff
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
@@ -5113,7 +5113,7 @@ theorem fs_leftCoeff_eq_swapped_rightCoeff
   have hVnz : hfaces.branch_result.branch_agg.value_rep.V q
       (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
     faceScale_idChannel_value_ne_zero_of_A1 hfaces hax q hq hAnd
-  have hval := faceScaleProduct_value_swap_eq_of_value_relabeling hrelV hax hfaces
+  have hval := faceScaleProduct_value_swap_eq_of_selectedRelabeling hsel hax
     q r (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B)
   rw [fs_bilinear_right_uninf hpair hax q r hq hr (Channel.idChannel : Channel A A)] at hval
   rw [fs_bilinear_left_uninf hpair hax r q hr hq (Channel.idChannel : Channel A A)] at hval
@@ -5122,7 +5122,7 @@ theorem fs_leftCoeff_eq_swapped_rightCoeff
 /-- Face-scale swap: `B_{q,r} = A_{r,q}` (nondegenerate second coordinate). -/
 theorem fs_rightCoeff_eq_swapped_leftCoeff
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
@@ -5131,7 +5131,7 @@ theorem fs_rightCoeff_eq_swapped_leftCoeff
   have hVnz : hfaces.branch_result.branch_agg.value_rep.V r
       (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0 :=
     faceScale_idChannel_value_ne_zero_of_A1 hfaces hax r hr hBnd
-  have hval := faceScaleProduct_value_swap_eq_of_value_relabeling hrelV hax hfaces
+  have hval := faceScaleProduct_value_swap_eq_of_selectedRelabeling hsel hax
     q r (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B)
   rw [fs_bilinear_left_uninf hpair hax q r hq hr (Channel.idChannel : Channel B B)] at hval
   rw [fs_bilinear_right_uninf hpair hax r q hr hq (Channel.idChannel : Channel B B)] at hval
@@ -5211,7 +5211,7 @@ theorem cobGauge_coboundary
 -- leftCoeff is relabel-invariant in the SECOND argument (via value formula + covariance).
 theorem fs_leftCoeff_relabel_right
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B B' : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype B'] [DecidableEq B'] [Nonempty B']
@@ -5232,7 +5232,7 @@ theorem fs_leftCoeff_relabel_right
         (experimentOfChannel (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B'))) =
       hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
         (experimentOfChannel (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B))) := by
-    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+    have hc := hsel.V_relabel_eq hax
       ((Equiv.refl A).prodCongr e) ((Equiv.refl A).prodCongr (Equiv.refl PUnit.{u+1}))
       (prodDist q r) (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B))
     rw [Relabeling.relabelDist_prodCongr, Relabeling.relabelChannel_prodCongr] at hc
@@ -5256,7 +5256,7 @@ theorem relabelChannel_id_eq {B B' : Type u} [Fintype B] [DecidableEq B] [Fintyp
 
 theorem fs_rightCoeff_relabel_right
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B B' : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype B'] [DecidableEq B'] [Nonempty B']
@@ -5275,7 +5275,7 @@ theorem fs_rightCoeff_relabel_right
         (experimentOfChannel (Channel.idChannel : Channel B' B')) =
       hfaces.branch_result.branch_agg.value_rep.V r
         (experimentOfChannel (Channel.idChannel : Channel B B)) := by
-    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep e e r
+    have hc := hsel.V_relabel_eq hax e e r
       (Channel.idChannel : Channel B B)
     rw [relabelChannel_id_eq e] at hc
     exact hc
@@ -5284,7 +5284,7 @@ theorem fs_rightCoeff_relabel_right
         (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B' B'))) =
       hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
         (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B))) := by
-    have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+    have hc := hsel.V_relabel_eq hax
       ((Equiv.refl A).prodCongr e) ((Equiv.refl PUnit.{u+1}).prodCongr e)
       (prodDist q r) (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B))
     rw [Relabeling.relabelDist_prodCongr, Relabeling.relabelChannel_prodCongr] at hc
@@ -5343,7 +5343,7 @@ theorem restrictToSupport_fullSupport_eq_relabel {A : Type u} [Fintype A] [Decid
 
 theorem cobGaugeSF_support_restrict
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (r : Dist A)
     (hrnd : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
@@ -5371,16 +5371,16 @@ theorem cobGaugeSF_support_restrict
     obtain ⟨a, b, hab, ha, hb⟩ := hrnd
     rw [not_subsingleton_iff_nontrivial]
     exact ⟨⟨a, ha⟩, ⟨b, hb⟩, fun h => hab (congrArg Subtype.val h)⟩
-  rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior rs
+  rw [fs_leftCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior rs
       (fullSupportRestrictEquiv rs hrsfs).symm faceScaleInteractionReferencePrior_fullSupport hrsfs
       faceScaleInteractionReference_not_subsingleton]
-  rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior rs
+  rw [fs_rightCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior rs
       (fullSupportRestrictEquiv rs hrsfs).symm faceScaleInteractionReferencePrior_fullSupport hrsfs hnd]
 
 
 theorem cobGaugeSF_relabel
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (e : A ≃ B) (q : Dist A) :
@@ -5398,11 +5398,11 @@ theorem cobGaugeSF_relabel
       restrictToSupport_relabelDist e q
     rw [hface]
     have hqsfs : q.restrictToSupport.FullSupport := Dist.restrictToSupport_fullSupport q
-    rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior
+    rw [fs_leftCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior
         q.restrictToSupport (relabelSupportEquiv e q).symm
         faceScaleInteractionReferencePrior_fullSupport hqsfs
         faceScaleInteractionReference_not_subsingleton]
-    rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior
+    rw [fs_rightCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior
         q.restrictToSupport (relabelSupportEquiv e q).symm
         faceScaleInteractionReferencePrior_fullSupport hqsfs hnd]
 
@@ -5410,7 +5410,7 @@ theorem cobGaugeSF_relabel
 /-- On full-support (nondegenerate) priors, `cobGaugeSF` agrees with `cobGauge`. -/
 theorem cobGaugeSF_eq_cobGauge_of_fullSupport
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (r : Dist A) (hr : r.FullSupport) (hnd : ¬ Subsingleton A) :
     cobGaugeSF hpair hax r = cobGauge hpair hax r := by
@@ -5422,39 +5422,39 @@ theorem cobGaugeSF_eq_cobGauge_of_fullSupport
   rw [if_neg hndsupp]
   -- r|supp = relabel (fullSupportRestrictEquiv r hr).symm r ; ρ relabel-inv
   rw [restrictToSupport_fullSupport_eq_relabel r hr]
-  rw [fs_leftCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior r
+  rw [fs_leftCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior r
       (fullSupportRestrictEquiv r hr).symm faceScaleInteractionReferencePrior_fullSupport hr
       faceScaleInteractionReference_not_subsingleton]
-  rw [fs_rightCoeff_relabel_right hpair hrelV hax faceScaleInteractionReferencePrior r
+  rw [fs_rightCoeff_relabel_right hpair hsel hax faceScaleInteractionReferencePrior r
       (fullSupportRestrictEquiv r hr).symm faceScaleInteractionReferencePrior_fullSupport hr hnd]
 
 /-- cobGaugeSF is invariant under product-commutation relabel. -/
 theorem cobGaugeSF_prodComm
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (q : Dist A) (r : Dist B) :
     cobGaugeSF hpair hax (prodDist r q) = cobGaugeSF hpair hax (prodDist q r) := by
-  have h := cobGaugeSF_relabel hpair hrelV hax (Equiv.prodComm B A) (prodDist r q)
+  have h := cobGaugeSF_relabel hpair hsel hax (Equiv.prodComm B A) (prodDist r q)
   rw [relabelDist_prodComm r q] at h
   exact h.symm
 
 /-- The coboundary gauge as a `CoherentFaceScaleGauge`. -/
 noncomputable def cobCoherentGauge
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) : CoherentFaceScaleGauge.{u} where
   gauge := fun {A} _ _ _ x => cobGaugeSF hpair hax x
   gauge_pos := fun {A} _ _ _ x => cobGaugeSF_pos hpair hax x
-  gauge_relabel_eq := fun {A B} _ _ _ _ _ _ e q => cobGaugeSF_relabel hpair hrelV hax e q
+  gauge_relabel_eq := fun {A B} _ _ _ _ _ _ e q => cobGaugeSF_relabel hpair hsel hax e q
   gauge_support_restrict_eq := fun {A} _ _ _ r _ hrn hrnd hrb =>
-    cobGaugeSF_support_restrict hpair hrelV hax r hrnd
+    cobGaugeSF_support_restrict hpair hsel hax r hrnd
 
 theorem cobGaugeSF_coboundary
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {B C : Type u}
     [Fintype B] [DecidableEq B] [Nonempty B] [Fintype C] [DecidableEq C] [Nonempty C]
     (r : Dist B) (s : Dist C) (hr : r.FullSupport) (hs : s.FullSupport)
@@ -5466,8 +5466,8 @@ theorem cobGaugeSF_coboundary
     rw [not_subsingleton_iff_nontrivial] at hBnd ⊢
     obtain ⟨b1, b2, hb⟩ := hBnd
     exact ⟨(b1, Classical.arbitrary C), (b2, Classical.arbitrary C), by simp [hb]⟩
-  rw [cobGaugeSF_eq_cobGauge_of_fullSupport hpair hrelV hax r hr hBnd,
-      cobGaugeSF_eq_cobGauge_of_fullSupport hpair hrelV hax (prodDist r s) hrs hrsnd]
+  rw [cobGaugeSF_eq_cobGauge_of_fullSupport hpair hsel hax r hr hBnd,
+      cobGaugeSF_eq_cobGauge_of_fullSupport hpair hsel hax (prodDist r s) hrs hrsnd]
   exact cobGauge_coboundary hpair htriple hax r s hr hs hBnd
 
 noncomputable def subsingletonProdEquiv' {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
@@ -5544,7 +5544,7 @@ theorem relabel_subsingletonSnd_prodChannel {A B O : Type u} [Fintype A] [Decida
 theorem gauged_product_quasi_add
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (g : CoherentFaceScaleGauge.{u})
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F)
     -- κ common (all full-support q,r)
     (κ : ℝ)
@@ -5597,7 +5597,7 @@ theorem gauged_product_quasi_add
       haveI : Subsingleton A := hA
       have hVeq : hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel (Channel.uninformativeChannelU A) R)) = Vrr := by
-        have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+        have hc := hsel.V_relabel_eq hax
           (subsingletonProdEquiv' (A := A) (B := B)) (Equiv.punitProd Y)
           (prodDist q r) (prodChannel (Channel.uninformativeChannelU A) R)
         rw [relabel_subsingleton_prodDist' q r hq, relabel_subsingleton_prodChannel' R] at hc
@@ -5623,7 +5623,7 @@ theorem gauged_product_quasi_add
       haveI : Subsingleton B := hB
       have hVeq : hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel P (Channel.uninformativeChannelU B))) = Vqp := by
-        have hc := hrelV.V_relabel_eq F hax hfaces.branch_result.branch_agg.value_rep
+        have hc := hsel.V_relabel_eq hax
           (subsingletonProdEquivSnd (A := A) (B := B)) (Equiv.prodPUnit O)
           (prodDist q r) (prodChannel P (Channel.uninformativeChannelU B))
         rw [relabel_subsingletonSnd_prodDist q r hr, relabel_subsingletonSnd_prodChannel P] at hc
@@ -5653,15 +5653,15 @@ theorem gauged_product_quasi_add
 theorem gaugedLeftCoeff_eq_one_nondeg
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
     (hA : ¬ Subsingleton A) (hB : ¬ Subsingleton B) :
-    faceScaleGaugeTransformedLeftCoeff hpair (cobCoherentGauge hpair hrelV hax) hax q r = 1 := by
+    faceScaleGaugeTransformedLeftCoeff hpair (cobCoherentGauge hpair hsel hax) hax q r = 1 := by
   unfold faceScaleGaugeTransformedLeftCoeff
   show hpair.leftCoeff hax q r * (cobGaugeSF hpair hax (prodDist q r) / cobGaugeSF hpair hax q) = 1
-  rw [cobGaugeSF_coboundary hpair htriple hrelV hax q r hq hr hA hB]
+  rw [cobGaugeSF_coboundary hpair htriple hsel hax q r hq hr hA hB]
   have h1 : 0 < cobGaugeSF hpair hax q := cobGaugeSF_pos hpair hax q
   have h2 : 0 < cobGaugeSF hpair hax (prodDist q r) := cobGaugeSF_pos hpair hax (prodDist q r)
   field_simp
@@ -5669,19 +5669,19 @@ theorem gaugedLeftCoeff_eq_one_nondeg
 theorem gaugedRightCoeff_eq_one_nondeg
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
     (hA : ¬ Subsingleton A) (hB : ¬ Subsingleton B) :
-    faceScaleGaugeTransformedRightCoeff hpair (cobCoherentGauge hpair hrelV hax) hax q r = 1 := by
+    faceScaleGaugeTransformedRightCoeff hpair (cobCoherentGauge hpair hsel hax) hax q r = 1 := by
   unfold faceScaleGaugeTransformedRightCoeff
   show hpair.rightCoeff hax q r * (cobGaugeSF hpair hax (prodDist q r) / cobGaugeSF hpair hax r) = 1
   -- rightCoeff q r = leftCoeff r q (swap, ¬Subsing B) = cobGaugeSF r/cobGaugeSF(r⊗q) [coboundary r,q]
-  rw [fs_rightCoeff_eq_swapped_leftCoeff hpair hrelV hax q r hq hr hB]
-  rw [cobGaugeSF_coboundary hpair htriple hrelV hax r q hr hq hB hA]
+  rw [fs_rightCoeff_eq_swapped_leftCoeff hpair hsel hax q r hq hr hB]
+  rw [cobGaugeSF_coboundary hpair htriple hsel hax r q hr hq hB hA]
   -- cobGaugeSF(r⊗q) = cobGaugeSF(q⊗r) [prodComm]
-  rw [cobGaugeSF_prodComm hpair hrelV hax q r]
+  rw [cobGaugeSF_prodComm hpair hsel hax q r]
   have h1 : 0 < cobGaugeSF hpair hax r := cobGaugeSF_pos hpair hax r
   have h2 : 0 < cobGaugeSF hpair hax (prodDist q r) := cobGaugeSF_pos hpair hax (prodDist q r)
   field_simp
@@ -5689,31 +5689,31 @@ theorem gaugedRightCoeff_eq_one_nondeg
 theorem gauged_bilinear_normalized_nondeg
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax : TraceAxioms F) {A B O Y : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A] [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
     (q : Dist A) (r : Dist B) (hq : q.FullSupport) (hr : r.FullSupport)
     (hA : ¬ Subsingleton A) (hB : ¬ Subsingleton B) (P : Channel A O) (R : Channel B Y) :
-    (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax)).branch_result.branch_agg.value_rep.V
+    (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax)).branch_result.branch_agg.value_rep.V
         (prodDist q r) (experimentOfChannel (prodChannel P R)) =
-      (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax)).branch_result.branch_agg.value_rep.V q
+      (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax)).branch_result.branch_agg.value_rep.V q
         (experimentOfChannel P) +
-      (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax)).branch_result.branch_agg.value_rep.V r
+      (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax)).branch_result.branch_agg.value_rep.V r
         (experimentOfChannel R) +
-      (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hrelV hax)).interactionCoeff hax q r *
-        (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax)).branch_result.branch_agg.value_rep.V q
+      (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hsel hax)).interactionCoeff hax q r *
+        (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax)).branch_result.branch_agg.value_rep.V q
           (experimentOfChannel P) *
-        (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax)).branch_result.branch_agg.value_rep.V r
+        (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax)).branch_result.branch_agg.value_rep.V r
           (experimentOfChannel R) := by
-  set g := cobCoherentGauge hpair hrelV hax
+  set g := cobCoherentGauge hpair hsel hax
   rw [(faceScaleProductPairwiseBilinearity_gaugeTransform hpair g).product_pair_bilinear hax q r hq hr P R]
   rw [show (faceScaleProductPairwiseBilinearity_gaugeTransform hpair g).leftCoeff hax q r =
     faceScaleGaugeTransformedLeftCoeff hpair g hax q r from rfl]
   rw [show (faceScaleProductPairwiseBilinearity_gaugeTransform hpair g).rightCoeff hax q r =
     faceScaleGaugeTransformedRightCoeff hpair g hax q r from rfl]
-  rw [gaugedLeftCoeff_eq_one_nondeg hpair htriple hrelV hax q r hq hr hA hB,
-      gaugedRightCoeff_eq_one_nondeg hpair htriple hrelV hax q r hq hr hA hB]
+  rw [gaugedLeftCoeff_eq_one_nondeg hpair htriple hsel hax q r hq hr hA hB,
+      gaugedRightCoeff_eq_one_nondeg hpair htriple hsel hax q r hq hr hA hB]
   ring
 
 private theorem prod_nondeg {A B : Type u} [Fintype A] [Nonempty A] [Fintype B] [Nonempty B]
@@ -5731,15 +5731,15 @@ private theorem prod_nondeg_r {A B : Type u} [Fintype A] [Nonempty A] [Fintype B
 theorem gaugedInteractionAssoc
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax0 : TraceAxioms F) :
     FiniteFaceScaleProductInteractionAssociativityAssumptionsFor
       (faceScaleProductPairwiseBilinearity_gaugeTransform hpair
-        (cobCoherentGauge hpair hrelV hax0)) where
+        (cobCoherentGauge hpair hsel hax0)) where
   interaction_assoc_xy := by
     intro hax A B C _ _ _ _ _ _ _ _ _ q r s hq hr hs hA hB hC
-    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax0)
-    have hgt := (faceScaleTripleProductValueAssociativity_of_valueRelabeling GT hrelV).triple_value_assoc
+    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax0)
+    have hgt := (faceScaleTripleProductValueAssociativity_gaugeTransform htriple (cobCoherentGauge hpair hsel hax0)).triple_value_assoc
     have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
     have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
     have hxne : GT.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
@@ -5749,21 +5749,21 @@ theorem gaugedInteractionAssoc
     have hxyne := mul_ne_zero hxne hyne
     have hval := hgt hax q r s hq hr hs
       (Channel.idChannel : Channel A A) (Channel.idChannel : Channel B B) (Channel.uninformativeChannelU C)
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax (prodDist q r) s hqr hs (prod_nondeg hA) hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax (prodDist q r) s hqr hs (prod_nondeg hA) hC
         (prodChannel (Channel.idChannel : Channel A A) (Channel.idChannel : Channel B B)) (Channel.uninformativeChannelU C)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q (prodDist r s) hq hrs hA (prod_nondeg hB)
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q (prodDist r s) hq hrs hA (prod_nondeg hB)
         (Channel.idChannel : Channel A A) (prodChannel (Channel.idChannel : Channel B B) (Channel.uninformativeChannelU C))] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q r hq hr hA hB
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q r hq hr hA hB
         (Channel.idChannel : Channel A A) (Channel.idChannel : Channel B B)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax r s hr hs hB hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax r s hr hs hB hC
         (Channel.idChannel : Channel B B) (Channel.uninformativeChannelU C)] at hval
     rw [GT.branch_result.branch_agg.value_rep.zero_normalized s hs] at hval
     ring_nf at hval
     exact mul_right_cancel₀ hxyne (by simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
   interaction_assoc_xz := by
     intro hax A B C _ _ _ _ _ _ _ _ _ q r s hq hr hs hA hB hC
-    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax0)
-    have hgt := (faceScaleTripleProductValueAssociativity_of_valueRelabeling GT hrelV).triple_value_assoc
+    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax0)
+    have hgt := (faceScaleTripleProductValueAssociativity_gaugeTransform htriple (cobCoherentGauge hpair hsel hax0)).triple_value_assoc
     have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
     have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
     have hxne : GT.branch_result.branch_agg.value_rep.V q (experimentOfChannel (Channel.idChannel : Channel A A)) ≠ 0 :=
@@ -5773,21 +5773,21 @@ theorem gaugedInteractionAssoc
     have hxzne := mul_ne_zero hxne hzne
     have hval := hgt hax q r s hq hr hs
       (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B) (Channel.idChannel : Channel C C)
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax (prodDist q r) s hqr hs (prod_nondeg hA) hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax (prodDist q r) s hqr hs (prod_nondeg hA) hC
         (prodChannel (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B)) (Channel.idChannel : Channel C C)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q (prodDist r s) hq hrs hA (prod_nondeg_r hC)
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q (prodDist r s) hq hrs hA (prod_nondeg_r hC)
         (Channel.idChannel : Channel A A) (prodChannel (Channel.uninformativeChannelU B) (Channel.idChannel : Channel C C))] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q r hq hr hA hB
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q r hq hr hA hB
         (Channel.idChannel : Channel A A) (Channel.uninformativeChannelU B)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax r s hr hs hB hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax r s hr hs hB hC
         (Channel.uninformativeChannelU B) (Channel.idChannel : Channel C C)] at hval
     rw [GT.branch_result.branch_agg.value_rep.zero_normalized r hr] at hval
     ring_nf at hval
     exact mul_right_cancel₀ hxzne (by simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
   interaction_assoc_yz := by
     intro hax A B C _ _ _ _ _ _ _ _ _ q r s hq hr hs hA hB hC
-    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax0)
-    have hgt := (faceScaleTripleProductValueAssociativity_of_valueRelabeling GT hrelV).triple_value_assoc
+    set GT := hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax0)
+    have hgt := (faceScaleTripleProductValueAssociativity_gaugeTransform htriple (cobCoherentGauge hpair hsel hax0)).triple_value_assoc
     have hqr : (prodDist q r).FullSupport := prodDist_fullSupport q r hq hr
     have hrs : (prodDist r s).FullSupport := prodDist_fullSupport r s hr hs
     have hyne : GT.branch_result.branch_agg.value_rep.V r (experimentOfChannel (Channel.idChannel : Channel B B)) ≠ 0 :=
@@ -5797,13 +5797,13 @@ theorem gaugedInteractionAssoc
     have hyzne := mul_ne_zero hyne hzne
     have hval := hgt hax q r s hq hr hs
       (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B) (Channel.idChannel : Channel C C)
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax (prodDist q r) s hqr hs (prod_nondeg_r hB) hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax (prodDist q r) s hqr hs (prod_nondeg_r hB) hC
         (prodChannel (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B)) (Channel.idChannel : Channel C C)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q (prodDist r s) hq hrs hA (prod_nondeg hB)
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q (prodDist r s) hq hrs hA (prod_nondeg hB)
         (Channel.uninformativeChannelU A) (prodChannel (Channel.idChannel : Channel B B) (Channel.idChannel : Channel C C))] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax q r hq hr hA hB
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax q r hq hr hA hB
         (Channel.uninformativeChannelU A) (Channel.idChannel : Channel B B)] at hval
-    rw [gauged_bilinear_normalized_nondeg hpair htriple hrelV hax r s hr hs hB hC
+    rw [gauged_bilinear_normalized_nondeg hpair htriple hsel hax r s hr hs hB hC
         (Channel.idChannel : Channel B B) (Channel.idChannel : Channel C C)] at hval
     rw [GT.branch_result.branch_agg.value_rep.zero_normalized q hq] at hval
     ring_nf at hval
@@ -5812,35 +5812,35 @@ theorem gaugedInteractionAssoc
 noncomputable def productQuasiAdditivity_cobGauge
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hax0 : TraceAxioms F) :
     FiniteProductQuasiAdditivityForFaceScales
-      (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax0)) where
+      (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax0)) where
   kappa := fun hax =>
     faceScaleInteractionReferenceKappa
-      (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hrelV hax0)) hax
+      (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hsel hax0)) hax
   product_quasi_add := by
     intro hax A B O Y _ _ _ _ _ _ _ _ _ _ q r hq hr P R
-    refine gauged_product_quasi_add hpair (cobCoherentGauge hpair hrelV hax0) hrelV hax _ ?_ ?_ ?_ q r hq hr P R
+    refine gauged_product_quasi_add hpair (cobCoherentGauge hpair hsel hax0) hsel hax _ ?_ ?_ ?_ q r hq hr P R
     · -- hκ: gauged interaction = ref κ at nondeg
       intro A' B' _ _ _ _ _ _ q' r' hq' hr' hA' hB'
       -- gauged interactionCoeff = raw·g(q⊗r)/(g(q)g(r)) by def; = ref κ via assoc-nondeg
       rw [show hpair.interactionCoeff hax q' r' *
-          ((cobCoherentGauge hpair hrelV hax0).gauge (prodDist q' r') /
-          ((cobCoherentGauge hpair hrelV hax0).gauge q' * (cobCoherentGauge hpair hrelV hax0).gauge r')) =
-        (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hrelV hax0)).interactionCoeff hax q' r'
+          ((cobCoherentGauge hpair hsel hax0).gauge (prodDist q' r') /
+          ((cobCoherentGauge hpair hsel hax0).gauge q' * (cobCoherentGauge hpair hsel hax0).gauge r')) =
+        (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hsel hax0)).interactionCoeff hax q' r'
         from rfl]
       exact faceScaleInteractionCoeff_eq_reference_of_assoc_nondegenerate
-        (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hrelV hax0))
-        (gaugedInteractionAssoc hpair htriple hrelV hax0) hax q' r' hq' hr' hA' hB'
+        (faceScaleProductPairwiseBilinearity_gaugeTransform hpair (cobCoherentGauge hpair hsel hax0))
+        (gaugedInteractionAssoc hpair htriple hsel hax0) hax q' r' hq' hr' hA' hB'
     · intro A' B' _ _ _ _ _ _ q' r' hq' hr' hA' hB'
-      exact cobGaugeSF_coboundary hpair htriple hrelV hax q' r' hq' hr' hA' hB'
+      exact cobGaugeSF_coboundary hpair htriple hsel hax q' r' hq' hr' hA' hB'
     · intro A' B' _ _ _ _ _ _ q' r' hq' hr' hA' hB'
       -- rightCoeff q' r' = g(r')/g(q'⊗r'): swap + coboundary + prodComm
-      rw [fs_rightCoeff_eq_swapped_leftCoeff hpair hrelV hax q' r' hq' hr' hB']
-      rw [cobGaugeSF_coboundary hpair htriple hrelV hax r' q' hr' hq' hB' hA']
-      show (cobCoherentGauge hpair hrelV hax0).gauge r' / cobGaugeSF hpair hax (prodDist r' q') = _
-      rw [cobGaugeSF_prodComm hpair hrelV hax q' r']
+      rw [fs_rightCoeff_eq_swapped_leftCoeff hpair hsel hax q' r' hq' hr' hB']
+      rw [cobGaugeSF_coboundary hpair htriple hsel hax r' q' hr' hq' hB' hA']
+      show (cobCoherentGauge hpair hsel hax0).gauge r' / cobGaugeSF hpair hax (prodDist r' q') = _
+      rw [cobGaugeSF_prodComm hpair hsel hax q' r']
       rfl
 
 theorem coordinateValueConvention_of_HM
@@ -5908,6 +5908,33 @@ theorem preEntropyRepresentativeGaugeConventions_of_parts
   universal_singleton := hscale.universal_singleton
 
 end FaceScaleProductCocycle
+
+/-- **Formal reduction of value-relabelling to the scalar pinning obligation.**
+
+The full-support selected value-relabelling clause
+(`FiniteFullSupportSelectedPosteriorValueRelabelingFor`) is *entirely* reduced,
+from the classical HM affine representation and the (proved, hypothesis-free)
+finite affine-utility uniqueness theorem, to the single scalar-pinning
+obligation `hpin` (`c = 1`).  The actionbase scalar `V ∘ relabel = c · V` with
+`c > 0` is derived by `selectedActionbaseScalar_of_orderRelabeling_HM_fullSupport`
+(order transport via `relabel_rel_of_axioms` + HM public-mix affinity + affine
+uniqueness + zero normalization pinning the additive constant to `0`); the
+outcome-relabelling half is derived from posterior-law invariance.  The only
+non-derived content of value-relabelling is therefore the scalar pinning
+`c = 1` — which in the paper follows from product quasi-additivity, but in the
+coboundary-gauge route that QA is *itself* built from relabelling, so importing
+the pinning that way would be circular.  This theorem records exactly where the
+residual sits: on `hpin`, and nowhere else. -/
+theorem finitePosteriorValueRelabeling_blockedOn_pinning
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hpin : FiniteFullSupportSelectedPermutationInvariancePinningFor hfaces) :
+    FiniteFullSupportSelectedPosteriorValueRelabelingFor hfaces :=
+  finiteFullSupportSelectedPosteriorValueRelabeling_of_actionbase_pinning
+    (selectedActionbaseScalar_of_orderRelabeling_HM_fullSupport
+      hhm classicalFiniteAffineUtilityUniquenessAssumptions)
+    hpin
 
 
 /-- Product quasi-additivity for a positive-gauge representative with the
@@ -7388,17 +7415,17 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_cobGaugeNoProductField
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
     (htriple : FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
-    (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
+    (hsel : FiniteSelectedPosteriorValueRelabelingFor hfaces)
     (hconv :
       FinalHarmlessConventions
-        (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax))
-        (productQuasiAdditivity_cobGauge hpair htriple hrelV hax)) :
+        (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax))
+        (productQuasiAdditivity_cobGauge hpair htriple hsel hax)) :
     MIRep F :=
   MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputsAndConventions
     hfad
-    (hfaces.gaugeTransform (cobCoherentGauge hpair hrelV hax))
+    (hfaces.gaugeTransform (cobCoherentGauge hpair hsel hax))
     (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
-    (hprod := productQuasiAdditivity_cobGauge hpair htriple hrelV hax)
+    (hprod := productQuasiAdditivity_cobGauge hpair htriple hsel hax)
     hconv hax
 
 /-- **Residual conventions for the product-gauge-free top-level route.**
@@ -7408,9 +7435,12 @@ requires once the product-normalisation conventions are eliminated:
 * the faithful-branch convention bundle, positive gauge, and its scale/support
   fields (`branch`, `gauge`, `scale_relabel`, `support_scale`) — the same
   representative-choice data the older routes carry;
-* `value_relabel` — the value-relabelling coherence clause
-  (`FinitePosteriorValueRelabelingAssumptions`), from which triple-product value
-  associativity and the product-swap slope-affinity are *derived*;
+* `selected_value_relabel` — the *per-representative* value-relabelling
+  coherence clause (`FiniteSelectedPosteriorValueRelabelingFor` for the
+  constructed coherent representative — strictly weaker than the
+  all-representations `FinitePosteriorValueRelabelingAssumptions`), from which
+  triple-product value associativity and the product-swap slope-affinity are
+  *derived*;
 * `harmless` — the `FinalHarmlessConventions` bundle (`singleton_slice` +
   `pre_entropy`) for the coboundary-gauge-transformed representative.
 
@@ -7463,7 +7493,13 @@ structure ResidualConventionsWithoutProductGauge
                 hhm branch)
               F hax (posteriorValueRepresentation_of_FinalHMInterface hhm hax)
             ).scale_factorization.scale r.restrictToSupport)
-  value_relabel : FinitePosteriorValueRelabelingAssumptions.{u}
+  selected_value_relabel :
+    FiniteSelectedPosteriorValueRelabelingFor
+      (coherentFaceScales_of_FinalHM_positiveGauge
+        hhm
+        (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
+          hhm branch)
+        hax gauge scale_relabel support_scale)
   harmless :
     FinalHarmlessConventions
       ((coherentFaceScales_of_FinalHM_positiveGauge
@@ -7493,13 +7529,7 @@ structure ResidualConventionsWithoutProductGauge
                     hhm branch)
                   hax gauge scale_relabel support_scale)))
             (faceScaleProductSlopeAffine_of_selectedRelabeling
-              (selectedPosteriorValueRelabeling_of_valueRelabeling
-                (coherentFaceScales_of_FinalHM_positiveGauge
-                  hhm
-                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
-                    hhm branch)
-                  hax gauge scale_relabel support_scale)
-                value_relabel)
+              selected_value_relabel
               (productInterceptPositiveLinear_of_FinalHM_positiveGauge
                 hhm
                 (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -7511,7 +7541,7 @@ structure ResidualConventionsWithoutProductGauge
                     (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
                       hhm branch)
                     hax gauge scale_relabel support_scale)))))
-          value_relabel hax))
+          selected_value_relabel hax))
       (productQuasiAdditivity_cobGauge
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
@@ -7534,13 +7564,7 @@ structure ResidualConventionsWithoutProductGauge
                   hhm branch)
                 hax gauge scale_relabel support_scale)))
           (faceScaleProductSlopeAffine_of_selectedRelabeling
-            (selectedPosteriorValueRelabeling_of_valueRelabeling
-              (coherentFaceScales_of_FinalHM_positiveGauge
-                hhm
-                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
-                  hhm branch)
-                hax gauge scale_relabel support_scale)
-              value_relabel)
+            selected_value_relabel
             (productInterceptPositiveLinear_of_FinalHM_positiveGauge
               hhm
               (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -7552,14 +7576,14 @@ structure ResidualConventionsWithoutProductGauge
                   (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
                     hhm branch)
                   hax gauge scale_relabel support_scale)))))
-        (faceScaleTripleProductValueAssociativity_of_valueRelabeling
+        (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
           (coherentFaceScales_of_FinalHM_positiveGauge
             hhm
             (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
               hhm branch)
             hax gauge scale_relabel support_scale)
-          value_relabel)
-        value_relabel hax)
+          selected_value_relabel)
+        selected_value_relabel hax)
 
 /-- **Top-level product-gauge-free, boundary-support-free final MI theorem.**
 
@@ -7572,7 +7596,11 @@ constructed internally by the coboundary gauge (`productQuasiAdditivity_cobGauge
 and the boundary content is proved.
 
 This is **not** a convention-free theorem.  The residual interfaces
-`value_relabel` (`FinitePosteriorValueRelabelingAssumptions`), `support_scale`
+`selected_value_relabel` (the *per-representative* relabelling clause
+`FiniteSelectedPosteriorValueRelabelingFor` — weaker than the earlier
+all-representations `FinitePosteriorValueRelabelingAssumptions`; its actionbase
+scalar is provable from HM/axioms, only the scalar pinning `c = 1` is residual —
+see `finitePosteriorValueRelabeling_blockedOn_pinning`), `support_scale`
 (the raw face-scale equation), and `harmless.pre_entropy`
 (`PreEntropyRepresentativeGaugeConventions`) remain and are disclosed in
 `TraceableAgency/CERTIFICATE_PRODUCT_GAUGE_FREE.md`.  The honest claim is:
@@ -7609,13 +7637,7 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductConventions
                 hhm hres.branch)
               hax hres.gauge hres.scale_relabel hres.support_scale)))
         (faceScaleProductSlopeAffine_of_selectedRelabeling
-          (selectedPosteriorValueRelabeling_of_valueRelabeling
-            (coherentFaceScales_of_FinalHM_positiveGauge
-              hhm
-              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
-                hhm hres.branch)
-              hax hres.gauge hres.scale_relabel hres.support_scale)
-            hres.value_relabel)
+          hres.selected_value_relabel
           (productInterceptPositiveLinear_of_FinalHM_positiveGauge
             hhm
             (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
@@ -7628,14 +7650,14 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductConventions
                   hhm hres.branch)
                 hax hres.gauge hres.scale_relabel hres.support_scale)))))
     (htriple :=
-      faceScaleTripleProductValueAssociativity_of_valueRelabeling
+      faceScaleTripleProductValueAssociativity_of_selectedRelabeling
         (coherentFaceScales_of_FinalHM_positiveGauge
           hhm
           (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle
             hhm hres.branch)
           hax hres.gauge hres.scale_relabel hres.support_scale)
-        hres.value_relabel)
-    (hrelV := hres.value_relabel)
+        hres.selected_value_relabel)
+    (hsel := hres.selected_value_relabel)
     hres.harmless
 
 /-- Final MI route through an explicitly constructed product-normalised

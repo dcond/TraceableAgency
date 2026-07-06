@@ -86,14 +86,38 @@ How the removed content is now discharged:
   **proved** `= 1` from the product-swap symmetry. No product-normalization
   convention is assumed.
 * `htriple` (triple-product value associativity) and the slope-affinity piece of
-  `hpair` are **derived** from `value_relabel` via
-  `faceScaleTripleProductValueAssociativity_of_valueRelabeling` and
-  `faceScaleProductSlopeAffine_of_selectedRelabeling
-   (selectedPosteriorValueRelabeling_of_valueRelabeling …)`.
+  `hpair` are **derived** from `selected_value_relabel` via
+  `faceScaleTripleProductValueAssociativity_of_selectedRelabeling` and
+  `faceScaleProductSlopeAffine_of_selectedRelabeling`.
 * The intercept piece of `hpair` is derived via
   `productInterceptPositiveLinear_of_FinalHM_positiveGauge`.
 * The boundary-support content is proved rather than assumed; the route goes
   through `MIRep_of_TraceAxioms_HM_Faddeev_withPreEntropyInputs_noCardinal`.
+
+### Relabelling residual weakened (this pass)
+
+The relabelling residual was **narrowed** from the all-representations,
+universe-polymorphic `FinitePosteriorValueRelabelingAssumptions` (invariance of
+*every* posterior-value representation of *every* preference family) to the
+per-representative `FiniteSelectedPosteriorValueRelabelingFor` for *the one*
+constructed coherent representative.  Verified by `#print` (`pp.all`): the
+fully-elaborated `ResidualConventionsWithoutProductGauge` contains **0**
+occurrences of `FinitePosteriorValueRelabelingAssumptions`.  The whole
+coboundary-gauge machinery (`cobCoherentGauge`, `productQuasiAdditivity_cobGauge`
+and every helper) was re-plumbed to consume the weaker per-representative clause
+— every internal use of the relabelling hypothesis was already instantiated at
+that representative, and the two gauge-transform associativity uses now go
+through `faceScaleTripleProductValueAssociativity_gaugeTransform` (which needs
+only `htriple` + the coherent gauge).
+
+Furthermore, `finitePosteriorValueRelabeling_blockedOn_pinning`
+(EntropyReductionClosure.lean) formally reduces the *entire* content of
+full-support selected relabelling to the single scalar-pinning obligation
+`c = 1`: from the classical HM affine representation and the proved,
+hypothesis-free finite affine-utility uniqueness theorem, the actionbase scalar
+(`V ∘ relabel = c · V`, `c > 0`) and the outcome-relabelling half are both
+**derived**.  So the only genuinely residual content of relabelling is the
+scalar pinning `c = 1`.
 
 ---
 
@@ -105,7 +129,7 @@ How the removed content is now discharged:
 | `gauge`         | positive face-scale gauge                                   | representative choice                    |
 | `scale_relabel` | scale relabel-equivariance equation                         | harmless normalization                   |
 | `support_scale` | raw face-scale equation `eq:facescale`                      | **RESIDUAL — genuine cross-cardinality content** |
-| `value_relabel` | `FinitePosteriorValueRelabelingAssumptions` (V relabel-coherent) | **RESIDUAL interface** |
+| `selected_value_relabel` | `FiniteSelectedPosteriorValueRelabelingFor` (relabel-coherence of *the* constructed representative) | **RESIDUAL interface (narrowed; reduces to scalar pinning `c = 1`)** |
 | `harmless`      | `singleton_slice` + `pre_entropy`                           | `pre_entropy` is **RESIDUAL** |
 
 ### Explicit residual-interface disclosure
@@ -113,12 +137,17 @@ How the removed content is now discharged:
 The following are **residual interfaces**, not proved from `TraceAxioms + HM +
 Faddeev` in this route:
 
-1. **`value_relabel`** (`FinitePosteriorValueRelabelingAssumptions`). States that
-   the posterior value representation is coherent under finite relabelling. It is
-   mathematically natural and should plausibly follow from relabelling invariance
-   / HM uniqueness, but there is currently **no constructor** producing it from
-   `hhm + hax`. It feeds both `htriple` and the selected-relabelling package used
-   for the slope-affinity piece of `hpair`.
+1. **`selected_value_relabel`** (`FiniteSelectedPosteriorValueRelabelingFor` for
+   the constructed representative). States that *that* posterior-value
+   representative is invariant under simultaneous action+outcome relabelling.
+   Its actionbase scalar (`c > 0`) and its outcome half are provable from
+   HM/axioms; the sole non-derived content is the scalar pinning `c = 1` (see
+   `finitePosteriorValueRelabeling_blockedOn_pinning`).  In the paper `c = 1`
+   follows from product quasi-additivity, but in the coboundary-gauge route the
+   QA is itself built from relabelling, so discharging the pinning that way would
+   be **circular** — hence it remains a genuine residual here.  This is strictly
+   weaker than the earlier all-representations
+   `FinitePosteriorValueRelabelingAssumptions`.
 2. **`support_scale`** (the raw face-scale equation `eq:facescale`). This is
    genuine cross-cardinality content, not merely a positive-gauge choice. It
    still requires either a proof or honest disclosure; here it is disclosed.
