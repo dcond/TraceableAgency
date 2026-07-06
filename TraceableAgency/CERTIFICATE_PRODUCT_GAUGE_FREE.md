@@ -346,3 +346,59 @@ claim: **product-gauge-free, boundary-support-free, support-scale-free,
 value-relabel-free, and singleton-slice-free, modulo the pre-entropy
 representative conventions (`pre_entropy`) and the faithful-branch representative
 choice (`branch`).**
+
+---
+
+## 9. `branch` SHRUNK from 6 fields to a 4-field boundary-transport core
+
+`FinalFaithfulBranchConventions hhm` has six fields.  Two are theorems of the HM
+integral representation and are eliminated:
+
+| `branch` field | Classification | Discharge |
+| --- | --- | --- |
+| `support_face` | `PROVABLE_FROM_HM_AXIOMS` | `supportFaceRepresentativeConvention_of_integralRepresentation` (`value_eq_integral` + `posteriorLawIntegral_restrictToSupport` + `marginalValue_support_face`) |
+| `singleton_scale` | `PURE_WLOG_REPRESENTATIVE_CHOICE` (coeff) + `PROVABLE_FROM_HM_AXIOMS` (value-zero) | `branchSingletonScaleConvention_of_integralRepresentation` (`singletonCoeff := 1`; `singleton_branch_value_zero` via support-face transport to the subsingleton support) |
+| `boundary_coeff` | `PURE_WLOG_REPRESENTATIVE_CHOICE` | **retained** — positive boundary-coefficient choice |
+| `marginal_value` | `GENUINE_REMAINING_BRANCH_ASSUMPTION` | **retained** — boundary linear-part transport `η(φ_q ∘ incl) = boundaryCoeff · η(φ_{r\|supp})`; definite content of the true HM functional (documented as out-of-scope to formalize), not a convention |
+| `boundary_scale` | `GENUINE_REMAINING_BRANCH_ASSUMPTION` | **retained** — factorization `branchCoeff = scale q / scale(post)` at boundary posteriors |
+| `singleton_scale_factorization` | `GENUINE_REMAINING_BRANCH_ASSUMPTION` | **retained** — same factorization at singleton posteriors |
+
+`boundary_scale`/`singleton_scale_factorization` are genuine inputs to
+`branchScaleFactorization_of_fullSupport_boundary_singleton` (which takes them as
+hypotheses): the chosen `boundaryCoeff`/`singletonCoeff` are not automatically
+equal to the derived cocycle scale ratio, so the equalities must be supplied.  A
+tighter collapse (defining `boundaryCoeff := scale q / scale(post)`) is circular
+here — the scale is built from the branch structure that consumes `boundaryCoeff`.
+
+**Deliverables (Option A — strictly smaller residual):**
+
+* `MinimalBranchResidual hhm` — the 4-field boundary-transport core
+  (`boundary_coeff`, `marginal_value`, `boundary_scale`,
+  `singleton_scale_factorization`).  Verified: `.support_face`/`.singleton_scale`
+  projections do not exist.
+* `finalFaithfulBranchConventions_of_minimal` — rebuilds the full 6-field
+  `FinalFaithfulBranchConventions` from the 4-field residual.
+* Exported theorem and bundle:
+
+```
+#check @MIRep_of_TraceAxioms_FinalHM_Faddeev_onlyMinimalBranchAndPreEntropy
+
+MIRep_of_TraceAxioms_FinalHM_Faddeev_onlyMinimalBranchAndPreEntropy :
+  ClassicalFaddeevTheoremAssumptions →
+    ∀ {F : PrefFamily} (hhm : FinalHMInterface) (hax : TraceAxioms F)
+      (hres : ResidualMinimalBranchAndPreEntropy hhm hax), MIRep F
+
+#print axioms …
+  depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+`ResidualMinimalBranchAndPreEntropy` carries `minimal : MinimalBranchResidual hhm`
+(4 fields) and `pre_entropy` — strictly fewer than the previous `branch`
+(6 fields) + `pre_entropy`.
+
+Updated honest claim: **product-gauge-free, boundary-support-free,
+support-scale-free, value-relabel-free, and singleton-slice-free; the branch
+residual is reduced to the 4-field boundary-transport core plus `pre_entropy`.**
+The genuinely irreducible branch content is the boundary linear-part transport
+(`marginal_value`) together with its two scale-factorization equations and the
+positive boundary-coefficient choice.

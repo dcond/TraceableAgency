@@ -1796,6 +1796,164 @@ noncomputable def faithfulBranchAggregationAssumptions_of_FinalHM_conventionBund
     hconv.marginal_value hconv.boundary_scale
     hconv.singleton_scale_factorization
 
+/-- **`support_face` PROVED from the HM integral representation.**
+
+The support-face representative convention `V r E = V (r|supp) (E|supp)` follows
+from the integral form `V q E = ∫ marginalValue q  d(posterior law)`
+(`value_eq_integral`), relabel/support-covariance of the posterior-law integral
+(`posteriorLawIntegral_restrictToSupport`), and the marginal-value support-face
+naturality clause (`marginalValue_support_face`).  It is not a convention. -/
+theorem supportFaceRepresentativeConvention_of_integralRepresentation
+    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u}) :
+    FiniteSupportFaceRepresentativeConventionAssumptions.{u} where
+  support_face_value_transport := by
+    intro F hax hV A O _ _ _ _ _ r _ P
+    rw [hint.value_eq_integral F hV r (experimentOfChannel P),
+        hint.value_eq_integral F hV r.restrictToSupport
+          (experimentOfChannel (Channel.restrictToSupport P r))]
+    rw [posteriorLawIntegralExp_experimentOfChannel, posteriorLawIntegralExp_experimentOfChannel]
+    rw [posteriorLawIntegral_restrictToSupport P r (hint.marginalValue F hV r)]
+    refine congrArg _ ?_
+    funext d
+    exact hint.marginalValue_support_face F hV r d
+
+/-- **`singleton_scale` CONSTRUCTED: `singletonCoeff := 1` (WLOG) and the
+singleton branch value is PROVED zero.**
+
+`singletonCoeff` multiplies a zero value, so any positive choice works; we take
+`1`.  `singleton_branch_value_zero` (`V r E = 0` when `r` has singleton support)
+is proved by transporting to the support face
+(`supportFaceRepresentativeConvention_of_integralRepresentation`), where the
+support subtype is a subsingleton and the value is zero
+(`branchValue_channel_eq_zero_of_subsingleton`). -/
+noncomputable def branchSingletonScaleConvention_of_integralRepresentation
+    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u}) :
+    FiniteBranchSingletonScaleConventionAssumptions.{u} where
+  singletonCoeff := fun _ _ => 1
+  singletonCoeff_pos := fun _ _ _ _ => one_pos
+  singleton_branch_value_zero := by
+    intro F hV A O _ _ _ _ _ r hr_single P
+    obtain ⟨a, ha, huniq⟩ := hr_single
+    haveI hsub : Subsingleton (supportSubtype r) := by
+      constructor
+      rintro ⟨x, hx⟩ ⟨y, hy⟩
+      exact Subtype.ext ((huniq x hx).trans (huniq y hy).symm)
+    haveI : Nonempty (supportSubtype r) := ⟨⟨a, ha⟩⟩
+    have htrans :
+        hV.V r (experimentOfChannel P) =
+          hV.V r.restrictToSupport
+            (experimentOfChannel (Channel.restrictToSupport P r)) := by
+      rw [hint.value_eq_integral F hV r (experimentOfChannel P),
+          hint.value_eq_integral F hV r.restrictToSupport
+            (experimentOfChannel (Channel.restrictToSupport P r))]
+      rw [posteriorLawIntegralExp_experimentOfChannel, posteriorLawIntegralExp_experimentOfChannel]
+      rw [posteriorLawIntegral_restrictToSupport P r (hint.marginalValue F hV r)]
+      refine congrArg _ ?_; funext d
+      exact hint.marginalValue_support_face F hV r d
+    rw [htrans]
+    exact branchValue_channel_eq_zero_of_subsingleton F hV r.restrictToSupport
+      (Dist.restrictToSupport_fullSupport r) (Channel.restrictToSupport P r)
+
+/-- **Minimal branch residual: the boundary-transport core (4 fields).**
+
+`FinalFaithfulBranchConventions` has six fields; two of them (`support_face`,
+`singleton_scale`) are theorems of the HM integral representation
+(`supportFaceRepresentativeConvention_of_integralRepresentation`,
+`branchSingletonScaleConvention_of_integralRepresentation`) and are dropped here.
+The four remaining fields are exactly the coupled boundary-transport data:
+
+* `boundary_coeff` — the positive boundary-coefficient choice
+  (`FiniteBoundaryCoefficientScaleConventionAssumptions`), a representative choice;
+* `marginal_value` — the marginal-value transport equation
+  `η(φ_q ∘ incl) = boundaryCoeff · η(φ_{r|supp})` (the boundary linear-part
+  transport; genuine mathematical content of the true HM functional, not a
+  convention — see `FiniteBoundaryLinearPartTransportAssumptions`);
+* `boundary_scale`, `singleton_scale_factorization` — the boundary/singleton
+  scale-factorization equations `branchCoeff = scale q / scale(post)` coupling the
+  chosen coefficients to the derived cocycle scale.
+
+This is strictly smaller than `FinalFaithfulBranchConventions` (4 fields vs 6). -/
+structure MinimalBranchResidual (hhm : FinalHMInterface.{u}) where
+  boundary_coeff : FiniteBoundaryCoefficientScaleConventionAssumptions.{u}
+  marginal_value :
+    FiniteSupportFaceMarginalValueTransportConvention
+      (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+      (boundaryFaceScale_of_coefficientScaleConvention boundary_coeff)
+  boundary_scale :
+    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+      (hV : PosteriorValueRepresentation F),
+      let hlin := affineLinearPart_of_FinalHMInterface hhm
+      let hpath :=
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+          hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+          (atomicLinearTangentSpanning_of_atomic
+            finiteAtomicPosteriorTangentSpanning) F hax hV
+      let hboundary := boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+      let hvalue :=
+        boundaryValueTransport_of_supportFaceRepresentativeConvention
+          (supportFaceRepresentativeConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+      let hcoeff :=
+        boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+          (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+            hhm hboundary marginal_value)
+      FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+        (faithfulBranchAggregationStructure_of_components
+          F hax hV hlin hpath hboundary
+          (branchSingletonScaleConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+          hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_components
+          F hax hV hlin hpath hboundary
+          (branchSingletonScaleConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+          hvalue hcoeff)
+  singleton_scale_factorization :
+    ∀ (F : PrefFamily.{u}) (hax : TraceAxioms F)
+      (hV : PosteriorValueRepresentation F),
+      let hlin := affineLinearPart_of_FinalHMInterface hhm
+      let hpath :=
+        branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
+          hlin finiteLinearFunctionalSameSignScalarOnTangent_of_direct
+          (atomicLinearTangentSpanning_of_atomic
+            finiteAtomicPosteriorTangentSpanning) F hax hV
+      let hboundary := boundaryFaceScale_of_coefficientScaleConvention boundary_coeff
+      let hvalue :=
+        boundaryValueTransport_of_supportFaceRepresentativeConvention
+          (supportFaceRepresentativeConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+      let hcoeff :=
+        boundaryCoefficientTransport_of_linearPartTransport hlin hboundary
+          (boundaryLinearPartTransport_of_FinalHM_marginalConvention
+            hhm hboundary marginal_value)
+      FiniteBranchScaleFactorizationSingletonConvention
+        (faithfulBranchAggregationStructure_of_components
+          F hax hV hlin hpath hboundary
+          (branchSingletonScaleConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+          hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_components
+          F hax hV hlin hpath hboundary
+          (branchSingletonScaleConvention_of_integralRepresentation
+            (posteriorIntegralRepresentation_of_FinalHMInterface hhm))
+          hvalue hcoeff)
+
+/-- Rebuild the full six-field `FinalFaithfulBranchConventions` from the
+four-field `MinimalBranchResidual`, supplying the two proved fields. -/
+noncomputable def finalFaithfulBranchConventions_of_minimal
+    {hhm : FinalHMInterface.{u}} (h : MinimalBranchResidual hhm) :
+    FinalFaithfulBranchConventions hhm where
+  support_face :=
+    supportFaceRepresentativeConvention_of_integralRepresentation
+      (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+  boundary_coeff := h.boundary_coeff
+  singleton_scale :=
+    branchSingletonScaleConvention_of_integralRepresentation
+      (posteriorIntegralRepresentation_of_FinalHMInterface hhm)
+  marginal_value := h.marginal_value
+  boundary_scale := h.boundary_scale
+  singleton_scale_factorization := h.singleton_scale_factorization
+
 /-- **R1: raw chain-scale relabelling invariance from the HM covariance clause.**
 
 The faithful branch chain scale is `scale q = branchCoeff q u_A` (the branch
@@ -8219,6 +8377,151 @@ theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonCon
       harmless :=
         finalHarmlessConventions_of_withoutSingletonSlice
           { pre_entropy := hres.pre_entropy } }
+
+/-- **Residual with `branch` reduced to its 4-field boundary-transport core.**
+
+Same as `ResidualConventionsWithoutProductGaugeSupportScaleValueRelabelOrSingletonSlice`
+except the six-field `branch : FinalFaithfulBranchConventions hhm` is replaced by
+the strictly smaller four-field `minimal : MinimalBranchResidual hhm` (the
+`support_face` and `singleton_scale` fields are proved, not assumed).  The full
+`branch` bundle is reconstructed internally by
+`finalFaithfulBranchConventions_of_minimal`.  Residual content: `minimal`
+(4 boundary-transport fields) and `pre_entropy`. -/
+structure ResidualMinimalBranchAndPreEntropy
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F) where
+  minimal : MinimalBranchResidual hhm
+  pre_entropy :
+    PreEntropyRepresentativeGaugeConventions
+      ((coherentFaceScales_of_FinalHM_positiveGauge
+          hhm
+          (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+          hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+          (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+          (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+            cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb)).gaugeTransform
+        (cobCoherentGauge
+          (faceScaleProductPairwiseBilinearity_of_multiPieces
+            (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+              (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                  hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+              hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+              (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                  hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))
+            (faceScaleProductSlopeAffine_of_selectedRelabeling
+              (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+              (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb)
+                (finiteFaceScaleSingletonSliceAffine_of_faces
+                  (coherentFaceScales_of_FinalHM_positiveGauge
+                    hhm
+                    (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                    hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                    (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                    (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                      cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))))
+          (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax) hax))
+      (productQuasiAdditivity_cobGauge
+        (faceScaleProductPairwiseBilinearity_of_multiPieces
+          (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
+            (classicalFiniteMixtureSpaceAffineRepresentation_of_FinalHMInterface hhm)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))
+          (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+            hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+            (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb)
+            (finiteFaceScaleSingletonSliceAffine_of_faces
+              (coherentFaceScales_of_FinalHM_positiveGauge
+                hhm
+                (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                  cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))
+          (faceScaleProductSlopeAffine_of_selectedRelabeling
+            (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+            (productInterceptPositiveLinear_of_FinalHM_positiveGauge
+              hhm
+              (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+              hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+              (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+              (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb)
+              (finiteFaceScaleSingletonSliceAffine_of_faces
+                (coherentFaceScales_of_FinalHM_positiveGauge
+                  hhm
+                  (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+                  hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+                  (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+                    cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))))))
+        (faceScaleTripleProductValueAssociativity_of_selectedRelabeling
+          (coherentFaceScales_of_FinalHM_positiveGauge
+            hhm
+            (faithfulBranchAggregationAssumptions_of_FinalHM_conventionBundle hhm (finalFaithfulBranchConventions_of_minimal minimal))
+            hax (cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+            (cardinalGauge_hrel hhm (finalFaithfulBranchConventions_of_minimal minimal) hax)
+            (fun {_A} _ _ _ q hq r _ hrn hrnd hrb =>
+              cardinalGauge_hsupport hhm (finalFaithfulBranchConventions_of_minimal minimal) hax q hq r hrn hrnd hrb))
+          (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax))
+        (selectedValueRelabel_of_cardinalGauge hhm (finalFaithfulBranchConventions_of_minimal minimal) hax) hax)
+
+/-- **Top-level MI theorem: residual is only the 4-field minimal branch core plus
+`pre_entropy`.**
+
+`branch` has been reduced from six fields to the four-field
+`MinimalBranchResidual` (boundary-transport core); `support_face` and
+`singleton_scale` are discharged by
+`supportFaceRepresentativeConvention_of_integralRepresentation` and
+`branchSingletonScaleConvention_of_integralRepresentation`.  All product-gauge,
+support-scale, value-relabelling, and singleton-slice conventions remain
+eliminated.  Residual: `minimal` (4 fields) + `pre_entropy`. -/
+theorem MIRep_of_TraceAxioms_FinalHM_Faddeev_onlyMinimalBranchAndPreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    {F : PrefFamily.{u}}
+    (hhm : FinalHMInterface.{u})
+    (hax : TraceAxioms F)
+    (hres : ResidualMinimalBranchAndPreEntropy hhm hax) :
+    MIRep F :=
+  MIRep_of_TraceAxioms_FinalHM_Faddeev_noProductSupportValueOrSingletonConventions
+    hfad hhm hax
+    { branch := finalFaithfulBranchConventions_of_minimal hres.minimal
+      pre_entropy := hres.pre_entropy }
 
 /-- Final MI route through an explicitly constructed product-normalised
 face-scale representative.
