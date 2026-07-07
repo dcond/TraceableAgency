@@ -359,7 +359,7 @@ full-support guard, no regularity hypothesis, and no boundary assumption.
 
 This is the content that `FiniteCardinalSupportBoundaryAssumptions.Hfun_boundary_identity`
 (and `FiniteHfunBoundaryIdentityAssumptions`) asserts as an external boundary
-convention.  For the representation actually built and used by the final theorem
+normalization.  For the representation actually built and used by the final theorem
 it is definitional, so that boundary field carries no information here. -/
 theorem hfun_eq_normalizedValue_idChannel_of_scale
     (F : PrefFamily.{u}) (hs : ScaleCoherenceStructure F)
@@ -2829,7 +2829,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hsecond :
-      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
         (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}),
         ClassicalFaceScaleSecondCoordinateAffineUniquenessAssumptionsFor
           (faceScaleProductLeftSliceAffine_of_transform
@@ -2839,7 +2839,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
               (faceScaleProductLeftSliceSameOrder_of_A8 hfaces)
               hsingle huniq)))
     (hslope :
-      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
         (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}),
         FiniteFaceScaleProductSlopeAffineAssumptionsFor
           (faceScaleProductLeftSliceAffine_of_transform
@@ -2849,10 +2849,10 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
               (faceScaleProductLeftSliceSameOrder_of_A8 hfaces)
               hsingle huniq)))
     (hextract :
-      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
         (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
         (hgauge :
-          FiniteFaceScaleProductGaugeConventionFor
+          FiniteFaceScaleCurrentProductGaugeNormalizationFor
             (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
@@ -2897,7 +2897,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
                   hsingle huniq)))
             (hsecond hsingle huniq)
             (hslope hsingle huniq))
-          (faceScaleProductGaugeNormalization_of_convention hgauge)
+          (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
           (faceScaleTripleProductValueAssociativity_of_valueRelabeling
             hfaces hrelV)) :
     FiniteFaceScaleProductRepresentationTheoremAssumptionsFor hfaces where
@@ -2939,7 +2939,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_and_coeffExtraction
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hsecond :
-      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
         (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}),
         ClassicalFaceScaleSecondCoordinateAffineUniquenessAssumptionsFor
           (faceScaleProductLeftSliceAffine_of_transform
@@ -2949,7 +2949,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_and_coeffExtraction
               (faceScaleProductLeftSliceSameOrder_of_A8 hfaces)
               hsingle huniq)))
     (hslope :
-      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
         (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}),
         FiniteFaceScaleProductSlopeAffineAssumptionsFor
           (faceScaleProductLeftSliceAffine_of_transform
@@ -5037,14 +5037,14 @@ structure FiniteTripleProductCoeffExtractionSingletonAssumptions.{v}
           hpair.rightCoeff F hax hs r s
 
 /--
-Singleton coefficient gauge convention. On singleton fibres the relevant
+Singleton coefficient gauge normalization. On singleton fibres the relevant
 coordinate value is identically zero, so the corresponding linear coefficient
 is not identified by product values. These equations are therefore classified
-as a singleton/gauge convention, not as an extracted coefficient comparison.
+as a singleton/gauge normalization, not as an extracted coefficient comparison.
 -/
-structure FiniteSingletonCoefficientGaugeConventionAssumptions.{v}
+structure FiniteSingletonCoefficientGaugeNormalizationAssumptions.{v}
     (hpair : FinitePairwiseProductBilinearAssumptions.{v}) where
-  coeff_assoc_A_singleton_convention :
+  coeff_assoc_A_singleton_normalization :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
       (hs : ScaleCoherenceStructure F)
       {A B C : Type v}
@@ -5058,7 +5058,7 @@ structure FiniteSingletonCoefficientGaugeConventionAssumptions.{v}
       hpair.leftCoeff F hax hs (prodDist q r) s *
           hpair.leftCoeff F hax hs q r =
         hpair.leftCoeff F hax hs q (prodDist r s)
-  coeff_assoc_mixed_singleton_convention :
+  coeff_assoc_mixed_singleton_normalization :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
       (hs : ScaleCoherenceStructure F)
       {A B C : Type v}
@@ -5073,7 +5073,7 @@ structure FiniteSingletonCoefficientGaugeConventionAssumptions.{v}
           hpair.rightCoeff F hax hs q r =
         hpair.rightCoeff F hax hs q (prodDist r s) *
           hpair.leftCoeff F hax hs r s
-  coeff_assoc_B_singleton_convention :
+  coeff_assoc_B_singleton_normalization :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
       (hs : ScaleCoherenceStructure F)
       {A B C : Type v}
@@ -5088,24 +5088,24 @@ structure FiniteSingletonCoefficientGaugeConventionAssumptions.{v}
         hpair.rightCoeff F hax hs q (prodDist r s) *
           hpair.rightCoeff F hax hs r s
 
-/-- Convert the singleton gauge convention into the old singleton coefficient
+/-- Convert the singleton gauge normalization into the old singleton coefficient
 extraction compatibility package. -/
-theorem tripleProductCoeffExtractionSingleton_of_gaugeConvention
+theorem tripleProductCoeffExtractionSingleton_of_gaugeNormalization
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
-    (hconv :
-      FiniteSingletonCoefficientGaugeConventionAssumptions.{u} hpair) :
+    (hgauge :
+      FiniteSingletonCoefficientGaugeNormalizationAssumptions.{u} hpair) :
     FiniteTripleProductCoeffExtractionSingletonAssumptions.{u} hpair where
   coeff_assoc_A_of_subsingleton := by
     intro F hax hs A B C _ _ _ _ _ _ _ _ _ q r s hq hr hsupp hsub htriple
-    exact hconv.coeff_assoc_A_singleton_convention
+    exact hgauge.coeff_assoc_A_singleton_normalization
       F hax hs q r s hq hr hsupp hsub htriple
   coeff_assoc_mixed_of_subsingleton := by
     intro F hax hs A B C _ _ _ _ _ _ _ _ _ q r s hq hr hsupp hsub htriple
-    exact hconv.coeff_assoc_mixed_singleton_convention
+    exact hgauge.coeff_assoc_mixed_singleton_normalization
       F hax hs q r s hq hr hsupp hsub htriple
   coeff_assoc_B_of_subsingleton := by
     intro F hax hs A B C _ _ _ _ _ _ _ _ _ q r s hq hr hsupp hsub htriple
-    exact hconv.coeff_assoc_B_singleton_convention
+    exact hgauge.coeff_assoc_B_singleton_normalization
       F hax hs q r s hq hr hsupp hsub htriple
 
 /-- Reconstruct full coefficient extraction from the internally proved
@@ -5267,13 +5267,13 @@ theorem linearCoeffRho_reciprocity_of_value_swap_nondegenerate
   field_simp [hleft_ne, hright_ne, hswapped_right_ne]
 
 /--
-Singleton coefficient swap convention. When one coordinate is singleton, the
+Singleton coefficient swap normalization. When one coordinate is singleton, the
 corresponding value representative is identically zero, so the swap coefficient
 comparison cannot be extracted from value variation. These equations are
-therefore classified with the singleton/gauge conventions rather than as
+therefore classified with the singleton/gauge normalizations rather than as
 nondegenerate coefficient extraction.
 -/
-structure FiniteProductLinearCoeffSwapSingletonConventionAssumptions.{v}
+structure FiniteProductLinearCoeffSwapSingletonNormalizationAssumptions.{v}
     (hpair : FinitePairwiseProductBilinearAssumptions.{v}) where
   rho_reciprocity_of_subsingleton_left :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
@@ -5299,12 +5299,12 @@ structure FiniteProductLinearCoeffSwapSingletonConventionAssumptions.{v}
         1
 
 /-- Reconstruct the old swap/rho reciprocity package from the internally
-proved nondegenerate swap extraction and the remaining singleton convention. -/
-theorem productLinearCoeffSwap_of_valueSwap_and_singletonConvention
+proved nondegenerate swap extraction and the remaining singleton normalization. -/
+theorem productLinearCoeffSwap_of_valueSwap_and_singletonNormalization
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
     (hsingle :
-      FiniteProductLinearCoeffSwapSingletonConventionAssumptions.{u} hpair) :
+      FiniteProductLinearCoeffSwapSingletonNormalizationAssumptions.{u} hpair) :
     FiniteProductLinearCoeffSwapAssumptions.{u} hpair where
   rho_reciprocity := by
     intro F hax hs A B _ _ _ _ _ _ q r hq hr
@@ -5414,7 +5414,7 @@ structure FiniteProductReferenceGaugeTransformAssumptions.{v}
       gaugeTransformedRightCoeff hpair gauge F hax hs q r = 1
 
 /--
-Representative-choice convention connecting the paper's transformed
+Representative-choice normalization connecting the paper's transformed
 coefficients to the current Lean representatives. Since the current code does
 not implement a new `ScaleCoherenceStructure` with rescaled `V`, this says the
 currently selected representatives are the post-gauge representatives.
@@ -5442,9 +5442,9 @@ structure FiniteCurrentRepresentativesGaugeNormalizedAssumptions.{v}
         gaugeTransformedRightCoeff hpair hgauge.gauge F hax hs q r
 
 /-- Reconstruct the old normalized-current-coefficients package from the
-reference-gauge transform law plus the convention that the current
+reference-gauge transform law plus the normalization that the current
 representatives are already the post-gauge representatives. -/
-theorem positiveGaugeChoice_of_representativeGaugeConvention
+theorem positiveGaugeChoice_of_representativeGaugeNormalization
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
     (hgauge : FiniteProductReferenceGaugeTransformAssumptions.{u} hpair)
     (hcurrent :
@@ -5964,13 +5964,13 @@ theorem productInteractionSwap_of_valueSwap_and_gaugeNormalization
       hrelV hpair hnorm F hax hs q r hq hr hA hB
 
 /--
-Singleton interaction convention. If one factor is singleton, the product
+Singleton interaction normalization. If one factor is singleton, the product
 interaction term is multiplied by a zero coordinate value, so the coefficient
 is not identified by value variation. The paper handles singleton factors in
 Step 5 using extra product-bijection/gauge reasoning; Lean isolates the
-remaining convention directly against the reference common coefficient.
+remaining normalization directly against the reference common coefficient.
 -/
-structure FiniteSingletonInteractionCoefficientConventionAssumptions.{v}
+structure FiniteSingletonInteractionCoefficientNormalizationAssumptions.{v}
     (hpair : FinitePairwiseProductBilinearAssumptions.{v}) where
   interactionCoeff_eq_reference_of_subsingleton_left :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
@@ -6043,13 +6043,13 @@ theorem interactionCoeff_eq_reference_of_assoc_nondegenerate
 
 /-- Reconstruct the old common-κ package from nondegenerate Step 4
 associativity, nondegenerate swap symmetry, and the singleton interaction
-convention. -/
+normalization. -/
 noncomputable def interactionUniversality_of_parts
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
     (hassoc : FiniteProductInteractionAssociativityAssumptions.{u} hpair)
     (_hswap : FiniteProductInteractionSwapAssumptions.{u} hpair)
     (hsingle :
-      FiniteSingletonInteractionCoefficientConventionAssumptions.{u} hpair) :
+      FiniteSingletonInteractionCoefficientNormalizationAssumptions.{u} hpair) :
     FiniteProductInteractionUniversalityAssumptions.{u} hpair where
   kappa := interactionReferenceKappa hpair
   interactionCoeff_common := by
@@ -6309,7 +6309,7 @@ structure FiniteCrossPriorBlockAssumptions.{v} where
         singletonSliceAffine_of_singletonCollapse classical_affine_uniqueness))
   posterior_value_relabeling : FinitePosteriorValueRelabelingAssumptions.{v}
   singleton_coeff_gauge :
-    FiniteSingletonCoefficientGaugeConventionAssumptions.{v}
+    FiniteSingletonCoefficientGaugeNormalizationAssumptions.{v}
       (pairwiseProductBilinear_of_sliceAffine
         (productLeftSliceAffine_of_affineUniqueness
           (affineSliceUniqueness_of_parts
@@ -6340,7 +6340,7 @@ structure FiniteCrossPriorBlockAssumptions.{v} where
               singletonSliceAffine_of_singletonCollapse classical_affine_uniqueness))
           slope_uniqueness))
   gauge_coeff_swap_singleton :
-    FiniteProductLinearCoeffSwapSingletonConventionAssumptions.{v}
+    FiniteProductLinearCoeffSwapSingletonNormalizationAssumptions.{v}
       (pairwiseProductBilinear_of_sliceAffine
         (productLeftSliceAffine_of_affineUniqueness
           (affineSliceUniqueness_of_parts
@@ -6434,7 +6434,7 @@ structure FiniteCrossPriorBlockAssumptions.{v} where
           slope_uniqueness))
       reference_gauge
   singleton_interaction :
-    FiniteSingletonInteractionCoefficientConventionAssumptions.{v}
+    FiniteSingletonInteractionCoefficientNormalizationAssumptions.{v}
       (pairwiseProductBilinear_of_sliceAffine
         (productLeftSliceAffine_of_affineUniqueness
           (affineSliceUniqueness_of_parts
@@ -6511,11 +6511,11 @@ noncomputable def FiniteCrossPriorBlockAssumptions.pairwise_bilinear
     hcross.slice_affine hcross.slice_intercept hcross.slice_slope
 
 /-- The singleton coefficient-extraction compatibility package, reconstructed
-from the live singleton coefficient gauge convention. -/
+from the live singleton coefficient gauge normalization. -/
 theorem FiniteCrossPriorBlockAssumptions.gauge_coeff_singleton
     (hcross : FiniteCrossPriorBlockAssumptions.{u}) :
     FiniteTripleProductCoeffExtractionSingletonAssumptions.{u} hcross.pairwise_bilinear :=
-  tripleProductCoeffExtractionSingleton_of_gaugeConvention
+  tripleProductCoeffExtractionSingleton_of_gaugeNormalization
     hcross.pairwise_bilinear hcross.singleton_coeff_gauge
 
 /-- The old Stage 10U full coefficient-extraction package, now derived from
@@ -6544,21 +6544,21 @@ theorem FiniteCrossPriorBlockAssumptions.gauge_coeff_associativity
     hcross.gauge_triple_value_assoc hcross.gauge_coeff_extraction
 
 /-- The old Stage 10T coordinate-swap/rho package, now reconstructed from
-coherent value relabeling plus the remaining singleton swap convention. -/
+coherent value relabeling plus the remaining singleton swap normalization. -/
 theorem FiniteCrossPriorBlockAssumptions.gauge_coeff_swap
     (hcross : FiniteCrossPriorBlockAssumptions.{u}) :
     FiniteProductLinearCoeffSwapAssumptions.{u} hcross.pairwise_bilinear :=
-  productLinearCoeffSwap_of_valueSwap_and_singletonConvention
+  productLinearCoeffSwap_of_valueSwap_and_singletonNormalization
     hcross.posterior_value_relabeling hcross.pairwise_bilinear
     hcross.gauge_coeff_swap_singleton
 
 /-- The old Stage 10T positive gauge-choice package, now reconstructed from
-the reference-gauge transform law plus the convention that the current
+the reference-gauge transform law plus the normalization that the current
 representatives are already the post-gauge representatives. -/
 theorem FiniteCrossPriorBlockAssumptions.gauge_choice
     (hcross : FiniteCrossPriorBlockAssumptions.{u}) :
     FiniteProductPositiveGaugeChoiceAssumptions.{u} hcross.pairwise_bilinear :=
-  positiveGaugeChoice_of_representativeGaugeConvention hcross.pairwise_bilinear
+  positiveGaugeChoice_of_representativeGaugeNormalization hcross.pairwise_bilinear
     hcross.reference_gauge hcross.current_gauge_normalized
 
 /-- The old Stage 10S Step 3 normalization package, now derived from
@@ -6589,7 +6589,7 @@ theorem FiniteCrossPriorBlockAssumptions.interaction_swap
 
 /-- The old Stage 10S interaction-universality package, reconstructed from
 the Step 4 nondegenerate interaction associativity equations, interaction swap
-symmetry, and the Step 5 singleton interaction convention. -/
+symmetry, and the Step 5 singleton interaction normalization. -/
 noncomputable def FiniteCrossPriorBlockAssumptions.interaction_universality
     (hcross : FiniteCrossPriorBlockAssumptions.{u}) :
     FiniteProductInteractionUniversalityAssumptions.{u} hcross.pairwise_bilinear :=
@@ -6614,7 +6614,7 @@ noncomputable def FiniteCrossPriorBlockAssumptions.coherent_product
 
 /-- Named Stage 10AE reassembly of paper Lemma `coherentnorm` from the
 decomposed HM/coherent-representative interfaces and gauge/singleton
-conventions carried by `FiniteCrossPriorBlockAssumptions`. -/
+normalizations carried by `FiniteCrossPriorBlockAssumptions`. -/
 noncomputable def coherentnorm_of_decomposed_components
     (hcross : FiniteCrossPriorBlockAssumptions.{u}) :
     FiniteCoherentProductQuasiAdditivityAssumptions.{u} :=
@@ -7257,17 +7257,17 @@ This is the reassembled clean constructor after the Fable stage.  Compared with
   proved by `finiteProductGroupingEquation_of_twoGroupingWeightEquation`.
 
 The remaining inputs are the accepted global classical/relabeling assumptions
-(`hhm`, `huniq`, `hrelV`), the accepted conventions, and the two honest paper
+(`hhm`, `huniq`, `hrelV`), the accepted normalizations, and the two honest paper
 product-grouping primitives (`hgroup`, `hpos`). -/
 noncomputable def InteractionCollapseUniversalScale_of_fableProductClosure
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
-    (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -7285,7 +7285,7 @@ noncomputable def InteractionCollapseUniversalScale_of_fableProductClosure
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -7302,15 +7302,15 @@ noncomputable def InteractionCollapseUniversalScale_of_fableProductClosure
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
-    (hcoordValue : FiniteCoordinateSupportFaceValueConventionFor hfaces)
-    (hcoordScale : FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+    (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
+    (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hgroup :
       ∀ (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces),
         FiniteProductTwoGroupingWeightEquationAssumptionsFor hfaces hprod)
     (hpos :
       ∀ (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces),
         FiniteProductScaleZPositiveAssumptionsFor hfaces hprod)
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_totalClosure
@@ -7336,17 +7336,17 @@ Compared with `InteractionCollapseUniversalScale_of_fableProductClosure`:
   exact remaining product-grouping primitive.
 
 Remaining inputs: the global classical assumptions (`hhm`, `huniq`), the global
-cardinal relabeling coherence (`hrelV`), the accepted conventions, and the
+cardinal relabeling coherence (`hrelV`), the accepted normalizations, and the
 weight recursion (W). -/
 noncomputable def InteractionCollapseUniversalScale_of_targetedFinalClosure
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
-    (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -7364,7 +7364,7 @@ noncomputable def InteractionCollapseUniversalScale_of_targetedFinalClosure
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -7381,12 +7381,12 @@ noncomputable def InteractionCollapseUniversalScale_of_targetedFinalClosure
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
-    (hcoordValue : FiniteCoordinateSupportFaceValueConventionFor hfaces)
-    (hcoordScale : FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+    (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
+    (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hrec :
       ∀ (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces),
         FinitePreUniversalGroupingWeightRecursionAssumptionsFor hfaces hprod)
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_totalClosure

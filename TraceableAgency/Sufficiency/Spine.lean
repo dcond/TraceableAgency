@@ -239,11 +239,12 @@ noncomputable def posteriorValueRep_of_axioms_HMTheorem
     (F : PrefFamily.{u})
     (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
     (hhm : ClassicalFiniteHersteinMilnorTheoremAssumptions.{u})
-    (hax : TraceAxioms F) :
+    (hax : TraceAxioms F)
+    (hplc : PosteriorLawContinuity F) :
     PosteriorValueRepresentation F :=
   posteriorValueRep_of_HersteinMilnorConclusion F
     (from_axioms_to_posterior_of_blackwell F hblackwell hax)
-    (finiteHersteinMilnorConclusion_of_blackwell_axioms F hblackwell hhm hax)
+    (finiteHersteinMilnorConclusion_of_blackwell_axioms F hblackwell hhm hax hplc)
 
 /--
 **From Axioms to Value Representation (Combined Bridge)**

@@ -8,7 +8,7 @@ import TraceableAgency.Basic.Dist
 /-!
 # Shannon Entropy
 
-Finite Shannon entropy H(q) with the convention 0 * log(0) = 0.
+Finite Shannon entropy H(q), taking the zero-probability contribution to be `0`.
 -/
 
 set_option linter.style.header false
@@ -18,8 +18,8 @@ namespace TraceableAgency
 variable {A : Type*} [Fintype A]
 
 open Real in
-/-- The entropy contribution from a single probability: -p * log(p).
-    Uses the convention that 0 * log(0) = 0. -/
+/-- The entropy contribution from a single probability: `-p * log p`.
+    At `p = 0`, the contribution is defined as `0`. -/
 noncomputable def entropyTerm (p : ℝ) : ℝ :=
   if p ≤ 0 then 0 else -p * log p
 

@@ -30,10 +30,10 @@ noncomputable def InteractionCollapseUniversalScale_of_preUniversalGR
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
-    (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -51,7 +51,7 @@ noncomputable def InteractionCollapseUniversalScale_of_preUniversalGR
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).base_publicMix
@@ -68,12 +68,12 @@ noncomputable def InteractionCollapseUniversalScale_of_preUniversalGR
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
           ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
-    (hcoordValue : FiniteCoordinateSupportFaceValueConventionFor hfaces)
-    (hcoordScale : FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+    (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
+    (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hGR :
       ∀ (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces),
         FinitePreUniversalGroupingGRFor hfaces hprod)
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_targetedFinalClosure

@@ -194,7 +194,7 @@ theorem branchCoeffCocycleFor_of_tangentScalar
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle) :
     FiniteBranchCoeffCocycleAssumptionsFor
@@ -298,9 +298,9 @@ structure FiniteBranchScaleFactorizationBoundaryTransportAssumptions.{v}
 /-- Singleton/degenerate part of branch scale factorization.
 
 The scale at singleton-support priors is not fixed by value variation in the
-branch formula.  This package isolates the needed convention for reconstructing
+branch formula.  This package isolates the needed normalization for reconstructing
 the public scale-factorization interface. -/
-structure FiniteBranchScaleFactorizationSingletonConvention.{v}
+structure FiniteBranchScaleFactorizationSingletonNormalization.{v}
     {F : PrefFamily.{v}} (hbranch : BranchAggregationStructure F)
     (hfull : FiniteBranchScaleFactorizationFullSupportAssumptions hbranch) : Prop where
   scale_pos_singleton :
@@ -350,7 +350,7 @@ noncomputable def branchScaleFactorization_of_fullSupport_boundary_singleton
     (hboundary :
       FiniteBranchScaleFactorizationBoundaryTransportAssumptions hbranch hfull)
     (hsingle :
-      FiniteBranchScaleFactorizationSingletonConvention hbranch hfull) :
+      FiniteBranchScaleFactorizationSingletonNormalization hbranch hfull) :
     FiniteBranchScaleFactorizationAssumptions hbranch where
   scale := hfull.scale
   scale_pos := by
@@ -390,7 +390,7 @@ noncomputable def faithfulBranchAggregationStructure_of_components
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
     (hvalue : FiniteBranchBoundaryValueTransportAssumptions.{u})
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -398,6 +398,24 @@ noncomputable def faithfulBranchAggregationStructure_of_components
   branchAggregationStructure_of_tangentFormulaFor
     F hax hV hlin hpath hboundary hsingle
     (branchAggregationFormulaTangentFor_of_boundaryTransport
+      F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+
+/-- Faithful branch aggregation structure reassembled from selected boundary
+value transport and coefficient transport components. -/
+noncomputable def faithfulBranchAggregationStructure_of_componentsFor
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (hpath : BranchPathTangentScalarStructure F hV hlin)
+    (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
+    (hcoeff :
+      FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
+    BranchAggregationStructure F :=
+  branchAggregationStructure_of_tangentFormulaFor
+    F hax hV hlin hpath hboundary hsingle
+    (branchAggregationFormulaTangentFor_of_boundaryTransportFor
       F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
 
 /-- Full-support factorization for the faithful branch structure reassembled
@@ -408,7 +426,7 @@ noncomputable def faithfulBranchFullSupportScale_of_components
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
     (hvalue : FiniteBranchBoundaryValueTransportAssumptions.{u})
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -417,6 +435,29 @@ noncomputable def faithfulBranchFullSupportScale_of_components
         F hax hV hlin hpath hboundary hsingle hvalue hcoeff) :=
   let hformula :=
     branchAggregationFormulaTangentFor_of_boundaryTransport
+      F hax hV hlin hpath hboundary hsingle hvalue hcoeff
+  branchScaleFactorizationFullSupport_of_cocycle
+    (branchAggregationStructure_of_tangentFormulaFor
+      F hax hV hlin hpath hboundary hsingle hformula)
+    (branchCoeffCocycleFor_of_tangentScalar
+      F hax hV hlin hpath hboundary hsingle hformula)
+
+/-- Full-support factorization for the selected faithful branch structure. -/
+noncomputable def faithfulBranchFullSupportScale_of_componentsFor
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (hpath : BranchPathTangentScalarStructure F hV hlin)
+    (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
+    (hcoeff :
+      FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
+    FiniteBranchScaleFactorizationFullSupportAssumptions
+      (faithfulBranchAggregationStructure_of_componentsFor
+        F hax hV hlin hpath hboundary hsingle hvalue hcoeff) :=
+  let hformula :=
+    branchAggregationFormulaTangentFor_of_boundaryTransportFor
       F hax hV hlin hpath hboundary hsingle hvalue hcoeff
   branchScaleFactorizationFullSupport_of_cocycle
     (branchAggregationStructure_of_tangentFormulaFor
@@ -438,8 +479,8 @@ noncomputable def branchChainStructure_of_scaleFactorization
 
 This is the Stage 22 faithful route for the named result "Branch aggregation,
 cocycle, and normalised chain rule": once the accepted tangent geometry, the
-support-face representative convention, boundary coefficient/scale conventions,
-and singleton conventions are supplied, the public `BranchChainStructure`
+support-face representative normalization, boundary coefficient/scale normalizations,
+and singleton normalizations are supplied, the public `BranchChainStructure`
 follows. -/
 noncomputable def BranchAggregationChainRule_of_faithful_components
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
@@ -447,7 +488,7 @@ noncomputable def BranchAggregationChainRule_of_faithful_components
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
     (hvalue : FiniteBranchBoundaryValueTransportAssumptions.{u})
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary)
@@ -458,7 +499,7 @@ noncomputable def BranchAggregationChainRule_of_faithful_components
         (faithfulBranchFullSupportScale_of_components
           F hax hV hlin hpath hboundary hsingle hvalue hcoeff))
     (hsingleScale :
-      FiniteBranchScaleFactorizationSingletonConvention
+      FiniteBranchScaleFactorizationSingletonNormalization
         (faithfulBranchAggregationStructure_of_components
           F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
         (faithfulBranchFullSupportScale_of_components
@@ -469,6 +510,44 @@ noncomputable def BranchAggregationChainRule_of_faithful_components
       F hax hV hlin hpath hboundary hsingle hvalue hcoeff
   let hfull :=
     faithfulBranchFullSupportScale_of_components
+      F hax hV hlin hpath hboundary hsingle hvalue hcoeff
+  branchChainStructure_of_scaleFactorization hbranch
+    (branchScaleFactorization_of_fullSupport_boundary_singleton
+      hbranch hfull hboundaryScale hsingleScale)
+
+/-- Selected faithful branch-chain reassembly.
+
+This is the same named-result constructor as
+`BranchAggregationChainRule_of_faithful_components`, but its support-face value
+input is fixed to the representative being assembled. -/
+noncomputable def BranchAggregationChainRule_of_faithful_componentsFor
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (hpath : BranchPathTangentScalarStructure F hV hlin)
+    (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
+    (hcoeff :
+      FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary)
+    (hboundaryScale :
+      FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+        (faithfulBranchAggregationStructure_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff))
+    (hsingleScale :
+      FiniteBranchScaleFactorizationSingletonNormalization
+        (faithfulBranchAggregationStructure_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)) :
+    BranchChainStructure F :=
+  let hbranch :=
+    faithfulBranchAggregationStructure_of_componentsFor
+      F hax hV hlin hpath hboundary hsingle hvalue hcoeff
+  let hfull :=
+    faithfulBranchFullSupportScale_of_componentsFor
       F hax hV hlin hpath hboundary hsingle hvalue hcoeff
   branchChainStructure_of_scaleFactorization hbranch
     (branchScaleFactorization_of_fullSupport_boundary_singleton
@@ -487,7 +566,7 @@ noncomputable def branchChainStructure_of_tangentFormulaAndScaleFactorization
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleConventionAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle)
     (hfactor :
@@ -547,7 +626,7 @@ theorem branchNormalizedValue_seqCompose_of_chain
 The old `FiniteBranchAggregationAssumptions` package returns a branch
 aggregation structure from only A7 and a value representation.  The faithful
 route developed in Stages 13--22 carries the extra classical finite-geometry
-interfaces and the explicit boundary/singleton conventions.  The following
+interfaces and the explicit boundary/singleton normalizations.  The following
 bundle exposes that route without pretending to reconstruct the old hax-free
 monolith.
 -/
@@ -561,13 +640,13 @@ structure FiniteFaithfulBranchAggregationAssumptions.{v} where
   linear_part : FiniteAffineLinearPartAssumptions.{v}
   tangent_spanning : FiniteAtomicLinearPosteriorTangentSpanningAssumptions.{v}
   same_sign_scalar : FiniteLinearFunctionalSameSignScalarOnTangentAssumptions.{v}
-  support_face_rep : FiniteSupportFaceRepresentativeConventionAssumptions.{v}
-  boundary_coeff_scale : FiniteBoundaryCoefficientScaleConventionAssumptions.{v}
-  singleton_scale : FiniteBranchSingletonScaleConventionAssumptions.{v}
+  support_face_rep : FiniteSupportFaceRepresentativeTransportAssumptions.{v}
+  boundary_coeff_scale : FiniteBoundaryCoefficientScaleNormalizationAssumptions.{v}
+  singleton_scale : FiniteBranchSingletonScaleNormalizationAssumptions.{v}
   boundary_linear_transport :
     FiniteBoundaryLinearPartTransportAssumptions.{v}
       linear_part
-      (boundaryFaceScale_of_coefficientScaleConvention boundary_coeff_scale)
+      (boundaryFaceScale_of_coefficientScaleNormalization boundary_coeff_scale)
   boundary_scale_factorization :
     ∀ (F : PrefFamily.{v}) (hax : TraceAxioms F)
       (hV : PosteriorValueRepresentation F),
@@ -575,9 +654,9 @@ structure FiniteFaithfulBranchAggregationAssumptions.{v} where
         branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
           linear_part same_sign_scalar tangent_spanning F hax hV
       let hboundary :=
-        boundaryFaceScale_of_coefficientScaleConvention boundary_coeff_scale
+        boundaryFaceScale_of_coefficientScaleNormalization boundary_coeff_scale
       let hvalue :=
-        boundaryValueTransport_of_supportFaceRepresentativeConvention support_face_rep
+        boundaryValueTransport_of_supportFaceRepresentativeTransport support_face_rep
       let hcoeff :=
         boundaryCoefficientTransport_of_linearPartTransport
           linear_part hboundary boundary_linear_transport
@@ -593,13 +672,13 @@ structure FiniteFaithfulBranchAggregationAssumptions.{v} where
         branchPathTangentScalarStructure_of_A1_atomicLinearTangentSpanning
           linear_part same_sign_scalar tangent_spanning F hax hV
       let hboundary :=
-        boundaryFaceScale_of_coefficientScaleConvention boundary_coeff_scale
+        boundaryFaceScale_of_coefficientScaleNormalization boundary_coeff_scale
       let hvalue :=
-        boundaryValueTransport_of_supportFaceRepresentativeConvention support_face_rep
+        boundaryValueTransport_of_supportFaceRepresentativeTransport support_face_rep
       let hcoeff :=
         boundaryCoefficientTransport_of_linearPartTransport
           linear_part hboundary boundary_linear_transport
-      FiniteBranchScaleFactorizationSingletonConvention
+      FiniteBranchScaleFactorizationSingletonNormalization
         (faithfulBranchAggregationStructure_of_components
           F hax hV linear_part hpath hboundary singleton_scale hvalue hcoeff)
         (faithfulBranchFullSupportScale_of_components
@@ -618,13 +697,13 @@ noncomputable def branchPathTangentScalarStructure_of_faithfulAssumptions
 def branchBoundaryFaceScale_of_faithfulAssumptions
     (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u}) :
     FiniteBranchBoundaryFaceScaleAssumptions.{u} :=
-  boundaryFaceScale_of_coefficientScaleConvention hfaith.boundary_coeff_scale
+  boundaryFaceScale_of_coefficientScaleNormalization hfaith.boundary_coeff_scale
 
 /-- Boundary value transport produced from a faithful branch bundle. -/
 theorem branchBoundaryValueTransport_of_faithfulAssumptions
     (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u}) :
     FiniteBranchBoundaryValueTransportAssumptions.{u} :=
-  boundaryValueTransport_of_supportFaceRepresentativeConvention
+  boundaryValueTransport_of_supportFaceRepresentativeTransport
     hfaith.support_face_rep
 
 /-- Boundary coefficient transport produced from a faithful branch bundle. -/
@@ -770,7 +849,7 @@ cocycle, and normalised chain rule".
 All residual inputs are explicit in `FiniteFaithfulBranchAggregationAssumptions`:
 finite tangent geometry, same-sign scalar linear algebra, support-face
 representative normalization, boundary coefficient/scale transport, and
-singleton conventions. -/
+singleton normalizations. -/
 noncomputable def BranchAggregationCocycleNormalizedChainRule_of_faithful
     (hfaith : FiniteFaithfulBranchAggregationAssumptions.{u})
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
@@ -808,6 +887,55 @@ noncomputable def BranchAggregationCocycleNormalizedChainRule_of_faithful
         hbranch hfull
         (hfaith.boundary_scale_factorization F hax hV)
         (hfaith.singleton_scale_factorization F hax hV)
+  }
+
+/-- Selected faithful theorem statement for branch aggregation, cocycle, and
+normalised chain rule.
+
+This is the same construction as `BranchAggregationCocycleNormalizedChainRule_of_faithful`,
+but it consumes boundary value transport only for the representative `hV` being
+assembled. -/
+noncomputable def BranchAggregationCocycleNormalizedChainRule_of_componentsFor
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hV : PosteriorValueRepresentation F)
+    (hlin : FiniteAffineLinearPartAssumptions.{u})
+    (hpath : BranchPathTangentScalarStructure F hV hlin)
+    (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
+    (hcoeff :
+      FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary)
+    (hboundaryScale :
+      FiniteBranchScaleFactorizationBoundaryTransportAssumptions
+        (faithfulBranchAggregationStructure_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff))
+    (hsingleScale :
+      FiniteBranchScaleFactorizationSingletonNormalization
+        (faithfulBranchAggregationStructure_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)
+        (faithfulBranchFullSupportScale_of_componentsFor
+          F hax hV hlin hpath hboundary hsingle hvalue hcoeff)) :
+    BranchAggregationCocycleNormalizedChainRuleStructure F :=
+  let hformula :=
+    branchAggregationFormulaTangentFor_of_boundaryTransportFor
+      F hax hV hlin hpath hboundary hsingle hvalue hcoeff
+  let hbranch :=
+    branchAggregationStructure_of_tangentFormulaFor
+      F hax hV hlin hpath hboundary hsingle hformula
+  let hcocycle :=
+    branchCoeffCocycleFor_of_tangentScalar
+      F hax hV hlin hpath hboundary hsingle hformula
+  let hfull :=
+    branchScaleFactorizationFullSupport_of_cocycle hbranch hcocycle
+  {
+    branch_agg := hbranch
+    coeff_cocycle := hcocycle
+    full_support_scale := hfull
+    scale_factorization :=
+      branchScaleFactorization_of_fullSupport_boundary_singleton
+        hbranch hfull hboundaryScale hsingleScale
   }
 
 /-!
@@ -1771,10 +1899,10 @@ structure FiniteFaceScaleBaseValueNonconstancyAssumptionsFor.{v}
         hfaces.branch_result.branch_agg.value_rep.V q
           (experimentOfChannel (Channel.uninformativeChannelU A))
 
-/-- Singleton first-coordinate slice affine convention.  This covers the
+/-- Singleton first-coordinate slice affine normalization.  This covers the
 degenerate case where the first-coordinate value domain cannot identify a
 positive slope from comparisons. -/
-structure FiniteFaceScaleSingletonSliceAffineConventionFor.{v}
+structure FiniteFaceScaleSingletonSliceAffineAssumptionsFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   singleton_left_slice_positive_affine_transform :
@@ -1876,7 +2004,7 @@ theorem faceScaleProductLeftSliceAffineTransform_of_parts
     (hnonconst :
       FiniteFaceScaleBaseValueNonconstancyAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq :
       ClassicalFaceScaleAffineUtilityUniquenessAssumptionsFor hfaces) :
     FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces where
@@ -3058,14 +3186,14 @@ structure FiniteFaceScaleProductGaugeNormalizationAssumptionsFor.{v}
       (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport),
       hpair.rightCoeff hax q r = 1
 
-/-- Explicit current-representative product gauge convention.
+/-- Explicit current-representative product gauge normalization.
 
 The paper chooses positive rescalings of the zero-normalised representatives
 before stating coherent product quasi-additivity.  At this point of the Lean
-development the representatives in `hfaces` are fixed, so this convention says
+development the representatives in `hfaces` are fixed, so this normalization says
 they are already in the product gauge where the two linear coefficients are
 normalised to one. -/
-structure FiniteFaceScaleProductGaugeConventionFor.{v}
+structure FiniteFaceScaleCurrentProductGaugeNormalizationFor.{v}
     {F : PrefFamily.{v}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces) :
@@ -3086,24 +3214,24 @@ structure FiniteFaceScaleProductGaugeConventionFor.{v}
       hpair.rightCoeff hax q r = 1
 
 /-- Reconstruct the gauge-normalization package from the explicit
-current-representative gauge convention. -/
-theorem faceScaleProductGaugeNormalization_of_convention
+current-representative gauge normalization. -/
+theorem faceScaleProductGaugeNormalization_of_currentGauge
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces}
-    (hgauge : FiniteFaceScaleProductGaugeConventionFor hpair) :
+    (hgauge : FiniteFaceScaleCurrentProductGaugeNormalizationFor hpair) :
     FiniteFaceScaleProductGaugeNormalizationAssumptionsFor hpair where
   leftCoeff_normalized := hgauge.current_leftCoeff_normalized
   rightCoeff_normalized := hgauge.current_rightCoeff_normalized
 
 /-- After applying the selected product gauge, the transformed representatives
 are in the current product gauge by construction. -/
-theorem faceScaleProductGaugeConvention_of_gaugeTransform
+theorem faceScaleCurrentProductGaugeNormalization_of_gaugeTransform
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces}
     (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair) :
-    FiniteFaceScaleProductGaugeConventionFor
+    FiniteFaceScaleCurrentProductGaugeNormalizationFor
       (faceScaleProductPairwiseBilinearity_gaugeTransform
         hpair hgauge.gauge) where
   current_leftCoeff_normalized := by
@@ -3267,10 +3395,10 @@ structure FiniteFaceScaleProductInteractionAssociativityAssumptionsFor.{v}
       hpair.interactionCoeff hax (prodDist q r) s =
         hpair.interactionCoeff hax r s
 
-/-- Singleton interaction coefficient convention for face-scale product
+/-- Singleton interaction coefficient normalization for face-scale product
 bilinearity.  Singleton coordinate values vanish, so the interaction
 coefficient is not value-identified in singleton factors. -/
-structure FiniteFaceScaleSingletonInteractionConventionFor.{v}
+structure FiniteFaceScaleSingletonInteractionNormalizationFor.{v}
     {F : PrefFamily.{v}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces) :
@@ -3345,7 +3473,7 @@ theorem faceScaleInteractionCoeff_eq_reference_of_assoc_nondegenerate
           using h_r_ref_to_ref_ref
 
 /-- Reconstruct face-scale interaction universality from K1--K3 and singleton
-interaction conventions. -/
+interaction normalizations. -/
 noncomputable def faceScaleProductInteractionUniversality_of_parts
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
@@ -3353,7 +3481,7 @@ noncomputable def faceScaleProductInteractionUniversality_of_parts
     (hassoc :
       FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair)
     (hsingle :
-      FiniteFaceScaleSingletonInteractionConventionFor hpair) :
+      FiniteFaceScaleSingletonInteractionNormalizationFor hpair) :
     FiniteFaceScaleProductInteractionUniversalityAssumptionsFor hpair where
   kappa := faceScaleInteractionReferenceKappa hpair
   interactionCoeff_common := by
@@ -3366,6 +3494,50 @@ noncomputable def faceScaleProductInteractionUniversality_of_parts
           hax q r hq hr hsubB
       · exact faceScaleInteractionCoeff_eq_reference_of_assoc_nondegenerate
           hpair hassoc hax q r hq hr hsubA hsubB
+
+/-- Product quasi-additivity from product gauge normalization and interaction
+associativity, without a singleton interaction normalization.
+
+The singleton coefficient is not value-identified: if either factor is a
+subsingleton, the corresponding posterior value is zero, so the interaction term
+vanishes for every coefficient.  The only coefficient identification needed for
+the product formula is therefore the nondegenerate one, which follows from the
+K1--K3 associativity equations. -/
+noncomputable def productQuasiAdditivityForFaceScales_of_components_noSingleton
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hnorm : FiniteFaceScaleProductGaugeNormalizationAssumptionsFor hpair)
+    (hassoc :
+      FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair) :
+    FiniteProductQuasiAdditivityForFaceScales hfaces where
+  kappa := faceScaleInteractionReferenceKappa hpair
+  product_quasi_add := by
+    intro hax A B O Y _ _ _ _ _ _ _ _ _ _ q r hq hr P R
+    rw [hpair.product_pair_bilinear hax q r hq hr P R]
+    rw [hnorm.leftCoeff_normalized hax q r hq hr]
+    rw [hnorm.rightCoeff_normalized hax q r hq hr]
+    by_cases hsubA : Subsingleton A
+    · haveI : Subsingleton A := hsubA
+      have hVq :
+          hfaces.branch_result.branch_agg.value_rep.V q
+            (experimentOfChannel P) = 0 :=
+        branchValue_channel_eq_zero_of_subsingleton F
+          hfaces.branch_result.branch_agg.value_rep q hq P
+      rw [hVq]
+      ring
+    · by_cases hsubB : Subsingleton B
+      · haveI : Subsingleton B := hsubB
+        have hVr :
+            hfaces.branch_result.branch_agg.value_rep.V r
+              (experimentOfChannel R) = 0 :=
+          branchValue_channel_eq_zero_of_subsingleton F
+            hfaces.branch_result.branch_agg.value_rep r hr R
+        rw [hVr]
+        ring
+      · rw [faceScaleInteractionCoeff_eq_reference_of_assoc_nondegenerate
+          hpair hassoc hax q r hq hr hsubA hsubB]
+        ring
 
 /-- Face-scale triple-product value associativity.  This is the
 pre-universal, pre-entropy version of the product-parenthesization value
@@ -3682,8 +3854,8 @@ theorem faceScaleProductInteractionAssociativity_gaugeTransform
         faceScaleProductPairwiseBilinearity_gaugeTransform
           hpair hgauge.gauge)
       (hnorm :=
-        faceScaleProductGaugeNormalization_of_convention
-          (faceScaleProductGaugeConvention_of_gaugeTransform hgauge))
+        faceScaleProductGaugeNormalization_of_currentGauge
+          (faceScaleCurrentProductGaugeNormalization_of_gaugeTransform hgauge))
       (htriple :=
         faceScaleTripleProductValueAssociativity_gaugeTransform
           htriple hgauge.gauge))
@@ -3695,14 +3867,14 @@ theorem faceScaleProductInteractionAssociativity_of_valueAssociativity_currentGa
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces}
-    (hgauge : FiniteFaceScaleProductGaugeConventionFor hpair)
+    (hgauge : FiniteFaceScaleCurrentProductGaugeNormalizationFor hpair)
     (htriple :
       FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces) :
     FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair :=
   faceScaleProductInteractionAssociativity_of_coeffExtraction
     (faceScaleTripleProductCoeffExtraction_of_valueAssociativity
       (hpair := hpair)
-      (hnorm := faceScaleProductGaugeNormalization_of_convention hgauge)
+      (hnorm := faceScaleProductGaugeNormalization_of_currentGauge hgauge)
       (htriple := htriple))
 
 /-- Pairwise product bilinearity reconstructed from the multi-stage
@@ -3750,14 +3922,14 @@ noncomputable def productQuasiAdditivityForFaceScales_of_finalProductComponents
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hgauge : FiniteFaceScaleProductGaugeConventionFor hpair)
+    (hgauge : FiniteFaceScaleCurrentProductGaugeNormalizationFor hpair)
     (hassoc :
       FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair)
     (hsingle :
-      FiniteFaceScaleSingletonInteractionConventionFor hpair) :
+      FiniteFaceScaleSingletonInteractionNormalizationFor hpair) :
     FiniteProductQuasiAdditivityForFaceScales hfaces :=
   productQuasiAdditivityForFaceScales_of_components hpair
-    (faceScaleProductGaugeNormalization_of_convention hgauge)
+    (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
     (faceScaleProductInteractionUniversality_of_parts hpair hassoc hsingle)
 
 /-- Product quasi-additivity for the product-gauge transformed representative.
@@ -3777,14 +3949,14 @@ noncomputable def productQuasiAdditivityForFaceScales_of_gaugeTransformedCompone
         (faceScaleProductPairwiseBilinearity_gaugeTransform
           hpair hgauge.gauge))
     (hsingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_gaugeTransform
           hpair hgauge.gauge)) :
     FiniteProductQuasiAdditivityForFaceScales
       (hfaces.gaugeTransform hgauge.gauge) :=
   productQuasiAdditivityForFaceScales_of_finalProductComponents
     (faceScaleProductPairwiseBilinearity_gaugeTransform hpair hgauge.gauge)
-    (faceScaleProductGaugeConvention_of_gaugeTransform hgauge)
+    (faceScaleCurrentProductGaugeNormalization_of_gaugeTransform hgauge)
     hassoc hsingle
 
 /-- Product quasi-additivity for the product-gauge transformed representative,
@@ -3798,7 +3970,7 @@ noncomputable def productQuasiAdditivityForFaceScales_of_gaugeTransformedProduct
     (htriple :
       FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_gaugeTransform
           hpair hgauge.gauge)) :
     FiniteProductQuasiAdditivityForFaceScales
@@ -3808,10 +3980,28 @@ noncomputable def productQuasiAdditivityForFaceScales_of_gaugeTransformedProduct
     (faceScaleProductInteractionAssociativity_gaugeTransform hgauge htriple)
     hsingle
 
+/-- Product quasi-additivity for the product-gauge transformed representative,
+with singleton-factor cases handled by value-zero rather than by an arbitrary
+singleton coefficient normalization. -/
+noncomputable def productQuasiAdditivityForFaceScales_of_gaugeTransformedProductData_noSingleton
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    (hpair : FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
+    (hgauge : FiniteFaceScaleProductGaugeTransformFor hpair)
+    (htriple :
+      FiniteFaceScaleTripleProductValueAssociativityAssumptionsFor hfaces) :
+    FiniteProductQuasiAdditivityForFaceScales
+      (hfaces.gaugeTransform hgauge.gauge) :=
+  productQuasiAdditivityForFaceScales_of_components_noSingleton
+    (faceScaleProductPairwiseBilinearity_gaugeTransform hpair hgauge.gauge)
+    (faceScaleProductGaugeNormalization_of_currentGauge
+      (faceScaleCurrentProductGaugeNormalization_of_gaugeTransform hgauge))
+    (faceScaleProductInteractionAssociativity_gaugeTransform hgauge htriple)
+
 /-- Product quasi-additivity from the multi-stage source-ready components:
 left-slice affine transform, intercept linearity, slope affinity, current
 gauge, triple-product value/coefficient extraction, and singleton interaction
-convention. -/
+normalization. -/
 noncomputable def productQuasiAdditivityForFaceScales_of_multiComponents
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
@@ -3824,7 +4014,7 @@ noncomputable def productQuasiAdditivityForFaceScales_of_multiComponents
       FiniteFaceScaleProductSlopeAffineAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform haff))
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope))
     (htriple :
@@ -3833,10 +4023,10 @@ noncomputable def productQuasiAdditivityForFaceScales_of_multiComponents
       FiniteFaceScaleTripleProductCoeffExtractionAssumptionsFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope)
-        (faceScaleProductGaugeNormalization_of_convention hgauge)
+        (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
         htriple)
     (hsingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope)) :
     FiniteProductQuasiAdditivityForFaceScales hfaces :=
@@ -3888,9 +4078,9 @@ structure FiniteTwoGroupingInteractionCollapseAssumptionsFor.{v}
   kappa_eq_zero :
     ∀ (hax : TraceAxioms F), hprod.kappa hax = 0
 
-/-- Singleton/degenerate scale convention for extending the nondegenerate
+/-- Singleton/degenerate scale normalization for extending the nondegenerate
 universal-scale conclusion to all full-support priors. -/
-structure FiniteUniversalScaleSingletonConventionFor.{v}
+structure FiniteUniversalScaleSingletonNormalizationFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   scale_eq_of_subsingleton :
@@ -5042,12 +5232,95 @@ structure FiniteCoordinateSupportFaceScaleTransportAssumptionsFor.{v}
           (prodDist q r) b) =
       hfaces.branch_result.scale_factorization.scale q
 
-/-- Coordinate support-face value convention.
+/-- Coordinate continuation value read on the support face of the boundary
+posterior.
+
+This is the support-read version of
+`FiniteCoordinateSupportFaceValueTransportAssumptionsFor`.  After revealing one
+coordinate of a full-support product prior, the posterior is a boundary prior
+on the ambient product type.  The paper reads the continuation on its positive
+support face before identifying that face with the unrevealed coordinate. -/
+structure FiniteCoordinateSupportFaceValueSupportReadFor.{v}
+    {F : PrefFamily.{v}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
+  first_coordinate_face_value_support :
+    ∀ (_hax : TraceAxioms F)
+      {A B : Type v}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport)
+      (_hA : ¬ Subsingleton A) (_hB : ¬ Subsingleton B)
+      (a : A),
+      hfaces.branch_result.branch_agg.value_rep.V
+        (Channel.posterior
+          (productFirstRevealChannel (A := A) (B := B))
+          (prodDist q r) a).restrictToSupport
+        (experimentOfChannel
+          (Channel.restrictToSupport
+            (productSecondRevealChannel (A := A) (B := B))
+            (Channel.posterior
+              (productFirstRevealChannel (A := A) (B := B))
+              (prodDist q r) a))) =
+      fullRevelationValueForFaceScales hfaces r
+  second_coordinate_face_value_support :
+    ∀ (_hax : TraceAxioms F)
+      {A B : Type v}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport)
+      (_hA : ¬ Subsingleton A) (_hB : ¬ Subsingleton B)
+      (b : B),
+      hfaces.branch_result.branch_agg.value_rep.V
+        (Channel.posterior
+          (productSecondRevealChannel (A := A) (B := B))
+          (prodDist q r) b).restrictToSupport
+        (experimentOfChannel
+          (Channel.restrictToSupport
+            (productFirstRevealChannel (A := A) (B := B))
+            (Channel.posterior
+              (productSecondRevealChannel (A := A) (B := B))
+              (prodDist q r) b))) =
+      fullRevelationValueForFaceScales hfaces q
+
+/-- Coordinate continuation scale read on the support face of the boundary
+posterior.  This is the support-read counterpart of
+`FiniteCoordinateSupportFaceScaleTransportAssumptionsFor`. -/
+structure FiniteCoordinateSupportFaceScaleSupportReadFor.{v}
+    {F : PrefFamily.{v}}
+    (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
+  first_coordinate_face_scale_support :
+    ∀ (_hax : TraceAxioms F)
+      {A B : Type v}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport)
+      (_hA : ¬ Subsingleton A) (_hB : ¬ Subsingleton B)
+      (a : A),
+      hfaces.branch_result.scale_factorization.scale
+        (Channel.posterior
+          (productFirstRevealChannel (A := A) (B := B))
+          (prodDist q r) a).restrictToSupport =
+      hfaces.branch_result.scale_factorization.scale r
+  second_coordinate_face_scale_support :
+    ∀ (_hax : TraceAxioms F)
+      {A B : Type v}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (q : Dist A) (r : Dist B) (_hq : q.FullSupport) (_hr : r.FullSupport)
+      (_hA : ¬ Subsingleton A) (_hB : ¬ Subsingleton B)
+      (b : B),
+      hfaces.branch_result.scale_factorization.scale
+        (Channel.posterior
+          (productSecondRevealChannel (A := A) (B := B))
+          (prodDist q r) b).restrictToSupport =
+      hfaces.branch_result.scale_factorization.scale q
+
+/-- Coordinate support-face value normalization.
 
 This names the representative choice identifying the ambient product boundary
 face after a coordinate reveal with the intrinsic unrevealed coordinate
 problem. -/
-structure FiniteCoordinateSupportFaceValueConventionFor.{v}
+structure FiniteCoordinateSupportFaceValueIdentificationFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   first_coordinate_face_value :
@@ -5081,8 +5354,8 @@ structure FiniteCoordinateSupportFaceValueConventionFor.{v}
           (productFirstRevealChannel (A := A) (B := B))) =
       fullRevelationValueForFaceScales hfaces q
 
-/-- Coordinate support-face scale convention. -/
-structure FiniteCoordinateSupportFaceScaleConventionFor.{v}
+/-- Coordinate support-face scale normalization. -/
+structure FiniteCoordinateSupportFaceScaleIdentificationFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   first_coordinate_face_scale :
@@ -5113,28 +5386,28 @@ structure FiniteCoordinateSupportFaceScaleConventionFor.{v}
       hfaces.branch_result.scale_factorization.scale q
 
 /-- Reconstruct value transport from the explicit coordinate support-face
-representative convention. -/
-theorem coordinateSupportFaceValueTransport_of_convention
+representative normalization. -/
+theorem coordinateSupportFaceValueTransport_of_identification
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
-    (hconv : FiniteCoordinateSupportFaceValueConventionFor hfaces) :
+    (hident : FiniteCoordinateSupportFaceValueIdentificationFor hfaces) :
     FiniteCoordinateSupportFaceValueTransportAssumptionsFor hfaces where
   first_coordinate_face_value :=
-    hconv.first_coordinate_face_value
+    hident.first_coordinate_face_value
   second_coordinate_face_value :=
-    hconv.second_coordinate_face_value
+    hident.second_coordinate_face_value
 
 /-- Reconstruct scale transport from the explicit coordinate support-face
-scale convention. -/
-theorem coordinateSupportFaceScaleTransport_of_convention
+scale normalization. -/
+theorem coordinateSupportFaceScaleTransport_of_identification
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
-    (hconv : FiniteCoordinateSupportFaceScaleConventionFor hfaces) :
+    (hident : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces) :
     FiniteCoordinateSupportFaceScaleTransportAssumptionsFor hfaces where
   first_coordinate_face_scale :=
-    hconv.first_coordinate_face_scale
+    hident.first_coordinate_face_scale
   second_coordinate_face_scale :=
-    hconv.second_coordinate_face_scale
+    hident.second_coordinate_face_scale
 
 /-- Reconstruct pointwise coordinate-branch continuation transport from the
 two exact coordinate support-face transports: value representatives and chain
@@ -6325,14 +6598,14 @@ theorem scale_eq_of_productRevelation_and_interactionCollapse
   exact hright'.symm.trans hleft'
 
 /-- Universal scale for all full-support priors from the nondegenerate product
-argument plus the singleton/degenerate convention. -/
+argument plus the singleton/degenerate normalization. -/
 theorem scale_universal_of_productRevelation_and_interactionCollapse
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (hcollapse : FiniteTwoGroupingInteractionCollapseAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F)
     {A B : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       [Fintype B] [DecidableEq B] [Nonempty B]
@@ -6354,7 +6627,7 @@ noncomputable def scaleCoherence_of_faceScales_interactionCollapse
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (hcollapse : FiniteTwoGroupingInteractionCollapseAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     ScaleCoherenceStructure F where
   branch_agg := hfaces.branch_result.branch_agg
@@ -6422,7 +6695,7 @@ noncomputable def InteractionCollapseUniversalScale_of_faithfulFaceScales
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (hcollapse : FiniteTwoGroupingInteractionCollapseAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F where
   face_scales := hfaces
@@ -6440,7 +6713,7 @@ noncomputable def InteractionCollapseUniversalScale_of_decomposedProductBridges
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (hseq : FiniteProductRevelationSequentialScaleAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_faithfulFaceScales
@@ -6458,7 +6731,7 @@ noncomputable def InteractionCollapseUniversalScale_of_normalizedSequentialProdu
     (hnorm :
       FiniteSequentialFullRevelationNormalizedChainAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_decomposedProductBridges
@@ -6476,7 +6749,7 @@ noncomputable def InteractionCollapseUniversalScale_of_coordinateRevealTransport
     (hcont :
       FiniteCoordinateRevealContinuationTransportAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_normalizedSequentialProduct
@@ -6497,7 +6770,7 @@ noncomputable def InteractionCollapseUniversalScale_of_coordinateTransportPieces
     (hbranch :
       FiniteCoordinateRevealBranchContinuationTransportAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_coordinateRevealTransports
@@ -6519,7 +6792,7 @@ noncomputable def InteractionCollapseUniversalScale_of_productQuasiAndCoordinate
     (hbranch :
       FiniteCoordinateRevealBranchContinuationTransportAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_coordinateTransportPieces
@@ -6538,7 +6811,7 @@ noncomputable def InteractionCollapseUniversalScale_of_productQuasiAndBranchCont
     (hbranch :
       FiniteCoordinateRevealBranchContinuationTransportAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_productQuasiAndCoordinatePieces
@@ -6561,7 +6834,7 @@ noncomputable def InteractionCollapseUniversalScale_of_minimalResiduals
     (hcoordScale :
       FiniteCoordinateSupportFaceScaleTransportAssumptionsFor hfaces)
     (hweight : FiniteProductGroupingWeightConstantAssumptionsFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_productQuasiAndBranchContinuation
@@ -6589,7 +6862,7 @@ noncomputable def InteractionCollapseUniversalScale_of_productComponents
       FiniteProductGroupingWeightConstantAssumptionsFor hfaces
         (productQuasiAdditivityForFaceScales_of_components
           hpair hnorm huniv))
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_minimalResiduals
@@ -6600,36 +6873,36 @@ noncomputable def InteractionCollapseUniversalScale_of_productComponents
 /-- Final current interaction-collapse constructor.
 
 This uses the smallest named product and coordinate components currently
-available in this file: explicit product current-gauge convention,
-interaction K-associativity plus singleton convention, and coordinate
-support-face representative/scale conventions. -/
+available in this file: explicit product current-gauge normalization,
+interaction K-associativity plus singleton normalization, and coordinate
+support-face representative/scale normalizations. -/
 noncomputable def InteractionCollapseUniversalScale_of_finalComponents
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hpair :
       FiniteFaceScaleProductPairwiseBilinearityAssumptionsFor hfaces)
-    (hgauge : FiniteFaceScaleProductGaugeConventionFor hpair)
+    (hgauge : FiniteFaceScaleCurrentProductGaugeNormalizationFor hpair)
     (hassoc :
       FiniteFaceScaleProductInteractionAssociativityAssumptionsFor hpair)
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor hpair)
+      FiniteFaceScaleSingletonInteractionNormalizationFor hpair)
     (hcoordValue :
-      FiniteCoordinateSupportFaceValueConventionFor hfaces)
+      FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale :
-      FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+      FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hweight :
       FiniteProductGroupingWeightConstantAssumptionsFor hfaces
         (productQuasiAdditivityForFaceScales_of_finalProductComponents
           hpair hgauge hassoc hinterSingle))
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_minimalResiduals
     hfaces
     (productQuasiAdditivityForFaceScales_of_finalProductComponents
       hpair hgauge hassoc hinterSingle)
-    (coordinateSupportFaceValueTransport_of_convention hcoordValue)
-    (coordinateSupportFaceScaleTransport_of_convention hcoordScale)
+    (coordinateSupportFaceValueTransport_of_identification hcoordValue)
+    (coordinateSupportFaceScaleTransport_of_identification hcoordScale)
     hweight hunivSingle hax
 
 /-- Interaction-collapse constructor using the multi-stage source-ready
@@ -6647,7 +6920,7 @@ noncomputable def InteractionCollapseUniversalScale_of_multiClosedComponents
       FiniteFaceScaleProductSlopeAffineAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform haff))
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope))
     (htriple :
@@ -6656,29 +6929,29 @@ noncomputable def InteractionCollapseUniversalScale_of_multiClosedComponents
       FiniteFaceScaleTripleProductCoeffExtractionAssumptionsFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope)
-        (faceScaleProductGaugeNormalization_of_convention hgauge)
+        (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
         htriple)
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_multiPieces
           haff hintercept hslope))
     (hcoordValue :
-      FiniteCoordinateSupportFaceValueConventionFor hfaces)
+      FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale :
-      FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+      FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hweight :
       FiniteProductGroupingReferenceWeightAssumptionsFor hfaces
         (productQuasiAdditivityForFaceScales_of_multiComponents
           haff hintercept hslope hgauge htriple hextract hinterSingle))
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_minimalResiduals
     hfaces
     (productQuasiAdditivityForFaceScales_of_multiComponents
       haff hintercept hslope hgauge htriple hextract hinterSingle)
-    (coordinateSupportFaceValueTransport_of_convention hcoordValue)
-    (coordinateSupportFaceScaleTransport_of_convention hcoordScale)
+    (coordinateSupportFaceValueTransport_of_identification hcoordValue)
+    (coordinateSupportFaceScaleTransport_of_identification hcoordScale)
     (productGroupingWeightConstant_of_reference hweight)
     hunivSingle hax
 
@@ -6698,7 +6971,7 @@ theorem faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
     (hsameOrder :
       FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces :=
   faceScaleProductLeftSliceAffineTransform_of_parts
@@ -6722,7 +6995,7 @@ noncomputable def faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
     (hsameOrder :
       FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hinterceptOrder :
       FiniteFaceScaleProductInterceptSameOrderAssumptionsFor
@@ -6767,7 +7040,7 @@ noncomputable def productQuasiAdditivityForFaceScales_of_closedLocalTheorems
     (hsameOrder :
       FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hinterceptOrder :
       FiniteFaceScaleProductInterceptSameOrderAssumptionsFor
@@ -6790,7 +7063,7 @@ noncomputable def productQuasiAdditivityForFaceScales_of_closedLocalTheorems
           (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
             hbaseAff hsliceAff hsameOrder hsingle huniq)))
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope))
@@ -6800,11 +7073,11 @@ noncomputable def productQuasiAdditivityForFaceScales_of_closedLocalTheorems
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope)
-        (faceScaleProductGaugeNormalization_of_convention hgauge)
+        (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
         (faceScaleTripleProductValueAssociativity_of_valueRelabeling
           hfaces hrelV))
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope)) :
@@ -6839,7 +7112,7 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
   left_slice_same_order :
     FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces
   intercept_same_order :
-    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
       (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{v}),
       FiniteFaceScaleProductInterceptSameOrderAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform
@@ -6847,7 +7120,7 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
             base_publicMix coordinate_publicMix left_slice_same_order
             hsingle huniq))
   intercept_publicMix :
-    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
       (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{v}),
       FiniteFaceScaleProductInterceptPublicMixAffinityAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform
@@ -6855,7 +7128,7 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
             base_publicMix coordinate_publicMix left_slice_same_order
             hsingle huniq))
   second_coordinate_uniqueness :
-    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
       (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{v}),
       ClassicalFaceScaleSecondCoordinateAffineUniquenessAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform
@@ -6863,7 +7136,7 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
             base_publicMix coordinate_publicMix left_slice_same_order
             hsingle huniq))
   slope_affine :
-    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
       (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{v}),
       FiniteFaceScaleProductSlopeAffineAssumptionsFor
         (faceScaleProductLeftSliceAffine_of_transform
@@ -6871,10 +7144,10 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
             base_publicMix coordinate_publicMix left_slice_same_order
             hsingle huniq))
   triple_coeff_extraction :
-    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+    ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
       (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{v})
       (hgauge :
-        FiniteFaceScaleProductGaugeConventionFor
+        FiniteFaceScaleCurrentProductGaugeNormalizationFor
           (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
             base_publicMix coordinate_publicMix left_slice_same_order
             hsingle huniq
@@ -6891,7 +7164,7 @@ structure FiniteFaceScaleProductRepresentationTheoremAssumptionsFor.{v}
           (intercept_publicMix hsingle huniq)
           (second_coordinate_uniqueness hsingle huniq)
           (slope_affine hsingle huniq))
-        (faceScaleProductGaugeNormalization_of_convention hgauge)
+        (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
         (faceScaleTripleProductValueAssociativity_of_valueRelabeling
           hfaces hrelV)
 
@@ -6903,10 +7176,10 @@ noncomputable def productQuasiAdditivityForFaceScales_of_productRepresentation
     (hprodRep :
       FiniteFaceScaleProductRepresentationTheoremAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hprodRep.base_publicMix
           hprodRep.coordinate_publicMix
@@ -6918,7 +7191,7 @@ noncomputable def productQuasiAdditivityForFaceScales_of_productRepresentation
           (hprodRep.slope_affine hsingle huniq)))
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hprodRep.base_publicMix
           hprodRep.coordinate_publicMix
@@ -6972,7 +7245,7 @@ Compared with `InteractionCollapseUniversalScale_of_multiClosedComponents`, this
 does not expose the old intercept-zero, face-scale-specific affine-uniqueness,
 or triple-product value-associativity packages.  Remaining theorem inputs are
 the public-mix/order/slope/coefficient/grouping statements that have not been
-proved locally, plus explicit gauge/support-face/singleton conventions. -/
+proved locally, plus explicit gauge/support-face/singleton normalizations. -/
 noncomputable def InteractionCollapseUniversalScale_of_closedLocalTheorems
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
@@ -6983,7 +7256,7 @@ noncomputable def InteractionCollapseUniversalScale_of_closedLocalTheorems
     (hsameOrder :
       FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hinterceptOrder :
       FiniteFaceScaleProductInterceptSameOrderAssumptionsFor
@@ -7006,7 +7279,7 @@ noncomputable def InteractionCollapseUniversalScale_of_closedLocalTheorems
           (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
             hbaseAff hsliceAff hsameOrder hsingle huniq)))
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope))
@@ -7016,25 +7289,25 @@ noncomputable def InteractionCollapseUniversalScale_of_closedLocalTheorems
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope)
-        (faceScaleProductGaugeNormalization_of_convention hgauge)
+        (faceScaleProductGaugeNormalization_of_currentGauge hgauge)
         (faceScaleTripleProductValueAssociativity_of_valueRelabeling
           hfaces hrelV))
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope))
     (hcoordValue :
-      FiniteCoordinateSupportFaceValueConventionFor hfaces)
+      FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale :
-      FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+      FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hweight :
       FiniteProductGroupingReferenceWeightAssumptionsFor hfaces
         (productQuasiAdditivityForFaceScales_of_closedLocalTheorems
           hbaseAff hsliceAff hsameOrder hsingle huniq
           hinterceptOrder hinterceptAff hinterceptUniq hslope
           hgauge hrelV hextract hinterSingle))
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_minimalResiduals
@@ -7043,8 +7316,8 @@ noncomputable def InteractionCollapseUniversalScale_of_closedLocalTheorems
       hbaseAff hsliceAff hsameOrder hsingle huniq
       hinterceptOrder hinterceptAff hinterceptUniq hslope
       hgauge hrelV hextract hinterSingle)
-    (coordinateSupportFaceValueTransport_of_convention hcoordValue)
-    (coordinateSupportFaceScaleTransport_of_convention hcoordScale)
+    (coordinateSupportFaceValueTransport_of_identification hcoordValue)
+    (coordinateSupportFaceScaleTransport_of_identification hcoordScale)
     (productGroupingWeightConstant_of_reference hweight)
     hunivSingle hax
 
@@ -7060,10 +7333,10 @@ noncomputable def InteractionCollapseUniversalScale_of_totalClosure
     (hprodRep :
       FiniteFaceScaleProductRepresentationTheoremAssumptionsFor hfaces)
     (hsingle :
-      FiniteFaceScaleSingletonSliceAffineConventionFor hfaces)
+      FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
-      FiniteFaceScaleProductGaugeConventionFor
+      FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hprodRep.base_publicMix
           hprodRep.coordinate_publicMix
@@ -7075,7 +7348,7 @@ noncomputable def InteractionCollapseUniversalScale_of_totalClosure
           (hprodRep.slope_affine hsingle huniq)))
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     (hinterSingle :
-      FiniteFaceScaleSingletonInteractionConventionFor
+      FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
           hprodRep.base_publicMix
           hprodRep.coordinate_publicMix
@@ -7086,12 +7359,12 @@ noncomputable def InteractionCollapseUniversalScale_of_totalClosure
           (hprodRep.second_coordinate_uniqueness hsingle huniq)
           (hprodRep.slope_affine hsingle huniq)))
     (hcoordValue :
-      FiniteCoordinateSupportFaceValueConventionFor hfaces)
+      FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale :
-      FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+      FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hgroup :
       FiniteProductGroupingEquationAssumptionsFor hfaces)
-    (hunivSingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hunivSingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   let hprod :=
@@ -7099,8 +7372,8 @@ noncomputable def InteractionCollapseUniversalScale_of_totalClosure
       hprodRep hsingle huniq hgauge hrelV hinterSingle
   InteractionCollapseUniversalScale_of_minimalResiduals
     hfaces hprod
-    (coordinateSupportFaceValueTransport_of_convention hcoordValue)
-    (coordinateSupportFaceScaleTransport_of_convention hcoordScale)
+    (coordinateSupportFaceValueTransport_of_identification hcoordValue)
+    (coordinateSupportFaceScaleTransport_of_identification hcoordScale)
     (productGroupingWeightConstant_of_reference
       (productGroupingReferenceWeight_of_groupingEquation hgroup hprod))
     hunivSingle hax

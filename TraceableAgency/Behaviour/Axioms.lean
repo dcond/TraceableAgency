@@ -55,11 +55,16 @@ def A1_WeakOrderLocalNontriviality : Prop :=
 /-!
 ## A2: Continuity
 
-Paper (lines 422-443):
-1. The set {(P,q,q') : q ≽_P q'} is closed.
-2. Block comparisons are continuous in posterior-law convergence at fixed full-support prior:
-   if q has full support, μ_{q,P_n} ⇒ μ_{q,P}, μ_{q,Q_n} ⇒ μ_{q,Q},
-   and q^0 ≽_{P_n ⊔ Q_n} q^1 for all n, then q^0 ≽_{P ⊔ Q} q^1.
+Paper `empowerment_v6.tex` (Axiom A2): the set {(P,q,q') : q ≽_P q'} is closed.
+
+**Change from v5 → v6.** In v5 Axiom A2 had a second clause — continuity of block
+comparisons under posterior-law convergence at a fixed full-support prior.  In v6
+that clause is **demoted to a derived lemma** (`lem:plcont`): it follows from the
+primitive first clause together with A1, A3, A4.  Accordingly `A2_Continuity` is
+now just `ClosedPreferenceGraph`.  The derived predicate `PosteriorLawContinuity`
+is retained as a standalone notion for internal interfaces, and any place that
+used to project `hax.a2.2` now takes a supplied `PosteriorLawContinuity F`
+instead.
 
 Note: P_n, Q_n may have different outcome alphabets (paper allows comparing
 channels on same action set with different outcome sets). We use FiniteExperimentOn
@@ -96,15 +101,21 @@ def ExperimentPairPref (F : PrefFamily.{u}) {A : Type u} [Fintype A] [DecidableE
     (inlDist q) (inrDist r)
 
 def A2_Continuity (F : PrefFamily.{u}) : Prop :=
-  ClosedPreferenceGraph F ∧
-  (∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
-     (q : Dist A) (_hq : q.FullSupport)
-     (Eₙ : ℕ → FiniteExperimentOn A) (E : FiniteExperimentOn A)
-     (Fₙ : ℕ → FiniteExperimentOn A) (G : FiniteExperimentOn A),
-     PosteriorLawConvergesAtExp q Eₙ E →
-     PosteriorLawConvergesAtExp q Fₙ G →
-     (∀ n, ExperimentPairPref F (Eₙ n) (Fₙ n) q q) →
-     ExperimentPairPref F E G q q)
+  ClosedPreferenceGraph F
+
+/-- **Posterior-law continuity** (paper `lem:plcont`), the clause that was A2's
+second conjunct in v5.  In v6 it is a *derived* notion, not an axiom.  It is kept
+here as a standalone predicate so downstream files that previously consumed
+`hax.a2.2` can take a supplied `PosteriorLawContinuity F` instead. -/
+def PosteriorLawContinuity (F : PrefFamily.{u}) : Prop :=
+  ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (_hq : q.FullSupport)
+    (Eₙ : ℕ → FiniteExperimentOn A) (E : FiniteExperimentOn A)
+    (Fₙ : ℕ → FiniteExperimentOn A) (G : FiniteExperimentOn A),
+    PosteriorLawConvergesAtExp q Eₙ E →
+    PosteriorLawConvergesAtExp q Fₙ G →
+    (∀ n, ExperimentPairPref F (Eₙ n) (Fₙ n) q q) →
+    ExperimentPairPref F E G q q
 
 /-!
 ## A3: Block-Comparison Coherence

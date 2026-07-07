@@ -178,8 +178,8 @@ theorem finitePreUniversalGroupingWeightRecursion_of_preUniversalBlockReveal
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
-    (hvalue : FiniteBlockSupportFaceValueConventionFor hfaces)
-    (hscale : FiniteBlockSupportFaceScaleConventionFor hfaces)
+    (hvalue : FiniteBlockSupportFaceValueIdentificationFor hfaces)
+    (hscale : FiniteBlockSupportFaceScaleIdentificationFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (href : FiniteProductReferenceZNormalizationFor hfaces hprod) :
     FinitePreUniversalGroupingWeightRecursionAssumptionsFor hfaces hprod :=
@@ -203,13 +203,13 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
-    (hcoordValue : FiniteCoordinateSupportFaceValueConventionFor hfaces)
-    (hcoordScale : FiniteCoordinateSupportFaceScaleConventionFor hfaces)
-    (hblockValue : FiniteBlockSupportFaceValueConventionFor hfaces)
-    (hblockScale : FiniteBlockSupportFaceScaleConventionFor hfaces)
+    (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
+    (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
+    (hblockValue : FiniteBlockSupportFaceValueIdentificationFor hfaces)
+    (hblockScale : FiniteBlockSupportFaceScaleIdentificationFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (href : FiniteProductReferenceZNormalizationFor hfaces hprod)
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces)
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   let hpos := productScaleZpositive_of_sliceTransform hprod haff
@@ -226,8 +226,8 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure
     productGroupingReferenceWeight_of_twoGroupingWeightEquation htwo hpos
   InteractionCollapseUniversalScale_of_minimalResiduals
     hfaces hprod
-    (coordinateSupportFaceValueTransport_of_convention hcoordValue)
-    (coordinateSupportFaceScaleTransport_of_convention hcoordScale)
+    (coordinateSupportFaceValueTransport_of_identification hcoordValue)
+    (coordinateSupportFaceScaleTransport_of_identification hcoordScale)
     (productGroupingWeightConstant_of_reference hreference)
     hsingle hax
 
@@ -239,7 +239,7 @@ The bundle does not contain theorem-like product inputs: product
 quasi-additivity, left-slice affine positivity, and product-revelation scale
 link remain visible obligations of the pre-entropy route.
 -/
-noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_withConventions
+noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_withNormalizations
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
@@ -247,18 +247,18 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_wit
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
-    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hgauge : PreEntropyRepresentativeGaugeNormalizations hfaces hprod)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_fullPreEntropyClosure
     hfaces hhm huniq hprod haff
-    hconv.coordinate_value
-    hconv.coordinate_scale
-    hconv.block_value
-    hconv.block_scale
+    hgauge.coordinate_value
+    hgauge.coordinate_scale
+    hgauge.block_value
+    hgauge.block_scale
     hlink
-    hconv.reference_z
-    hconv.universal_singleton
+    hgauge.reference_z
+    hgauge.universal_singleton
     hax
 
 /--
@@ -266,8 +266,8 @@ Minimal full pre-entropy constructor after the remaining-input audit.
 
 The product-revelation scale link is derived from product quasi-additivity,
 same-posterior-law transport, the normalized chain rule, and the coordinate
-support-face value/scale conventions.  The only bundled inputs are explicit
-representative/gauge/support conventions.
+support-face value/scale normalizations.  The only bundled inputs are explicit
+representative/gauge/support normalizations.
 -/
 noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_minimal
     {F : PrefFamily.{u}}
@@ -276,7 +276,7 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_min
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
-    (hconv : PreEntropyRepresentativeGaugeConventions hfaces hprod)
+    (hgauge : PreEntropyRepresentativeGaugeNormalizations hfaces hprod)
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
   let hvalue :=
@@ -286,8 +286,8 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_min
       (coordinateSwapFullRevelationValueTransport_of_posteriorLaw hfaces)
   let hbranch :=
     coordinateRevealBranchContinuationTransport_of_coordinateSupportFaceTransports
-      (coordinateSupportFaceValueTransport_of_convention hconv.coordinate_value)
-      (coordinateSupportFaceScaleTransport_of_convention hconv.coordinate_scale)
+      (coordinateSupportFaceValueTransport_of_identification hgauge.coordinate_value)
+      (coordinateSupportFaceScaleTransport_of_identification hgauge.coordinate_scale)
   let hcont :=
     coordinateRevealContinuationTransport_of_branchTransport hbranch
   let hnorm :=
@@ -297,8 +297,8 @@ noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_min
     productRevelationSequentialScale_of_normalizedChain hfaces hnorm
   let hlink :=
     productRevelationScaleLink_of_sequentialScale hfaces hprod hseq
-  InteractionCollapseUniversalScale_of_fullPreEntropyClosure_withConventions
-    hfaces hhm huniq hprod haff hlink hconv hax
+  InteractionCollapseUniversalScale_of_fullPreEntropyClosure_withNormalizations
+    hfaces hhm huniq hprod haff hlink hgauge hax
 
 namespace PreEntropyReadyFaceScalesStructure
 
@@ -311,12 +311,12 @@ noncomputable def ofProductQuasiAdditivity
     (hnorm : FiniteProductNormalizedSelectedRepresentativesFor hfaces)
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
-    (hcoordV : FiniteCoordinateSupportFaceValueConventionFor hfaces)
-    (hcoordZ : FiniteCoordinateSupportFaceScaleConventionFor hfaces)
+    (hcoordV : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
+    (hcoordZ : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
     (hchain :
       ∀ (hprod' : FiniteProductQuasiAdditivityForFaceScales hfaces),
         FinitePreUniversalBlockRevealChainRuleFor hfaces hprod')
-    (hsingle : FiniteUniversalScaleSingletonConventionFor hfaces) :
+    (hsingle : FiniteUniversalScaleSingletonNormalizationFor hfaces) :
     PreEntropyReadyFaceScalesStructure F where
   hfaces := hfaces
   product_normalized_representatives := hnorm
