@@ -87,9 +87,9 @@ theorem finitePreUniversalBlockRevealValue_of_crossPriorBlockBridge
 /-- Value transport for arbitrary dependent-sum support faces.
 
 This is the fiber version of the coordinate support-face representative
-convention: a posterior supported on the block `{k} × Act k` is evaluated with
+normalization: a posterior supported on the block `{k} × Act k` is evaluated with
 the intrinsic representative on `Act k`. -/
-structure FiniteBlockSupportFaceValueConventionFor.{v}
+structure FiniteBlockSupportFaceValueIdentificationFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   block_face_value :
@@ -107,7 +107,7 @@ structure FiniteBlockSupportFaceValueConventionFor.{v}
       fullRevelationValueForFaceScales hfaces q
 
 /-- Scale transport for arbitrary dependent-sum support faces. -/
-structure FiniteBlockSupportFaceScaleConventionFor.{v}
+structure FiniteBlockSupportFaceScaleIdentificationFor.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) : Prop where
   block_face_scale :
@@ -132,29 +132,29 @@ structure FiniteProductReferenceZNormalizationFor.{v}
       productScaleZForFaceScales hfaces hprod hax
         universalScaleReferencePrior = 1
 
-/-- Explicit representative/gauge/support conventions used by the full
+/-- Explicit representative/gauge/support normalizations used by the full
 pre-entropy constructor.
 
 This bundle intentionally contains only harmless choices: coordinate and block
 support-face identifications, product-reference `Z` gauge normalization, and
 singleton-scale normalization.  The product theorem inputs remain outside this
 bundle. -/
-structure PreEntropyRepresentativeGaugeConventions.{v}
+structure PreEntropyRepresentativeGaugeNormalizations.{v}
     {F : PrefFamily.{v}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces) : Prop where
   coordinate_value :
-    FiniteCoordinateSupportFaceValueConventionFor hfaces
+    FiniteCoordinateSupportFaceValueIdentificationFor hfaces
   coordinate_scale :
-    FiniteCoordinateSupportFaceScaleConventionFor hfaces
+    FiniteCoordinateSupportFaceScaleIdentificationFor hfaces
   block_value :
-    FiniteBlockSupportFaceValueConventionFor hfaces
+    FiniteBlockSupportFaceValueIdentificationFor hfaces
   block_scale :
-    FiniteBlockSupportFaceScaleConventionFor hfaces
+    FiniteBlockSupportFaceScaleIdentificationFor hfaces
   reference_z :
     FiniteProductReferenceZNormalizationFor hfaces hprod
   universal_singleton :
-    FiniteUniversalScaleSingletonConventionFor hfaces
+    FiniteUniversalScaleSingletonNormalizationFor hfaces
 
 /-- Outcome marginal of a channel followed by full revelation. -/
 theorem preUniversal_outcomeMarginal_seq_id_apply
@@ -380,14 +380,14 @@ theorem productScaleZ_ne_zero_of_productRevelation
   exact ne_of_gt hs_prod_pos hzero
 
 /-- Pre-universal block-reveal chain assembly from normalized branch-chain,
-fiber support-face conventions, product-revelation scale links, and the
+fiber support-face normalizations, product-revelation scale links, and the
 reference `Z` gauge. -/
 theorem preUniversalBlockRevealChainRule_of_branchChain_supportFace_productScale
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
-    (hvalue : FiniteBlockSupportFaceValueConventionFor hfaces)
-    (hscale : FiniteBlockSupportFaceScaleConventionFor hfaces)
+    (hvalue : FiniteBlockSupportFaceValueIdentificationFor hfaces)
+    (hscale : FiniteBlockSupportFaceScaleIdentificationFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (href : FiniteProductReferenceZNormalizationFor hfaces hprod) :
     FinitePreUniversalBlockRevealChainRuleFor hfaces hprod where
@@ -560,8 +560,8 @@ theorem finitePreUniversalGroupingWeightRecursion_of_blockReveal_supportFace_pro
     {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
     (hblock : FinitePreUniversalBlockRevealValueFor hfaces)
     (hpos : FiniteProductScaleZPositiveAssumptionsFor hfaces hprod)
-    (hvalue : FiniteBlockSupportFaceValueConventionFor hfaces)
-    (hscale : FiniteBlockSupportFaceScaleConventionFor hfaces)
+    (hvalue : FiniteBlockSupportFaceValueIdentificationFor hfaces)
+    (hscale : FiniteBlockSupportFaceScaleIdentificationFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (href : FiniteProductReferenceZNormalizationFor hfaces hprod) :
     FinitePreUniversalGroupingWeightRecursionAssumptionsFor hfaces hprod :=
@@ -1515,14 +1515,14 @@ structure PreEntropyReadyFaceScalesStructure (F : PrefFamily.{u}) where
   left_slice_affine_transform :
     FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces
   coordinate_value :
-    FiniteCoordinateSupportFaceValueConventionFor hfaces
+    FiniteCoordinateSupportFaceValueIdentificationFor hfaces
   coordinate_scale :
-    FiniteCoordinateSupportFaceScaleConventionFor hfaces
+    FiniteCoordinateSupportFaceScaleIdentificationFor hfaces
   block_reveal_chain :
     ∀ (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces),
       FinitePreUniversalBlockRevealChainRuleFor hfaces hprod
   universal_singleton :
-    FiniteUniversalScaleSingletonConventionFor hfaces
+    FiniteUniversalScaleSingletonNormalizationFor hfaces
 
 namespace PreEntropyReadyFaceScalesStructure
 
@@ -1669,8 +1669,8 @@ noncomputable def InteractionCollapseUniversalScale_of_preEntropyReady
   InteractionCollapseUniversalScale_of_minimalResiduals
     hready.hfaces
     hready.product_quasi_additivity
-    (coordinateSupportFaceValueTransport_of_convention hready.coordinate_value)
-    (coordinateSupportFaceScaleTransport_of_convention hready.coordinate_scale)
+    (coordinateSupportFaceValueTransport_of_identification hready.coordinate_value)
+    (coordinateSupportFaceScaleTransport_of_identification hready.coordinate_scale)
     (productGroupingWeightConstant_of_reference hready.groupingReferenceWeight)
     hready.universal_singleton
     hax
@@ -1690,8 +1690,8 @@ noncomputable def InteractionCollapseUniversalScale_of_preEntropyReady_fullSuppo
   InteractionCollapseUniversalScale_of_minimalResiduals
     hready.hfaces
     hready.product_quasi_additivity
-    (coordinateSupportFaceValueTransport_of_convention hready.coordinate_value)
-    (coordinateSupportFaceScaleTransport_of_convention hready.coordinate_scale)
+    (coordinateSupportFaceValueTransport_of_identification hready.coordinate_value)
+    (coordinateSupportFaceScaleTransport_of_identification hready.coordinate_scale)
     (productGroupingWeightConstant_of_reference
       (hready.groupingReferenceWeight_fullSupportRelabeling hhm huniq))
     hready.universal_singleton

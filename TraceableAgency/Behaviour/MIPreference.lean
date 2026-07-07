@@ -692,16 +692,11 @@ theorem tendsto_mutualInfo_of_posteriorLaw_entropy_converges
 
 end PosteriorLawContinuity
 
-/-- MIPrefFamily satisfies the posterior-law continuity clause. -/
+/-- MIPrefFamily satisfies posterior-law continuity (paper `lem:plcont`).  This is
+the benchmark witness of the derived predicate `PosteriorLawContinuity`; for the
+MI family it also holds directly from entropy reduction and continuity of `H`. -/
 theorem MIPrefFamily_posteriorLawContinuity :
-    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
-      (q : Dist A) (_hq : q.FullSupport)
-      (Eₙ : ℕ → FiniteExperimentOn A) (E : FiniteExperimentOn A)
-      (Fₙ : ℕ → FiniteExperimentOn A) (G : FiniteExperimentOn A),
-      PosteriorLawConvergesAtExp q Eₙ E →
-      PosteriorLawConvergesAtExp q Fₙ G →
-      (∀ n, ExperimentPairPref MIPrefFamily (Eₙ n) (Fₙ n) q q) →
-      ExperimentPairPref MIPrefFamily E G q q := by
+    PosteriorLawContinuity MIPrefFamily := by
   intro A instFA instDA instNA q _hq Eₙ E Fₙ G hE hF h_ineq
   simp only [ExperimentPairPref, MIPrefFamily] at h_ineq ⊢
   letI instFO_E := E.outFintype
@@ -726,9 +721,11 @@ theorem MIPrefFamily_posteriorLawContinuity :
   have h_right := @tendsto_mutualInfo_of_posteriorLaw_entropy_converges A _ _ instNA q Fₙ G hF_entropy
   exact le_of_tendsto_of_tendsto h_right h_left (Filter.Eventually.of_forall h_ineq')
 
-/-- MIPrefFamily satisfies A2 (Continuity). -/
+/-- MIPrefFamily satisfies A2 (Continuity).  In v6 A2 is exactly
+`ClosedPreferenceGraph`; posterior-law continuity is the separate
+`MIPrefFamily_posteriorLawContinuity`. -/
 theorem MIPrefFamily_A2 : A2_Continuity MIPrefFamily :=
-  ⟨MIPrefFamily_closedPreferenceGraph, MIPrefFamily_posteriorLawContinuity⟩
+  MIPrefFamily_closedPreferenceGraph
 
 /-!
 ## A4 and A5: Data Processing Inequality Dependent Axioms
@@ -811,21 +808,26 @@ theorem MIRep_A1 {F : PrefFamily.{v}} (hrep : MIRep F) :
     apply (strictRel_iff_MIPrefFamily_of_MIRep hrep _ _ _).mpr
     exact MIPrefFamily_A1.2 q hq
 
-/-- Any mutual-information representation satisfies A2. -/
+/-- Any mutual-information representation satisfies A2 (= `ClosedPreferenceGraph`). -/
 theorem MIRep_A2 {F : PrefFamily.{v}} (hrep : MIRep F) :
     A2_Continuity F := by
-  constructor
-  · intro A O _ _ _ _ Pₙ P qₙ rₙ q r hP hq hr hrel
-    apply (rel_iff_MIPrefFamily_of_MIRep hrep P q r).mpr
-    apply MIPrefFamily_A2.1 Pₙ P qₙ rₙ q r hP hq hr
-    intro n
-    exact (rel_iff_MIPrefFamily_of_MIRep hrep (Pₙ n) (qₙ n) (rₙ n)).mp (hrel n)
-  · intro A _ _ _ q hq Eₙ E Fₙ G hE hF hrel
-    apply (experimentPairPref_iff_MIPrefFamily_of_MIRep hrep E G q q).mpr
-    apply MIPrefFamily_A2.2 q hq Eₙ E Fₙ G hE hF
-    intro n
-    exact (experimentPairPref_iff_MIPrefFamily_of_MIRep hrep (Eₙ n) (Fₙ n) q q).mp
-      (hrel n)
+  intro A O _ _ _ _ Pₙ P qₙ rₙ q r hP hq hr hrel
+  apply (rel_iff_MIPrefFamily_of_MIRep hrep P q r).mpr
+  apply MIPrefFamily_A2 Pₙ P qₙ rₙ q r hP hq hr
+  intro n
+  exact (rel_iff_MIPrefFamily_of_MIRep hrep (Pₙ n) (qₙ n) (rₙ n)).mp (hrel n)
+
+/-- Any mutual-information representation satisfies posterior-law continuity
+(paper `lem:plcont`).  This transfers `MIPrefFamily_posteriorLawContinuity`
+across the ordinal equivalence of `MIRep`. -/
+theorem MIRep_posteriorLawContinuity {F : PrefFamily.{v}} (hrep : MIRep F) :
+    PosteriorLawContinuity F := by
+  intro A _ _ _ q hq Eₙ E Fₙ G hE hF hrel
+  apply (experimentPairPref_iff_MIPrefFamily_of_MIRep hrep E G q q).mpr
+  apply MIPrefFamily_posteriorLawContinuity q hq Eₙ E Fₙ G hE hF
+  intro n
+  exact (experimentPairPref_iff_MIPrefFamily_of_MIRep hrep (Eₙ n) (Fₙ n) q q).mp
+    (hrel n)
 
 /-- Any mutual-information representation satisfies A3. -/
 theorem MIRep_A3 {F : PrefFamily.{v}} (hrep : MIRep F) :

@@ -442,10 +442,16 @@ theorem posteriorLawHMRel_nontrivial_full_revelation_of_axioms
   exact hax.a1.2 q hq
 
 /-- The Herstein--Milnor input hypotheses for the posterior-law quotient are
-proved from `TraceAxioms` plus posterior-law sufficiency. -/
+proved from `TraceAxioms` plus posterior-law sufficiency and posterior-law
+continuity.
+
+In v6, posterior-law continuity is no longer a clause of Axiom A2; it is the
+derived lemma `lem:plcont`, supplied here as the explicit hypothesis `hplc`.
+Previously this field was discharged by `hax.a2.2`. -/
 theorem finitePosteriorLawHMHypotheses_of_axioms
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
     (hpls : PosteriorLawSufficiency F)
+    (hplc : PosteriorLawContinuity F)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q : Dist A) (hq : q.FullSupport) :
     FinitePosteriorLawHMHypothesesFor F hax hpls q hq where
@@ -475,7 +481,7 @@ theorem finitePosteriorLawHMHypotheses_of_axioms
     exact hm_posteriorLawIntegral_publicMixExperiment q t ht0 ht1 E R φ
   closed_upper_contour := by
     intro Eₙ E Gₙ G hE hG hrel
-    exact hax.a2.2 q hq Eₙ E Gₙ G hE hG hrel
+    exact hplc q hq Eₙ E Gₙ G hE hG hrel
   nontrivial_full_revelation := by
     intro _hnt
     exact posteriorLawHMRel_nontrivial_full_revelation_of_axioms F hax q hq
@@ -486,12 +492,13 @@ theorem finitePosteriorLawHMHypotheses_of_blackwell_axioms
     (F : PrefFamily.{u})
     (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
     (hax : TraceAxioms F)
+    (hplc : PosteriorLawContinuity F)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q : Dist A) (hq : q.FullSupport) :
     FinitePosteriorLawHMHypothesesFor F hax
       (from_axioms_to_posterior_of_blackwell F hblackwell hax) q hq :=
   finitePosteriorLawHMHypotheses_of_axioms F hax
-    (from_axioms_to_posterior_of_blackwell F hblackwell hax) q hq
+    (from_axioms_to_posterior_of_blackwell F hblackwell hax) hplc q hq
 
 /-!
 ## Theorem-shaped external Herstein--Milnor interface
@@ -544,14 +551,15 @@ noncomputable def finiteHersteinMilnorConclusion_of_blackwell_axioms
     (F : PrefFamily.{u})
     (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
     (hhm : ClassicalFiniteHersteinMilnorTheoremAssumptions.{u})
-    (hax : TraceAxioms F) :
+    (hax : TraceAxioms F)
+    (hplc : PosteriorLawContinuity F) :
     FiniteHersteinMilnorConclusionFor F
       (from_axioms_to_posterior_of_blackwell F hblackwell hax) :=
   hhm.posterior_value_conclusion F hax
     (from_axioms_to_posterior_of_blackwell F hblackwell hax)
     (fun {A} [Fintype A] [DecidableEq A] [Nonempty A] q hq =>
       finitePosteriorLawHMHypotheses_of_blackwell_axioms
-        F hblackwell hax q hq)
+        F hblackwell hax hplc q hq)
 
 /--
 **Herstein-Milnor Posterior Value Assumptions**

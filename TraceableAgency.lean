@@ -34,4 +34,4 @@ import TraceableAgency.External.EntropyReductionClosure
 import TraceableAgency.External.Faddeev
 import TraceableAgency.External.Blackwell
 import TraceableAgency.Main
-import TraceableAgency.Tests.Sanity
+import TraceableAgency.MainTheorem

@@ -5,31 +5,37 @@ Authors: Daniele Condorelli
 -/
 import TraceableAgency.Main
 import TraceableAgency.External.Faddeev
+import TraceableAgency.External.EntropyReductionClosure
 
 /-!
-# Main Theorem Assembly from External Assumptions
+# Main Theorem Assembly from Known Results
 
-This file assembles the full main characterization theorem from explicit
-external assumption bundles.
+This file assembles the full main characterization theorem.  The canonical
+paper-facing route is the cardinal-gauge route from named known results:
+classical Faddeev, the final HM interface, the constructed-representative
+known-result package, and finite DPI for the benchmark direction.  Product
+normalisation, support-scale, cardinal-boundary, branch/scale/cross-prior
+monoliths, and posterior-law-continuity assumptions are kept off the public
+theorem boundary.
 
 ## Main results
 
-* `MainCharacterization_of_external_assumptions` - TraceAxioms F ↔ MIRep F
-* `MainCharacterizationWithMoreover_of_external_assumptions` - full theorem with
-  block-scale moreover clause
+* `MainCharacterization_of_final_known_results` - TraceAxioms F ↔ MIRep F
+* `MainCharacterizationWithMoreover_of_final_known_results` - canonical theorem
+  with the block-scale moreover clause
 
 ## Dependencies
 
 The proof combines:
-1. `SufficiencyStatement_of_external_assumptions` (from External/Faddeev.lean)
+1. `SufficiencyStatement_of_final_known_results`
 2. `BenchmarkStatement_of_DPI` (from Main.lean)
 3. `blockScaleStatement_from_sufficiency` + `blockScaleFromMIRepStatement`
 4. `main_characterization_from_spine`
 
-## External Assumptions
+## Known-Result Inputs
 
-- **Sufficiency**: `SufficiencyExternalAssumptions` bundles the remaining
-  sufficiency assumptions; support-restriction boundary assembly is now internal
+- **Sufficiency**: classical Faddeev, final HM, and the per-axiom
+  cardinal-gauge constructed-representative known result
 - **Benchmark**: `FiniteDPIAssumptions` bundles finite data processing inequalities
 -/
 
@@ -40,138 +46,277 @@ namespace TraceableAgency
 universe u
 
 /-!
-## Full Main Theorem Modulo External Assumptions
+## Final Main Route: Known Results plus Internalized Normalizations
 -/
 
 /--
-**Main Characterization from External Assumptions**
+**Sufficiency from Final Known Results**
 
-The main theorem TraceAxioms F ↔ MIRep F, proved modulo explicit external
-assumption bundles for sufficiency and benchmark.
-
-This theorem states: given the sufficiency external assumptions and the
-finite DPI assumptions, the full main characterization holds.
+This is the cleaned sufficiency route after the pre-entropy/cardinal/product
+graft.  The obsolete sufficiency wrapper is deliberately absent: the theorem takes
+exactly the named classical results and the per-axiom cardinal-gauge
+known-result constructor used by the proof.
 -/
-theorem MainCharacterization_of_external_assumptions
-    (hsuff : SufficiencyExternalAssumptions.{u})
+theorem SufficiencyStatement_of_final_known_results
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (hknown :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FinalConstructedRepresentativeKnownResultsCardinalGaugeProductTransform
+          hhm hax) :
+    SufficiencyStatement.{u} := by
+  intro F hax
+  exact MIRep_of_TraceAxioms_FinalHM_Faddeev_withCardinalGaugeKnownResults
+    hfad hhm hax (hknown hax)
+
+/--
+**Main Characterization from Final Known Results**
+
+This theorem is the paper-facing route: the sufficiency direction uses the
+cardinal-gauge construction directly from named known results, and the benchmark
+direction uses finite DPI.  No sufficiency assumption bundle and no
+posterior-law-continuity assumption appears at this boundary.
+-/
+theorem MainCharacterization_of_final_known_results
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (hknown :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FinalConstructedRepresentativeKnownResultsCardinalGaugeProductTransform
+          hhm hax)
     (hdpi : FiniteDPIAssumptions.{u}) :
     MainCharacterization.{u} := by
   intro F
   constructor
   · intro hax
-    exact (SufficiencyStatement_of_external_assumptions hsuff) F hax
+    exact (SufficiencyStatement_of_final_known_results hfad hhm hknown) F hax
   · intro hrep
     exact (BenchmarkStatement_of_DPI hdpi) F hrep
 
 /--
-**Main Characterization With Moreover from External Assumptions**
+**Main Characterization With Moreover from Final Known Results**
 
-The full main theorem including the "moreover" clause about block-supported
-cross-channel comparisons being on the same MI scale.
-
-Paper: Theorem 1 (lines 770-787 of empowerment_v5.tex)
-
-This combines:
-1. `SufficiencyStatement_of_external_assumptions`
-2. `BenchmarkStatement_of_DPI`
-3. `blockScaleStatement_from_sufficiency` + `blockScaleFromMIRepStatement`
-4. `main_characterization_from_spine`
+The full theorem, including the block-scale moreover clause, using the final
+known-result cardinal-gauge sufficiency route.
 -/
-theorem MainCharacterizationWithMoreover_of_external_assumptions
-    (hsuff : SufficiencyExternalAssumptions.{u})
+theorem MainCharacterizationWithMoreover_of_final_known_results
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (hknown :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FinalConstructedRepresentativeKnownResultsCardinalGaugeProductTransform
+          hhm hax)
     (hdpi : FiniteDPIAssumptions.{u}) :
     MainCharacterizationWithMoreover.{u} := by
   apply main_characterization_from_spine
-  · exact SufficiencyStatement_of_external_assumptions hsuff
+  · exact SufficiencyStatement_of_final_known_results hfad hhm hknown
   · exact BenchmarkStatement_of_DPI hdpi
   · exact blockScaleStatement_from_sufficiency
-      (SufficiencyStatement_of_external_assumptions hsuff)
+      (SufficiencyStatement_of_final_known_results hfad hhm hknown)
+      blockScaleFromMIRepStatement
+
+/--
+**Main Characterization With Moreover, Exposing Only Pre-Entropy Inputs**
+
+This is the audit-facing theorem boundary.  The branch/cardinal/product-gauge
+representative is constructed internally from `FinalHMInterface` and
+`TraceAxioms`; the only remaining sufficiency-side inputs are the six
+pre-entropy transport/normalization facts for that constructed representative.
+-/
+theorem MainCharacterizationWithMoreover_onlyPreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (coordinate_value :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteCoordinateSupportFaceValueTransportAssumptionsFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (coordinate_scale :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteCoordinateSupportFaceScaleTransportAssumptionsFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (block_value :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteBlockSupportFaceValueTransportFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (block_scale :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteBlockSupportFaceScaleTransportFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (reference_z :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteProductReferenceZNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)
+          (finalConstructedCardinalGaugeProductQuasiAdditivity hhm hax))
+    (universal_singleton :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteUniversalScaleSingletonNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (hdpi : FiniteDPIAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} := by
+  refine MainCharacterizationWithMoreover_of_final_known_results
+    hfad hhm ?_ hdpi
+  intro F hax
+  exact
+    finalConstructedRepresentativeKnownResultsCardinalGaugeProductTransform_of_preEntropy
+      hhm hax
+      (coordinate_value hax)
+      (coordinate_scale hax)
+      (block_value hax)
+      (block_scale hax)
+      (reference_z hax)
+      (universal_singleton hax)
+
+/--
+**Sufficiency with Support-Read Pre-Entropy Internalized**
+
+The coordinate value/scale facts are proved internally as support-read theorems
+for the final constructed representative, and the block value/scale facts are
+proved internally on the support face of the embedded block posterior.  The
+remaining visible pre-entropy inputs are the two product/singleton
+normalizations.
+-/
+theorem SufficiencyStatement_of_coordinateSupportReadPreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (reference_z :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteProductReferenceZNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)
+          (finalConstructedCardinalGaugeProductQuasiAdditivity hhm hax))
+    (universal_singleton :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteUniversalScaleSingletonNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)) :
+    SufficiencyStatement.{u} := by
+  intro F hax
+  exact
+    MIRep_of_TraceAxioms_FinalHM_Faddeev_withCoordinateSupportReadPreEntropy
+      hfad hhm hax
+      (reference_z hax)
+      (universal_singleton hax)
+
+/--
+**Main Characterization With Moreover, Support-Read Route**
+
+Audit-facing theorem after internalizing the coordinate and block support-face
+value/scale facts.  No ambient coordinate or block transport hypothesis appears.
+-/
+theorem MainCharacterizationWithMoreover_coordinateSupportReadPreEntropy
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (reference_z :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteProductReferenceZNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)
+          (finalConstructedCardinalGaugeProductQuasiAdditivity hhm hax))
+    (universal_singleton :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteUniversalScaleSingletonNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax))
+    (hdpi : FiniteDPIAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} := by
+  apply main_characterization_from_spine
+  · exact SufficiencyStatement_of_coordinateSupportReadPreEntropy
+      hfad hhm reference_z universal_singleton
+  · exact BenchmarkStatement_of_DPI hdpi
+  · exact blockScaleStatement_from_sufficiency
+      (SufficiencyStatement_of_coordinateSupportReadPreEntropy
+        hfad hhm reference_z universal_singleton)
+      blockScaleFromMIRepStatement
+
+/--
+**Sufficiency with Only Reference-Z Pre-Entropy Remaining**
+
+The universal singleton scale normalization is constructed internally from the
+remaining product-reference `Z` normalization and the final cardinal-gauge
+representative.  Thus `reference_z` is the only visible pre-entropy
+normalization at this boundary.
+-/
+theorem SufficiencyStatement_of_onlyReferenceZ
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (reference_z :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteProductReferenceZNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)
+          (finalConstructedCardinalGaugeProductQuasiAdditivity hhm hax)) :
+    SufficiencyStatement.{u} := by
+  intro F hax
+  exact
+    MIRep_of_TraceAxioms_FinalHM_Faddeev_onlyReferenceZPreEntropy
+      hfad hhm hax (reference_z hax)
+
+/--
+**Main Characterization With Moreover, Only Reference-Z Remaining**
+
+Audit-facing theorem after internalizing the universal singleton scale
+normalization.  The only visible sufficiency-side pre-entropy obligation is the
+product-reference `Z` normalization for the internally constructed
+cardinal-gauge representative.
+-/
+theorem MainCharacterizationWithMoreover_onlyReferenceZ
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (reference_z :
+      ∀ {F : PrefFamily.{u}} (hax : TraceAxioms F),
+        FiniteProductReferenceZNormalizationFor
+          (finalConstructedCardinalGaugeFaceScales hhm hax)
+          (finalConstructedCardinalGaugeProductQuasiAdditivity hhm hax))
+    (hdpi : FiniteDPIAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} := by
+  apply main_characterization_from_spine
+  · exact SufficiencyStatement_of_onlyReferenceZ hfad hhm reference_z
+  · exact BenchmarkStatement_of_DPI hdpi
+  · exact blockScaleStatement_from_sufficiency
+      (SufficiencyStatement_of_onlyReferenceZ hfad hhm reference_z)
+      blockScaleFromMIRepStatement
+
+/--
+**Clean Sufficiency Statement**
+
+All sufficiency-side pre-entropy normalization obligations are now constructed
+internally for the final cardinal-gauge representative.  The only remaining
+inputs are the paper axioms, supplied per `F`, and the accepted classical
+Faddeev/HM interfaces.
+-/
+theorem SufficiencyStatement_clean
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u}) :
+    SufficiencyStatement.{u} := by
+  intro F hax
+  exact MIRep_of_TraceAxioms_FinalHM_Faddeev_clean hfad hhm hax
+
+/--
+**Clean Main Characterization With Moreover**
+
+Audit-facing theorem with no extra sufficiency-side conventions: reference-Z
+normalization, universal singleton normalization, coordinate/block
+support-face transport, branch data, product gauge, support scale, and
+value-relabeling facts are all internalized before this boundary.
+-/
+theorem MainCharacterizationWithMoreover_clean
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u})
+    (hhm : FinalHMInterface.{u})
+    (hdpi : FiniteDPIAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} := by
+  apply main_characterization_from_spine
+  · exact SufficiencyStatement_clean hfad hhm
+  · exact BenchmarkStatement_of_DPI hdpi
+  · exact blockScaleStatement_from_sufficiency
+      (SufficiencyStatement_clean hfad hhm)
       blockScaleFromMIRepStatement
 
 /-!
-## Combined Assumption Bundle
--/
-
-/--
-**All External Assumptions Bundle**
-
-Combines both sufficiency and benchmark external assumptions into a single bundle.
-This provides a complete specification of what is assumed to prove the main theorem.
--/
-structure AllExternalAssumptions.{v} where
-  /-- Sufficiency external assumptions; support assembly is internal. -/
-  sufficiency : SufficiencyExternalAssumptions.{v}
-  /-- Finite DPI assumptions for benchmark direction -/
-  dpi : FiniteDPIAssumptions.{v}
-
-/--
-**Main Characterization With Moreover from All External Assumptions**
-
-The full main theorem from a single combined assumption bundle.
--/
-theorem MainCharacterizationWithMoreover_of_all_assumptions
-    (h : AllExternalAssumptions.{u}) :
-    MainCharacterizationWithMoreover.{u} :=
-  MainCharacterizationWithMoreover_of_external_assumptions h.sufficiency h.dpi
-
-/--
-**Main Characterization from All External Assumptions**
-
-The basic characterization (without moreover) from a single combined assumption bundle.
--/
-theorem MainCharacterization_of_all_assumptions
-    (h : AllExternalAssumptions.{u}) :
-    MainCharacterization.{u} :=
-  MainCharacterization_of_external_assumptions h.sufficiency h.dpi
-
-/-!
-## Summary of External Assumptions
+## Summary of Known-Result Inputs
 
 The full main theorem depends on:
 
-### Sufficiency Direction (SufficiencyExternalAssumptions)
-1. `FiniteSamePosteriorLawBlackwellEquivalenceAssumptions` - classical finite
-   same-posterior-law mutual garbling; `FiniteBlackwellPosteriorAssumptions`
-   is reconstructed internally from this plus A4/A3/A1 block replacement
-2. `FiniteHersteinMilnorAssumptions` - posterior value representation
-   (classical Herstein-Milnor plus paper-specific quotient interface)
-3. `FiniteBranchAggregationAssumptions` - branch aggregation compatibility
-   monolith.  The faithful branch route is exposed separately through
-   `SufficiencyFaithfulBranchAssumptions`, which produces
-   `BranchAggregationStructure`, `BranchChainStructure`, and the normalized
-   chain rule without using the old hax-free/global branch packages.
-4. `FiniteScaleCoherenceAssumptions` - universal scale
-5. `FiniteCrossPriorBlockAssumptions` - law-level posterior value affinity,
-   first-slice affine uniqueness, second-coordinate intercept affine
-   uniqueness, second-coordinate slope affine uniqueness, posterior value
-   relabeling coherence, singleton coefficient gauge convention,
-   singleton swap/rho gauge convention, reference-gauge transform and
-   current-representative gauge convention, and singleton interaction gauge
-   convention; Lean proves singleton slice affinity internally (Stage 10N),
-   public-mix posterior-law mixture structurally, derives channel-level value
-   public-mix affinity, A1 experiment-pair strictness, value nonconstancy,
-   product-slice public-mix affinity, the intercept, slope, nondegenerate
-   C1-C3 coefficient extraction, triple-product value associativity from
-   value relabeling, product-swap value equality and nondegenerate rho
-   reciprocity, derives the positive gauge-choice package from the reference
-   gauge convention, Step 3 gauge normalization, proves K1-K4 interaction
-   associativity from normalized triple-product expansions, proves interaction
-   swap symmetry from product-swap value equality and normalized coefficients,
-   proves singleton interaction-term degeneracy, derives the common-κ
-   interaction package from the remaining singleton convention,
-   and derives gauge coherence packages,
-   affine-slice uniqueness,
-   left-slice affinity, pairwise product bilinear form, coherent product
-   quasi-additivity via `coherentnorm_of_decomposed_components`, the
-   product-lift value identities, and
-   product-block transfer from A3/A4/A5, then assembles the unscaled
-   cross-prior blockbridge and converts it to the normalized bridge by
-   universal scale
-6. `FiniteEntropyRegularityFromAxiomsAssumptions` - entropy regularity
-7. `FiniteHfunBlockEmbeddingInvarianceAssumptions` - fibre embedding invariance
-8. `FiniteCoarseRevealEntropyReductionAssumptions` - coarse-reveal entropy reduction
-9. `FiniteCardinalSupportBoundaryAssumptions` - cardinal support boundary extension
-10. `ClassicalFaddeevTheoremAssumptions` - classical Faddeev theorem/application
+### Sufficiency Direction
+1. `ClassicalFaddeevTheoremAssumptions` - classical Faddeev theorem/application
+2. `FinalHMInterface` - final HM interface used by the constructed
+   representative
+3. `FinalConstructedRepresentativeKnownResultsCardinalGaugeProductTransform` -
+   per-axiom known-result package for the cardinal-gauge product transform
 Support-restriction boundary assembly is now proved internally from A5, A1, and
 A3 in `External.SupportRestriction`.
 Finite action/outcome relabeling invariance is now proved internally from A4,

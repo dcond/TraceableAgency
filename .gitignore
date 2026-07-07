@@ -1,3 +1,6 @@
-/.lake
-.DS_Store
+.lake/
+lake-packages/
 *.olean
+*.ilean
+.DS_Store
+/tmp/

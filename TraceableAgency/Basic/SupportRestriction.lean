@@ -50,6 +50,10 @@ theorem supportSubtype_nonempty (q : Dist A) : Nonempty (supportSubtype q) := by
     simp [hzero]
   linarith [q.sum_eq_one]
 
+/-- The positive support of a finite distribution is always nonempty. -/
+instance instNonemptySupportSubtype (q : Dist A) : Nonempty (supportSubtype q) :=
+  supportSubtype_nonempty q
+
 /-- Sums over the positive support agree with ambient sums for functions that
     vanish on zero-probability actions. -/
 theorem sum_supportSubtype_eq_sum_of_zero
