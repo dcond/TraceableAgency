@@ -381,7 +381,7 @@ end DependentBlockEntropy
 /-!
 ## Product Distribution Entropy Identities
 
-For A8 (independent-background separability), we need entropy additivity
+For A7 (independent-background separability), we need entropy additivity
 for product distributions: H(q₁ ⊗ q₂) = H(q₁) + H(q₂).
 -/
 
@@ -474,13 +474,13 @@ theorem mutualInfo_prod (q₁ : Dist A₁) (q₂ : Dist A₂)
 end ProductEntropy
 
 /-!
-## A8 Product Background Cancellation Helpers
+## A7 Product Background Cancellation Helpers
 
 For Independent-Background Separability: comparing P₁ vs Q₁ in the first
 component is independent of the background channel in the second component.
 -/
 
-section A8ProductHelpers
+section A7ProductHelpers
 
 /-- Left-background cancellation: comparing P₁ vs Q₁ is independent of the
     second-component background channel. -/
@@ -514,12 +514,12 @@ theorem mutualInfo_prod_same_background_right
   rw [mutualInfo_prod, mutualInfo_prod, mutualInfo_prod, mutualInfo_prod]
   constructor <;> intro h <;> linarith
 
-end A8ProductHelpers
+end A7ProductHelpers
 
 /-!
 ## Sequential Composition Chain Rule
 
-For A7 (Dynamic Consistency), we need the mutual information chain rule
+For A6 (Dynamic Consistency), we need the mutual information chain rule
 for sequential composition:
   I(q, P₁ ▷ Q) = I(q, P₁) + Σ_{o₁} m(o₁) * I(posterior(o₁), Q^{o₁})
 -/
@@ -623,9 +623,102 @@ theorem entropy_sigma_chain {O₁ : Type*} [Fintype O₁] {Y : O₁ → Type*}
 end SequentialChainRule
 
 /-!
+## Outcome padding and posterior-law preservation
+
+These elementary identities live here because padding is needed both by the
+derived public-coin argument and by the later branch-aggregation construction.
+-/
+
+/-- Pad a channel into the left side of a disjoint-sum outcome type. -/
+noncomputable def outcomePadLeft {A O Y : Type u}
+    [Fintype O] [Fintype Y] (P : Channel A O) : Channel A (O ⊕ Y) :=
+  fun a =>
+    { prob := fun oy =>
+        match oy with
+        | Sum.inl o => P a o
+        | Sum.inr _ => 0
+      nonneg := fun oy =>
+        match oy with
+        | Sum.inl o => (P a).nonneg o
+        | Sum.inr _ => le_refl 0
+      sum_eq_one := by
+        simp only [Fintype.sum_sum_type, Finset.sum_const_zero, add_zero]
+        exact (P a).sum_eq_one }
+
+/-- Pad a channel into the right side of a disjoint-sum outcome type. -/
+noncomputable def outcomePadRight {A O Y : Type u}
+    [Fintype O] [Fintype Y] (P : Channel A Y) : Channel A (O ⊕ Y) :=
+  fun a =>
+    { prob := fun oy =>
+        match oy with
+        | Sum.inl _ => 0
+        | Sum.inr y => P a y
+      nonneg := fun oy =>
+        match oy with
+        | Sum.inl _ => le_refl 0
+        | Sum.inr y => (P a).nonneg y
+      sum_eq_one := by
+        simp only [Fintype.sum_sum_type, Finset.sum_const_zero, zero_add]
+        exact (P a).sum_eq_one }
+
+/-- Left-padded channels preserve posterior-law integrals. -/
+theorem posteriorLawIntegral_outcomePadLeft
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (P : Channel A O) (φ : Dist A → ℝ) :
+    posteriorLawIntegral q (outcomePadLeft (Y := Y) P) φ =
+      posteriorLawIntegral q P φ := by
+  unfold posteriorLawIntegral
+  rw [Fintype.sum_sum_type]
+  simp only [outcomePadLeft, Channel.outcomeMarginal_apply]
+  have hinl :
+      (∑ x : O,
+          (∑ a : A, q a * P a x) *
+            φ (Channel.posterior (outcomePadLeft (Y := Y) P) q (Sum.inl x))) =
+        ∑ x : O,
+          (∑ a : A, q a * P a x) *
+            φ (Channel.posterior P q x) := by
+    apply Finset.sum_congr rfl
+    intro o _ho
+    simp [outcomePadLeft, Channel.posterior, Channel.outcomeMarginal_apply]
+  have hinr :
+      (∑ x : Y,
+          (∑ a : A, q a * 0) *
+            φ (Channel.posterior (outcomePadLeft (Y := Y) P) q (Sum.inr x))) = 0 := by
+    simp
+  rw [hinl, hinr, add_zero]
+
+/-- Right-padded channels preserve posterior-law integrals. -/
+theorem posteriorLawIntegral_outcomePadRight
+    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (P : Channel A Y) (φ : Dist A → ℝ) :
+    posteriorLawIntegral q (outcomePadRight (O := O) P) φ =
+      posteriorLawIntegral q P φ := by
+  unfold posteriorLawIntegral
+  rw [Fintype.sum_sum_type]
+  simp only [outcomePadRight, Channel.outcomeMarginal_apply]
+  have hinl :
+      (∑ x : O,
+          (∑ a : A, q a * 0) *
+            φ (Channel.posterior (outcomePadRight (O := O) P) q (Sum.inl x))) = 0 := by
+    simp
+  have hinr :
+      (∑ x : Y,
+          (∑ a : A, q a * P a x) *
+            φ (Channel.posterior (outcomePadRight (O := O) P) q (Sum.inr x))) =
+        ∑ x : Y,
+          (∑ a : A, q a * P a x) *
+            φ (Channel.posterior P q x) := by
+    apply Finset.sum_congr rfl
+    intro y _hy
+    simp [outcomePadRight, Channel.posterior, Channel.outcomeMarginal_apply]
+  rw [hinl, zero_add, hinr]
+
+/-!
 ## Sequential Composition Mutual Information Chain Rule
 
-For A7 (Branchwise Continuation Monotonicity), we need the chain rule:
+For A6 (Branchwise Continuation Monotonicity), we need the chain rule:
   I(q, P₁ ▷ Q) = I(q, P₁) + Σ_{o₁} m(o₁) * I(posterior(o₁), Q^{o₁})
 
 We use explicit universe annotations to match seqComposeDep.
@@ -871,7 +964,7 @@ theorem condEntropySum_seqComposeDep
 /-- Mutual information chain rule for dependent sequential composition:
     I(q, P₁ ▷ Q) = I(q, P₁) + Σ_{o₁} m(o₁) * I(posterior(o₁), Q^{o₁})
 
-    This is the key identity for A7 (Branchwise Continuation Monotonicity). -/
+    This is the key identity for A6 (Branchwise Continuation Monotonicity). -/
 theorem mutualInfo_seqComposeDep
     (q : Dist A) (P₁ : Channel A O₁)
     (Y : O₁ → Type v_seq) [∀ o₁, Fintype (Y o₁)] [∀ o₁, DecidableEq (Y o₁)]

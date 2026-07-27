@@ -30,45 +30,45 @@ obligations in `PreUniversalBlockBridge.lean`.
 noncomputable def InteractionCollapseUniversalScale_of_blockRevealChain
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hgauge :
       FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
       FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A8_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)

@@ -3,7 +3,7 @@ Copyright (c) 2026 Daniele Condorelli. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
-import TraceableAgency.External.SupportRestriction
+import TraceableAgency.Behaviour.Axioms
 
 /-!
 # Structural Relabeling Lemmas
@@ -408,43 +408,43 @@ theorem pairwise_relabel_replacement_from_weak_equiv
   have hleft_dup :
       F.rel P q r ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) :=
-    hax.a3.1 P q r
+    hax.a3.duplication P q r
   have hright_dup :
       F.rel P' q' r' ↔
         F.rel (blockChannel P' P') (inlDist q') (inrDist r') :=
-    hax.a3.1 P' q' r'
+    hax.a3.duplication P' q' r'
   have hcommon_02 :
       F.rel commonP x y ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) := by
     simpa [commonP, x, y, k0, k2, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k2) h02_ne
         (qᵢ := q) (qⱼ := r))
   have hcommon_01 : F.rel commonP x x' := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k1) h01_ne
         (qᵢ := q) (qⱼ := q')).mpr hq_to_new
     simpa [commonP, x, x', k0, k1, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_10 : F.rel commonP x' x := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k0) h10_ne
         (qᵢ := q') (qⱼ := q)).mpr hq_to_old
     simpa [commonP, x, x', k0, k1, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_23 : F.rel commonP y y' := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k2) (j := k3) h23_ne
         (qᵢ := r) (qⱼ := r')).mpr hr_to_new
     simpa [commonP, y, y', k2, k3, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_32 : F.rel commonP y' y := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k3) (j := k2) h32_ne
         (qᵢ := r') (qⱼ := r)).mpr hr_to_old
     simpa [commonP, y, y', k2, k3, Act, Out, C, relabelReplacementAct,
@@ -457,7 +457,7 @@ theorem pairwise_relabel_replacement_from_weak_equiv
         F.rel (blockChannel P' P') (inlDist q') (inrDist r') := by
     simpa [commonP, x', y', k1, k3, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k3) h13_ne
         (qᵢ := q') (qⱼ := r'))
   exact hleft_dup.trans

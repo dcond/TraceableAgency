@@ -10,20 +10,21 @@ import TraceableAgency.Basic.Sequential
 import TraceableAgency.Basic.Convergence
 
 /-!
-# Axioms A1-A8
+# Axioms A1-A7
 
-The behavioural axioms for traceable agency from empowerment_v5.tex.
-Each axiom is a predicate on PrefFamily.
+The behavioural axioms for traceable agency from `empowerment_v6.tex`.
+Each axiom is a predicate on `PrefFamily`:
 
-Paper line references (empowerment_v5.tex):
-- A1: lines 410-420
-- A2: lines 422-446
-- A3: lines 448-467
-- A4: lines 469-476
-- A5: lines 478-491
-- A6: lines 493-503
-- A7: lines 505-524
-- A8: lines 526-543
+- A1: weak order and local non-triviality;
+- A2: closed preference graph;
+- A3: finite block-comparison coherence;
+- A4: outcome post-processing aversion;
+- A5: action-coarsening aversion;
+- A6: branchwise continuation monotonicity;
+- A7: independent-background separability.
+
+Public-coin independence is not primitive: it is derived from these axioms in
+`External/HersteinMilnor.lean`.
 -/
 
 set_option linter.style.header false
@@ -33,6 +34,22 @@ namespace TraceableAgency
 universe u
 
 variable (F : PrefFamily.{u})
+
+/-- Pure relational replacement by two-sided weak equivalence.  This elementary
+lemma lives with the behavioural primitives so structural relabelling can be
+derived without importing any downstream sufficiency file. -/
+theorem rel_replace_by_equiv
+    {α : Type*} (R : α → α → Prop)
+    (htrans : ∀ x y z, R x y → R y z → R x z)
+    {x x' y y' : α}
+    (hxx' : R x x') (hx'x : R x' x)
+    (hyy' : R y y') (hy'y : R y' y) :
+    (R x y ↔ R x' y') := by
+  constructor
+  · intro hxy
+    exact htrans x' y y' (htrans x' x y hx'x hxy) hyy'
+  · intro hx'y'
+    exact htrans x y' y (htrans x x' y' hxx' hx'y') hy'y
 
 /-!
 ## A1: Weak Order and Local Non-triviality
@@ -127,24 +144,28 @@ Paper (lines 448-463):
      q_i^i ≽_{⨆_k P_k} q_j^j ↔ q_i^0 ≽_{P_i ⊔ P_j} q_j^1
 -/
 
-def A3_BlockComparisonCoherence : Prop :=
-  (∀ {A O : Type u} [Fintype A] [DecidableEq A] [Fintype O] [DecidableEq O]
-     (P : Channel A O) (q q' : Dist A),
-     F.rel P q q' ↔ F.rel (blockChannel P P) (inlDist q) (inrDist q')) ∧
-  (∀ {K : Type u} [Fintype K] [DecidableEq K]
-     (Act : K → Type u) (Out : K → Type u)
-     [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
-     [∀ k, Fintype (Out k)] [∀ k, DecidableEq (Out k)]
-     (P : ∀ k, Channel (Act k) (Out k))
-     (i j : K) (hij : i ≠ j)
-     (qᵢ : Dist (Act i)) (qⱼ : Dist (Act j)),
-     F.rel (blockFamilyChannel Act Out P)
-       (blockEmbedDist Act i qᵢ)
-       (blockEmbedDist Act j qⱼ)
-     ↔
-     F.rel (blockChannel (P i) (P j))
-       (inlDist qᵢ)
-       (inrDist qⱼ))
+structure A3_BlockComparisonCoherence : Prop where
+  duplication :
+    ∀ {A O : Type u} [Fintype A] [DecidableEq A]
+      [Fintype O] [DecidableEq O]
+      (P : Channel A O) (q q' : Dist A),
+      F.rel P q q' ↔
+        F.rel (blockChannel P P) (inlDist q) (inrDist q')
+  finite_block :
+    ∀ {K : Type u} [Fintype K] [DecidableEq K]
+      (Act : K → Type u) (Out : K → Type u)
+      [∀ k, Fintype (Act k)] [∀ k, DecidableEq (Act k)]
+      [∀ k, Fintype (Out k)] [∀ k, DecidableEq (Out k)]
+      (P : ∀ k, Channel (Act k) (Out k))
+      (i j : K) (hij : i ≠ j)
+      (qᵢ : Dist (Act i)) (qⱼ : Dist (Act j)),
+      F.rel (blockFamilyChannel Act Out P)
+          (blockEmbedDist Act i qᵢ)
+          (blockEmbedDist Act j qⱼ)
+        ↔
+      F.rel (blockChannel (P i) (P j))
+          (inlDist qᵢ)
+          (inrDist qⱼ)
 
 /-!
 ## A4: Outcome Post-processing Aversion
@@ -176,11 +197,11 @@ def A5_ActionCoarseningAversion : Prop :=
     F.rel (blockChannel P P_hat) (inlDist q) (inrDist (Channel.actionPushforward q S))
 
 /-!
-## A6: Public-Coin Independence
+## Public-coin channel
 
-Paper (lines 493-499):
-At fixed q∈Δ(A), for channels P,Q,R on A and λ∈(0,1):
-  q^0 ≽_{P ⊔ Q} q^1 ↔ q^0 ≽_{(λP⊕(1-λ)R) ⊔ (λQ⊕(1-λ)R)} q^1.
+Public-coin independence is not an axiom in v6.  The channel constructor is
+kept here because `lem:publiccoin` is derived later from A1, A3, A4, and the
+weak/strict clauses of branchwise continuation monotonicity.
 -/
 
 noncomputable def publicMixChannel {A O_P O_Q : Type u}
@@ -201,19 +222,8 @@ noncomputable def publicMixChannel {A O_P O_Q : Type u}
         rw [(P a).sum_eq_one, (Q a).sum_eq_one]
         ring }
 
-def A6_PublicCoinIndependence : Prop :=
-  ∀ {A O_P O_Q O_R : Type u} [Fintype A] [DecidableEq A]
-    [Fintype O_P] [DecidableEq O_P] [Fintype O_Q] [DecidableEq O_Q]
-    [Fintype O_R] [DecidableEq O_R]
-    (q : Dist A) (P : Channel A O_P) (Q : Channel A O_Q) (R : Channel A O_R)
-    (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1),
-    let mixPR := publicMixChannel t ht0 ht1 P R
-    let mixQR := publicMixChannel t ht0 ht1 Q R
-    F.rel (blockChannel P Q) (inlDist q) (inrDist q) ↔
-    F.rel (blockChannel mixPR mixQR) (inlDist q) (inrDist q)
-
 /-!
-## A7: Branchwise Continuation Monotonicity
+## A6: Branchwise Continuation Monotonicity
 
 Paper (lines 505-520):
 Fix q∈Δ(A) and P₁:A→Δ(O₁). For branches o with m(o)>0, let r_o be the posterior.
@@ -229,10 +239,10 @@ If r_o^0 ≽_{Q^o ⊔ R^o} r_o^1 for all o with m(o)>0, then
 If one branch is strict with positive probability, the aggregate is strict.
 -/
 
-/-- **Strong A7 (auxiliary)**: allows different branch outcome families Y and Z
-    for the two continuation profiles. This is stronger than the paper's A7.
+/-- **Strong A6 (auxiliary)**: allows different branch outcome families Y and Z
+    for the two continuation profiles. This is stronger than the paper's A6.
     Useful as an auxiliary strengthening; not part of TraceAxioms. -/
-def A7Strong_BranchwiseContinuationMonotonicity_Weak : Prop :=
+def A6Strong_BranchwiseContinuationMonotonicity_Weak : Prop :=
   ∀ {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
     (Y Z : O₁ → Type u)
@@ -247,8 +257,8 @@ def A7Strong_BranchwiseContinuationMonotonicity_Weak : Prop :=
     F.rel (blockChannel (seqComposeDep P₁ Y Q) (seqComposeDep P₁ Z R))
       (inlDist q) (inrDist q)
 
-/-- **Strong A7 strict (auxiliary)**: allows different branch outcome families. -/
-def A7Strong_BranchwiseContinuationMonotonicity_Strict : Prop :=
+/-- **Strong A6 strict (auxiliary)**: allows different branch outcome families. -/
+def A6Strong_BranchwiseContinuationMonotonicity_Strict : Prop :=
   ∀ {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
     (Y Z : O₁ → Type u)
@@ -267,15 +277,15 @@ def A7Strong_BranchwiseContinuationMonotonicity_Strict : Prop :=
     F.strictRel (blockChannel (seqComposeDep P₁ Y Q) (seqComposeDep P₁ Z R))
       (inlDist q) (inrDist q)
 
-/-- **Strong A7 combined (auxiliary)**: useful for benchmark proofs. -/
-def A7Strong_BranchwiseContinuationMonotonicity : Prop :=
-  A7Strong_BranchwiseContinuationMonotonicity_Weak F ∧
-  A7Strong_BranchwiseContinuationMonotonicity_Strict F
+/-- **Strong A6 combined (auxiliary)**: useful for benchmark proofs. -/
+def A6Strong_BranchwiseContinuationMonotonicity : Prop :=
+  A6Strong_BranchwiseContinuationMonotonicity_Weak F ∧
+  A6Strong_BranchwiseContinuationMonotonicity_Strict F
 
-/-- **Paper-faithful A7 weak**: Both continuation channels Q and R share the same
+/-- **Paper-faithful A6 weak**: Both continuation channels Q and R share the same
     branch outcome family O₂ : O₁ → Type. This matches the paper exactly:
     "For each such branch, let Q^o, R^o : A → Δ(O₂^o)". -/
-def A7_BranchwiseContinuationMonotonicity_Weak : Prop :=
+def A6_BranchwiseContinuationMonotonicity_Weak : Prop :=
   ∀ {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
     (O₂ : O₁ → Type u)
@@ -289,9 +299,9 @@ def A7_BranchwiseContinuationMonotonicity_Weak : Prop :=
     F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q)
 
-/-- **Paper-faithful A7 strict**: Both continuation channels share the same
+/-- **Paper-faithful A6 strict**: Both continuation channels share the same
     branch outcome family O₂. -/
-def A7_BranchwiseContinuationMonotonicity_Strict : Prop :=
+def A6_BranchwiseContinuationMonotonicity_Strict : Prop :=
   ∀ {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
     (O₂ : O₁ → Type u)
@@ -309,16 +319,16 @@ def A7_BranchwiseContinuationMonotonicity_Strict : Prop :=
     F.strictRel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q)
 
-/-- **Paper-faithful A7**: Branchwise continuation monotonicity with common
+/-- **Paper-faithful A6**: Branchwise continuation monotonicity with common
     branch outcome family O₂. This is the version used in TraceAxioms. -/
-def A7_BranchwiseContinuationMonotonicity : Prop :=
-  A7_BranchwiseContinuationMonotonicity_Weak F ∧
-  A7_BranchwiseContinuationMonotonicity_Strict F
+def A6_BranchwiseContinuationMonotonicity : Prop :=
+  A6_BranchwiseContinuationMonotonicity_Weak F ∧
+  A6_BranchwiseContinuationMonotonicity_Strict F
 
-/-- Strong A7 implies paper-faithful A7 by specializing Y = Z = O₂. -/
-theorem A7_of_A7Strong :
-    A7Strong_BranchwiseContinuationMonotonicity F →
-    A7_BranchwiseContinuationMonotonicity F := by
+/-- Strong A6 implies paper-faithful A6 by specializing Y = Z = O₂. -/
+theorem A6_of_A6Strong :
+    A6Strong_BranchwiseContinuationMonotonicity F →
+    A6_BranchwiseContinuationMonotonicity F := by
   intro ⟨hstrong_weak, hstrong_strict⟩
   constructor
   · intro A O₁ _ _ _ _ _ O₂ _ _ q P₁ Q R h_branch
@@ -327,7 +337,7 @@ theorem A7_of_A7Strong :
     exact hstrong_strict O₂ O₂ q P₁ Q R h_branch h_strict
 
 /-!
-## A8: Independent-Background Separability
+## A7: Independent-Background Separability
 
 Paper (lines 526-538):
 For full-support q₁∈Δ(A₁), q₂∈Δ(A₂):
@@ -344,7 +354,7 @@ The background alternatives may have different outcome alphabets. This follows
 the paper's "any channels" wording for R₂,S₂ and, symmetrically, R₁,S₁.
 -/
 
-def A8_IndependentBackgroundSeparability : Prop :=
+def A7_IndependentBackgroundSeparability : Prop :=
   (∀ {A₁ A₂ O₁ O₂R O₂S : Type u}
      [Fintype A₁] [DecidableEq A₁] [Fintype A₂] [DecidableEq A₂]
      [Fintype O₁] [DecidableEq O₁]
@@ -382,8 +392,7 @@ structure TraceAxioms (F : PrefFamily.{u}) : Prop where
   a3 : A3_BlockComparisonCoherence F
   a4 : A4_OutcomePostprocessingAversion F
   a5 : A5_ActionCoarseningAversion F
-  a6 : A6_PublicCoinIndependence F
-  a7 : A7_BranchwiseContinuationMonotonicity F
-  a8 : A8_IndependentBackgroundSeparability F
+  a6 : A6_BranchwiseContinuationMonotonicity F
+  a7 : A7_IndependentBackgroundSeparability F
 
 end TraceableAgency

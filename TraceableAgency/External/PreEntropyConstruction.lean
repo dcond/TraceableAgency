@@ -199,7 +199,7 @@ block support-face construction rather than from GR/W/block-chain assumptions.
 noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
@@ -242,7 +242,7 @@ link remain visible obligations of the pre-entropy route.
 noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_withNormalizations
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
@@ -272,7 +272,7 @@ representative/gauge/support normalizations.
 noncomputable def InteractionCollapseUniversalScale_of_fullPreEntropyClosure_minimal
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hprod : FiniteProductQuasiAdditivityForFaceScales hfaces)
     (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
