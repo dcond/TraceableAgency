@@ -106,6 +106,179 @@ def SamePosteriorLawExp (q : Dist A) (E E' : FiniteExperimentOn A) : Prop :=
     posteriorLawIntegralExp q E φ = posteriorLawIntegralExp q E' φ
 
 /-!
+## Finite posterior-law extensionality
+
+A finite experiment induces a finitely supported posterior law. Consequently,
+equality against continuous test functions already gives equality against an
+arbitrary test function: interpolate that function continuously on the finite
+union of the two posterior supports.
+
+The construction below is explicit. For a finite set `s` of beliefs, it uses
+the multivariate Lagrange basis built from the squared coordinate distance
+`∑ a, (x a - y a)^2`.
+-/
+
+/-- Squared Euclidean coordinate distance between two finite distributions. -/
+noncomputable def posteriorSquaredDistance
+    (x y : Dist A) : ℝ :=
+  ∑ a : A, (x a - y a) ^ 2
+
+@[simp]
+theorem posteriorSquaredDistance_self
+    (x : Dist A) :
+    posteriorSquaredDistance x x = 0 := by
+  simp [posteriorSquaredDistance]
+
+theorem posteriorSquaredDistance_ne_zero
+    {x y : Dist A} (hxy : x ≠ y) :
+    posteriorSquaredDistance x y ≠ 0 := by
+  intro hzero
+  have hall :
+      ∀ a : A, (x a - y a) ^ 2 = 0 := by
+    intro a
+    have hfun :=
+      (Fintype.sum_eq_zero_iff_of_nonneg
+        (fun a => sq_nonneg (x a - y a))).mp hzero
+    exact congrFun hfun a
+  apply hxy
+  ext a
+  have ha := hall a
+  nlinarith [sq_nonneg (x a - y a)]
+
+theorem continuous_posteriorSquaredDistance_right
+    (z : Dist A) :
+    Continuous (fun y : Dist A => posteriorSquaredDistance y z) := by
+  unfold posteriorSquaredDistance
+  apply continuous_finsetSum
+  intro a _ha
+  exact ((Dist.continuous_prob_apply a).sub continuous_const).pow 2
+
+/-- Lagrange basis function attached to `x` in a finite set of beliefs. -/
+noncomputable def finitePosteriorInterpolationBasis
+    (s : Finset (Dist A)) (x y : Dist A) : ℝ := by
+  classical
+  exact
+    (∏ z ∈ s.erase x, posteriorSquaredDistance y z) /
+      (∏ z ∈ s.erase x, posteriorSquaredDistance x z)
+
+@[simp]
+theorem finitePosteriorInterpolationBasis_self
+    (s : Finset (Dist A)) (x : Dist A) :
+    finitePosteriorInterpolationBasis s x x = 1 := by
+  classical
+  unfold finitePosteriorInterpolationBasis
+  apply div_self
+  rw [Finset.prod_ne_zero_iff]
+  intro z hz
+  exact posteriorSquaredDistance_ne_zero
+    (Finset.ne_of_mem_erase hz).symm
+
+theorem finitePosteriorInterpolationBasis_eq_zero
+    {s : Finset (Dist A)} {x y : Dist A}
+    (hy : y ∈ s) (hyx : y ≠ x) :
+    finitePosteriorInterpolationBasis s x y = 0 := by
+  classical
+  unfold finitePosteriorInterpolationBasis
+  rw [show (∏ z ∈ s.erase x, posteriorSquaredDistance y z) = 0 by
+    exact Finset.prod_eq_zero (Finset.mem_erase.mpr ⟨hyx, hy⟩)
+      (posteriorSquaredDistance_self y)]
+  exact zero_div _
+
+theorem continuous_finitePosteriorInterpolationBasis
+    (s : Finset (Dist A)) (x : Dist A) :
+    Continuous (finitePosteriorInterpolationBasis s x) := by
+  classical
+  unfold finitePosteriorInterpolationBasis
+  apply Continuous.div_const
+  apply continuous_finsetProd
+  intro z _hz
+  exact continuous_posteriorSquaredDistance_right z
+
+/-- Continuous extension of arbitrary prescribed values on a finite set of
+beliefs. -/
+noncomputable def finitePosteriorContinuousInterpolation
+    (s : Finset (Dist A)) (φ : Dist A → ℝ) (y : Dist A) : ℝ := by
+  classical
+  exact
+    ∑ x ∈ s, φ x * finitePosteriorInterpolationBasis s x y
+
+theorem continuous_finitePosteriorContinuousInterpolation
+    (s : Finset (Dist A)) (φ : Dist A → ℝ) :
+    Continuous (finitePosteriorContinuousInterpolation s φ) := by
+  classical
+  unfold finitePosteriorContinuousInterpolation
+  apply continuous_finsetSum
+  intro x _hx
+  exact continuous_const.mul
+    (continuous_finitePosteriorInterpolationBasis s x)
+
+theorem finitePosteriorContinuousInterpolation_eq
+    (s : Finset (Dist A)) (φ : Dist A → ℝ)
+    {y : Dist A} (hy : y ∈ s) :
+    finitePosteriorContinuousInterpolation s φ y = φ y := by
+  classical
+  unfold finitePosteriorContinuousInterpolation
+  rw [Finset.sum_eq_single y]
+  · rw [finitePosteriorInterpolationBasis_self, mul_one]
+  · intro x _hx hxy
+    rw [finitePosteriorInterpolationBasis_eq_zero hy hxy.symm, mul_zero]
+  · exact fun h => (h hy).elim
+
+/-- Finite posterior laws are determined by their integrals against
+continuous tests.
+
+This is proved in Lean by continuous interpolation on the finite union of the
+two posterior supports; it is not an external assumption. -/
+theorem samePosteriorLawExp_all_test_functions
+    (q : Dist A) (E E' : FiniteExperimentOn A)
+    (hsame : SamePosteriorLawExp q E E')
+    (φ : Dist A → ℝ) :
+    posteriorLawIntegralExp q E φ =
+      posteriorLawIntegralExp q E' φ := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : DecidableEq E.OutcomeType := E.outDecEq
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  letI : DecidableEq E'.OutcomeType := E'.outDecEq
+  let sE : Finset (Dist A) :=
+    Finset.univ.image (E.posterior q)
+  let sE' : Finset (Dist A) :=
+    Finset.univ.image (E'.posterior q)
+  let s := sE ∪ sE'
+  let ψ := finitePosteriorContinuousInterpolation s φ
+  have hψ_cont : Continuous ψ :=
+    continuous_finitePosteriorContinuousInterpolation s φ
+  have hsameψ := hsame ψ hψ_cont
+  calc
+    posteriorLawIntegralExp q E φ =
+        posteriorLawIntegralExp q E ψ := by
+      unfold posteriorLawIntegralExp
+      apply Finset.sum_congr rfl
+      intro o _ho
+      congr 1
+      change φ (E.posterior q o) =
+        finitePosteriorContinuousInterpolation s φ (E.posterior q o)
+      exact
+        (finitePosteriorContinuousInterpolation_eq s φ
+          (Finset.mem_union_left sE'
+            (Finset.mem_image.mpr
+              ⟨o, Finset.mem_univ o, rfl⟩))).symm
+    _ = posteriorLawIntegralExp q E' ψ := hsameψ
+    _ = posteriorLawIntegralExp q E' φ := by
+      unfold posteriorLawIntegralExp
+      apply Finset.sum_congr rfl
+      intro o _ho
+      congr 1
+      change finitePosteriorContinuousInterpolation s φ
+          (E'.posterior q o) =
+        φ (E'.posterior q o)
+      exact
+        finitePosteriorContinuousInterpolation_eq s φ
+          (Finset.mem_union_right sE
+            (Finset.mem_image.mpr
+              ⟨o, Finset.mem_univ o, rfl⟩))
+
+/-!
 ## Legacy fixed-outcome-type convergence (for convenience)
 
 When all channels share the same outcome type, we can use the simpler definition.

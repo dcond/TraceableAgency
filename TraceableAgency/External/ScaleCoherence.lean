@@ -39,7 +39,7 @@ The scale coherence theorem derives:
 The proof uses:
 - Branch aggregation (Lemma branchagg)
 - Cocycle identity from tangent-space arguments
-- A8 (independent background separability) for the two-grouping argument
+- A7 (independent background separability) for the two-grouping argument
 - Product revelation and quasi-additivity
 -/
 
@@ -194,7 +194,7 @@ theorem branchCoeffCocycleFor_of_tangentScalar
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle) :
     FiniteBranchCoeffCocycleAssumptionsFor
@@ -408,7 +408,7 @@ noncomputable def faithfulBranchAggregationStructure_of_componentsFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -449,7 +449,7 @@ noncomputable def faithfulBranchFullSupportScale_of_componentsFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -526,7 +526,7 @@ noncomputable def BranchAggregationChainRule_of_faithful_componentsFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary)
@@ -566,7 +566,7 @@ noncomputable def branchChainStructure_of_tangentFormulaAndScaleFactorization
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle)
     (hfactor :
@@ -624,7 +624,7 @@ theorem branchNormalizedValue_seqCompose_of_chain
 ## Faithful Branch API
 
 The old `FiniteBranchAggregationAssumptions` package returns a branch
-aggregation structure from only A7 and a value representation.  The faithful
+aggregation structure from only A6 and a value representation.  The faithful
 route developed in Stages 13--22 carries the extra classical finite-geometry
 interfaces and the explicit boundary/singleton normalizations.  The following
 bundle exposes that route without pretending to reconstruct the old hax-free
@@ -901,7 +901,7 @@ noncomputable def BranchAggregationCocycleNormalizedChainRule_of_componentsFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary)
@@ -1116,6 +1116,11 @@ noncomputable def posteriorValueRepresentation_positiveGaugeTransform
           hV.V q E₂ ≤ hV.V q E₁ :=
         le_of_mul_le_mul_left hge' hpos
       exact (hV.represents_block_comparisons q hq E₁ E₂).mpr hge
+  affine_of_posteriorLawIntegral_mix := by
+    intro A _ _ _ q t ht0 ht1 E_mix E₁ E₂ hmix
+    rw [hV.affine_of_posteriorLawIntegral_mix
+      q t ht0 ht1 E_mix E₁ E₂ hmix]
+    ring
   zero_normalized := by
     intro A _ _ _ q hq
     rw [hV.zero_normalized q hq, mul_zero]
@@ -1357,6 +1362,11 @@ noncomputable def posteriorValueRepresentation_gaugeTransform
           hV.V q E₂ ≤ hV.V q E₁ :=
         le_of_mul_le_mul_left hge' hpos
       exact (hV.represents_block_comparisons q hq E₁ E₂).mpr hge
+  affine_of_posteriorLawIntegral_mix := by
+    intro A _ _ _ q t ht0 ht1 E_mix E₁ E₂ hmix
+    rw [hV.affine_of_posteriorLawIntegral_mix
+      q t ht0 ht1 E_mix E₁ E₂ hmix]
+    ring
   zero_normalized := by
     intro A _ _ _ q hq
     rw [hV.zero_normalized q hq, mul_zero]
@@ -7429,7 +7439,7 @@ The scale coherence theorem states that given branch aggregation coefficients β
 
 1. **Cocycle**: β(q,s) = β(q,r) β(r,s) for nested supports
 2. **Factorization**: β(q,r) = a_q/a_r where a_q := 1/β(q₀, q) for fixed basepoint q₀
-3. **Universal scale**: The two-grouping argument (using A8) shows a_q = a is
+3. **Universal scale**: The two-grouping argument (using A7) shows a_q = a is
    independent of q across all full-support priors on all finite action sets
 
 Paper proof sketch (Lemma scalecoherence, lines 2347-2500):
@@ -7437,7 +7447,7 @@ Paper proof sketch (Lemma scalecoherence, lines 2347-2500):
 2. Product revelation: reveal A first, then B in each branch
 3. Compare with quasi-additivity to get a_{q⊗r}/a_r = Z(q)
 4. Symmetry gives a_q = C·Z(q) for universal C > 0
-5. Two-grouping argument via A8 forces κ = 0, hence Z ≡ 1
+5. Two-grouping argument via A7 forces κ = 0, hence Z ≡ 1
 6. Therefore a_q = C is universal
 -/
 
@@ -7452,7 +7462,7 @@ Paper: Lemmas chain, facescales, scalecoherence (lines 2108-2500).
 **Key mathematical content:**
 - Cocycle: β(q,s) = β(q,r) β(r,s)
 - Factorization: β(q,r) = a_q/a_r
-- Universal scale: a_q = a for all full-support q (via two-grouping + A8)
+- Universal scale: a_q = a for all full-support q (via two-grouping + A7)
 
 This is a data-carrying structure because it provides the scale function.
 -/
