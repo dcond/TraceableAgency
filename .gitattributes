@@ -1,0 +1,3 @@
+# Preserve the reviewed paper snapshot byte-for-byte, including its source
+# whitespace, while keeping Git's whitespace checks active for authored files.
+Paper/empowerment_v6.tex -whitespace

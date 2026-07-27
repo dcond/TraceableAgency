@@ -19,7 +19,9 @@ equals a positive multiple of Shannon entropy.
 
 * `EntropyRegularity` - nonnegativity and point-mass zero for the entropy function.
 * `FaddeevRecursionForm` - the finite grouping recursion for that entropy function.
-* `ClassicalFaddeevTheoremAssumptions` - the classical theorem/application.
+* `FiniteFaddeevStandardHypotheses` - the ordinary, preference-free hypotheses.
+* `ClassicalFaddeevTheoremAssumptions` - the classical theorem, stated only for
+  an abstract entropy functional.
 * `relabel_rel_of_axioms` - finite action/outcome relabeling invariance, now
   proved from A4, A5, A3, and A1 transitivity.
 
@@ -57,6 +59,8 @@ namespace TraceableAgency
 
 universe u
 
+open Filter Topology
+
 /-!
 ## Faddeev Entropy External Assumption
 
@@ -93,7 +97,7 @@ theorem a3_block_equivalence_of_traceAxioms
       [Fintype O] [DecidableEq O]
       (P : Channel A O) (q q' : Dist A),
       F.rel P q q' ↔ F.rel (blockChannel P P) (inlDist q) (inrDist q') := by
-  exact hax.a3.1
+  exact hax.a3.duplication
 
 /--
 **Entropy Regularity**
@@ -154,6 +158,82 @@ structure FaddeevRecursionForm
     (F : PrefFamily.{u}) (hentropy : EntropyReductionRepresentation F) : Prop where
   regularity : EntropyRegularity F hentropy
   grouping_recursion : SatisfiesFiniteFaddeevRecursion hentropy.Hfun
+
+/-!
+## The preference-free classical Faddeev boundary
+
+The next definitions contain no preference family, channel, posterior value,
+or paper-specific representation.  They state the usual finite Faddeev input
+for an abstract entropy functional.  We use the standard "binary interior
+continuity + expansibility" variant: expansibility reads boundary faces in
+lower dimension, while continuity is needed only on the positive binary
+simplex.  This is equivalent to the familiar formulation with continuity on
+closed simplices.
+-/
+
+/-- The binary probability vector `(t, 1-t)`, on a universe-polymorphic
+two-point type. -/
+noncomputable def faddeevBinaryDist
+    (t : Set.Icc (0 : ℝ) 1) : Dist (ULift.{u, 0} Bool) where
+  prob := fun b => if b.down then t.1 else 1 - t.1
+  nonneg := by
+    intro b
+    split
+    · exact t.2.1
+    · linarith [t.2.2]
+  sum_eq_one := by
+    rw [← (Equiv.ulift (α := Bool)).symm.sum_comp
+      (fun b : ULift.{u, 0} Bool => if b.down then t.1 else 1 - t.1)]
+    simp [Fintype.sum_bool, Equiv.ulift]
+
+/-- Restrict the binary path to the positive (full-support) simplex. -/
+noncomputable def faddeevBinaryDistInterior
+    (t : Set.Ioo (0 : ℝ) 1) : Dist (ULift.{u, 0} Bool) :=
+  faddeevBinaryDist ⟨t.1, le_of_lt t.2.1, le_of_lt t.2.2⟩
+
+theorem faddeevBinaryDistInterior_fullSupport
+    (t : Set.Ioo (0 : ℝ) 1) :
+    (faddeevBinaryDistInterior t).FullSupport := by
+  intro b
+  rcases b with ⟨b⟩
+  cases b <;> simp [faddeevBinaryDistInterior, faddeevBinaryDist, t.2.1, t.2.2]
+
+/-- Standard finite Faddeev hypotheses for an abstract entropy functional.
+
+`support_restriction` is expansibility in support-face form: deleting all
+zero-probability labels leaves the value unchanged.  Together with
+`fullSupport_relabel`, it is exactly invariance under finite bijections and
+adjoining/deleting zero-probability states. -/
+structure FiniteFaddeevStandardHypotheses
+    (Hfun :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+        Dist A → ℝ) : Prop where
+  nonnegative :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A),
+      0 ≤ Hfun q
+  pointMass_zero :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (a : A),
+      Hfun (Dist.pure a) = 0
+  fullSupport_relabel :
+    ∀ {A B : Type u}
+      [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype B] [DecidableEq B] [Nonempty B]
+      (e : A ≃ B) (q : Dist A),
+      q.FullSupport →
+      Hfun (Relabeling.relabelDist e q) = Hfun q
+  support_restriction :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A),
+      letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      Hfun q = Hfun q.restrictToSupport
+  binary_continuous :
+    Continuous
+      (fun t : Set.Ioo (0 : ℝ) 1 =>
+        Hfun (faddeevBinaryDistInterior t))
+  strong_additivity :
+    SatisfiesFiniteFaddeevRecursion Hfun
 
 /--
 **Coarse Block-Reveal Channel**
@@ -864,21 +944,23 @@ theorem faddeevRecursionForm_of_coarseReveal_parts
 /--
 **Classical Faddeev Theorem Assumption**
 
-Classical/external theorem application: a regular entropy candidate satisfying
-the finite grouping recursion is a nonnegative multiple of Shannon entropy.
+Classical/external theorem application, with an entirely preference-free
+boundary: an abstract finite entropy functional satisfying the standard
+Faddeev hypotheses is a nonnegative multiple of Shannon entropy.
 
 This bridge intentionally returns only `0 ≤ alpha`; strict positivity is split
 out because the paper obtains it from local nontriviality/A1.
 -/
 structure ClassicalFaddeevTheoremAssumptions.{v} where
-  of_recursion :
-    ∀ (F : PrefFamily.{v})
-      {hentropy : EntropyReductionRepresentation F},
-      FaddeevRecursionForm F hentropy →
+  of_standard_hypotheses :
+    ∀ (Hfun :
+        ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A],
+          Dist A → ℝ),
+      FiniteFaddeevStandardHypotheses Hfun →
       ∃ alpha : ℝ, 0 ≤ alpha ∧
         ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
           (q : Dist A),
-          hentropy.Hfun q = alpha * H(q)
+          Hfun q = alpha * H(q)
 
 /--
 **Distribution Relabeling**
@@ -1203,43 +1285,43 @@ theorem pairwise_relabel_replacement_from_weak_equiv
   have hleft_dup :
       F.rel P q r ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) :=
-    hax.a3.1 P q r
+    hax.a3.duplication P q r
   have hright_dup :
       F.rel P' q' r' ↔
         F.rel (blockChannel P' P') (inlDist q') (inrDist r') :=
-    hax.a3.1 P' q' r'
+    hax.a3.duplication P' q' r'
   have hcommon_02 :
       F.rel commonP x y ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) := by
     simpa [commonP, x, y, k0, k2, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k2) h02_ne
         (qᵢ := q) (qⱼ := r))
   have hcommon_01 : F.rel commonP x x' := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k1) h01_ne
         (qᵢ := q) (qⱼ := q')).mpr hq_to_new
     simpa [commonP, x, x', k0, k1, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_10 : F.rel commonP x' x := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k0) h10_ne
         (qᵢ := q') (qⱼ := q)).mpr hq_to_old
     simpa [commonP, x, x', k0, k1, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_23 : F.rel commonP y y' := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k2) (j := k3) h23_ne
         (qᵢ := r) (qⱼ := r')).mpr hr_to_new
     simpa [commonP, y, y', k2, k3, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using h
   have hcommon_32 : F.rel commonP y' y := by
     have h :=
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k3) (j := k2) h32_ne
         (qᵢ := r') (qⱼ := r)).mpr hr_to_old
     simpa [commonP, y, y', k2, k3, Act, Out, C, relabelReplacementAct,
@@ -1252,7 +1334,7 @@ theorem pairwise_relabel_replacement_from_weak_equiv
         F.rel (blockChannel P' P') (inlDist q') (inrDist r') := by
     simpa [commonP, x', y', k1, k3, Act, Out, C, relabelReplacementAct,
       relabelReplacementOut, relabelReplacementChannel] using
-      (hax.a3.2 (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := RelabelReplacementBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k3) h13_ne
         (qᵢ := q') (qⱼ := r'))
   exact hleft_dup.trans
@@ -2035,6 +2117,622 @@ theorem alpha_strict_pos_of_positive_Hfun_witness
   rw [hH_bool] at hHfun_pos
   nlinarith
 
+/-!
+## Internal verification of the standard Faddeev hypotheses
+
+The erasure-calibrator argument below is the formal counterpart of the binary
+continuity paragraph in the paper.  It is deliberately downstream of the
+preference and entropy-reduction development: none of it is part of the
+classical Faddeev assumption.
+-/
+
+/-- A finite full-support prior whose entropy value is a prescribed natural
+multiple of a fixed binary entropy value.  The carrier is allowed to vary with
+the exponent, avoiding any hidden identification of differently parenthesised
+finite products. -/
+structure FiniteEntropyPowerWitness
+    (Hfun :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+        Dist A → ℝ)
+    (baseValue : ℝ) (n : ℕ) where
+  Carrier : Type u
+  carrierFintype : Fintype Carrier
+  carrierDecidableEq : DecidableEq Carrier
+  carrierNonempty : Nonempty Carrier
+  prior : @Dist Carrier carrierFintype
+  prior_fullSupport : prior.FullSupport
+  entropy_eq : @Hfun Carrier carrierFintype carrierDecidableEq carrierNonempty prior =
+    (n : ℝ) * baseValue
+
+/-- Iterating the strong-additivity equation constructs the `n`-fold binary
+calibrator and proves its entropy is exactly `n` times the binary value. -/
+noncomputable def finiteEntropyPowerWitness
+    {F : PrefFamily.{u}}
+    (hcross : CrossPriorBlockRepresentation F)
+    (hrec : FaddeevRecursionForm F hcross.entropy_reduction)
+    (base : Dist (ULift.{u, 0} Bool))
+    (hbase : base.FullSupport) :
+    ∀ n : ℕ,
+      FiniteEntropyPowerWitness hcross.entropy_reduction.Hfun
+        (hcross.entropy_reduction.Hfun base) n
+  | 0 =>
+      { Carrier := PUnit.{u + 1}
+        carrierFintype := inferInstance
+        carrierDecidableEq := inferInstance
+        carrierNonempty := inferInstance
+        prior := Dist.pure PUnit.unit
+        prior_fullSupport := by
+          intro x
+          simpa using Dist.pure_apply_self x
+        entropy_eq := by
+          rw [hrec.regularity.H_singleton]
+          norm_num }
+  | n + 1 => by
+      let prev := finiteEntropyPowerWitness hcross hrec base hbase n
+      letI : Fintype prev.Carrier := prev.carrierFintype
+      letI : DecidableEq prev.Carrier := prev.carrierDecidableEq
+      letI : Nonempty prev.Carrier := prev.carrierNonempty
+      let Act : ULift.{u, 0} Bool → Type u := fun _ => prev.Carrier
+      letI : ∀ b, Fintype (Act b) := fun _ => inferInstance
+      letI : ∀ b, DecidableEq (Act b) := fun _ => inferInstance
+      letI : ∀ b, Nonempty (Act b) := fun _ => inferInstance
+      letI : Nonempty ((b : ULift.{u, 0} Bool) × Act b) :=
+        ⟨⟨Classical.arbitrary (ULift.{u, 0} Bool),
+          Classical.arbitrary prev.Carrier⟩⟩
+      let q : ∀ b, Dist (Act b) := fun _ => prev.prior
+      let w := sigmaDist base q
+      have hw : w.FullSupport :=
+        sigmaDist_fullSupport base q hbase (fun _ => prev.prior_fullSupport)
+      refine
+        { Carrier := (b : ULift.{u, 0} Bool) × Act b
+          carrierFintype := inferInstance
+          carrierDecidableEq := inferInstance
+          carrierNonempty := inferInstance
+          prior := w
+          prior_fullSupport := hw
+          entropy_eq := ?_ }
+      have hadd := hrec.grouping_recursion Act base q
+      change hcross.entropy_reduction.Hfun w =
+        ((n + 1 : ℕ) : ℝ) * hcross.entropy_reduction.Hfun base
+      change hcross.entropy_reduction.Hfun (sigmaDist base q) =
+        ((n + 1 : ℕ) : ℝ) * hcross.entropy_reduction.Hfun base
+      have hsum :
+          (∑ b, base b * hcross.entropy_reduction.Hfun (q b)) =
+            (n : ℝ) * hcross.entropy_reduction.Hfun base := by
+        simp only [q, prev.entropy_eq]
+        rw [← Finset.sum_mul, base.sum_eq_one, one_mul]
+      calc
+        hcross.entropy_reduction.Hfun (sigmaDist base q) =
+            hcross.entropy_reduction.Hfun base +
+              ∑ b, base b * hcross.entropy_reduction.Hfun (q b) := hadd
+        _ = hcross.entropy_reduction.Hfun base +
+              (n : ℝ) * hcross.entropy_reduction.Hfun base := by rw [hsum]
+        _ = ((n + 1 : ℕ) : ℝ) *
+              hcross.entropy_reduction.Hfun base := by
+          push_cast
+          ring
+
+/-- A fixed experiment, at a fixed full-support prior, whose normalized value
+is the requested nonnegative real number. -/
+structure FiniteEntropyErasureCalibrator
+    {F : PrefFamily.{u}} (hcross : CrossPriorBlockRepresentation F)
+    (c : ℝ) where
+  Carrier : Type u
+  carrierFintype : Fintype Carrier
+  carrierDecidableEq : DecidableEq Carrier
+  carrierNonempty : Nonempty Carrier
+  Outcome : Type u
+  outcomeFintype : Fintype Outcome
+  outcomeDecidableEq : DecidableEq Outcome
+  prior : @Dist Carrier carrierFintype
+  prior_fullSupport : prior.FullSupport
+  channel : @Channel Carrier Outcome outcomeFintype
+  value_eq :
+    @normalizedValue F hcross.entropy_reduction.scale_coherence Carrier Outcome
+        carrierFintype carrierDecidableEq carrierNonempty outcomeFintype
+        outcomeDecidableEq prior channel = c
+
+/-- Every `c ≥ 0` has a prior-independent erasure calibrator. -/
+noncomputable def finiteEntropyErasureCalibrator
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hrec : FaddeevRecursionForm F hcross.entropy_reduction)
+    (c : ℝ) (hc : 0 ≤ c) :
+    FiniteEntropyErasureCalibrator hcross c := by
+  let base : Dist (ULift.{u, 0} Bool) := Dist.uniform
+  have hbase : base.FullSupport := Dist.uniform_fullSupport
+  have hu :
+      0 < hcross.entropy_reduction.Hfun base :=
+    uniform_ulift_bool_Hfun_pos_of_A1 F hax hcross hrec
+  by_cases hc0 : c = 0
+  · subst c
+    refine
+      { Carrier := ULift.{u, 0} Bool
+        carrierFintype := inferInstance
+        carrierDecidableEq := inferInstance
+        carrierNonempty := inferInstance
+        Outcome := PUnit.{u + 1}
+        outcomeFintype := inferInstance
+        outcomeDecidableEq := inferInstance
+        prior := base
+        prior_fullSupport := hbase
+        channel := Channel.uninformativeChannelU _
+        value_eq := ?_ }
+    exact normalizedValue_uninformativeChannel_eq_zero
+      hcross.entropy_reduction hrec.regularity base hbase
+  · have hcpos : 0 < c := lt_of_le_of_ne hc (Ne.symm hc0)
+    let n : ℕ :=
+      Classical.choose
+        (exists_nat_gt (c / hcross.entropy_reduction.Hfun base))
+    have hn :
+        c / hcross.entropy_reduction.Hfun base < (n : ℝ) :=
+      Classical.choose_spec
+        (exists_nat_gt (c / hcross.entropy_reduction.Hfun base))
+    have hnpos : 0 < n := by
+      have hnreal : (0 : ℝ) < (n : ℝ) :=
+        lt_of_le_of_lt (div_nonneg hc (le_of_lt hu)) hn
+      exact_mod_cast hnreal
+    let power := finiteEntropyPowerWitness hcross hrec base hbase n
+    letI : Fintype power.Carrier := power.carrierFintype
+    letI : DecidableEq power.Carrier := power.carrierDecidableEq
+    letI : Nonempty power.Carrier := power.carrierNonempty
+    have hpower_pos :
+        0 < hcross.entropy_reduction.Hfun power.prior := by
+      rw [power.entropy_eq]
+      exact mul_pos (by exact_mod_cast hnpos) hu
+    have hc_lt_power :
+        c < hcross.entropy_reduction.Hfun power.prior := by
+      rw [power.entropy_eq]
+      have := (div_lt_iff₀ hu).mp hn
+      simpa [mul_comm] using this
+    let lam := c / hcross.entropy_reduction.Hfun power.prior
+    have hlam0 : 0 < lam := div_pos hcpos hpower_pos
+    have hlam1 : lam < 1 := (div_lt_one hpower_pos).mpr hc_lt_power
+    let P :=
+      publicMixChannel lam hlam0 hlam1
+        (Channel.idChannel : Channel power.Carrier power.Carrier)
+        (Channel.uninformativeChannelU power.Carrier)
+    refine
+      { Carrier := power.Carrier
+        carrierFintype := inferInstance
+        carrierDecidableEq := inferInstance
+        carrierNonempty := inferInstance
+        Outcome := power.Carrier ⊕ PUnit.{u + 1}
+        outcomeFintype := inferInstance
+        outcomeDecidableEq := inferInstance
+        prior := power.prior
+        prior_fullSupport := power.prior_fullSupport
+        channel := P
+        value_eq := ?_ }
+    have hred :=
+      hcross.entropy_reduction.value_entropy_reduction
+        power.prior power.prior_fullSupport P
+    have hint :
+        posteriorLawIntegral power.prior P hcross.entropy_reduction.Hfun =
+          lam * 0 +
+            (1 - lam) * hcross.entropy_reduction.Hfun power.prior := by
+      rw [show P = publicMixChannel lam hlam0 hlam1
+          (Channel.idChannel : Channel power.Carrier power.Carrier)
+          (Channel.uninformativeChannelU power.Carrier) from rfl]
+      rw [posteriorLawIntegral_publicMixChannel,
+        posteriorLawIntegral_idChannel_Hfun_eq_zero hrec.regularity,
+        posteriorLawIntegral_uninformativeChannelU_Hfun_eq_self hrec.regularity]
+    rw [hint] at hred
+    change normalizedValue hcross.entropy_reduction.scale_coherence power.prior P = c
+    unfold normalizedValue
+    rw [hred]
+    dsimp [lam]
+    field_simp [ne_of_gt hpower_pos]
+    ring
+
+/-- Coordinate convergence of the binary probability path. -/
+theorem faddeevBinaryDistInterior_converges
+    (tseq : ℕ → Set.Ioo (0 : ℝ) 1)
+    (t : Set.Ioo (0 : ℝ) 1)
+    (ht : Tendsto tseq atTop (𝓝 t)) :
+    DistConverges
+      (fun n => faddeevBinaryDistInterior (tseq n))
+      (faddeevBinaryDistInterior t) := by
+  have hval :
+      Tendsto (fun n => (tseq n : ℝ)) atTop (𝓝 (t : ℝ)) :=
+    (continuous_subtype_val.tendsto t).comp ht
+  intro b
+  rcases b with ⟨b⟩
+  cases b
+  · simpa [faddeevBinaryDistInterior, faddeevBinaryDist] using
+      (tendsto_const_nhds.sub hval)
+  · simpa [faddeevBinaryDistInterior, faddeevBinaryDist] using hval
+
+/-- Convergence after embedding the varying binary prior in the left side of
+a fixed two-block comparison. -/
+theorem inl_faddeevBinaryDistInterior_converges
+    {B : Type u} [Fintype B]
+    (tseq : ℕ → Set.Ioo (0 : ℝ) 1)
+    (t : Set.Ioo (0 : ℝ) 1)
+    (ht : Tendsto tseq atTop (𝓝 t)) :
+    DistConverges
+      (fun n => inlDist (B := B) (faddeevBinaryDistInterior (tseq n)))
+      (inlDist (B := B) (faddeevBinaryDistInterior t)) := by
+  have hbin := faddeevBinaryDistInterior_converges tseq t ht
+  intro x
+  cases x with
+  | inl b => exact hbin b
+  | inr b => simp [inlDist]
+
+/-- Binary continuity derived from primitive A2 by the erasure-calibrator
+argument.  Every real threshold is represented by one fixed experiment;
+primitive closed-graph continuity therefore makes every sublevel and
+superlevel set of the binary entropy closed. -/
+theorem faddeevBinaryEntropy_continuous_of_axioms
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hrec : FaddeevRecursionForm F hcross.entropy_reduction) :
+    Continuous
+      (fun t : Set.Ioo (0 : ℝ) 1 =>
+        hcross.entropy_reduction.Hfun (faddeevBinaryDistInterior t)) := by
+  let hbin := fun t : Set.Ioo (0 : ℝ) 1 =>
+    hcross.entropy_reduction.Hfun (faddeevBinaryDistInterior t)
+  rw [continuous_iff_lower_upperSemicontinuous]
+  constructor
+  · rw [lowerSemicontinuous_iff_isClosed_preimage]
+    intro c
+    by_cases hc : 0 ≤ c
+    · let cal := finiteEntropyErasureCalibrator hax hcross hrec c hc
+      letI : Fintype cal.Carrier := cal.carrierFintype
+      letI : DecidableEq cal.Carrier := cal.carrierDecidableEq
+      letI : Nonempty cal.Carrier := cal.carrierNonempty
+      letI : Fintype cal.Outcome := cal.outcomeFintype
+      letI : DecidableEq cal.Outcome := cal.outcomeDecidableEq
+      rw [← isSeqClosed_iff_isClosed]
+      intro tseq t htmem htt
+      have hrel :
+          ∀ n,
+            F.rel
+              (blockChannel
+                (Channel.idChannel :
+                  Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+                cal.channel)
+              (inrDist cal.prior)
+              (inlDist (faddeevBinaryDistInterior (tseq n))) := by
+        intro n
+        apply
+          (cross_prior_reverse_in_same_block
+            finiteRelabelingInvariance_of_axioms F hax hcross
+            (faddeevBinaryDistInterior (tseq n)) cal.prior
+            (faddeevBinaryDistInterior_fullSupport (tseq n))
+            cal.prior_fullSupport Channel.idChannel cal.channel).mpr
+        rw [cal.value_eq,
+          normalizedValue_idChannel_eq_Hfun
+            hcross.entropy_reduction hrec.regularity
+            (faddeevBinaryDistInterior (tseq n))
+            (faddeevBinaryDistInterior_fullSupport (tseq n))]
+        exact htmem n
+      have hclosed :=
+        hax.a2
+          (fun _ =>
+            blockChannel
+              (Channel.idChannel :
+                Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+              cal.channel)
+          (blockChannel
+            (Channel.idChannel :
+              Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+            cal.channel)
+          (fun _ => inrDist cal.prior)
+          (fun n => inlDist (faddeevBinaryDistInterior (tseq n)))
+          (inrDist cal.prior)
+          (inlDist (faddeevBinaryDistInterior t))
+          (by intro a o; exact tendsto_const_nhds)
+          (by intro x; exact tendsto_const_nhds)
+          (inl_faddeevBinaryDistInterior_converges tseq t htt)
+          hrel
+      have hge :=
+        (cross_prior_reverse_in_same_block
+          finiteRelabelingInvariance_of_axioms F hax hcross
+          (faddeevBinaryDistInterior t) cal.prior
+          (faddeevBinaryDistInterior_fullSupport t)
+          cal.prior_fullSupport Channel.idChannel cal.channel).mp hclosed
+      change
+        normalizedValue hcross.entropy_reduction.scale_coherence
+            (faddeevBinaryDistInterior t) Channel.idChannel ≤
+          normalizedValue hcross.entropy_reduction.scale_coherence
+            cal.prior cal.channel at hge
+      change hbin t ≤ c
+      calc
+        hbin t =
+            normalizedValue hcross.entropy_reduction.scale_coherence
+              (faddeevBinaryDistInterior t) Channel.idChannel :=
+          (normalizedValue_idChannel_eq_Hfun
+            hcross.entropy_reduction hrec.regularity
+            (faddeevBinaryDistInterior t)
+            (faddeevBinaryDistInterior_fullSupport t)).symm
+        _ ≤ normalizedValue hcross.entropy_reduction.scale_coherence
+              cal.prior cal.channel := hge
+        _ = c := cal.value_eq
+    · have hcneg : c < 0 := lt_of_not_ge hc
+      have hempty : hbin ⁻¹' Set.Iic c = ∅ := by
+        ext t
+        simp only [Set.mem_preimage, Set.mem_Iic, Set.mem_empty_iff_false, iff_false]
+        exact not_le_of_gt (lt_of_lt_of_le hcneg (hrec.regularity.H_nonneg _))
+      rw [hempty]
+      exact isClosed_empty
+  · rw [upperSemicontinuous_iff_isClosed_preimage]
+    intro c
+    by_cases hc : 0 ≤ c
+    · let cal := finiteEntropyErasureCalibrator hax hcross hrec c hc
+      letI : Fintype cal.Carrier := cal.carrierFintype
+      letI : DecidableEq cal.Carrier := cal.carrierDecidableEq
+      letI : Nonempty cal.Carrier := cal.carrierNonempty
+      letI : Fintype cal.Outcome := cal.outcomeFintype
+      letI : DecidableEq cal.Outcome := cal.outcomeDecidableEq
+      rw [← isSeqClosed_iff_isClosed]
+      intro tseq t htmem htt
+      have hrel :
+          ∀ n,
+            F.rel
+              (blockChannel
+                (Channel.idChannel :
+                  Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+                cal.channel)
+              (inlDist (faddeevBinaryDistInterior (tseq n)))
+              (inrDist cal.prior) := by
+        intro n
+        apply
+          (hcross.cross_prior_block_rep
+            (faddeevBinaryDistInterior (tseq n)) cal.prior
+            (faddeevBinaryDistInterior_fullSupport (tseq n))
+            cal.prior_fullSupport Channel.idChannel cal.channel).mpr
+        change
+          normalizedValue hcross.entropy_reduction.scale_coherence
+              (faddeevBinaryDistInterior (tseq n)) Channel.idChannel ≥
+            normalizedValue hcross.entropy_reduction.scale_coherence
+              cal.prior cal.channel
+        rw [normalizedValue_idChannel_eq_Hfun
+          hcross.entropy_reduction hrec.regularity
+          (faddeevBinaryDistInterior (tseq n))
+          (faddeevBinaryDistInterior_fullSupport (tseq n)),
+          cal.value_eq]
+        exact htmem n
+      have hclosed :=
+        hax.a2
+          (fun _ =>
+            blockChannel
+              (Channel.idChannel :
+                Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+              cal.channel)
+          (blockChannel
+            (Channel.idChannel :
+              Channel (ULift.{u, 0} Bool) (ULift.{u, 0} Bool))
+            cal.channel)
+          (fun n => inlDist (faddeevBinaryDistInterior (tseq n)))
+          (fun _ => inrDist cal.prior)
+          (inlDist (faddeevBinaryDistInterior t))
+          (inrDist cal.prior)
+          (by intro a o; exact tendsto_const_nhds)
+          (inl_faddeevBinaryDistInterior_converges tseq t htt)
+          (by intro x; exact tendsto_const_nhds)
+          hrel
+      have hge :=
+        (hcross.cross_prior_block_rep
+          (faddeevBinaryDistInterior t) cal.prior
+          (faddeevBinaryDistInterior_fullSupport t)
+          cal.prior_fullSupport Channel.idChannel cal.channel).mp hclosed
+      change
+        normalizedValue hcross.entropy_reduction.scale_coherence
+            (faddeevBinaryDistInterior t) Channel.idChannel ≥
+          normalizedValue hcross.entropy_reduction.scale_coherence
+            cal.prior cal.channel at hge
+      change c ≤ hbin t
+      calc
+        c = normalizedValue hcross.entropy_reduction.scale_coherence
+              cal.prior cal.channel := cal.value_eq.symm
+        _ ≤ normalizedValue hcross.entropy_reduction.scale_coherence
+              (faddeevBinaryDistInterior t) Channel.idChannel := hge
+        _ = hbin t :=
+          normalizedValue_idChannel_eq_Hfun
+            hcross.entropy_reduction hrec.regularity
+            (faddeevBinaryDistInterior t)
+            (faddeevBinaryDistInterior_fullSupport t)
+    · have hcneg : c < 0 := lt_of_not_ge hc
+      have hall : hbin ⁻¹' Set.Ici c = Set.univ := by
+        ext t
+        simp only [Set.mem_preimage, Set.mem_Ici, Set.mem_univ, iff_true]
+        exact le_trans (le_of_lt hcneg) (hrec.regularity.H_nonneg _)
+      rw [hall]
+      exact isClosed_univ
+
+/-- Normalized values are invariant under a bijective action relabeling.  This
+is derived from A5 in both directions and the cross-prior value bridge. -/
+theorem normalizedValue_actionRelabel_of_crossPrior
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A B O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B]
+    [Fintype O] [DecidableEq O]
+    (eA : A ≃ B) (q : Dist A) (hq : q.FullSupport) (P : Channel A O) :
+    haveI : Nonempty B := ⟨eA (Classical.arbitrary A)⟩
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q)
+        (Relabeling.relabelChannel eA (Equiv.refl O) P) =
+      normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+  haveI : Nonempty B := ⟨eA (Classical.arbitrary A)⟩
+  set P' : Channel B O :=
+    Relabeling.relabelChannel eA (Equiv.refl O) P with hP'
+  have hqB : (Relabeling.relabelDist eA q).FullSupport :=
+    Relabeling.relabelDist_fullSupport eA q hq
+  have hq_to_new :
+      F.rel (blockChannel P P') (inlDist q)
+        (inrDist (Relabeling.relabelDist eA q)) := by
+    have h := hax.a5 P q (Relabeling.actionEquivKernel eA) P'
+      (Relabeling.relabelChannel_isBayesPushforwardCompletion eA P q)
+    simpa [P', Relabeling.actionPushforward_equiv] using h
+  have hq_to_old :
+      F.rel (blockChannel P' P)
+        (inlDist (Relabeling.relabelDist eA q)) (inrDist q) := by
+    have h :=
+      hax.a5 P' (Relabeling.relabelDist eA q)
+        (Relabeling.actionEquivKernel eA.symm) P
+        (Relabeling.relabelChannel_symm_isBayesPushforwardCompletion eA P q)
+    simpa [P', Relabeling.actionPushforward_equiv,
+      Relabeling.relabelDist_symm] using h
+  have hge₁ :=
+    (hcross.cross_prior_block_rep q (Relabeling.relabelDist eA q)
+      hq hqB P P').mp hq_to_new
+  have hge₂ :=
+    (hcross.cross_prior_block_rep (Relabeling.relabelDist eA q) q
+      hqB hq P' P).mp hq_to_old
+  have e₁ :
+      normalizedValue hcross.entropy_reduction.scale_coherence q P ≥
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          (Relabeling.relabelDist eA q) P' := by
+    simpa [normalizedValue] using hge₁
+  have e₂ :
+      normalizedValue hcross.entropy_reduction.scale_coherence
+          (Relabeling.relabelDist eA q) P' ≥
+        normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+    simpa [normalizedValue] using hge₂
+  exact le_antisymm e₁ e₂
+
+/-- Merely relabeling outcomes preserves normalized value, because the two
+channels induce the same posterior law. -/
+theorem normalizedValue_outcomeRelabel
+    {F : PrefFamily.{u}}
+    (hcross : CrossPriorBlockRepresentation F)
+    {A O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (eO : O ≃ Y) (q : Dist A) (P : Channel A O) :
+    normalizedValue hcross.entropy_reduction.scale_coherence q
+        (Relabeling.relabelChannel (Equiv.refl A) eO P) =
+      normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+  have hchan :
+      Channel.postprocess P (posteriorLawEquivKernel eO) =
+        Relabeling.relabelChannel (Equiv.refl A) eO P := by
+    ext a y
+    change (∑ o : O, P a o * Dist.pure (eO o) y) = P a (eO.symm y)
+    rw [Fintype.sum_eq_single (eO.symm y)]
+    · simp
+    · intro o hone
+      have hne : y ≠ eO o := by
+        intro hy
+        apply hone
+        exact eO.injective (by simpa using hy.symm)
+      simp [Dist.pure_apply_ne _ _ hne]
+  have hsame :=
+    samePosteriorLawExp_of_bijective_postprocess q P eO
+  rw [hchan] at hsame
+  let hVrep :=
+    hcross.entropy_reduction.scale_coherence.branch_agg.value_rep
+  have hV := hVrep.respects_same_posterior_law q _ _ hsame
+  unfold normalizedValue
+  change
+    hVrep.V q
+          (experimentOfChannel
+            (Relabeling.relabelChannel (Equiv.refl A) eO P)) /
+        hcross.entropy_reduction.scale_coherence.scale q =
+      hVrep.V q (experimentOfChannel P) /
+        hcross.entropy_reduction.scale_coherence.scale q
+  exact congrArg
+    (fun x => x / hcross.entropy_reduction.scale_coherence.scale q) hV.symm
+
+/-- Simultaneous action/outcome relabeling preserves normalized value. -/
+theorem normalizedValue_relabel_of_crossPrior
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (eA : A ≃ B) (eO : O ≃ Y)
+    (q : Dist A) (hq : q.FullSupport) (P : Channel A O) :
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q)
+        (Relabeling.relabelChannel eA eO P) =
+      normalizedValue hcross.entropy_reduction.scale_coherence q P := by
+  let P₁ : Channel B O :=
+    Relabeling.relabelChannel eA (Equiv.refl O) P
+  calc
+    normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q)
+        (Relabeling.relabelChannel eA eO P) =
+      normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q)
+        (Relabeling.relabelChannel (Equiv.refl B) eO P₁) := by
+          rw [Relabeling.relabelChannel_action_then_outcome]
+    _ = normalizedValue hcross.entropy_reduction.scale_coherence
+        (Relabeling.relabelDist eA q) P₁ :=
+      normalizedValue_outcomeRelabel hcross eO _ P₁
+    _ = normalizedValue hcross.entropy_reduction.scale_coherence q P :=
+      normalizedValue_actionRelabel_of_crossPrior F hax hcross eA q hq P
+
+/-- Full-support relabeling invariance of the entropy candidate, derived from
+the ordinal action-relabeling axioms and the identity-channel characterization. -/
+theorem Hfun_fullSupport_relabel_of_crossPrior
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hreg : EntropyRegularity F hcross.entropy_reduction)
+    {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (e : A ≃ B) (q : Dist A) (hq : q.FullSupport) :
+    hcross.entropy_reduction.Hfun (Relabeling.relabelDist e q) =
+      hcross.entropy_reduction.Hfun q := by
+  have hqB : (Relabeling.relabelDist e q).FullSupport :=
+    Relabeling.relabelDist_fullSupport e q hq
+  calc
+    hcross.entropy_reduction.Hfun (Relabeling.relabelDist e q) =
+        normalizedValue hcross.entropy_reduction.scale_coherence
+          (Relabeling.relabelDist e q)
+          (Channel.idChannel : Channel B B) :=
+      Hfun_eq_normalizedValue_id_fullSupport
+        hcross.entropy_reduction hreg _ hqB
+    _ = normalizedValue hcross.entropy_reduction.scale_coherence q
+          (Channel.idChannel : Channel A A) := by
+      have h :=
+        normalizedValue_relabel_of_crossPrior
+          F hax hcross e e q hq
+          (Channel.idChannel : Channel A A)
+      have hid :
+          Relabeling.relabelChannel e e
+              (Channel.idChannel : Channel A A) =
+            (Channel.idChannel : Channel B B) := by
+        ext b o
+        simp only [Relabeling.relabelChannel, Channel.idChannel,
+          Relabeling.relabelDist_apply]
+        rw [Dist.pure_apply, Dist.pure_apply]
+        simp
+      rw [hid] at h
+      exact h
+    _ = hcross.entropy_reduction.Hfun q :=
+      normalizedValue_idChannel_eq_Hfun
+        hcross.entropy_reduction hreg q hq
+
+/-- Assemble exactly the preference-free standard Faddeev hypotheses from the
+internally proved project facts. -/
+theorem finiteFaddeevStandardHypotheses_of_axioms
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (hcross : CrossPriorBlockRepresentation F)
+    (hrec : FaddeevRecursionForm F hcross.entropy_reduction)
+    (hsupport :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+        (q : Dist A),
+        letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+        hcross.entropy_reduction.Hfun q =
+          hcross.entropy_reduction.Hfun q.restrictToSupport) :
+    FiniteFaddeevStandardHypotheses hcross.entropy_reduction.Hfun where
+  nonnegative := hrec.regularity.H_nonneg
+  pointMass_zero := hrec.regularity.H_singleton
+  fullSupport_relabel := by
+    intro A B _ _ _ _ _ _ e q hq
+    exact Hfun_fullSupport_relabel_of_crossPrior hax hcross hrec.regularity e q hq
+  support_restriction := hsupport
+  binary_continuous :=
+    faddeevBinaryEntropy_continuous_of_axioms hax hcross hrec
+  strong_additivity := hrec.grouping_recursion
+
 /--
 **Faddeev Entropy Form from Split Components**
 
@@ -2063,7 +2761,13 @@ noncomputable def FaddeevEntropyForm_of_parts
   let hrecForm : FaddeevRecursionForm F hcross.entropy_reduction :=
     faddeevRecursionForm_of_coarseReveal_parts
       hblock hred hnorm hhfun hrestricted F hax hcross hregular
-  let hex := hfad.of_recursion F hrecForm
+  let hstandard :
+      FiniteFaddeevStandardHypotheses hcross.entropy_reduction.Hfun :=
+    finiteFaddeevStandardHypotheses_of_axioms hax hcross hrecForm
+      (fun q => hhfun.Hfun_support_restrict F hax hcross hregular q)
+  let hex :=
+    hfad.of_standard_hypotheses
+      hcross.entropy_reduction.Hfun hstandard
   let alpha := Classical.choose hex
   have hspec := Classical.choose_spec hex
   have hH :

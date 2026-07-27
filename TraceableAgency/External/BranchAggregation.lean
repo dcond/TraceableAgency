@@ -6,12 +6,13 @@ Authors: Daniele Condorelli
 import TraceableAgency.Sufficiency.Spine
 import TraceableAgency.External.Blackwell
 import TraceableAgency.External.Relabeling
+import TraceableAgency.External.SupportRestriction
 
 /-!
 # External Branch Aggregation Assumptions
 
 This file contains external assumptions for the branch aggregation theorem,
-which derives cardinal branch coefficients from the behavioural Axiom A7
+which derives cardinal branch coefficients from the behavioural Axiom A6
 (branchwise continuation monotonicity) and the posterior value representation.
 
 ## Main definitions
@@ -34,7 +35,7 @@ The branch aggregation theorem derives:
 ## References
 
 * empowerment_v5.tex, Lemma branchagg (lines 1830-1929)
-* The proof uses A7 + Herstein-Milnor uniqueness to derive the coefficients
+* The proof uses A6 + Herstein-Milnor uniqueness to derive the coefficients
 -/
 
 set_option linter.style.header false
@@ -655,92 +656,6 @@ theorem posteriorLawDifferenceExp_swap {A : Type u}
   funext φ
   simp [posteriorLawDifferenceExp, posteriorLawSignedSMul]
 
-/-- Pad a channel into the left side of a disjoint-sum outcome type. -/
-noncomputable def outcomePadLeft {A O Y : Type u}
-    [Fintype O] [Fintype Y] (P : Channel A O) : Channel A (O ⊕ Y) :=
-  fun a =>
-    { prob := fun oy =>
-        match oy with
-        | Sum.inl o => P a o
-        | Sum.inr _ => 0
-      nonneg := fun oy =>
-        match oy with
-        | Sum.inl o => (P a).nonneg o
-        | Sum.inr _ => le_refl 0
-      sum_eq_one := by
-        simp only [Fintype.sum_sum_type, Finset.sum_const_zero, add_zero]
-        exact (P a).sum_eq_one }
-
-/-- Pad a channel into the right side of a disjoint-sum outcome type. -/
-noncomputable def outcomePadRight {A O Y : Type u}
-    [Fintype O] [Fintype Y] (P : Channel A Y) : Channel A (O ⊕ Y) :=
-  fun a =>
-    { prob := fun oy =>
-        match oy with
-        | Sum.inl _ => 0
-        | Sum.inr y => P a y
-      nonneg := fun oy =>
-        match oy with
-        | Sum.inl _ => le_refl 0
-        | Sum.inr y => (P a).nonneg y
-      sum_eq_one := by
-        simp only [Fintype.sum_sum_type, Finset.sum_const_zero, zero_add]
-        exact (P a).sum_eq_one }
-
-/-- Left-padded channels preserve posterior-law integrals. -/
-theorem posteriorLawIntegral_outcomePadLeft
-    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
-    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
-    (q : Dist A) (P : Channel A O) (φ : Dist A → ℝ) :
-    posteriorLawIntegral q (outcomePadLeft (Y := Y) P) φ =
-      posteriorLawIntegral q P φ := by
-  unfold posteriorLawIntegral
-  rw [Fintype.sum_sum_type]
-  simp only [outcomePadLeft, Channel.outcomeMarginal_apply]
-  have hinl :
-      (∑ x : O,
-          (∑ a : A, q a * P a x) *
-            φ (Channel.posterior (outcomePadLeft (Y := Y) P) q (Sum.inl x))) =
-        ∑ x : O,
-          (∑ a : A, q a * P a x) *
-            φ (Channel.posterior P q x) := by
-    apply Finset.sum_congr rfl
-    intro o _ho
-    simp [outcomePadLeft, Channel.posterior, Channel.outcomeMarginal_apply]
-  have hinr :
-      (∑ x : Y,
-          (∑ a : A, q a * 0) *
-            φ (Channel.posterior (outcomePadLeft (Y := Y) P) q (Sum.inr x))) = 0 := by
-    simp
-  rw [hinl, hinr, add_zero]
-
-/-- Right-padded channels preserve posterior-law integrals. -/
-theorem posteriorLawIntegral_outcomePadRight
-    {A O Y : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
-    [Fintype O] [DecidableEq O] [Fintype Y] [DecidableEq Y]
-    (q : Dist A) (P : Channel A Y) (φ : Dist A → ℝ) :
-    posteriorLawIntegral q (outcomePadRight (O := O) P) φ =
-      posteriorLawIntegral q P φ := by
-  unfold posteriorLawIntegral
-  rw [Fintype.sum_sum_type]
-  simp only [outcomePadRight, Channel.outcomeMarginal_apply]
-  have hinl :
-      (∑ x : O,
-          (∑ a : A, q a * 0) *
-            φ (Channel.posterior (outcomePadRight (O := O) P) q (Sum.inl x))) = 0 := by
-    simp
-  have hinr :
-      (∑ x : Y,
-          (∑ a : A, q a * P a x) *
-            φ (Channel.posterior (outcomePadRight (O := O) P) q (Sum.inr x))) =
-        ∑ x : Y,
-          (∑ a : A, q a * P a x) *
-            φ (Channel.posterior P q x) := by
-    apply Finset.sum_congr rfl
-    intro y _hy
-    simp [outcomePadRight, Channel.posterior, Channel.outcomeMarginal_apply]
-  rw [hinl, zero_add, hinr]
-
 @[simp] theorem posteriorLawIntegralExp_experimentOfChannel
     {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O] [DecidableEq O]
@@ -935,17 +850,18 @@ theorem posteriorLawSignedSMul_neg_ne_zero {A : Type u}
 
 This is a narrow replacement component for the first analytic step of
 `Branch aggregation`: an affine posterior-value representative has a linear
-part on extensional signed posterior-law differences.  It does not include A7,
+part on extensional signed posterior-law differences.  It does not include A6,
 branch comparison, tangent-space path-independence, boundary support handling,
 or the final aggregation formula.
 -/
 
-/-- Finite posterior-law integral representation.
+/-- Finite posterior-law integral representation package.
 
-This is the project-level finite specialization of the Herstein--Milnor
-posterior-separable conclusion: the chosen value representative is evaluation
-against a finite posterior test function.  It is global to posterior-law values,
-not branch-specific. -/
+The `marginalValue` and `value_eq_integral` fields express the usual finite
+integral form of an affine posterior-law functional.  No coherence between
+different priors or finite alphabets is included: such equalities are
+gauge-dependent and must be obtained only after a representative has been
+canonically normalised. -/
 structure FinitePosteriorIntegralRepresentationAssumptions.{v} where
   marginalValue :
     ∀ (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F)
@@ -957,37 +873,6 @@ structure FinitePosteriorIntegralRepresentationAssumptions.{v} where
       (q : Dist A) (E : FiniteExperimentOn A),
       hV.V q E =
         posteriorLawIntegralExp q E (marginalValue F hV q)
-  /-- **Support-face coherence of the marginal-value test function.**
-      The Herstein--Milnor marginal-value function at a prior `q` agrees, on
-      posteriors supported inside `supp(q)`, with the marginal-value function at
-      the support-face prior `q.restrictToSupport`.  A posterior belief supported
-      on the positive support is the same belief whether read in the ambient
-      action space or on the support face, so the representing test function must
-      agree on it.  This is a genuine coherence property of the true HM functional
-      (which represents the whole order, boundary included), not a boundary
-      normalization; it lets boundary support-restriction of the value be proved
-      rather than assumed (see `normalizedValueSupportBoundary_of_boundaryComplete`). -/
-  marginalValue_support_face :
-    ∀ (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F)
-      {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
-      (q : Dist A) [Nonempty (supportSubtype q)]
-      (d : Dist (supportSubtype q)),
-      marginalValue F hV q (Channel.actionPushforward d (supportIncludeKernel q)) =
-        marginalValue F hV q.restrictToSupport d
-  /-- **Exact relabelling covariance (naturality) of the marginal-value test
-      function.**
-      The Herstein--Milnor marginal-value function is natural in finite action
-      relabellings: relabelling the alphabet by a bijection `eA : A ≃ B` carries
-      the representing test function to the test function at the relabelled prior,
-      evaluated at the relabelled posterior belief. -/
-  marginalValue_relabel :
-    ∀ (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F)
-      {A B : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
-      [Fintype B] [DecidableEq B] [Nonempty B]
-      (eA : A ≃ B) (q : Dist A) (d : Dist A),
-      marginalValue F hV (Relabeling.relabelDist eA q)
-          (Relabeling.relabelDist eA d) =
-        marginalValue F hV q d
 
 /-- Finite affine linear-part interface for posterior-law values.
 
@@ -997,11 +882,9 @@ for a marginal value function `φ_q : Dist A → ℝ`.  The linear part is then
 `L_q(η) := η(φ_q)`, where `η : PosteriorLawSigned A = (Dist A → ℝ) → ℝ` acts
 on the test function `φ_q`.  This satisfies `F_q(μ_E) - F_q(μ_{E'}) = L_q(μ_E - μ_{E'})`.
 
-**External mathematical status**: this structure is an explicit external assumption
-packaging the integral representation of `V q` and its extension to the full
-signed-law tangent space.  It is a theorem, not a representative choice, that follows from
-Herstein-Milnor applied to the posterior-law quotient, but formalizing the integral
-representation in Lean is out of scope for the current development.
+**Construction status**: the final route does not assume this structure.
+`finiteAffineLinearPartAssumptions_of_integralRepresentation` constructs it in
+Lean by evaluating signed laws on the internally constructed test function.
 
 Paper citation: Lemma postsep / integral form (lines 1000-1196); the affinity of
 `F_q` is the Herstein-Milnor output and the integral form is immediate from it. -/
@@ -1109,10 +992,10 @@ theorem linearPart_sum
     linearPart_finsetSum hlin F hV q Finset.univ η
 
 /-!
-## One-branch A7 plumbing
+## One-branch A6 plumbing
 
 These lemmas do not prove the branch-slice affine theorem.  They isolate the
-pure A7/A3/A1 step: if two continuation profiles differ in one branch only,
+pure A6/A3/A1 step: if two continuation profiles differ in one branch only,
 then the branch comparison lifts to the aggregate comparison.
 -/
 
@@ -1131,12 +1014,12 @@ theorem block_duplicate_rel_refl_of_axioms
     {A O : Type u} [Fintype A] [DecidableEq A] [Fintype O] [DecidableEq O]
     (P : Channel A O) (q : Dist A) :
     F.rel (blockChannel P P) (inlDist q) (inrDist q) := by
-  exact (hax.a3.1 P q q).mp (rel_refl_of_A1 F hax.a1 P q)
+  exact (hax.a3.duplication P q q).mp (rel_refl_of_A1 F hax.a1 P q)
 
-/-- Weak one-branch A7 specialization.  All non-target branches are identical,
+/-- Weak one-branch A6 specialization.  All non-target branches are identical,
 so their weak comparisons are supplied by `block_duplicate_rel_refl_of_axioms`.
 -/
-theorem A7_weak_one_branch_of_rel
+theorem A6_weak_one_branch_of_rel
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
     {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
@@ -1151,16 +1034,16 @@ theorem A7_weak_one_branch_of_rel
         (inrDist (branchPosterior P₁ q target))) :
     F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q) := by
-  exact hax.a7.1 O₂ q P₁ Q R (fun o _hpos => by
+  exact hax.a6.1 O₂ q P₁ Q R (fun o _hpos => by
     by_cases ho : o = target
     · subst ho
       exact htarget
     · rw [hsame o ho]
       exact block_duplicate_rel_refl_of_axioms F hax (R o) (branchPosterior P₁ q o))
 
-/-- Strict one-branch A7 specialization.  The target branch is strictly better,
+/-- Strict one-branch A6 specialization.  The target branch is strictly better,
 and all non-target branches are identical. -/
-theorem A7_strict_one_branch_of_strict
+theorem A6_strict_one_branch_of_strict
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
     {A O₁ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁]
@@ -1180,7 +1063,7 @@ theorem A7_strict_one_branch_of_strict
         (inrDist (branchPosterior P₁ q target))) :
     F.strictRel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q) := by
-  exact hax.a7.2 O₂ q P₁ Q R
+  exact hax.a6.2 O₂ q P₁ Q R
     (fun o _hpos => by
       by_cases ho : o = target
       · subst ho
@@ -1193,8 +1076,8 @@ theorem A7_strict_one_branch_of_strict
 ## Feasible branch-difference sign preservation
 
 The tangent-space sign-preservation theorem needed for path independence is
-stronger than A7 directly supplies: it talks about arbitrary signed
-posterior-law directions.  A7 directly supplies the following feasible-channel
+stronger than A6 directly supplies: it talks about arbitrary signed
+posterior-law directions.  A6 directly supplies the following feasible-channel
 version, where the signed direction is the difference of two continuation
 experiments and the aggregate experiments differ only in one branch.
 -/
@@ -1494,7 +1377,7 @@ theorem branch_feasible_difference_pos_of_branch_pos
       F.strictRel
         (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
         (inlDist q) (inrDist q) :=
-    A7_strict_one_branch_of_strict F hax O₂ q P₁ Q R target hpos hsame
+    A6_strict_one_branch_of_strict F hax O₂ q P₁ Q R target hpos hsame
       htarget_weak htarget_strict
   have hagg_gt :
       hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ R)) <
@@ -1585,11 +1468,11 @@ theorem branch_feasible_difference_zero_of_branch_zero
   have hagg_QR :
       F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
         (inlDist q) (inrDist q) :=
-    A7_weak_one_branch_of_rel F hax O₂ q P₁ Q R target hsame htarget_QR
+    A6_weak_one_branch_of_rel F hax O₂ q P₁ Q R target hsame htarget_QR
   have hagg_RQ :
       F.rel (blockChannel (seqComposeDep P₁ O₂ R) (seqComposeDep P₁ O₂ Q))
         (inlDist q) (inrDist q) :=
-    A7_weak_one_branch_of_rel F hax O₂ q P₁ R Q target
+    A6_weak_one_branch_of_rel F hax O₂ q P₁ R Q target
       (fun o ho => (hsame o ho).symm) htarget_RQ
   have hpref_QR :
       ExperimentPairPref F
@@ -2078,7 +1961,7 @@ theorem branch_formula_linearPart_seqCompose_sum
 /-- Forward and zero sign transport for a common-outcome feasible branch
 direction.
 
-This is the compiled A7/posterior-law-realization core of tangent sign
+This is the compiled A6/posterior-law-realization core of tangent sign
 agreement: if a signed branch direction `η` is a positive scalar multiple of a
 common-outcome feasible difference at a reached posterior `r`, then positive
 and zero branch-linear signs transport to the aggregate prior `q`.  The reverse
@@ -2781,11 +2664,11 @@ theorem finiteAtomicPosteriorTangentSpanning :
 
 /-- Common-outcome realization of tangent directions.
 
-The paper's A7 step compares two continuation channels in the same branch
+The paper's A6 step compares two continuation channels in the same branch
 outcome alphabet.  The older tangent spanning interface realizes a tangent
 direction by two finite experiments, whose bundled outcome types may differ.
 This interface isolates the padding/realization strengthening needed before
-A7 can be applied directly. -/
+A6 can be applied directly. -/
 structure FiniteCommonOutcomeTangentRealizationAssumptions.{v} : Prop where
   tangent_as_common_outcome_difference :
     ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
@@ -3218,7 +3101,7 @@ structure FiniteLinearFunctionalSameSignScalarAssumptions.{v} : Prop where
 /-- Tangent-subspace version of the same-sign scalar theorem.
 
 This is the faithful linear-algebra interface for the branch path argument:
-A7 supplies sign agreement only on genuine tangent signed posterior laws, not
+A6 supplies sign agreement only on genuine tangent signed posterior laws, not
 on all extensional functionals `PosteriorLawSigned A`. -/
 structure FiniteLinearFunctionalSameSignScalarOnTangentAssumptions.{v} : Prop where
   same_sign_scalar_on_tangent :
@@ -3349,7 +3232,7 @@ theorem gives a positive scalar relating `L_q` and `L_r`.
 
 /-- Tangent sign-preservation interface for the branch path argument.
 
-This is the A7/realization part after tangent-space spanning has reduced the
+This is the A6/realization part after tangent-space spanning has reduced the
 problem to signed posterior-law directions: on nonzero tangent directions, the
 aggregate prior linear part and the reached-posterior linear part have the same
 positive half-space and zero set. -/
@@ -3389,7 +3272,7 @@ structure FiniteBranchTangentSignAgreementAssumptions.{v}
         (hlin.linearPart F hV q η = 0 ↔
           hlin.linearPart F hV r η = 0)
 
-/-- Faithful A7-aware tangent-domain sign agreement for a fixed
+/-- Faithful A6-aware tangent-domain sign agreement for a fixed
 representation.
 
 Unlike the legacy `FiniteBranchTangentSignAgreementAssumptions`, this package
@@ -3413,7 +3296,7 @@ structure BranchTangentSignAgreementOnTangentFor
 
 /-- The forward and zero half of tangent sign preservation.
 
-This is exactly what the one-branch A7 plumbing proves directly.  The reverse
+This is exactly what the one-branch A6 plumbing proves directly.  The reverse
 positive direction is the remaining swapped-direction realization step. -/
 structure BranchTangentForwardZeroOnTangentFor
     (F : PrefFamily.{u}) (hax : TraceAxioms F)
@@ -3512,7 +3395,7 @@ theorem branchTangentSignAgreementOnTangentFor_of_forwardZero_and_neg
       · exact hfwd.2
 
 /-- Common-outcome tangent realization and full-support reachability close the
-faithful A7-aware tangent-domain sign agreement package. -/
+faithful A6-aware tangent-domain sign agreement package. -/
 theorem branchTangentSignAgreementOnTangentFor_of_realization_and_reachability
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hreal : FiniteCommonOutcomeTangentRealizationAssumptions.{u})
@@ -3731,7 +3614,7 @@ structure BranchPathScalarStructure.{v}
         branchPathCoeff q r * hlin.linearPart F hV r η
 
 /-- Representation-level full-support path scalar restricted to atomic-linear
-tangent directions.  This is the faithful object produced by the corrected A7
+tangent directions.  This is the faithful object produced by the corrected A6
 tangent-sign route; the broader `BranchPathScalarStructure` asserts the scalar
 relation on all extensional signed laws. -/
 structure BranchPathTangentScalarStructure.{v}
@@ -5908,7 +5791,7 @@ theorem branch_boundary_tangent_forward_zero_of_commonOutcome_realization
         F.strictRel
           (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ S))
           (inlDist q) (inrDist q) :=
-      A7_strict_one_branch_of_strict F hax O₂ q P₁ Q S target hpos hsame
+      A6_strict_one_branch_of_strict F hax O₂ q P₁ Q S target hpos hsame
         htarget_weak htarget_strict
     have hagg_gt :
         hV.V q (experimentOfChannel (seqComposeDep P₁ O₂ S)) <
@@ -6002,11 +5885,11 @@ theorem branch_boundary_tangent_forward_zero_of_commonOutcome_realization
     have hagg_QR :
         F.rel (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ S))
           (inlDist q) (inrDist q) :=
-      A7_weak_one_branch_of_rel F hax O₂ q P₁ Q S target hsame htarget_QR
+      A6_weak_one_branch_of_rel F hax O₂ q P₁ Q S target hsame htarget_QR
     have hagg_RQ :
         F.rel (blockChannel (seqComposeDep P₁ O₂ S) (seqComposeDep P₁ O₂ Q))
           (inlDist q) (inrDist q) :=
-      A7_weak_one_branch_of_rel F hax O₂ q P₁ S Q target
+      A6_weak_one_branch_of_rel F hax O₂ q P₁ S Q target
         (fun o ho => (hsame o ho).symm) htarget_RQ
     have hpref_QR :
         ExperimentPairPref F
@@ -6059,7 +5942,7 @@ theorem branch_boundary_tangent_forward_zero_of_commonOutcome_realization
     have hqzero := hbranch_zero_to_q_zero hbzero
     nlinarith [hη_lin_q, ht, hqzero]
 
-/-- A1/A7 plus atomic tangent spanning construct the boundary support-face
+/-- A1/A6 plus atomic tangent spanning construct the boundary support-face
 scalar.
 
 For a full-support ambient prior `q` and an arbitrary finite boundary posterior
@@ -6388,7 +6271,7 @@ theorem boundaryAtomicLinearTangentCoeffOfA1Spanning_relation
       hlin htangent F hax hV q r hq hnd)).2 η hηatomic hηtan
 
 /-- A boundary coefficient normalization whose positive coefficient is proved
-to exist from A1/A7 and atomic tangent spanning. -/
+to exist from A1/A6 and atomic tangent spanning. -/
 noncomputable def boundaryCoefficientScaleNormalization_of_A1_atomicLinearTangentSpanning
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (htangent : FiniteAtomicLinearPosteriorTangentSpanningAssumptions.{u})
@@ -6691,6 +6574,50 @@ structure FiniteBranchSingletonScaleNormalizationAssumptions.{v} where
       (P : Channel A O),
       hV.V r (experimentOfChannel P) = 0
 
+/-- Singleton coefficient data for one selected posterior-value
+representative.
+
+Unlike the historical universal package above, this record makes no assertion
+about arbitrary gauge transforms of the selected representative.  It is the
+appropriate branch-layer interface once the HM output has been canonically
+normalised. -/
+structure FiniteBranchSingletonScaleNormalizationFor
+    (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F) where
+  singletonCoeff :
+    ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A],
+      Dist A → Dist A → ℝ
+  singletonCoeff_pos :
+    ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q r : Dist A) (_hq : q.FullSupport)
+      (_hr_singleton_support :
+        ∃ a : A, 0 < r a ∧ ∀ b : A, 0 < r b → b = a),
+      0 < singletonCoeff q r
+  singleton_branch_value_zero :
+    ∀ {A O : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
+      [Fintype O] [DecidableEq O]
+      (r : Dist A)
+      (_hr_singleton_support :
+        ∃ a : A, 0 < r a ∧ ∀ b : A, 0 < r b → b = a)
+      (P : Channel A O),
+      hV.V r (experimentOfChannel P) = 0
+
+/-- Specialize the historical universal singleton package to one
+representative.  This compatibility coercion is one-way: the selected package
+does not imply the false universal assertion. -/
+def FiniteBranchSingletonScaleNormalizationAssumptions.forRepresentative
+    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{v})
+    (F : PrefFamily.{v}) (hV : PosteriorValueRepresentation F) :
+    FiniteBranchSingletonScaleNormalizationFor F hV where
+  singletonCoeff := hsingle.singletonCoeff
+  singletonCoeff_pos := hsingle.singletonCoeff_pos
+  singleton_branch_value_zero :=
+    hsingle.singleton_branch_value_zero F hV
+
+instance {F : PrefFamily.{v}} {hV : PosteriorValueRepresentation F} :
+    Coe (FiniteBranchSingletonScaleNormalizationAssumptions.{v})
+      (FiniteBranchSingletonScaleNormalizationFor F hV) :=
+  ⟨fun hsingle => hsingle.forRepresentative F hV⟩
+
 /-!
 ## Aggregation coefficient assembly
 
@@ -6787,7 +6714,7 @@ noncomputable def branchCoeffFromRepParts
     {F : PrefFamily.{u}} {hV : PosteriorValueRepresentation F}
     (hpath : BranchFullSupportPathIndependenceStructure F hV)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q r : Dist A) : ℝ := by
   classical
@@ -6804,7 +6731,7 @@ theorem branchCoeffFromRepParts_pos
     {F : PrefFamily.{u}} {hV : PosteriorValueRepresentation F}
     (hpath : BranchFullSupportPathIndependenceStructure F hV)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q r : Dist A) (hq : q.FullSupport)
     (hr : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
@@ -6827,7 +6754,7 @@ structure FiniteBranchAggregationFormulaFor
     (hV : PosteriorValueRepresentation F)
     (hpath : BranchFullSupportPathIndependenceStructure F hV)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u}) where
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV) where
   branch_aggregation_formula :
     ∀ {A O₁ O₂ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       [Fintype O₁] [DecidableEq O₁] [Fintype O₂] [DecidableEq O₂]
@@ -6848,7 +6775,7 @@ noncomputable def branchAggregationStructure_of_formulaFor
     (hV : PosteriorValueRepresentation F)
     (hpath : BranchFullSupportPathIndependenceStructure F hV)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaFor F hax hV hpath hboundary hsingle) :
     BranchAggregationStructure F where
@@ -6872,7 +6799,7 @@ noncomputable def branchCoeffFromTangentRepParts
     {hlin : FiniteAffineLinearPartAssumptions.{u}}
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q r : Dist A) : ℝ := by
   classical
@@ -6890,7 +6817,7 @@ theorem branchCoeffFromTangentRepParts_pos
     {hlin : FiniteAffineLinearPartAssumptions.{u}}
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q r : Dist A) (hq : q.FullSupport)
     (hr : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b) :
@@ -6977,7 +6904,7 @@ theorem branch_formula_singleton_summand_zero
     {hlin : FiniteAffineLinearPartAssumptions.{u}}
     {hpath : BranchPathTangentScalarStructure F hV hlin}
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O] [DecidableEq O]
     (q r : Dist A) (m : ℝ)
@@ -6986,7 +6913,7 @@ theorem branch_formula_singleton_summand_zero
     (Q : Channel A O) :
     m * branchCoeffFromTangentRepParts hpath hboundary hsingle q r *
         hV.V r (experimentOfChannel Q) = 0 := by
-  rw [hsingle.singleton_branch_value_zero F hV r hr_singleton_support Q]
+  rw [hsingle.singleton_branch_value_zero r hr_singleton_support Q]
   ring
 
 /-- A distribution whose positive support is not nondegenerate has singleton
@@ -7072,47 +6999,6 @@ theorem posteriorLawDifferenceExp_singleton_support_eq_zero
   rw [posteriorLawIntegralExp_uninformativeChannelU_eq_prior]
   ring
 
-/-- The singleton branch package is canonically supplied by the posterior-law
-integral representation.
-
-The coefficient is fixed to `1`; the value-zero clause is no longer a boundary
-normalization.  It follows by transporting the value to the positive support face
-using the marginal-value support-face coherence in `hint`; on a singleton support
-face every posterior value is zero by the full-support subsingleton theorem. -/
-noncomputable def branchSingletonScaleNormalization_of_integralRepresentation
-    (hint : FinitePosteriorIntegralRepresentationAssumptions.{u}) :
-    FiniteBranchSingletonScaleNormalizationAssumptions.{u} where
-  singletonCoeff := fun _ _ => 1
-  singletonCoeff_pos := by
-    intro A _ _ _ q r _hq _hr_singleton
-    exact zero_lt_one
-  singleton_branch_value_zero := by
-    intro F hV A O _ _ _ _ _ r hr_singleton P
-    classical
-    haveI : Nonempty (supportSubtype r) := supportSubtype_nonempty r
-    haveI : Subsingleton (supportSubtype r) :=
-      supportSubtype_subsingleton_of_singleton_support r hr_singleton
-    have hsupport :
-        hV.V r (experimentOfChannel P) =
-          hV.V r.restrictToSupport
-            (experimentOfChannel (Channel.restrictToSupport P r)) := by
-      rw [hint.value_eq_integral F hV r (experimentOfChannel P)]
-      rw [hint.value_eq_integral F hV r.restrictToSupport
-        (experimentOfChannel (Channel.restrictToSupport P r))]
-      rw [posteriorLawIntegralExp_experimentOfChannel,
-        posteriorLawIntegralExp_experimentOfChannel]
-      rw [posteriorLawIntegral_restrictToSupport P r]
-      unfold posteriorLawIntegral
-      apply Finset.sum_congr rfl
-      intro o _ho
-      dsimp
-      rw [hint.marginalValue_support_face F hV r
-        (Channel.posterior (Channel.restrictToSupport P r) r.restrictToSupport o)]
-    rw [hsupport]
-    exact branchValue_channel_eq_zero_of_subsingleton F hV
-      r.restrictToSupport (Dist.restrictToSupport_fullSupport r)
-      (Channel.restrictToSupport P r)
-
 /-- Singleton-support branch linear-part contributions are zero. -/
 theorem branch_formula_singleton_summand_linearPart_zero
     (hlin : FiniteAffineLinearPartAssumptions.{u})
@@ -7159,7 +7045,7 @@ theorem branch_formula_singleton_summand_linearPart_eq
     (F : PrefFamily.{u}) (hV : PosteriorValueRepresentation F)
     {hpath : BranchPathTangentScalarStructure F hV hlin}
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A O : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O] [DecidableEq O]
     (q r : Dist A) (m : ℝ)
@@ -7184,7 +7070,7 @@ theorem branch_formula_zero_probability_summand_zero
     (F : PrefFamily.{u}) (hV : PosteriorValueRepresentation F)
     {hpath : BranchPathTangentScalarStructure F hV hlin}
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     {A O₁ O₂ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype O₁] [DecidableEq O₁] [Fintype O₂] [DecidableEq O₂]
     (q : Dist A) (P₁ : Channel A O₁) (target : O₁)
@@ -7211,7 +7097,7 @@ structure FiniteBranchFormulaSummandAssumptions
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u}) : Prop where
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV) : Prop where
   summand_linearPart_eq :
     ∀ {A O₁ O₂ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       [Fintype O₁] [DecidableEq O₁] [Fintype O₂] [DecidableEq O₂]
@@ -7236,7 +7122,7 @@ theorem branchFormulaSummands_of_boundary
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hboundarySummand :
       FiniteBranchFormulaBoundarySummandAssumptions hlin hboundary) :
     FiniteBranchFormulaSummandAssumptions F hax hV hlin hpath hboundary hsingle where
@@ -7379,7 +7265,7 @@ theorem branchFormulaSummands_of_boundaryFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hboundarySummand :
       FiniteBranchFormulaBoundarySummandFor F hax hV hlin hboundary) :
     FiniteBranchFormulaSummandAssumptions F hax hV hlin hpath hboundary hsingle where
@@ -7525,7 +7411,7 @@ structure FiniteBranchAggregationFormulaTangentFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u}) where
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV) where
   branch_aggregation_formula :
     ∀ {A O₁ O₂ : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       [Fintype O₁] [DecidableEq O₁] [Fintype O₂] [DecidableEq O₂]
@@ -7547,7 +7433,7 @@ theorem branchAggregationFormulaTangentFor_of_summands
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hsummand :
       FiniteBranchFormulaSummandAssumptions F hax hV hlin hpath hboundary hsingle) :
     FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle where
@@ -7611,7 +7497,7 @@ theorem branchAggregationFormulaTangentFor_of_boundarySummands
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hboundarySummand :
       FiniteBranchFormulaBoundarySummandAssumptions hlin hboundary) :
     FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle :=
@@ -7627,7 +7513,7 @@ theorem branchAggregationFormulaTangentFor_of_boundarySummandsFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hboundarySummand :
       FiniteBranchFormulaBoundarySummandFor F hax hV hlin hboundary) :
     FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle :=
@@ -7644,7 +7530,7 @@ theorem branchAggregationFormulaTangentFor_of_boundaryTransportFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -7668,7 +7554,7 @@ theorem branchAggregationFormulaTangentFor_of_boundaryTransportAtomicFor
       BranchPathTangentScalarStructure F hV
         (finiteAffineLinearPartAssumptions_of_integralRepresentation hint))
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportFor F hax hV)
     (hmarginal :
       FiniteSupportFaceMarginalValueTransportAtomicFor
@@ -7690,7 +7576,7 @@ theorem branchAggregationFormulaTangentFor_of_boundaryTransport
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hvalue : FiniteBranchBoundaryValueTransportAssumptions.{u})
     (hcoeff :
       FiniteBranchBoundaryCoefficientTransportAssumptions.{u} hlin hboundary) :
@@ -7708,7 +7594,7 @@ noncomputable def branchAggregationStructure_of_tangentFormulaFor
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle) :
     BranchAggregationStructure F where
@@ -7730,7 +7616,7 @@ theorem branchAggregationStructure_of_tangentFormulaFor_branchCoeff_eq
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
@@ -7747,7 +7633,7 @@ theorem branchAggregationStructure_of_tangentFormulaFor_branchCoeff_fullSupport_
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hpath : BranchPathTangentScalarStructure F hV hlin)
     (hboundary : FiniteBranchBoundaryFaceScaleAssumptions.{u})
-    (hsingle : FiniteBranchSingletonScaleNormalizationAssumptions.{u})
+    (hsingle : FiniteBranchSingletonScaleNormalizationFor F hV)
     (hformula :
       FiniteBranchAggregationFormulaTangentFor F hax hV hlin hpath hboundary hsingle)
     {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
@@ -7763,7 +7649,7 @@ theorem branchAggregationStructure_of_tangentFormulaFor_branchCoeff_fullSupport_
 ## Branch Aggregation External Assumption
 
 The branch aggregation theorem states that given:
-1. Axiom A7 (branchwise continuation monotonicity)
+1. Axiom A6 (branchwise continuation monotonicity)
 2. A posterior value representation V from Herstein-Milnor
 
 There exist positive branch coefficients β(q, r) such that the value of a
@@ -7774,7 +7660,7 @@ Paper proof sketch:
 1. Fix first-stage channel P₁ with branch structure (m(o), r_o)
 2. For a positive-probability branch o̅, define g(ν) = F_q(T_H(ν)) where T_H
    embeds branch law ν into the full posterior law
-3. A7 implies g and F_r represent the same weak order on M_r
+3. A6 implies g and F_r represent the same weak order on M_r
 4. Herstein-Milnor uniqueness gives g = αF_r + γ with α > 0
 5. Path-independence argument shows α/m depends only on (q, r), not on P₁
 6. Define β(q, r) := α/m to get the aggregation formula
@@ -7783,14 +7669,14 @@ Paper proof sketch:
 /--
 **Finite Branch Aggregation Assumptions**
 
-External assumption that Axiom A7 (branchwise continuation monotonicity)
+External assumption that Axiom A6 (branchwise continuation monotonicity)
 combined with a posterior value representation yields a branch aggregation
 structure with positive coefficients.
 
 Paper: Lemma branchagg (lines 1830-2068).
 
 **Key mathematical content:**
-- From A7 + posterior value representation, derive positive β(q, r)
+- From A6 + posterior value representation, derive positive β(q, r)
 - β(q, r) depends only on prior q and reached posterior r, not on the
   specific first-stage channel
 - The value decomposes as: V_q(P₁▷{Q}) = V_q(P₁) + Σ m(o) β(q,r_o) V_{r_o}(Q^o)
@@ -7801,14 +7687,14 @@ We state this as an external assumption because the proof involves:
 - Case analysis for boundary/degenerate posteriors
 -/
 structure FiniteBranchAggregationAssumptions.{v} where
-  /-- Given A7 and a posterior value representation, construct a branch
+  /-- Given A6 and a posterior value representation, construct a branch
       aggregation structure. This is the main theorem of Lemma branchagg.
 
       Note: This returns a data-carrying structure (BranchAggregationStructure),
       so FiniteBranchAggregationAssumptions is Type, not Prop. -/
-  of_A7 :
+  of_A6 :
     ∀ (F : PrefFamily.{v}),
-      A7_BranchwiseContinuationMonotonicity F →
+      A6_BranchwiseContinuationMonotonicity F →
       PosteriorValueRepresentation F →
       BranchAggregationStructure F
 
@@ -7820,18 +7706,18 @@ sufficiency spine.
 -/
 
 /--
-**Branch Aggregation from A7 Assumption**
+**Branch Aggregation from A6 Assumption**
 
-Given the external branch aggregation assumption, A7, and a posterior value
+Given the external branch aggregation assumption, A6, and a posterior value
 representation, derive a branch aggregation structure.
 -/
 noncomputable def branchAggregation_of_assumption
     (hbranch : FiniteBranchAggregationAssumptions.{u})
     (F : PrefFamily.{u})
-    (hA7 : A7_BranchwiseContinuationMonotonicity F)
+    (hA6 : A6_BranchwiseContinuationMonotonicity F)
     (hV : PosteriorValueRepresentation F) :
     BranchAggregationStructure F :=
-  hbranch.of_A7 F hA7 hV
+  hbranch.of_A6 F hA6 hV
 
 /--
 **Branch Aggregation from TraceAxioms**
@@ -7845,7 +7731,7 @@ noncomputable def branchAggregation_of_traceAxioms
     (hax : TraceAxioms F)
     (hV : PosteriorValueRepresentation F) :
     BranchAggregationStructure F :=
-  hbranch.of_A7 F hax.a7 hV
+  hbranch.of_A6 F hax.a6 hV
 
 /--
 **Branch Aggregation from All External Assumptions**
@@ -7868,8 +7754,9 @@ noncomputable def branchAggregation_of_axioms
     (hax : TraceAxioms F) :
     BranchAggregationStructure F :=
   let hpls : PosteriorLawSufficiency F := from_axioms_to_posterior_of_blackwell F hblackwell hax
-  let hV : PosteriorValueRepresentation F := posteriorValueRep_of_HersteinMilnor F hhm hpls
-  hbranch.of_A7 F hax.a7 hV
+  let hV : PosteriorValueRepresentation F :=
+    posteriorValueRep_of_HersteinMilnor F hhm hax hpls
+  hbranch.of_A6 F hax.a6 hV
 
 /-!
 ## Spine Integration Helper
@@ -7880,7 +7767,7 @@ Shows how to fill the `value_rep_to_branch` field of `SufficiencySpineAssumption
 /--
 **Value Rep to Branch Bridge**
 
-Given A7 and the branch aggregation external assumption, provides the bridge
+Given A6 and the branch aggregation external assumption, provides the bridge
 from PosteriorValueRepresentation to BranchAggregationStructure.
 
 This can be used to fill the `value_rep_to_branch` field when constructing
@@ -7889,8 +7776,8 @@ This can be used to fill the `value_rep_to_branch` field when constructing
 noncomputable def value_rep_to_branch_of_assumption
     (hbranch : FiniteBranchAggregationAssumptions.{u})
     (F : PrefFamily.{u})
-    (hA7 : A7_BranchwiseContinuationMonotonicity F) :
+    (hA6 : A6_BranchwiseContinuationMonotonicity F) :
     PosteriorValueRepresentation F → BranchAggregationStructure F :=
-  fun hV => hbranch.of_A7 F hA7 hV
+  fun hV => hbranch.of_A6 F hA6 hV
 
 end TraceableAgency

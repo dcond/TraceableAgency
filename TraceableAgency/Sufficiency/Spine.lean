@@ -5,6 +5,7 @@ Authors: Daniele Condorelli
 -/
 import TraceableAgency.Behaviour.MIPreference
 import TraceableAgency.Main
+import TraceableAgency.Basic.SupportRestriction
 import TraceableAgency.External.Blackwell
 import TraceableAgency.External.HersteinMilnor
 
@@ -23,7 +24,7 @@ The proof follows the paper's roadmap (empowerment_v5.tex, lines 801-820):
    structure; Herstein--Milnor yields a posterior-separable integral representation
    (Lemmas plsuff--actionbase).
 
-3. **Branch aggregation**: Branchwise monotonicity (A7) implies cardinal branch
+3. **Branch aggregation**: Branchwise monotonicity (A6) implies cardinal branch
    aggregation with path-independent coefficients (Lemma branchagg).
 
 4. **Scale coherence**: The branch-coefficient cocycle, normalised chain rule,
@@ -144,6 +145,52 @@ There exists a value functional V that:
 3. Will eventually be shown to be affine (via Herstein--Milnor)
 -/
 
+/-- A convex identity between finite posterior laws descends to the positive
+support face.  The proof compares the proposed mixture with the concrete
+public-coin mixture, uses finite posterior-law extensionality under support
+restriction, and then invokes the explicit public-mixture calculation on the
+restricted experiments. -/
+theorem posteriorLawIntegralMix_restrictToSupport
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A)
+    (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
+    (E_mix E₁ E₂ : FiniteExperimentOn A)
+    (hmix : ∀ φ : Dist A → ℝ, Continuous φ →
+      posteriorLawIntegralExp q E_mix φ =
+        t * posteriorLawIntegralExp q E₁ φ +
+          (1 - t) * posteriorLawIntegralExp q E₂ φ) :
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    ∀ ψ : Dist (supportSubtype q) → ℝ, Continuous ψ →
+      posteriorLawIntegralExp q.restrictToSupport
+          (E_mix.restrictToSupport q) ψ =
+        t * posteriorLawIntegralExp q.restrictToSupport
+            (E₁.restrictToSupport q) ψ +
+          (1 - t) * posteriorLawIntegralExp q.restrictToSupport
+            (E₂.restrictToSupport q) ψ := by
+  letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  have hsame :
+      SamePosteriorLawExp q E_mix
+        (hmPublicMixExperiment t ht0 ht1 E₁ E₂) := by
+    intro φ hφ
+    exact (hmix φ hφ).trans
+      (hm_posteriorLawIntegral_publicMixExperiment
+        q t ht0 ht1 E₁ E₂ φ).symm
+  have hrestricted :=
+    samePosteriorLawExp_restrictToSupport q E_mix
+      (hmPublicMixExperiment t ht0 ht1 E₁ E₂) hsame
+  intro ψ hψ
+  have hEq := hrestricted ψ hψ
+  have hpublic :
+      (hmPublicMixExperiment t ht0 ht1 E₁ E₂).restrictToSupport q =
+        hmPublicMixExperiment t ht0 ht1
+          (E₁.restrictToSupport q) (E₂.restrictToSupport q) := by
+    rfl
+  rw [hpublic,
+    hm_posteriorLawIntegral_publicMixExperiment
+      q.restrictToSupport t ht0 ht1
+        (E₁.restrictToSupport q) (E₂.restrictToSupport q) ψ] at hEq
+  exact hEq
+
 /--
 **Posterior Value Representation (explicit)**
 
@@ -168,6 +215,20 @@ structure PosteriorValueRepresentation (F : PrefFamily.{u}) where
       (q : Dist A) (_hq : q.FullSupport)
       (E₁ E₂ : FiniteExperimentOn A),
       ExperimentPairPref F E₁ E₂ q q ↔ V q E₁ ≥ V q E₂
+  /-- Affinity of this selected cardinal representative on convex mixtures of
+  posterior laws.  An arbitrary strictly increasing transform is therefore not
+  another `PosteriorValueRepresentation`; this records the cardinal content
+  supplied by Herstein--Milnor. -/
+  affine_of_posteriorLawIntegral_mix :
+    ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+      (q : Dist A)
+      (t : ℝ) (_ht0 : 0 < t) (_ht1 : t < 1)
+      (E_mix E₁ E₂ : FiniteExperimentOn A),
+      (∀ φ : Dist A → ℝ, Continuous φ →
+        posteriorLawIntegralExp q E_mix φ =
+          t * posteriorLawIntegralExp q E₁ φ +
+            (1 - t) * posteriorLawIntegralExp q E₂ φ) →
+      V q E_mix = t * V q E₁ + (1 - t) * V q E₂
   /-- V is zero-normalized: V_q(δ_q) = 0 (no-information value is zero).
       Paper (line 1204, 1301, 1383): F_q(δ_q) = 0.
       The no-information experiment is the uninformative channel U_A. -/
@@ -175,6 +236,22 @@ structure PosteriorValueRepresentation (F : PrefFamily.{u}) where
     ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       (q : Dist A) (_hq : q.FullSupport),
       V q (experimentOfChannel (uninformativeChannelU A)) = 0
+
+/-- Complete a full-support-selected value at a boundary prior by evaluating
+the same experiment on the prior's positive support face.  This is a
+definition, not a cross-face normalization assumption. -/
+noncomputable def supportCompletedPosteriorValue
+    (Vraw :
+      ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A],
+        Dist A → FiniteExperimentOn A → ℝ)
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) : ℝ := by
+  classical
+  exact if hq : q.FullSupport then
+    Vraw q E
+  else
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    Vraw q.restrictToSupport (E.restrictToSupport q)
 
 /--
 **Posterior-Separable Representation** (Prop version)
@@ -196,19 +273,59 @@ a PosteriorValueRepresentation from PosteriorLawSufficiency.
 noncomputable def posteriorValueRep_of_HersteinMilnor
     (F : PrefFamily.{u})
     (hhm : FiniteHersteinMilnorAssumptions.{u})
+    (hax : TraceAxioms F)
     (hpls : PosteriorLawSufficiency F) :
     PosteriorValueRepresentation F where
-  V := fun {A} [Fintype A] [DecidableEq A] [Nonempty A] q E =>
-    hhm.V F hpls q E
-  respects_same_posterior_law := fun {A} [_] [_] [_] q E E' hsame =>
-    hhm.V_respects_same_posterior_law F hpls q E E' hsame
+  V := supportCompletedPosteriorValue (hhm.V F hax hpls)
+  respects_same_posterior_law := by
+    intro A _ _ _ q E E' hsame
+    classical
+    by_cases hq : q.FullSupport
+    · simp only [supportCompletedPosteriorValue, hq, if_pos]
+      exact hhm.V_respects_same_posterior_law
+        F hax hpls q E E' hsame
+    · letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      have hrsame :=
+        samePosteriorLawExp_restrictToSupport q E E' hsame
+      simp only [supportCompletedPosteriorValue, hq, if_neg]
+      exact hhm.V_respects_same_posterior_law
+        F hax hpls q.restrictToSupport
+          (E.restrictToSupport q) (E'.restrictToSupport q) hrsame
   represents_block_comparisons := fun {A} [_] [_] [_] q hq E₁ E₂ =>
-    hhm.V_represents_block_comparisons F hpls q hq E₁ E₂
+    by
+      simpa [supportCompletedPosteriorValue, hq] using
+        hhm.V_represents_block_comparisons F hax hpls q hq E₁ E₂
+  affine_of_posteriorLawIntegral_mix :=
+    by
+      intro A _ _ _ q t ht0 ht1 E_mix E₁ E₂ hmix
+      classical
+      by_cases hq : q.FullSupport
+      · simpa [supportCompletedPosteriorValue, hq] using
+          hhm.V_affine_of_posteriorLawIntegral_mix
+            F hax hpls q hq t ht0 ht1 E_mix E₁ E₂ hmix
+      · letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+        have hmixSupport :=
+          posteriorLawIntegralMix_restrictToSupport
+            q t ht0 ht1 E_mix E₁ E₂ hmix
+        simpa [supportCompletedPosteriorValue, hq] using
+          hhm.V_affine_of_posteriorLawIntegral_mix
+            F hax hpls q.restrictToSupport
+              (Dist.restrictToSupport_fullSupport q)
+              t ht0 ht1
+              (E_mix.restrictToSupport q)
+              (E₁.restrictToSupport q)
+              (E₂.restrictToSupport q)
+              hmixSupport
   zero_normalized := fun {A} [_] [_] [_] q hq => by
-    have h := hhm.V_zero_normalized F hpls q hq
+    have h := hhm.V_zero_normalized F hax hpls q hq
     have heq : experimentOfChannel (uninformativeChannelU A) = uninformativeExperiment A := by
       simp only [experimentOfChannel, uninformativeChannelU, uninformativeExperiment,
                  Channel.uninformativeChannelU, FiniteExperimentOn.ofChannel]
+    rw [show supportCompletedPosteriorValue (hhm.V F hax hpls) q
+        (experimentOfChannel (uninformativeChannelU A)) =
+          hhm.V F hax hpls q
+            (experimentOfChannel (uninformativeChannelU A)) by
+      simp [supportCompletedPosteriorValue, hq]]
     rw [heq]
     exact h
 
@@ -219,16 +336,53 @@ noncomputable def posteriorValueRep_of_HersteinMilnorConclusion
     (hpls : PosteriorLawSufficiency F)
     (hhm : FiniteHersteinMilnorConclusionFor F hpls) :
     PosteriorValueRepresentation F where
-  V := fun {A} [Fintype A] [DecidableEq A] [Nonempty A] q E =>
-    hhm.V q E
-  respects_same_posterior_law := fun {A} [_] [_] [_] q E E' hsame =>
-    hhm.V_respects_same_posterior_law q E E' hsame
+  V := supportCompletedPosteriorValue hhm.V
+  respects_same_posterior_law := by
+    intro A _ _ _ q E E' hsame
+    classical
+    by_cases hq : q.FullSupport
+    · simp only [supportCompletedPosteriorValue, hq, if_pos]
+      exact hhm.V_respects_same_posterior_law q E E' hsame
+    · letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+      have hrsame :=
+        samePosteriorLawExp_restrictToSupport q E E' hsame
+      simp only [supportCompletedPosteriorValue, hq, if_neg]
+      exact hhm.V_respects_same_posterior_law
+        q.restrictToSupport
+          (E.restrictToSupport q) (E'.restrictToSupport q) hrsame
   represents_block_comparisons := fun {A} [_] [_] [_] q hq E₁ E₂ =>
-    hhm.V_represents_block_comparisons q hq E₁ E₂
+    by
+      simpa [supportCompletedPosteriorValue, hq] using
+        hhm.V_represents_block_comparisons q hq E₁ E₂
+  affine_of_posteriorLawIntegral_mix :=
+    by
+      intro A _ _ _ q t ht0 ht1 E_mix E₁ E₂ hmix
+      classical
+      by_cases hq : q.FullSupport
+      · simpa [supportCompletedPosteriorValue, hq] using
+          hhm.V_affine_of_posteriorLawIntegral_mix
+            q hq t ht0 ht1 E_mix E₁ E₂ hmix
+      · letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+        have hmixSupport :=
+          posteriorLawIntegralMix_restrictToSupport
+            q t ht0 ht1 E_mix E₁ E₂ hmix
+        simpa [supportCompletedPosteriorValue, hq] using
+          hhm.V_affine_of_posteriorLawIntegral_mix
+            q.restrictToSupport
+              (Dist.restrictToSupport_fullSupport q)
+              t ht0 ht1
+              (E_mix.restrictToSupport q)
+              (E₁.restrictToSupport q)
+              (E₂.restrictToSupport q)
+              hmixSupport
   zero_normalized := fun {A} [_] [_] [_] q hq => by
     have h := hhm.V_zero_normalized q hq
     have heq : experimentOfChannel (uninformativeChannelU A) = uninformativeExperiment A := by
       simp only [experimentOfChannel, uninformativeExperiment, FiniteExperimentOn.ofChannel]
+    rw [show supportCompletedPosteriorValue hhm.V q
+        (experimentOfChannel (uninformativeChannelU A)) =
+          hhm.V q (experimentOfChannel (uninformativeChannelU A)) by
+      simp [supportCompletedPosteriorValue, hq]]
     rw [heq]
     exact h
 
@@ -237,14 +391,15 @@ theorem-shaped Herstein--Milnor interface: Lean proves the HM hypotheses, then
 the external theorem supplies the value conclusion. -/
 noncomputable def posteriorValueRep_of_axioms_HMTheorem
     (F : PrefFamily.{u})
-    (hblackwell : FiniteBlackwellPosteriorAssumptions.{u})
-    (hhm : ClassicalFiniteHersteinMilnorTheoremAssumptions.{u})
-    (hax : TraceAxioms F)
-    (hplc : PosteriorLawContinuity F) :
+    (hblackwell : FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{u})
+    (hhm : ClassicalHersteinMilnorMixtureTheoremAssumptions.{u})
+    (hax : TraceAxioms F) :
     PosteriorValueRepresentation F :=
   posteriorValueRep_of_HersteinMilnorConclusion F
-    (from_axioms_to_posterior_of_blackwell F hblackwell hax)
-    (finiteHersteinMilnorConclusion_of_blackwell_axioms F hblackwell hhm hax hplc)
+    (from_axioms_to_posterior_of_blackwell F
+      (blackwellPosteriorReplacement_of_samePosteriorGarblings hblackwell) hax)
+    (finiteHersteinMilnorConclusion_of_blackwell_axioms
+      F hblackwell hhm hax)
 
 /--
 **From Axioms to Value Representation (Combined Bridge)**
@@ -261,6 +416,7 @@ noncomputable def posteriorValueRep_of_axioms
     (hax : TraceAxioms F) :
     PosteriorValueRepresentation F :=
   posteriorValueRep_of_HersteinMilnor F hhm
+    hax
     (from_axioms_to_posterior_of_blackwell F hblackwell hax)
 
 /-!
@@ -268,7 +424,7 @@ noncomputable def posteriorValueRep_of_axioms
 
 Paper Lemma branchagg (lines 1830-2068).
 
-From branchwise monotonicity (A7), we derive that the value of a sequential
+From branchwise monotonicity (A6), we derive that the value of a sequential
 experiment is an aggregation of branch values with positive coefficients.
 -/
 
@@ -732,7 +888,7 @@ structure SufficiencySpineAssumptions where
   posterior_to_value_rep :
     ∀ F : PrefFamily.{u}, PosteriorLawSufficiency F → PosteriorValueRepresentation F
   /-- Stage 3: Value representation implies branch aggregation.
-      Paper Lemma branchagg. Uses A7.
+      Paper Lemma branchagg. Uses A6.
       Returns the same V plus branch coefficients β(q,r). -/
   value_rep_to_branch :
     ∀ F : PrefFamily.{u}, PosteriorValueRepresentation F → BranchAggregationStructure F
@@ -815,18 +971,18 @@ theorem SufficiencyAndBlockScale_of_spine
       (SufficiencyStatement_of_spine hspine) blockScaleFromMIRepStatement
 
 /--
-**Main Theorem from Spine and DPI**
+**Main Theorem from the sufficiency spine**
 
-Given sufficiency spine assumptions and the explicit finite DPI assumptions
-used by the benchmark direction, derive the full main characterisation.
+Given sufficiency spine assumptions, derive the full main characterisation.
+The benchmark direction uses the internally proved finite data-processing
+inequalities.
 -/
-theorem MainCharacterizationWithMoreover_of_spine_and_DPI
-    (hspine : SufficiencySpineAssumptions.{u})
-    (hdpi : FiniteDPIAssumptions.{u}) :
+theorem MainCharacterizationWithMoreover_of_spine
+    (hspine : SufficiencySpineAssumptions.{u}) :
     MainCharacterizationWithMoreover.{u} := by
   apply main_characterization_from_spine
   · exact SufficiencyStatement_of_spine hspine
-  · exact BenchmarkStatement_of_DPI hdpi
+  · exact BenchmarkStatement_of_MIRep
   · exact (SufficiencyAndBlockScale_of_spine hspine).2
 
 /-!

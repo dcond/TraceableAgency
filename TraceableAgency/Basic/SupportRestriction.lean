@@ -21,6 +21,8 @@ set_option linter.style.header false
 
 namespace TraceableAgency
 
+universe u
+
 variable {A O : Type*}
 variable [Fintype A]
 
@@ -409,5 +411,132 @@ theorem posteriorLawIntegral_restrictToSupport [Fintype O] [DecidableEq O]
       rw [hmarg, hzero]
     rw [hzero, hzero_restrict]
     simp
+
+/-!
+## Bundled experiments on a support face
+
+These definitions live in the basic finite-probability layer so that later
+value-representation constructions can complete a full-support theorem at
+boundary priors without importing any preference-specific convention.
+-/
+
+/-- Restrict a bundled finite experiment to the positive support of its
+prior, retaining the same outcome alphabet. -/
+noncomputable def FiniteExperimentOn.restrictToSupport
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) :
+    FiniteExperimentOn (supportSubtype q) where
+  OutcomeType := E.OutcomeType
+  outFintype := E.outFintype
+  outDecEq := E.outDecEq
+  channel := @Channel.restrictToSupport
+    A E.OutcomeType _ E.outFintype E.P q
+
+/-- Inclusion of a support-face distribution into the ambient simplex. -/
+noncomputable def supportFaceInclude
+    {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) [Nonempty (supportSubtype q)]
+    (d : Dist (supportSubtype q)) : Dist A :=
+  Channel.actionPushforward d (supportIncludeKernel q)
+
+/-- Support-face inclusion is injective. -/
+theorem supportFaceInclude_injective
+    {A : Type u} [Fintype A] [DecidableEq A]
+    (q : Dist A) [Nonempty (supportSubtype q)] :
+    Function.Injective (supportFaceInclude q) := by
+  intro d d' h
+  ext a
+  have ha := congrArg (fun x : Dist A => x a.1) h
+  have heval :
+      ∀ x : Dist (supportSubtype q), supportFaceInclude q x a.1 = x a := by
+    intro x
+    change (∑ b : supportSubtype q, x b * Dist.pure b.1 a.1) = x a
+    rw [Fintype.sum_eq_single a]
+    · simp
+    · intro b hba
+      have hne : b.1 ≠ a.1 := by
+        intro h
+        exact hba (Subtype.ext h)
+      rw [Dist.pure_apply_ne b.1 a.1 hne.symm, mul_zero]
+  rw [heval d, heval d'] at ha
+  exact ha
+
+/-- A weakly stated equality of finite posterior laws remains true after both
+experiments are restricted to the positive support face.
+
+Continuous-test extensionality is proved in `Basic.Convergence` by finite
+polynomial interpolation.  The inverse used below therefore need not itself
+be continuous. -/
+theorem samePosteriorLawExp_restrictToSupport
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E E' : FiniteExperimentOn A)
+    (hsame : SamePosteriorLawExp q E E') :
+    letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+    SamePosteriorLawExp q.restrictToSupport
+      (E.restrictToSupport q) (E'.restrictToSupport q) := by
+  letI : Nonempty (supportSubtype q) := supportSubtype_nonempty q
+  intro ψ _hψ
+  classical
+  let φ : Dist A → ℝ := fun d =>
+    if h : ∃ s : Dist (supportSubtype q), supportFaceInclude q s = d then
+      ψ (Classical.choose h)
+    else
+      0
+  have hφ_include :
+      ∀ d : Dist (supportSubtype q), φ (supportFaceInclude q d) = ψ d := by
+    intro d
+    have hex : ∃ s : Dist (supportSubtype q), supportFaceInclude q s =
+        supportFaceInclude q d := ⟨d, rfl⟩
+    rw [show φ (supportFaceInclude q d) = ψ (Classical.choose hex) by
+      simp only [φ, dif_pos hex]]
+    congr 1
+    exact supportFaceInclude_injective q
+      (Classical.choose_spec hex)
+  have hall := samePosteriorLawExp_all_test_functions q E E' hsame φ
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : DecidableEq E.OutcomeType := E.outDecEq
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  letI : DecidableEq E'.OutcomeType := E'.outDecEq
+  have hE :=
+    posteriorLawIntegral_restrictToSupport E.P q φ
+  have hE' :=
+    posteriorLawIntegral_restrictToSupport E'.P q φ
+  change posteriorLawIntegral q E.P φ =
+      posteriorLawIntegral q E'.P φ at hall
+  change posteriorLawIntegral q.restrictToSupport
+      (Channel.restrictToSupport E.P q) ψ =
+    posteriorLawIntegral q.restrictToSupport
+      (Channel.restrictToSupport E'.P q) ψ
+  have hEψ :
+      posteriorLawIntegral q E.P φ =
+        posteriorLawIntegral q.restrictToSupport
+          (Channel.restrictToSupport E.P q) ψ := by
+    rw [hE]
+    apply Finset.sum_congr rfl
+    intro o _ho
+    congr 1
+    exact show
+      φ (Channel.actionPushforward
+          (Channel.posterior (Channel.restrictToSupport E.P q)
+            q.restrictToSupport o)
+          (supportIncludeKernel q)) =
+        ψ (Channel.posterior (Channel.restrictToSupport E.P q)
+          q.restrictToSupport o) from hφ_include _
+  have hE'ψ :
+      posteriorLawIntegral q E'.P φ =
+        posteriorLawIntegral q.restrictToSupport
+          (Channel.restrictToSupport E'.P q) ψ := by
+    rw [hE']
+    apply Finset.sum_congr rfl
+    intro o _ho
+    congr 1
+    exact show
+      φ (Channel.actionPushforward
+          (Channel.posterior (Channel.restrictToSupport E'.P q)
+            q.restrictToSupport o)
+          (supportIncludeKernel q)) =
+        ψ (Channel.posterior (Channel.restrictToSupport E'.P q)
+          q.restrictToSupport o) from hφ_include _
+  exact hEψ.symm.trans (hall.trans hE'ψ)
 
 end TraceableAgency

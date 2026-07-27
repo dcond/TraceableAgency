@@ -644,12 +644,184 @@ theorem relabelChannel_uninformative_action
   cases u
   rfl
 
+/-- Positive scalar relating an arbitrary zero-normalised affine posterior
+representative to its action-relabelled copy at a full-support,
+non-singleton prior.  This is the generic form of affine-utility uniqueness;
+it does not assume that the representative has already been made natural. -/
+theorem posteriorValue_relabel_positiveScalar_fullSupport
+    {F : PrefFamily.{u}} (hax : TraceAxioms F)
+    (V : PosteriorValueRepresentation F)
+    (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
+    {A B : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    (eA : A ≃ B) (q : Dist A) (hq : q.FullSupport)
+    (hA : ¬ Subsingleton A) :
+    ∃ c : ℝ, 0 < c ∧
+      ∀ {O Y : Type u}
+        [Fintype O] [DecidableEq O]
+        [Fintype Y] [DecidableEq Y]
+        (eO : O ≃ Y) (P : Channel A O),
+        V.V (Relabeling.relabelDist eA q)
+            (experimentOfChannel (Relabeling.relabelChannel eA eO P)) =
+          c * V.V q (experimentOfChannel P) := by
+  classical
+  let q' : Dist B := Relabeling.relabelDist eA q
+  have hq' : q'.FullSupport :=
+    Relabeling.relabelDist_fullSupport eA q hq
+  let base :
+      {O : Type u} → [Fintype O] → [DecidableEq O] →
+        Channel A O → ℝ :=
+    fun {O} [Fintype O] [DecidableEq O] P =>
+      V.V q (experimentOfChannel P)
+  let target :
+      {O : Type u} → [Fintype O] → [DecidableEq O] →
+        Channel A O → ℝ :=
+    fun {O} [Fintype O] [DecidableEq O] P =>
+      V.V q'
+        (experimentOfChannel
+          (Relabeling.relabelChannel eA (Equiv.refl O) P))
+  let hVaff :=
+    posteriorValueAffine_of_lawAffine_and_publicMixLaw
+      finitePosteriorLawValueAffine_of_representation
+  have hbaseAff :
+      ∀ {O Z : Type u} [Fintype O] [DecidableEq O]
+        [Fintype Z] [DecidableEq Z]
+        (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
+        (P : Channel A O) (Q : Channel A Z),
+        base (publicMixChannel t ht0 ht1 P Q) =
+          t * base P + (1 - t) * base Q := by
+    intro O Z _ _ _ _ t ht0 ht1 P Q
+    exact hVaff.V_publicMix_affine F hax V q hq t ht0 ht1 P Q
+  have htargetAff :
+      ∀ {O Z : Type u} [Fintype O] [DecidableEq O]
+        [Fintype Z] [DecidableEq Z]
+        (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
+        (P : Channel A O) (Q : Channel A Z),
+        target (publicMixChannel t ht0 ht1 P Q) =
+          t * target P + (1 - t) * target Q := by
+    intro O Z _ _ _ _ t ht0 ht1 P Q
+    change
+      V.V q'
+          (experimentOfChannel
+            (Relabeling.relabelChannel eA (Equiv.refl (O ⊕ Z))
+              (publicMixChannel t ht0 ht1 P Q))) =
+        t * target P + (1 - t) * target Q
+    rw [show
+        Relabeling.relabelChannel eA (Equiv.refl (O ⊕ Z))
+            (publicMixChannel t ht0 ht1 P Q) =
+          publicMixChannel t ht0 ht1
+            (Relabeling.relabelChannel eA (Equiv.refl O) P)
+            (Relabeling.relabelChannel eA (Equiv.refl Z) Q) from
+          relabelChannel_publicMix_action eA t ht0 ht1 P Q]
+    exact hVaff.V_publicMix_affine F hax V q' hq' t ht0 ht1
+      (Relabeling.relabelChannel eA (Equiv.refl O) P)
+      (Relabeling.relabelChannel eA (Equiv.refl Z) Q)
+  have hnonconst :
+      base (Channel.idChannel : Channel A A) ≠
+        base (Channel.uninformativeChannelU A) := by
+    have hstrict :=
+      branch_id_uninformativeU_experiment_strict_of_A1 F hax q hq hA
+    exact branch_value_ne_of_strict_experiment_pref F V q hq
+      (experimentOfChannel (Channel.idChannel : Channel A A))
+      (experimentOfChannel (Channel.uninformativeChannelU A))
+      hstrict.1 hstrict.2
+  have horder :
+      ∀ {O : Type u} [Fintype O] [DecidableEq O]
+        (P Q : Channel A O),
+        target P ≥ target Q ↔ base P ≥ base Q := by
+    intro O _ _ P Q
+    let P' : Channel B O := Relabeling.relabelChannel eA (Equiv.refl O) P
+    let Q' : Channel B O := Relabeling.relabelChannel eA (Equiv.refl O) Q
+    have hrel_order :
+        ExperimentPairPref F (experimentOfChannel P') (experimentOfChannel Q')
+            q' q' ↔
+          ExperimentPairPref F (experimentOfChannel P) (experimentOfChannel Q)
+            q q := by
+      have hblockRelabel :
+          Relabeling.relabelChannel (Equiv.sumCongr eA eA)
+              (Equiv.sumCongr (Equiv.refl O) (Equiv.refl O))
+              (blockChannel P Q) =
+            blockChannel P' Q' := by
+        simpa [P', Q'] using
+          Relabeling.relabel_blockChannel_sumCongr_eq
+            eA (Equiv.refl O) P Q
+      have hrel :=
+        Relabeling.relabel_rel_of_axioms F hax
+          (Equiv.sumCongr eA eA)
+          (Equiv.sumCongr (Equiv.refl O) (Equiv.refl O))
+          (blockChannel P Q) (inlDist q) (inrDist q)
+      have hrel' :
+          F.rel (blockChannel P Q) (inlDist q) (inrDist q) ↔
+            F.rel (blockChannel P' Q') (inlDist q') (inrDist q') := by
+        have hrel'' := hrel
+        rw [hblockRelabel] at hrel''
+        rw [Relabeling.relabelDist_sumCongr_inl eA q] at hrel''
+        rw [Relabeling.relabelDist_sumCongr_inr eA q] at hrel''
+        simpa [q'] using hrel''
+      change
+        F.rel (blockChannel P' Q') (inlDist q') (inrDist q') ↔
+          F.rel (blockChannel P Q) (inlDist q) (inrDist q)
+      exact hrel'.symm
+    have htgt :=
+      V.represents_block_comparisons q' hq'
+        (experimentOfChannel P') (experimentOfChannel Q')
+    have hbase :=
+      V.represents_block_comparisons q hq
+        (experimentOfChannel P) (experimentOfChannel Q)
+    calc
+      target P ≥ target Q
+          ↔ ExperimentPairPref F
+              (experimentOfChannel P') (experimentOfChannel Q') q' q' := by
+            simpa [target, P', Q'] using htgt.symm
+      _ ↔ ExperimentPairPref F
+              (experimentOfChannel P) (experimentOfChannel Q) q q :=
+            hrel_order
+      _ ↔ base P ≥ base Q := by
+            simpa [base] using hbase
+  rcases huniq.positive_affine_transform base target
+      hbaseAff htargetAff hnonconst horder with
+    ⟨c, b, hc, hct⟩
+  have hbaseU : base (Channel.uninformativeChannelU A) = 0 :=
+    V.zero_normalized q hq
+  have htargetU : target (Channel.uninformativeChannelU A) = 0 := by
+    have hUrel := relabelChannel_uninformative_action eA
+    simpa [target, q', hUrel] using V.zero_normalized q' hq'
+  have hb : b = 0 := by
+    have hU := hct (Channel.uninformativeChannelU A)
+    rw [hbaseU, htargetU] at hU
+    linarith
+  refine ⟨c, hc, ?_⟩
+  intro O Y _ _ _ _ eO P
+  let P₀ : Channel B O :=
+    Relabeling.relabelChannel eA (Equiv.refl O) P
+  have hout :
+      V.V q'
+          (experimentOfChannel
+            (Relabeling.relabelChannel eA eO P)) =
+        V.V q' (experimentOfChannel P₀) := by
+    have hsame :
+        SamePosteriorLawExp q'
+          (experimentOfChannel
+            (Relabeling.relabelChannel (Equiv.refl B) eO P₀))
+          (experimentOfChannel P₀) :=
+      samePosteriorLawExp_outcomeRelabel eO q' P₀
+    have hVsame :=
+      V.respects_same_posterior_law q'
+        (experimentOfChannel
+          (Relabeling.relabelChannel (Equiv.refl B) eO P₀))
+        (experimentOfChannel P₀) hsame
+    simpa [P₀, Relabeling.relabelChannel_action_then_outcome] using hVsame
+  have hmain := hct P
+  rw [hb, add_zero] at hmain
+  simpa [target, base, q', P₀] using hout.trans hmain
+
 /-- Full-support actionbase scalar from order-level relabeling, HM public-mix
 affinity, and finite affine-utility uniqueness. -/
 theorem selectedActionbaseScalar_of_orderRelabeling_HM_fullSupport
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteFullSupportSelectedActionbaseScalarFor hfaces where
   relabel_scalar := by
@@ -673,7 +845,7 @@ theorem selectedActionbaseScalar_of_orderRelabeling_HM_fullSupport
             (Relabeling.relabelChannel eA (Equiv.refl O) P))
     let hVaff :=
       posteriorValueAffine_of_lawAffine_and_publicMixLaw
-        hhm.posterior_law_value_affine
+        (finitePosteriorLawValueAffine_of_HM hhm)
     have hbaseAff :
         ∀ {O Z : Type u} [Fintype O] [DecidableEq O]
           [Fintype Z] [DecidableEq Z]
@@ -1003,7 +1175,7 @@ product-normalization pinning calculation. -/
 theorem finiteFullSupportSelectedPosteriorValueRelabeling_of_HM_productNormalization
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
     (hpos : FiniteProductScaleZPositiveAssumptionsFor hfaces hprod) :
@@ -1479,7 +1651,7 @@ normalization.
 theorem finiteProductGroupingEquation_of_weightRecursion_fullSupportRelabeling
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (haff :
       FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
@@ -1603,7 +1775,7 @@ theorem groupingEquation
 theorem fullSupportRelabeling
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteFullSupportSelectedPosteriorValueRelabelingFor hready.hfaces :=
   finiteFullSupportSelectedPosteriorValueRelabeling_of_HM_productNormalization
@@ -1612,7 +1784,7 @@ theorem fullSupportRelabeling
 theorem twoGroupingWeight_fullSupportRelabeling
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteProductTwoGroupingWeightEquationAssumptionsFor hready.hfaces
       hready.product_quasi_additivity :=
@@ -1624,7 +1796,7 @@ theorem twoGroupingWeight_fullSupportRelabeling
 theorem groupingReferenceWeight_fullSupportRelabeling
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteProductGroupingReferenceWeightAssumptionsFor hready.hfaces
       hready.product_quasi_additivity :=
@@ -1635,7 +1807,7 @@ theorem groupingReferenceWeight_fullSupportRelabeling
 theorem groupingEquation_fullSupportRelabeling
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u}) :
     FiniteProductGroupingEquationAssumptionsFor hready.hfaces :=
   finiteProductGroupingEquation_of_weightRecursion_fullSupportRelabeling
@@ -1662,7 +1834,7 @@ order.
 noncomputable def InteractionCollapseUniversalScale_of_preEntropyReady
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (_hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (_hhm : FinitePosteriorIntegralRepresentationData.{u})
     (_huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
@@ -1683,7 +1855,7 @@ relabeling theorem instead of `product_normalized_representatives`.
 noncomputable def InteractionCollapseUniversalScale_of_preEntropyReady_fullSupportRelabeling
     {F : PrefFamily.{u}}
     (hready : PreEntropyReadyFaceScalesStructure F)
-    (hhm : ClassicalFiniteMixtureSpaceAffineRepresentationAssumptions.{u})
+    (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (huniq : ClassicalFiniteAffineUtilityUniquenessAssumptions.{u})
     (hax : TraceAxioms F) :
     InteractionCollapseUniversalChainScaleStructure F :=
