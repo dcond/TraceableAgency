@@ -3,40 +3,17 @@ Copyright (c) 2026 Daniele Condorelli. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
-import TraceableAgency.Info.MutualInfo
+import TraceableAgency.Info.DataProcessing
 import TraceableAgency.Basic.Channel
 import TraceableAgency.Basic.Convergence
 import TraceableAgency.Behaviour.Axioms
 
 /-!
-# External Finite Data Processing Inequality Assumptions
+# Finite Blackwell Equivalence Boundary
 
-This file contains external assumptions for finite information-theoretic
-data processing inequalities (DPI). These are standard results in finite
-information theory that are not proved in this development.
-
-## Main definitions
-
-* `FiniteDPIAssumptions` - a structure bundling the finite DPI inequalities
-  needed to close the benchmark direction (A4 and A5 axioms for MIPrefFamily).
-
-## Status
-
-These assumptions are:
-1. Standard finite information-theory results
-2. NOT proved in this Lean development
-3. Used as explicit, auditable external assumptions
-4. No anonymous `axiom` declarations are used
-
-The two inequalities are:
-1. **Outcome post-processing DPI**: I(q, P∘T) ≤ I(q, P)
-2. **Action Bayes-pushforward DPI**: I(qS, P̂) ≤ I(q, P) when P̂ is a valid completion
-
-## References
-
-* Cover & Thomas, "Elements of Information Theory", Chapter 2
-* The data processing inequality is a standard consequence of the chain rule
-  and non-negativity of conditional mutual information.
+The finite mutual-information data-processing inequalities are proved
+internally in `TraceableAgency.Info.DataProcessing`.  This file isolates the
+remaining classical finite Blackwell equivalence theorem.
 -/
 
 set_option linter.style.header false
@@ -44,50 +21,6 @@ set_option linter.style.header false
 namespace TraceableAgency
 
 universe u
-
-/-!
-## Finite Data Processing Inequality Assumptions
-
-These are the standard finite DPI inequalities needed for the benchmark direction.
--/
-
-/--
-External finite information-theoretic assumptions used to close the benchmark
-direction (axioms A4 and A5 for MIPrefFamily).
-
-These are standard finite data-processing inequalities for mutual information.
-They are NOT proved in this development but are used as explicit external assumptions.
-
-* `outcome_postprocess`: Post-processing outcomes cannot increase mutual information.
-  For any channel P : A → Δ(O) and post-processing T : O → Δ(O'), we have
-  I(q, P∘T) ≤ I(q, P).
-
-* `action_bayes_pushforward`: Coarsening actions via a valid Bayesian pushforward
-  cannot increase mutual information. For action kernel S : A → Δ(A') and
-  any valid completion P̂ of the pushforward channel S^q P, we have
-  I(qS, P̂) ≤ I(q, P).
--/
-structure FiniteDPIAssumptions.{v} : Prop where
-  /-- Outcome post-processing DPI: I(q, P∘T) ≤ I(q, P).
-      Post-processing the outcomes of a channel cannot increase mutual information.
-      This is the standard data processing inequality for outcome garbling. -/
-  outcome_postprocess :
-    ∀ {A O O' : Type v} [Fintype A] [DecidableEq A]
-      [Fintype O] [DecidableEq O] [Fintype O'] [DecidableEq O']
-      (q : Dist A) (P : Channel A O) (T : Channel O O'),
-      mutualInfo q (Channel.postprocess P T) ≤ mutualInfo q P
-  /-- Action Bayes-pushforward DPI: I(qS, P̂) ≤ I(q, P).
-      Coarsening actions via Bayesian pushforward cannot increase MI.
-      For action kernel S : A → Δ(A'), prior q, channel P : A → Δ(O),
-      and any valid completion P̂ : A' → Δ(O) of the pushforward S^q P,
-      the mutual information cannot increase. -/
-  action_bayes_pushforward :
-    ∀ {A A' O : Type v} [Fintype A] [DecidableEq A]
-      [Fintype A'] [DecidableEq A'] [Fintype O] [DecidableEq O] [Nonempty A]
-      (P : Channel A O) (q : Dist A) (S : Channel.ActionKernel A A')
-      (P_hat : Channel A' O),
-      Channel.IsBayesPushforwardCompletion P q S P_hat →
-      mutualInfo (Channel.actionPushforward q S) P_hat ≤ mutualInfo q P
 
 /-!
 ## Finite Blackwell / Posterior-Law Sufficiency Assumptions
@@ -210,7 +143,7 @@ theorem experimentPairPref_self_of_axioms
   letI : DecidableEq E.OutcomeType := E.outDecEq
   have hself : F.rel E.P q q := by
     rcases (hax.a1.1 E.P).1 q q with h | h <;> exact h
-  have hblock := (hax.a3.1 E.P q q).mp hself
+  have hblock := (hax.a3.duplication E.P q q).mp hself
   simpa [ExperimentPairPref, blockExperimentChannel] using hblock
 
 theorem blackwell_rel_replace_by_equiv
@@ -359,33 +292,33 @@ theorem blackwell_pairwise_block_replacement_from_weak_equiv
         F.rel (blockChannel P Q) (inlDist q) (inrDist r) := by
     simpa [commonP, x, y, k0, k2, Act, Out, C, blackwellPairBlockReplacementAct,
       blackwellPairBlockReplacementOut, blackwellPairBlockReplacementChannel] using
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k0) (j := k2) h02_ne
         (qᵢ := q) (qⱼ := r))
   have hcommon_01 : F.rel commonP x x' := by
     have h :=
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k0) (j := k1) h01_ne
         (qᵢ := q) (qⱼ := q')).mpr hleft_to_new
     simpa [commonP, x, x', k0, k1, Act, Out, C, blackwellPairBlockReplacementAct,
       blackwellPairBlockReplacementOut, blackwellPairBlockReplacementChannel] using h
   have hcommon_10 : F.rel commonP x' x := by
     have h :=
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k1) (j := k0) h10_ne
         (qᵢ := q') (qⱼ := q)).mpr hleft_to_old
     simpa [commonP, x, x', k0, k1, Act, Out, C, blackwellPairBlockReplacementAct,
       blackwellPairBlockReplacementOut, blackwellPairBlockReplacementChannel] using h
   have hcommon_23 : F.rel commonP y y' := by
     have h :=
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k2) (j := k3) h23_ne
         (qᵢ := r) (qⱼ := r')).mpr hright_to_new
     simpa [commonP, y, y', k2, k3, Act, Out, C, blackwellPairBlockReplacementAct,
       blackwellPairBlockReplacementOut, blackwellPairBlockReplacementChannel] using h
   have hcommon_32 : F.rel commonP y' y := by
     have h :=
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k3) (j := k2) h32_ne
         (qᵢ := r') (qⱼ := r)).mpr hright_to_old
     simpa [commonP, y, y', k2, k3, Act, Out, C, blackwellPairBlockReplacementAct,
@@ -398,7 +331,7 @@ theorem blackwell_pairwise_block_replacement_from_weak_equiv
         F.rel (blockChannel P' Q') (inlDist q') (inrDist r') := by
     simpa [commonP, x', y', k1, k3, Act, Out, C, blackwellPairBlockReplacementAct,
       blackwellPairBlockReplacementOut, blackwellPairBlockReplacementChannel] using
-      (hax.a3.2 (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
+      (hax.a3.finite_block (K := BlackwellPairBlockReplacementBlock) (Act := Act) (Out := Out)
         (P := C) (i := k1) (j := k3) h13_ne
         (qᵢ := q') (qⱼ := r'))
   exact hcommon_02.symm.trans (hreplace.trans hcommon_13)

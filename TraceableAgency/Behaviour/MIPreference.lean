@@ -132,7 +132,9 @@ MIPrefFamily satisfies A3 (Block-Comparison Coherence).
 -/
 
 theorem MIPrefFamily_A3 : A3_BlockComparisonCoherence MIPrefFamily := by
-  constructor
+  refine
+    { duplication := ?_
+      finite_block := ?_ }
   · intro A O _ _ _ _ P q q'
     simp only [MIPrefFamily]
     rw [mutualInfo_block_inl P P q, mutualInfo_block_inr P P q']
@@ -144,9 +146,9 @@ theorem MIPrefFamily_A3 : A3_BlockComparisonCoherence MIPrefFamily := by
         mutualInfo_block_inr (P i) (P j) qⱼ]
 
 /-!
-## A7 Benchmark Component
+## A6 Benchmark Component
 
-MIPrefFamily satisfies A7 (Branchwise Continuation Monotonicity).
+MIPrefFamily satisfies A6 (Branchwise Continuation Monotonicity).
 -/
 
 /-- Weighted sum monotonicity: if weights are nonneg and pointwise ≥ holds for positive weights,
@@ -193,9 +195,9 @@ theorem sum_mul_gt_sum_mul_of_nonneg_of_exists_strict
     _ > ∑ i, w i * y i + 0 := by linarith
     _ = ∑ i, w i * y i := by ring
 
-/-- Strong weak A7: branchwise weak preference implies aggregate weak preference.
+/-- Strong weak A6: branchwise weak preference implies aggregate weak preference.
     This is the auxiliary strong version with different Y and Z. -/
-theorem MIPrefFamily_A7Strong_weak : A7Strong_BranchwiseContinuationMonotonicity_Weak MIPrefFamily := by
+theorem MIPrefFamily_A6Strong_weak : A6Strong_BranchwiseContinuationMonotonicity_Weak MIPrefFamily := by
   intro A O₁ _ _ _ _ _ Y Z _ _ _ _ q P₁ Q R h_branch
   simp only [MIPrefFamily]
   rw [mutualInfo_block_inl, mutualInfo_block_inr]
@@ -219,9 +221,9 @@ theorem MIPrefFamily_A7Strong_weak : A7Strong_BranchwiseContinuationMonotonicity
     rw [mutualInfo_block_inl, mutualInfo_block_inr] at h_branch_o₁
     exact h_branch_o₁
 
-/-- Strong strict A7: if one branch is strict, aggregate is strict.
+/-- Strong strict A6: if one branch is strict, aggregate is strict.
     This is the auxiliary strong version with different Y and Z. -/
-theorem MIPrefFamily_A7Strong_strict : A7Strong_BranchwiseContinuationMonotonicity_Strict MIPrefFamily := by
+theorem MIPrefFamily_A6Strong_strict : A6Strong_BranchwiseContinuationMonotonicity_Strict MIPrefFamily := by
   intro A O₁ _ _ _ _ _ Y Z _ _ _ _ q P₁ Q R h_branch h_strict
   rw [MIPrefFamily_strictRel_iff_gt]
   rw [mutualInfo_block_inl, mutualInfo_block_inr]
@@ -253,31 +255,31 @@ theorem MIPrefFamily_A7Strong_strict : A7Strong_BranchwiseContinuationMonotonici
       rw [mutualInfo_block_inl, mutualInfo_block_inr] at h_strict₀
       exact h_strict₀
 
-/-- MIPrefFamily satisfies the strong A7 (auxiliary). -/
-theorem MIPrefFamily_A7Strong : A7Strong_BranchwiseContinuationMonotonicity MIPrefFamily :=
-  ⟨MIPrefFamily_A7Strong_weak, MIPrefFamily_A7Strong_strict⟩
+/-- MIPrefFamily satisfies the strong A6 (auxiliary). -/
+theorem MIPrefFamily_A6Strong : A6Strong_BranchwiseContinuationMonotonicity MIPrefFamily :=
+  ⟨MIPrefFamily_A6Strong_weak, MIPrefFamily_A6Strong_strict⟩
 
-/-- Weak A7 (paper-faithful): branchwise weak preference implies aggregate weak preference.
+/-- Weak A6 (paper-faithful): branchwise weak preference implies aggregate weak preference.
     Uses common branch outcome family O₂. -/
-theorem MIPrefFamily_A7_weak : A7_BranchwiseContinuationMonotonicity_Weak MIPrefFamily :=
-  (A7_of_A7Strong MIPrefFamily MIPrefFamily_A7Strong).1
+theorem MIPrefFamily_A6_weak : A6_BranchwiseContinuationMonotonicity_Weak MIPrefFamily :=
+  (A6_of_A6Strong MIPrefFamily MIPrefFamily_A6Strong).1
 
-/-- Strict A7 (paper-faithful): if one branch is strict, aggregate is strict.
+/-- Strict A6 (paper-faithful): if one branch is strict, aggregate is strict.
     Uses common branch outcome family O₂. -/
-theorem MIPrefFamily_A7_strict : A7_BranchwiseContinuationMonotonicity_Strict MIPrefFamily :=
-  (A7_of_A7Strong MIPrefFamily MIPrefFamily_A7Strong).2
+theorem MIPrefFamily_A6_strict : A6_BranchwiseContinuationMonotonicity_Strict MIPrefFamily :=
+  (A6_of_A6Strong MIPrefFamily MIPrefFamily_A6Strong).2
 
-/-- MIPrefFamily satisfies A7 (paper-faithful Branchwise Continuation Monotonicity). -/
-theorem MIPrefFamily_A7 : A7_BranchwiseContinuationMonotonicity MIPrefFamily :=
-  A7_of_A7Strong MIPrefFamily MIPrefFamily_A7Strong
+/-- MIPrefFamily satisfies A6 (paper-faithful Branchwise Continuation Monotonicity). -/
+theorem MIPrefFamily_A6 : A6_BranchwiseContinuationMonotonicity MIPrefFamily :=
+  A6_of_A6Strong MIPrefFamily MIPrefFamily_A6Strong
 
 /-!
-## A8 Benchmark Component
+## A7 Benchmark Component
 
-MIPrefFamily satisfies A8 (Independent-Background Separability).
+MIPrefFamily satisfies A7 (Independent-Background Separability).
 -/
 
-theorem MIPrefFamily_A8 : A8_IndependentBackgroundSeparability MIPrefFamily := by
+theorem MIPrefFamily_A7 : A7_IndependentBackgroundSeparability MIPrefFamily := by
   constructor
   · intro A₁ A₂ O₁ O₂R O₂S _ _ _ _ _ _ _ _ _ _ q₁ q₂ _hq₁ _hq₂ P₁ Q₁ R₂ S₂
     simp only [MIPrefFamily]
@@ -300,7 +302,7 @@ This then immediately gives the invariance:
   I(q,P) ≥ I(q,Q) ↔ I(q, t·P⊕(1-t)·R) ≥ I(q, t·Q⊕(1-t)·R)
 -/
 
-section A6_Infrastructure
+section PublicMixInfrastructure
 
 variable {A O Y : Type u}
 variable [Fintype A] [DecidableEq A]
@@ -464,15 +466,7 @@ theorem mutualInfo_publicMix_common_background_iff
   rw [mutualInfo_publicMixChannel, mutualInfo_publicMixChannel]
   constructor <;> intro h <;> nlinarith
 
-end A6_Infrastructure
-
-/-- MIPrefFamily satisfies A6 (Public-Coin Independence). -/
-theorem MIPrefFamily_A6 : A6_PublicCoinIndependence MIPrefFamily := by
-  intro A O_P O_Q O_R _ _ _ _ _ _ _ _ q t ht0 ht1 P Q R
-  simp only [MIPrefFamily]
-  rw [mutualInfo_block_inl, mutualInfo_block_inr, mutualInfo_block_inl, mutualInfo_block_inr]
-  rw [mutualInfo_publicMixChannel, mutualInfo_publicMixChannel]
-  constructor <;> intro h <;> nlinarith
+end PublicMixInfrastructure
 
 /-!
 ## A2 Benchmark Component
@@ -728,66 +722,55 @@ theorem MIPrefFamily_A2 : A2_Continuity MIPrefFamily :=
   MIPrefFamily_closedPreferenceGraph
 
 /-!
-## A4 and A5: Data Processing Inequality Dependent Axioms
+## A4 and A5: Internally proved data processing
 
 The remaining axioms A4 (outcome post-processing aversion) and A5 (action coarsening
-aversion) follow from the finite data processing inequality.
-
-We prove them conditional on the `FiniteDPIAssumptions` structure defined in
-`TraceableAgency/External/Blackwell.lean`.
+aversion) follow from the finite data-processing theorems proved in
+`TraceableAgency.Info.DataProcessing`.
 -/
 
-section DPI_Dependent
+section DataProcessing
 
-open FiniteDPIAssumptions
-
-/-- MIPrefFamily satisfies A4 (Outcome Post-processing Aversion) given finite DPI.
+/-- MIPrefFamily satisfies A4 (Outcome Post-processing Aversion).
 
 A4 requires: for any P : A → Δ(O), T : O → Δ(O'), q ∈ Δ(A),
   q^0 ≽_{P ⊔ PT} q^1
 
 For MIPrefFamily this becomes: I(q, P) ≥ I(q, P∘T),
 which is exactly the outcome post-processing DPI. -/
-theorem MIPrefFamily_A4_of_DPI.{v}
-    (hdpi : FiniteDPIAssumptions.{v}) :
+theorem MIPrefFamily_A4.{v} :
     A4_OutcomePostprocessingAversion.{v} MIPrefFamily := by
   unfold A4_OutcomePostprocessingAversion
   intro A O O' _ _ _ _ _ _ P T q
   simp only [MIPrefFamily]
   rw [mutualInfo_block_inl, mutualInfo_block_inr]
-  exact hdpi.outcome_postprocess q P T
+  exact mutualInfo_outcome_postprocess_le q P T
 
-/-- MIPrefFamily satisfies A5 (Action Coarsening Aversion) given finite DPI.
+/-- MIPrefFamily satisfies A5 (Action Coarsening Aversion).
 
 A5 requires: for S : A → Δ(A'), P : A → Δ(O), q ∈ Δ(A), and valid completion P̂,
   q^0 ≽_{P ⊔ P̂} (qS)^1
 
 For MIPrefFamily this becomes: I(q, P) ≥ I(qS, P̂),
 which is exactly the action Bayes-pushforward DPI. -/
-theorem MIPrefFamily_A5_of_DPI.{v}
-    (hdpi : FiniteDPIAssumptions.{v}) :
+theorem MIPrefFamily_A5.{v} :
     A5_ActionCoarseningAversion.{v} MIPrefFamily := by
   unfold A5_ActionCoarseningAversion
   intro A A' O _ _ _ _ _ _ _ P q S P_hat hcompl
   simp only [MIPrefFamily]
   rw [mutualInfo_block_inl, mutualInfo_block_inr]
-  exact hdpi.action_bayes_pushforward P q S P_hat hcompl
+  exact mutualInfo_action_bayes_pushforward_le P q S P_hat hcompl
 
-/-- MIPrefFamily satisfies all TraceAxioms given finite DPI assumptions.
-
-This closes the benchmark direction for the canonical MI preference family,
-modulo the finite data processing inequality assumptions. -/
-theorem MIPrefFamily_TraceAxioms_of_DPI.{v}
-    (hdpi : FiniteDPIAssumptions.{v}) :
+/-- MIPrefFamily satisfies all TraceAxioms. -/
+theorem MIPrefFamily_TraceAxioms.{v} :
     TraceAxioms.{v} MIPrefFamily :=
   { a1 := MIPrefFamily_A1
     a2 := MIPrefFamily_A2
     a3 := MIPrefFamily_A3
-    a4 := MIPrefFamily_A4_of_DPI.{v} hdpi
-    a5 := MIPrefFamily_A5_of_DPI.{v} hdpi
+    a4 := MIPrefFamily_A4.{v}
+    a5 := MIPrefFamily_A5.{v}
     a6 := MIPrefFamily_A6
-    a7 := MIPrefFamily_A7
-    a8 := MIPrefFamily_A8 }
+    a7 := MIPrefFamily_A7 }
 
 /-- Any mutual-information representation satisfies A1. -/
 theorem MIRep_A1 {F : PrefFamily.{v}} (hrep : MIRep F) :
@@ -832,23 +815,25 @@ theorem MIRep_posteriorLawContinuity {F : PrefFamily.{v}} (hrep : MIRep F) :
 /-- Any mutual-information representation satisfies A3. -/
 theorem MIRep_A3 {F : PrefFamily.{v}} (hrep : MIRep F) :
     A3_BlockComparisonCoherence F := by
-  constructor
+  refine
+    { duplication := ?_
+      finite_block := ?_ }
   · intro A O _ _ _ _ P q q'
     constructor
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep (blockChannel P P) (inlDist q) (inrDist q')).mpr
-      exact (MIPrefFamily_A3.1 P q q').mp
+      exact (MIPrefFamily_A3.duplication P q q').mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep P q q').mp h)
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep P q q').mpr
-      exact (MIPrefFamily_A3.1 P q q').mpr
+      exact (MIPrefFamily_A3.duplication P q q').mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep (blockChannel P P) (inlDist q) (inrDist q')).mp h)
   · intro K _ _ Act Out _ _ _ _ P i j hij qᵢ qⱼ
     constructor
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel (P i) (P j)) (inlDist qᵢ) (inrDist qⱼ)).mpr
-      exact (MIPrefFamily_A3.2 Act Out P i j hij qᵢ qⱼ).mp
+      exact (MIPrefFamily_A3.finite_block Act Out P i j hij qᵢ qⱼ).mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockFamilyChannel Act Out P)
           (blockEmbedDist Act i qᵢ)
@@ -858,57 +843,34 @@ theorem MIRep_A3 {F : PrefFamily.{v}} (hrep : MIRep F) :
         (blockFamilyChannel Act Out P)
         (blockEmbedDist Act i qᵢ)
         (blockEmbedDist Act j qⱼ)).mpr
-      exact (MIPrefFamily_A3.2 Act Out P i j hij qᵢ qⱼ).mpr
+      exact (MIPrefFamily_A3.finite_block Act Out P i j hij qᵢ qⱼ).mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel (P i) (P j)) (inlDist qᵢ) (inrDist qⱼ)).mp h)
-
-/-- Any mutual-information representation satisfies A4, modulo finite DPI. -/
-theorem MIRep_A4_of_DPI {F : PrefFamily.{v}} (hdpi : FiniteDPIAssumptions.{v})
-    (hrep : MIRep F) :
+/-- Any mutual-information representation satisfies A4. -/
+theorem MIRep_A4 {F : PrefFamily.{v}} (hrep : MIRep F) :
     A4_OutcomePostprocessingAversion F := by
   intro A O O' _ _ _ _ _ _ P T q
   apply (rel_iff_MIPrefFamily_of_MIRep hrep
     (blockChannel P (Channel.postprocess P T)) (inlDist q) (inrDist q)).mpr
-  exact MIPrefFamily_A4_of_DPI hdpi P T q
+  exact MIPrefFamily_A4 P T q
 
-/-- Any mutual-information representation satisfies A5, modulo finite DPI. -/
-theorem MIRep_A5_of_DPI {F : PrefFamily.{v}} (hdpi : FiniteDPIAssumptions.{v})
-    (hrep : MIRep F) :
+/-- Any mutual-information representation satisfies A5. -/
+theorem MIRep_A5 {F : PrefFamily.{v}} (hrep : MIRep F) :
     A5_ActionCoarseningAversion F := by
   intro A A' O _ _ _ _ _ _ _ P q S P_hat hcompl
   apply (rel_iff_MIPrefFamily_of_MIRep hrep
     (blockChannel P P_hat) (inlDist q) (inrDist (Channel.actionPushforward q S))).mpr
-  exact MIPrefFamily_A5_of_DPI hdpi P q S P_hat hcompl
+  exact MIPrefFamily_A5 P q S P_hat hcompl
 
 /-- Any mutual-information representation satisfies A6. -/
 theorem MIRep_A6 {F : PrefFamily.{v}} (hrep : MIRep F) :
-    A6_PublicCoinIndependence F := by
-  intro A O_P O_Q O_R _ _ _ _ _ _ _ _ q P Q R t ht0 ht1
-  let mixPR := publicMixChannel t ht0 ht1 P R
-  let mixQR := publicMixChannel t ht0 ht1 Q R
-  constructor
-  · intro h
-    apply (rel_iff_MIPrefFamily_of_MIRep hrep
-      (blockChannel mixPR mixQR) (inlDist q) (inrDist q)).mpr
-    exact (MIPrefFamily_A6 q P Q R t ht0 ht1).mp
-      ((rel_iff_MIPrefFamily_of_MIRep hrep
-        (blockChannel P Q) (inlDist q) (inrDist q)).mp h)
-  · intro h
-    apply (rel_iff_MIPrefFamily_of_MIRep hrep
-      (blockChannel P Q) (inlDist q) (inrDist q)).mpr
-    exact (MIPrefFamily_A6 q P Q R t ht0 ht1).mpr
-      ((rel_iff_MIPrefFamily_of_MIRep hrep
-        (blockChannel mixPR mixQR) (inlDist q) (inrDist q)).mp h)
-
-/-- Any mutual-information representation satisfies A7. -/
-theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
-    A7_BranchwiseContinuationMonotonicity F := by
+    A6_BranchwiseContinuationMonotonicity F := by
   constructor
   · intro A O₁ _ _ _ _ _ O₂ _ _ q P₁ Q R hbranch
     apply (rel_iff_MIPrefFamily_of_MIRep hrep
       (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q)).mpr
-    apply MIPrefFamily_A7_weak O₂ q P₁ Q R
+    apply MIPrefFamily_A6_weak O₂ q P₁ Q R
     intro o₁ hpos
     exact (rel_iff_MIPrefFamily_of_MIRep hrep
       (blockChannel (Q o₁) (R o₁))
@@ -918,7 +880,7 @@ theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
     apply (strictRel_iff_MIPrefFamily_of_MIRep hrep
       (blockChannel (seqComposeDep P₁ O₂ Q) (seqComposeDep P₁ O₂ R))
       (inlDist q) (inrDist q)).mpr
-    apply MIPrefFamily_A7_strict O₂ q P₁ Q R
+    apply MIPrefFamily_A6_strict O₂ q P₁ Q R
     · intro o₁ hpos
       exact (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel (Q o₁) (R o₁))
@@ -931,9 +893,9 @@ theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
           (inlDist (branchPosterior P₁ q o₁))
           (inrDist (branchPosterior P₁ q o₁))).mp hstr⟩
 
-/-- Any mutual-information representation satisfies A8. -/
-theorem MIRep_A8 {F : PrefFamily.{v}} (hrep : MIRep F) :
-    A8_IndependentBackgroundSeparability F := by
+/-- Any mutual-information representation satisfies A7. -/
+theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
+    A7_IndependentBackgroundSeparability F := by
   constructor
   · intro A₁ A₂ O₁ O₂R O₂S _ _ _ _ _ _ _ _ _ _ q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂
     let prodPR := prodChannel P₁ R₂
@@ -945,13 +907,13 @@ theorem MIRep_A8 {F : PrefFamily.{v}} (hrep : MIRep F) :
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodPS prodQS) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A8.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mp
+      exact (MIPrefFamily_A7.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodPR prodQR) (inlDist prodQ) (inrDist prodQ)).mp h)
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodPR prodQR) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A8.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mpr
+      exact (MIPrefFamily_A7.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodPS prodQS) (inlDist prodQ) (inrDist prodQ)).mp h)
   · intro A₁ A₂ O₁R O₁S O₂ _ _ _ _ _ _ _ _ _ _ q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂
@@ -964,31 +926,29 @@ theorem MIRep_A8 {F : PrefFamily.{v}} (hrep : MIRep F) :
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodSP prodSQ) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A8.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mp
+      exact (MIPrefFamily_A7.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodRP prodRQ) (inlDist prodQ) (inrDist prodQ)).mp h)
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodRP prodRQ) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A8.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mpr
+      exact (MIPrefFamily_A7.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodSP prodSQ) (inlDist prodQ) (inrDist prodQ)).mp h)
 
-/-- Necessity/benchmark transfer: every MI-representable family satisfies the axioms,
-    modulo the explicit finite DPI assumptions used for A4 and A5. -/
-theorem MIRep_TraceAxioms_of_DPI.{v}
-    (hdpi : FiniteDPIAssumptions.{v})
+/-- Necessity/benchmark transfer: every MI-representable family satisfies the
+axioms. -/
+theorem MIRep_TraceAxioms.{v}
     (F : PrefFamily.{v}) (hrep : MIRep F) :
     TraceAxioms F :=
   { a1 := MIRep_A1 hrep
     a2 := MIRep_A2 hrep
     a3 := MIRep_A3 hrep
-    a4 := MIRep_A4_of_DPI hdpi hrep
-    a5 := MIRep_A5_of_DPI hdpi hrep
+    a4 := MIRep_A4 hrep
+    a5 := MIRep_A5 hrep
     a6 := MIRep_A6 hrep
-    a7 := MIRep_A7 hrep
-    a8 := MIRep_A8 hrep }
+    a7 := MIRep_A7 hrep }
 
-end DPI_Dependent
+end DataProcessing
 
 end TraceableAgency

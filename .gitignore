@@ -4,3 +4,18 @@ lake-packages/
 *.ilean
 .DS_Store
 /tmp/
+
+# LaTeX build products.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# The Lean development is pinned to the paper's v6 snapshot. Preserve later
+# local drafts without accidentally publishing them with this certificate.
+Paper/*
+!Paper/README.md
+!Paper/empowerment_v6.tex
+!Paper/empowerment_v6.pdf

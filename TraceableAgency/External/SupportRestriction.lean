@@ -31,20 +31,6 @@ namespace TraceableAgency
 
 universe u
 
-/-- Pure relational replacement by two-sided weak equivalence. -/
-theorem rel_replace_by_equiv
-    {α : Type*} (R : α → α → Prop)
-    (htrans : ∀ x y z, R x y → R y z → R x z)
-    {x x' y y' : α}
-    (hxx' : R x x') (hx'x : R x' x)
-    (hyy' : R y y') (hy'y : R y' y) :
-    (R x y ↔ R x' y') := by
-  constructor
-  · intro hxy
-    exact htrans x' y y' (htrans x' x y hx'x hxy) hyy'
-  · intro hx'y'
-    exact htrans x y' y (htrans x x' y' hxx' hx'y') hy'y
-
 /-- A5 gives that an ambient experiment weakly dominates its positive-support
 restriction: deleting zero-prior rows by support projection is an action
 coarsening. -/
@@ -200,39 +186,39 @@ theorem pairwise_support_restriction_from_weak_equiv
   have hleft_dup :
       F.rel P q r ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) :=
-    hax.a3.1 P q r
+    hax.a3.duplication P q r
   have hcommon_02 :
       F.rel commonP x y ↔
         F.rel (blockChannel P P) (inlDist q) (inrDist r) := by
     simpa [commonP, x, y, k0, k2, Act, Out, C, supportRestrictionAct,
       supportRestrictionChannel] using
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k2) h02_ne
         (qᵢ := q) (qⱼ := r))
   have hcommon_01 : F.rel commonP x x' := by
     have h :=
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k0) (j := k1) h01_ne
         (qᵢ := q) (qⱼ := q.restrictToSupport)).mpr hq_to_support
     simpa [commonP, x, x', k0, k1, Act, Out, C, supportRestrictionAct,
       supportRestrictionChannel] using h
   have hcommon_10 : F.rel commonP x' x := by
     have h :=
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k0) h10_ne
         (qᵢ := q.restrictToSupport) (qⱼ := q)).mpr hq_to_ambient
     simpa [commonP, x, x', k0, k1, Act, Out, C, supportRestrictionAct,
       supportRestrictionChannel] using h
   have hcommon_23 : F.rel commonP y y' := by
     have h :=
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k2) (j := k3) h23_ne
         (qᵢ := r) (qⱼ := r.restrictToSupport)).mpr hr_to_support
     simpa [commonP, y, y', k2, k3, Act, Out, C, supportRestrictionAct,
       supportRestrictionChannel] using h
   have hcommon_32 : F.rel commonP y' y := by
     have h :=
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k3) (j := k2) h32_ne
         (qᵢ := r.restrictToSupport) (qⱼ := r)).mpr hr_to_ambient
     simpa [commonP, y, y', k2, k3, Act, Out, C, supportRestrictionAct,
@@ -249,7 +235,7 @@ theorem pairwise_support_restriction_from_weak_equiv
           (inrDist r.restrictToSupport) := by
     simpa [commonP, x', y', k1, k3, Act, Out, C, supportRestrictionAct,
       supportRestrictionChannel] using
-      (hax.a3.2 (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
+      (hax.a3.finite_block (K := SupportRestrictionBlock) (Act := Act) (Out := Out) (P := C)
         (i := k1) (j := k3) h13_ne
         (qᵢ := q.restrictToSupport) (qⱼ := r.restrictToSupport))
   exact hleft_dup.trans (hcommon_02.symm.trans (hreplace.trans hcommon_13))

@@ -12,7 +12,7 @@ import TraceableAgency.Info.Identities
 # Main Theorem Statement and Spine
 
 The main result (Theorem 1 in empowerment_v5.tex, lines 770-787):
-A preference family satisfies axioms A1-A8 if and only if it is represented
+A preference family satisfies axioms A1-A7 if and only if it is represented
 by mutual information.
 
 Moreover, under these conditions, block-supported cross-channel comparisons
@@ -135,13 +135,13 @@ theorem main_characterization_from_package
     (Already proved in MIPreference.lean as MIPrefFamily_is_MIRep) -/
 theorem MIPrefFamily_MIRep : MIRep MIPrefFamily := MIPrefFamily_is_MIRep
 
-/-- Benchmark/necessity direction, modulo the explicit finite DPI assumptions:
-    every MI-representable preference family satisfies A1-A8. -/
-theorem BenchmarkStatement_of_DPI
-    (hdpi : FiniteDPIAssumptions.{u}) :
+/-- Benchmark/necessity direction: every MI-representable preference family
+satisfies A1--A7.  Both finite data-processing inequalities are proved
+internally. -/
+theorem BenchmarkStatement_of_MIRep :
     BenchmarkStatement.{u} := by
   intro F hrep
-  exact MIRep_TraceAxioms_of_DPI hdpi F hrep
+  exact MIRep_TraceAxioms F hrep
 
 /-!
 ## Block Scale from MIRep

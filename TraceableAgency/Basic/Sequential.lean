@@ -57,7 +57,7 @@ theorem seqCompose_apply (P₁ : Channel A O₁) (Q : O₁ → Channel A O₂)
 /-!
 ## Dependent Continuation Outcome Types
 
-For the paper's A7, where continuation channels Q^o, R^o may have different
+For the paper's A6, where continuation channels Q^o, R^o may have different
 outcome types Y^o, Z^o for each first-stage outcome o.
 -/
 
