@@ -9,11 +9,12 @@ import TraceableAgency.External.SupportRestriction
 import TraceableAgency.External.Blackwell
 
 /-!
-# External Faddeev Entropy Characterisation Assumptions
+# Faddeev Entropy Characterisation Interface and Paper-Specific Bridges
 
-This file contains external assumptions for the Faddeev entropy characterisation,
-which establishes that the entropy function H derived from the sufficiency proof
-equals a positive multiple of Shannon entropy.
+This file states the generic finite Faddeev interface and proves the
+paper-specific bridges showing that the entropy function derived from the
+sufficiency proof satisfies it. The generic interface is discharged by the
+Lean proof in `TraceableAgency.External.GenericFaddeev`.
 
 ## Main definitions
 
@@ -27,9 +28,10 @@ equals a positive multiple of Shannon entropy.
 
 ## Status
 
-These assumptions are:
+The audit schema and paper-specific derivations are:
 1. Based on the paper's Lemma faddeevsketch, Faddeev-recursion part (lines 2560-2646)
-2. Uses Faddeev's classical theorem (1956) as an external mathematical fact
+2. Matches Faddeev's classical theorem (1956), now formally proved in
+   `TraceableAgency.External.GenericFaddeev`
 3. Split into explicit, auditable assumptions, with relabeling internalized
 4. No anonymous `axiom` declarations are used
 
@@ -942,11 +944,12 @@ theorem faddeevRecursionForm_of_coarseReveal_parts
       hblock hred hnorm hhfun hrestricted F hax hcross hreg
 
 /--
-**Classical Faddeev Theorem Assumption**
+**Classical Faddeev Theorem Audit Schema**
 
-Classical/external theorem application, with an entirely preference-free
-boundary: an abstract finite entropy functional satisfying the standard
-Faddeev hypotheses is a nonnegative multiple of Shannon entropy.
+Preference-free statement of the exact theorem consumed by the downstream
+proof: an abstract finite entropy functional satisfying the standard Faddeev
+hypotheses is a nonnegative multiple of Shannon entropy. The schema has a
+closed inhabitant in `TraceableAgency.External.GenericFaddeev`.
 
 This bridge intentionally returns only `0 ≤ alpha`; strict positivity is split
 out because the paper obtains it from local nontriviality/A1.

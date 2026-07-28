@@ -9,11 +9,12 @@ import TraceableAgency.Basic.Convergence
 import TraceableAgency.Behaviour.Axioms
 
 /-!
-# Finite Blackwell Equivalence Boundary
+# Finite Blackwell Equivalence
 
 The finite mutual-information data-processing inequalities are proved
-internally in `TraceableAgency.Info.DataProcessing`.  This file isolates the
-remaining classical finite Blackwell equivalence theorem.
+internally in `TraceableAgency.Info.DataProcessing`.  This file also proves
+the finite same-posterior-law Blackwell equivalence by constructing the
+garbling kernels explicitly.
 -/
 
 set_option linter.style.header false
@@ -23,11 +24,13 @@ namespace TraceableAgency
 universe u
 
 /-!
-## Finite Blackwell / Posterior-Law Sufficiency Assumptions
+## Finite Blackwell statement
 
-These are external assumptions for the finite Blackwell equivalence theorem,
-which establishes that two channels inducing the same posterior law at a
-full-support prior are mutual garblings of each other.
+The proposition-valued record below states the exact finite Blackwell theorem:
+two channels inducing the same posterior law at a full-support prior are
+mutual garblings of each other.  It is retained as a compatibility-friendly
+statement schema; `finiteSamePosteriorLawBlackwellEquivalence` constructs its
+canonical inhabitant below.
 
 Paper reference: Lemma blackwell (lines 891-961) and Lemma plsuff (lines 963-998).
 
@@ -37,8 +40,8 @@ The paper proves:
 3. Combined with A3 (block coherence) and A1 transitivity: same-posterior-law
    experiments may be replaced inside pairwise block comparisons.
 
-The finite Blackwell/garbling equivalence remains a classical finite theorem.
-The A4/A3/A1 replacement plumbing is proved below.
+Both the finite Blackwell/garbling equivalence and the A4/A3/A1 replacement
+plumbing are proved below.
 -/
 
 /-- Experiment-level postprocessing/garbling relation. -/
@@ -50,10 +53,10 @@ def ExperimentPostprocesses {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A
     E'.P = Channel.postprocess E.P T
 
 /--
-Classical finite Blackwell equivalence at a fixed full-support prior:
+Finite Blackwell equivalence at a fixed full-support prior:
 same posterior law gives garblings in both directions.
 
-This is the exact finite theorem isolated from paper Lemma `blackwell`.
+This is the exact statement of paper Lemma `blackwell`.
 It does not mention preferences, A3/A4, or block replacement.
 -/
 structure FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{v} : Prop where
@@ -69,6 +72,339 @@ structure FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{v} : Prop where
       (E E' : FiniteExperimentOn A),
       SamePosteriorLawExp q E E' →
       ExperimentPostprocesses E' E
+
+/-!
+## Constructive proof of finite Blackwell equivalence
+
+For a posterior `r`, `posteriorClassMass q E r` is the total probability of
+all outcomes of `E` that induce `r`.  Equality of finite posterior laws says
+exactly that these class masses agree.  The garbling below forgets which
+outcome inside a posterior class was observed and redraws an outcome of the
+target experiment proportionally to its marginal probability inside the same
+class.  Null source outcomes receive an arbitrary stochastic row; full support
+of the prior makes every such source column identically zero.
+-/
+
+/-- Total outcome mass carried by one exact posterior value. -/
+noncomputable def posteriorClassMass
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) (r : Dist A) : ℝ := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  exact
+    ∑ o : E.OutcomeType,
+      if E.posterior q o = r then E.outcomeMarginal q o else 0
+
+theorem posteriorClassMass_nonneg
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) (r : Dist A) :
+    0 ≤ posteriorClassMass q E r := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  unfold posteriorClassMass
+  apply Finset.sum_nonneg
+  intro o _ho
+  split_ifs
+  · exact (E.outcomeMarginal q).nonneg o
+  · exact le_rfl
+
+/-- The mass of an outcome is bounded by the mass of its posterior class. -/
+theorem outcomeMarginal_le_posteriorClassMass
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) (o : E.OutcomeType) :
+    E.outcomeMarginal q o ≤
+      posteriorClassMass q E (E.posterior q o) := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  unfold posteriorClassMass
+  calc
+    E.outcomeMarginal q o =
+        (if E.posterior q o = E.posterior q o
+          then E.outcomeMarginal q o else 0) := by simp
+    _ ≤ ∑ y : E.OutcomeType,
+          if E.posterior q y = E.posterior q o
+            then E.outcomeMarginal q y else 0 := by
+      have h :=
+        Finset.single_le_sum
+          (s := Finset.univ)
+          (f := fun y : E.OutcomeType =>
+            if E.posterior q y = E.posterior q o
+              then E.outcomeMarginal q y else 0)
+          (fun y _hy => by
+            split_ifs
+            · exact (E.outcomeMarginal q).nonneg y
+            · exact le_rfl)
+          (Finset.mem_univ o)
+      simpa using h
+
+/-- Equal finite posterior laws give equal mass to every exact posterior
+class.  The passage from continuous tests to the class indicator is the
+finite interpolation theorem already proved in `Basic.Convergence`. -/
+theorem posteriorClassMass_eq_of_samePosteriorLawExp
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E E' : FiniteExperimentOn A)
+    (hsame : SamePosteriorLawExp q E E') (r : Dist A) :
+    posteriorClassMass q E r = posteriorClassMass q E' r := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  have h :=
+    samePosteriorLawExp_all_test_functions q E E' hsame
+      (fun s : Dist A => if s = r then 1 else 0)
+  simpa [posteriorLawIntegralExp, posteriorClassMass] using h
+
+/-- The conditional marginal distribution of outcomes inside one positive
+posterior class. -/
+noncomputable def posteriorClassDistribution
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E : FiniteExperimentOn A) (r : Dist A)
+    (hpos : 0 < posteriorClassMass q E r) :
+    @Dist E.OutcomeType E.outFintype := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  refine
+    { prob := fun o =>
+        if E.posterior q o = r then
+          E.outcomeMarginal q o / posteriorClassMass q E r
+        else 0
+      nonneg := ?_
+      sum_eq_one := ?_ }
+  · intro o
+    split_ifs
+    · exact div_nonneg ((E.outcomeMarginal q).nonneg o) (le_of_lt hpos)
+    · exact le_rfl
+  · calc
+      (∑ o : E.OutcomeType,
+          if E.posterior q o = r then
+            E.outcomeMarginal q o / posteriorClassMass q E r
+          else 0) =
+          (∑ o : E.OutcomeType,
+            (if E.posterior q o = r then E.outcomeMarginal q o else 0) /
+              posteriorClassMass q E r) := by
+            apply Finset.sum_congr rfl
+            intro o _ho
+            split_ifs <;> simp
+      _ =
+          (∑ o : E.OutcomeType,
+            if E.posterior q o = r then E.outcomeMarginal q o else 0) /
+              posteriorClassMass q E r := by
+            rw [Finset.sum_div]
+      _ = posteriorClassMass q E r / posteriorClassMass q E r := by
+            rfl
+      _ = 1 := div_self (ne_of_gt hpos)
+
+/-- Kernel that randomizes only within the target experiment's posterior
+class.  A zero-mass class uses an arbitrary target-channel row. -/
+noncomputable def posteriorMatchingKernel
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E E' : FiniteExperimentOn A) :
+    @Channel E.OutcomeType E'.OutcomeType E'.outFintype := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  exact fun o =>
+    if hpos : 0 < posteriorClassMass q E' (E.posterior q o) then
+      posteriorClassDistribution q E' (E.posterior q o) hpos
+    else
+      E'.P (Classical.arbitrary A)
+
+theorem posteriorMatchingKernel_apply_of_classMass_pos_of_eq
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E E' : FiniteExperimentOn A)
+    (o : E.OutcomeType) (y : E'.OutcomeType)
+    (hpos : 0 < posteriorClassMass q E' (E.posterior q o))
+    (hpost : E'.posterior q y = E.posterior q o) :
+    posteriorMatchingKernel q E E' o y =
+      E'.outcomeMarginal q y /
+        posteriorClassMass q E' (E.posterior q o) := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  unfold posteriorMatchingKernel
+  rw [dif_pos hpos]
+  simp [posteriorClassDistribution, hpost]
+
+theorem posteriorMatchingKernel_apply_of_classMass_pos_of_ne
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (E E' : FiniteExperimentOn A)
+    (o : E.OutcomeType) (y : E'.OutcomeType)
+    (hpos : 0 < posteriorClassMass q E' (E.posterior q o))
+    (hpost : E'.posterior q y ≠ E.posterior q o) :
+    posteriorMatchingKernel q E E' o y = 0 := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  unfold posteriorMatchingKernel
+  rw [dif_pos hpos]
+  simp [posteriorClassDistribution, hpost]
+
+/-- One direction of finite Blackwell equivalence: equality of posterior laws
+constructs an explicit post-processing from `E` to `E'`. -/
+theorem experimentPostprocesses_of_samePosteriorLawExp
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hq : q.FullSupport)
+    (E E' : FiniteExperimentOn A)
+    (hsame : SamePosteriorLawExp q E E') :
+    ExperimentPostprocesses E E' := by
+  classical
+  letI : Fintype E.OutcomeType := E.outFintype
+  letI : DecidableEq E.OutcomeType := E.outDecEq
+  letI : Fintype E'.OutcomeType := E'.outFintype
+  letI : DecidableEq E'.OutcomeType := E'.outDecEq
+  let T := posteriorMatchingKernel q E E'
+  refine ⟨T, ?_⟩
+  ext a y
+  have hterm :
+      ∀ o : E.OutcomeType,
+        q a * (E.P a o * T o y) =
+          if E'.posterior q y = E.posterior q o then
+            (E.outcomeMarginal q o * E.posterior q o a) *
+              (E'.outcomeMarginal q y /
+                posteriorClassMass q E' (E.posterior q o))
+          else 0 := by
+    intro o
+    by_cases hmo : 0 < E.outcomeMarginal q o
+    · have hclassE :
+          0 < posteriorClassMass q E (E.posterior q o) :=
+        lt_of_lt_of_le hmo
+          (outcomeMarginal_le_posteriorClassMass q E o)
+      have hclassE' :
+          0 < posteriorClassMass q E' (E.posterior q o) := by
+        rw [← posteriorClassMass_eq_of_samePosteriorLawExp q E E'
+          hsame (E.posterior q o)]
+        exact hclassE
+      by_cases hpost : E'.posterior q y = E.posterior q o
+      · rw [posteriorMatchingKernel_apply_of_classMass_pos_of_eq
+          q E E' o y hclassE' hpost]
+        rw [if_pos hpost]
+        rw [show q a * (E.P a o *
+              (E'.outcomeMarginal q y /
+                posteriorClassMass q E' (E.posterior q o))) =
+            (q a * E.P a o) *
+              (E'.outcomeMarginal q y /
+                posteriorClassMass q E' (E.posterior q o)) by ring]
+        rw [← posterior_mul_marginal q E.P o a]
+        simp only [FiniteExperimentOn.outcomeMarginal,
+          FiniteExperimentOn.posterior]
+      · rw [posteriorMatchingKernel_apply_of_classMass_pos_of_ne
+          q E E' o y hclassE' hpost]
+        rw [if_neg hpost]
+        ring
+    · have hmozero : E.outcomeMarginal q o = 0 :=
+        le_antisymm (le_of_not_gt hmo) ((E.outcomeMarginal q).nonneg o)
+      have hjointzero : q a * E.P a o = 0 := by
+        rw [← posterior_mul_marginal q E.P o a]
+        change E.outcomeMarginal q o * E.posterior q o a = 0
+        rw [hmozero]
+        ring
+      rw [show q a * (E.P a o * T o y) =
+          (q a * E.P a o) * T o y by ring]
+      rw [hjointzero]
+      simp [hmozero]
+  have hscaled :
+      q a * Channel.postprocess E.P T a y =
+        ∑ o : E.OutcomeType,
+          if E'.posterior q y = E.posterior q o then
+            (E.outcomeMarginal q o * E.posterior q o a) *
+              (E'.outcomeMarginal q y /
+                posteriorClassMass q E' (E.posterior q o))
+          else 0 := by
+    change q a * (∑ o : E.OutcomeType, E.P a o * T o y) = _
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro o _ho
+    exact hterm o
+  have hscaled_target :
+      q a * Channel.postprocess E.P T a y = q a * E'.P a y := by
+    rw [hscaled]
+    by_cases hmy : 0 < E'.outcomeMarginal q y
+    · have hclassE' :
+          0 < posteriorClassMass q E' (E'.posterior q y) :=
+        lt_of_lt_of_le hmy
+          (outcomeMarginal_le_posteriorClassMass q E' y)
+      have hclassEq :
+          posteriorClassMass q E (E'.posterior q y) =
+            posteriorClassMass q E' (E'.posterior q y) :=
+        posteriorClassMass_eq_of_samePosteriorLawExp q E E' hsame
+          (E'.posterior q y)
+      have hfactor :
+          (∑ o : E.OutcomeType,
+            if E'.posterior q y = E.posterior q o then
+              (E.outcomeMarginal q o * E.posterior q o a) *
+                (E'.outcomeMarginal q y /
+                  posteriorClassMass q E' (E.posterior q o))
+            else 0) =
+            posteriorClassMass q E (E'.posterior q y) *
+              (E'.posterior q y a *
+                (E'.outcomeMarginal q y /
+                  posteriorClassMass q E' (E'.posterior q y))) := by
+        unfold posteriorClassMass
+        rw [Finset.sum_mul]
+        apply Finset.sum_congr rfl
+        intro o _ho
+        by_cases hpost : E'.posterior q y = E.posterior q o
+        · simp only [hpost, ↓reduceIte]
+          ring
+        · have hpost' : E.posterior q o ≠ E'.posterior q y :=
+            fun h => hpost h.symm
+          simp only [hpost, hpost', ↓reduceIte, zero_mul]
+      rw [hfactor, hclassEq]
+      have hclassNe :
+          posteriorClassMass q E' (E'.posterior q y) ≠ 0 :=
+        ne_of_gt hclassE'
+      calc
+        posteriorClassMass q E' (E'.posterior q y) *
+              (E'.posterior q y a *
+                (E'.outcomeMarginal q y /
+                  posteriorClassMass q E' (E'.posterior q y))) =
+            E'.outcomeMarginal q y * E'.posterior q y a := by
+              field_simp [hclassNe]
+        _ = q a * E'.P a y :=
+          posterior_mul_marginal q E'.P y a
+    · have hmyzero : E'.outcomeMarginal q y = 0 :=
+        le_antisymm (le_of_not_gt hmy) ((E'.outcomeMarginal q).nonneg y)
+      have hjointzero : q a * E'.P a y = 0 := by
+        rw [← posterior_mul_marginal q E'.P y a]
+        change E'.outcomeMarginal q y * E'.posterior q y a = 0
+        rw [hmyzero]
+        ring
+      simp [hmyzero, hjointzero]
+  exact
+    (mul_left_cancel₀ (ne_of_gt (hq a)) hscaled_target).symm
+
+theorem samePosteriorLawExp_symm
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    {q : Dist A} {E E' : FiniteExperimentOn A}
+    (hsame : SamePosteriorLawExp q E E') :
+    SamePosteriorLawExp q E' E := by
+  intro φ hφ
+  exact (hsame φ hφ).symm
+
+/-- Prior-specific finite Blackwell equivalence in the direct paper form:
+equal posterior laws produce stochastic garblings in both directions. -/
+theorem finiteBlackwellEquivalence_of_samePosteriorLawExp
+    {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
+    (q : Dist A) (hq : q.FullSupport)
+    (E E' : FiniteExperimentOn A)
+    (hsame : SamePosteriorLawExp q E E') :
+    ExperimentPostprocesses E E' ∧ ExperimentPostprocesses E' E :=
+  ⟨experimentPostprocesses_of_samePosteriorLawExp q hq E E' hsame,
+    experimentPostprocesses_of_samePosteriorLawExp q hq E' E
+      (samePosteriorLawExp_symm hsame)⟩
+
+/-- Finite Blackwell equivalence, proved internally. -/
+theorem finiteSamePosteriorLawBlackwellEquivalence :
+    FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{u} where
+  same_posterior_left_garbling := by
+    intro A _ _ _ q hq E E' hsame
+    exact
+      (finiteBlackwellEquivalence_of_samePosteriorLawExp
+        q hq E E' hsame).1
+  same_posterior_right_garbling := by
+    intro A _ _ _ q hq E E' hsame
+    exact
+      (finiteBlackwellEquivalence_of_samePosteriorLawExp
+        q hq E E' hsame).2
 
 /--
 **Finite Blackwell Posterior-Law Assumptions**
@@ -91,8 +427,9 @@ Paper: Lemmas blackwell + plsuff + blockcoh (lines 810-998).
 - Combined: q^0 ~_{P⊔Q} q^1
 - For replacement: place E, E', G in 3-block environment, use A3 + transitivity
 
-We state the replacement property directly as the external assumption,
-and reconstruct it below from the classical finite mutual-garbling interface.
+The record states the replacement property used by older internal APIs.  It
+is not a public assumption: it is reconstructed below from the proved finite
+mutual-garbling theorem.
 -/
 structure FiniteBlackwellPosteriorAssumptions.{v} : Prop where
   /-- Left replacement: same posterior law allows substitution on the left.
@@ -370,8 +707,8 @@ theorem experimentPairPref_replacement_from_weak_equiv
   simpa [ExperimentPairPref, blockExperimentChannel] using h
 
 /--
-Reconstruct the old Blackwell/posterior replacement package from the classical
-finite same-posterior-law mutual-garbling theorem plus internal A4/A3/A1
+Reconstruct the old Blackwell/posterior replacement package from the finite
+same-posterior-law mutual-garbling theorem plus internal A4/A3/A1
 replacement plumbing.
 -/
 theorem blackwellPosteriorReplacement_of_samePosteriorGarblings
@@ -404,8 +741,15 @@ theorem blackwellPosteriorReplacement_of_samePosteriorGarblings
       experimentPairPref_replacement_from_weak_equiv F hax q G G E E'
         hG_self hG_self hE_to_E' hE'_to_E
 
+/-- Canonical posterior-replacement package obtained from the internally
+proved finite Blackwell equivalence. -/
+theorem finiteBlackwellPosteriorReplacement :
+    FiniteBlackwellPosteriorAssumptions.{u} :=
+  blackwellPosteriorReplacement_of_samePosteriorGarblings
+    finiteSamePosteriorLawBlackwellEquivalence
+
 /-!
-## Posterior-Law Sufficiency from Blackwell Assumptions
+## Posterior-Law Sufficiency from finite Blackwell equivalence
 
 Given the Blackwell replacement properties, we can prove PosteriorLawSufficiency.
 -/
@@ -447,5 +791,14 @@ theorem from_axioms_to_posterior_of_blackwell
   calc ExperimentPairPref F E₁ E₂ q q
       ↔ ExperimentPairPref F E₁' E₂ q q := hblackwell.left_replacement hax q hq E₁ E₁' E₂ hsame₁
     _ ↔ ExperimentPairPref F E₁' E₂' q q := hblackwell.right_replacement hax q hq E₁' E₂ E₂' hsame₂
+
+/-- Posterior-law sufficiency derived from the trace axioms, using the
+internally proved finite Blackwell theorem. -/
+theorem posteriorLawSufficiency_of_axioms
+    (F : PrefFamily.{u})
+    (hax : TraceAxioms F) :
+    PosteriorLawSufficiency F :=
+  from_axioms_to_posterior_of_blackwell F
+    finiteBlackwellPosteriorReplacement hax
 
 end TraceableAgency

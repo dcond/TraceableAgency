@@ -10,9 +10,9 @@ import TraceableAgency.Basic.Sequential
 import TraceableAgency.Basic.Convergence
 
 /-!
-# Axioms A1-A7
+# Axioms A1-A6
 
-The behavioural axioms for traceable agency from `empowerment_v6.tex`.
+The behavioural axioms for traceable agency from `empowerment_v7.tex`.
 Each axiom is a predicate on `PrefFamily`:
 
 - A1: weak order and local non-triviality;
@@ -20,11 +20,12 @@ Each axiom is a predicate on `PrefFamily`:
 - A3: finite block-comparison coherence;
 - A4: outcome post-processing aversion;
 - A5: action-coarsening aversion;
-- A6: branchwise continuation monotonicity;
-- A7: independent-background separability.
+- A6: branchwise continuation monotonicity.
 
-Public-coin independence is not primitive: it is derived from these axioms in
-`External/HersteinMilnor.lean`.
+Public-coin independence and independent-background separability are not
+primitive.  The latter's v6 predicate is retained below as a named derived
+consequence for compatibility and is proved from A1/A3--A6 in
+`External/EntropyReduction.lean`.
 -/
 
 set_option linter.style.header false
@@ -72,7 +73,7 @@ def A1_WeakOrderLocalNontriviality : Prop :=
 /-!
 ## A2: Continuity
 
-Paper `empowerment_v6.tex` (Axiom A2): the set {(P,q,q') : q ≽_P q'} is closed.
+Paper `empowerment_v7.tex` (Axiom A2): the set {(P,q,q') : q ≽_P q'} is closed.
 
 **Change from v5 → v6.** In v5 Axiom A2 had a second clause — continuity of block
 comparisons under posterior-law convergence at a fixed full-support prior.  In v6
@@ -337,9 +338,11 @@ theorem A6_of_A6Strong :
     exact hstrong_strict O₂ O₂ q P₁ Q R h_branch h_strict
 
 /-!
-## A7: Independent-Background Separability
+## Derived target: Independent-Background Separability
 
-Paper (lines 526-538):
+This statement was called A7 in paper v6.  It is not a field of `TraceAxioms`
+in v7: theorem `independentBackgroundSeparability_of_axioms` derives it from
+A1/A3--A6.
 For full-support q₁∈Δ(A₁), q₂∈Δ(A₂):
 
 First component:
@@ -354,7 +357,7 @@ The background alternatives may have different outcome alphabets. This follows
 the paper's "any channels" wording for R₂,S₂ and, symmetrically, R₁,S₁.
 -/
 
-def A7_IndependentBackgroundSeparability : Prop :=
+def IndependentBackgroundSeparability : Prop :=
   (∀ {A₁ A₂ O₁ O₂R O₂S : Type u}
      [Fintype A₁] [DecidableEq A₁] [Fintype A₂] [DecidableEq A₂]
      [Fintype O₁] [DecidableEq O₁]
@@ -393,6 +396,5 @@ structure TraceAxioms (F : PrefFamily.{u}) : Prop where
   a4 : A4_OutcomePostprocessingAversion F
   a5 : A5_ActionCoarseningAversion F
   a6 : A6_BranchwiseContinuationMonotonicity F
-  a7 : A7_IndependentBackgroundSeparability F
 
 end TraceableAgency

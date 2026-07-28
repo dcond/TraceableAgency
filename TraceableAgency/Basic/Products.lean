@@ -9,7 +9,7 @@ import TraceableAgency.Basic.Channel
 # Product Distributions and Channels
 
 Product distributions q₁ ⊗ q₂ and product channels P₁ ⊗ P₂ for
-statistically independent components. Needed for Axiom A7.
+statistically independent components and derived background inertness.
 -/
 
 set_option linter.style.header false

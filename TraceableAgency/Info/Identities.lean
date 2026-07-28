@@ -381,8 +381,8 @@ end DependentBlockEntropy
 /-!
 ## Product Distribution Entropy Identities
 
-For A7 (independent-background separability), we need entropy additivity
-for product distributions: H(q₁ ⊗ q₂) = H(q₁) + H(q₂).
+For benchmark background cancellation, we need entropy additivity for product
+distributions: H(q₁ ⊗ q₂) = H(q₁) + H(q₂).
 -/
 
 section ProductEntropy
@@ -474,13 +474,14 @@ theorem mutualInfo_prod (q₁ : Dist A₁) (q₂ : Dist A₂)
 end ProductEntropy
 
 /-!
-## A7 Product Background Cancellation Helpers
+## Product Background Cancellation Helpers
 
-For Independent-Background Separability: comparing P₁ vs Q₁ in the first
-component is independent of the background channel in the second component.
+For the benchmark consequence of derived background inertness: comparing P₁
+vs Q₁ in the first component is independent of the background channel in the
+second component.
 -/
 
-section A7ProductHelpers
+section ProductBackgroundHelpers
 
 /-- Left-background cancellation: comparing P₁ vs Q₁ is independent of the
     second-component background channel. -/
@@ -514,7 +515,7 @@ theorem mutualInfo_prod_same_background_right
   rw [mutualInfo_prod, mutualInfo_prod, mutualInfo_prod, mutualInfo_prod]
   constructor <;> intro h <;> linarith
 
-end A7ProductHelpers
+end ProductBackgroundHelpers
 
 /-!
 ## Sequential Composition Chain Rule

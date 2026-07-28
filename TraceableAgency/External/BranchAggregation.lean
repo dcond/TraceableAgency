@@ -7734,10 +7734,11 @@ noncomputable def branchAggregation_of_traceAxioms
   hbranch.of_A6 F hax.a6 hV
 
 /--
-**Branch Aggregation from All External Assumptions**
+**Legacy packaged branch-aggregation constructor**
 
-Given all three external assumptions (Blackwell, Herstein-Milnor, Branch Aggregation)
-and TraceAxioms, derive a branch aggregation structure.
+Given the older packaged Blackwell, Herstein--Milnor, and branch-aggregation
+interfaces plus `TraceAxioms`, derive a branch aggregation structure. This
+constructor is retained for compatibility and is not the final theorem route.
 
 This composes the first three sufficiency bridges:
 1. TraceAxioms → PosteriorLawSufficiency (via Blackwell)

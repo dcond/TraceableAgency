@@ -4,19 +4,22 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
 import TraceableAgency.Main
-import TraceableAgency.External.Faddeev
+import TraceableAgency.External.GenericFaddeev
 import TraceableAgency.External.EntropyReductionClosure
 
 /-!
 # Main Theorem Assembly and Audit Boundary
 
-This file exposes the convention-free main characterization.  Its sufficiency
-boundary consists only of named finite mathematical theorems:
+This file exposes the convention-free main characterization.  The exact finite
+Faddeev theorem needed by the proof is now proved in
+`TraceableAgency.External.GenericFaddeev`; there is no remaining external
+mathematical theorem parameter at the public boundary.
 
-* same-posterior-law Blackwell equivalence;
-* the generic Herstein--Milnor affine-utility theorem for convex mixture spaces;
-* Faddeev's entropy characterization.
-
+The exact generic Herstein--Milnor theorem for sequentially closed independent
+weak orders and interior mixtures is proved in
+`TraceableAgency.External.GenericHersteinMilnor`.
+Finite same-posterior-law Blackwell equivalence is proved internally by an
+explicit posterior-class matching kernel.
 Posterior-law continuity is derived in Lean from the ordinal axioms A1--A4
 (including primitive A2); the continuous barycentric grid and spread/merge
 approximation are constructed explicitly in Lean. Finite posterior-law extensionality is
@@ -66,5 +69,48 @@ theorem MainCharacterizationWithMoreover_of_FinalHM
   · exact blockScaleStatement_from_sufficiency
       (SufficiencyStatement_of_FinalHM hfad hhm)
       blockScaleFromMIRepStatement
+
+/-- Compatibility theorem with Herstein--Milnor discharged internally and the
+Faddeev audit schema supplied explicitly. The closed public theorem below
+supplies its proved inhabitant. -/
+theorem SufficiencyStatement_of_Faddeev
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
+    SufficiencyStatement.{u} :=
+  SufficiencyStatement_of_FinalHM hfad provedFinalHMInterface
+
+/-- Main characterization with the exact generic HM schema proved in Lean. -/
+theorem MainCharacterization_of_Faddeev
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
+    MainCharacterization.{u} :=
+  MainCharacterization_of_FinalHM hfad provedFinalHMInterface
+
+/-- Public convention-free characterization, including the moreover clause.
+Its sole external mathematical input is Faddeev's entropy theorem. -/
+theorem MainCharacterizationWithMoreover_of_Faddeev
+    (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
+    MainCharacterizationWithMoreover.{u} :=
+  MainCharacterizationWithMoreover_of_FinalHM hfad provedFinalHMInterface
+
+/-! ## Closed public theorem surface -/
+
+/-- The axioms imply mutual-information representation, with both generic
+mathematical interfaces discharged by Lean proofs. -/
+theorem provedSufficiencyStatement :
+    SufficiencyStatement.{u} :=
+  SufficiencyStatement_of_Faddeev
+    GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
+
+/-- The paper's main equivalence, with no theorem-interface parameter. -/
+theorem provedMainCharacterization :
+    MainCharacterization.{u} :=
+  MainCharacterization_of_Faddeev
+    GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
+
+/-- The paper's complete main theorem, including the same-scale block clause,
+with no convention and no external mathematical theorem parameter. -/
+theorem provedMainCharacterizationWithMoreover :
+    MainCharacterizationWithMoreover.{u} :=
+  MainCharacterizationWithMoreover_of_Faddeev
+    GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
 
 end TraceableAgency

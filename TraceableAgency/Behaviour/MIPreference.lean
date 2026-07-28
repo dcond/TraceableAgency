@@ -274,12 +274,14 @@ theorem MIPrefFamily_A6 : A6_BranchwiseContinuationMonotonicity MIPrefFamily :=
   A6_of_A6Strong MIPrefFamily MIPrefFamily_A6Strong
 
 /-!
-## A7 Benchmark Component
+## Benchmark Background-Separability Consequence
 
-MIPrefFamily satisfies A7 (Independent-Background Separability).
+Mutual-information preferences satisfy the former v6 A7 predicate.  In the v7
+axiom system this is a consequence rather than a benchmark obligation.
 -/
 
-theorem MIPrefFamily_A7 : A7_IndependentBackgroundSeparability MIPrefFamily := by
+theorem MIPrefFamily_independentBackgroundSeparability :
+    IndependentBackgroundSeparability MIPrefFamily := by
   constructor
   · intro A₁ A₂ O₁ O₂R O₂S _ _ _ _ _ _ _ _ _ _ q₁ q₂ _hq₁ _hq₂ P₁ Q₁ R₂ S₂
     simp only [MIPrefFamily]
@@ -769,8 +771,7 @@ theorem MIPrefFamily_TraceAxioms.{v} :
     a3 := MIPrefFamily_A3
     a4 := MIPrefFamily_A4.{v}
     a5 := MIPrefFamily_A5.{v}
-    a6 := MIPrefFamily_A6
-    a7 := MIPrefFamily_A7 }
+    a6 := MIPrefFamily_A6 }
 
 /-- Any mutual-information representation satisfies A1. -/
 theorem MIRep_A1 {F : PrefFamily.{v}} (hrep : MIRep F) :
@@ -893,9 +894,11 @@ theorem MIRep_A6 {F : PrefFamily.{v}} (hrep : MIRep F) :
           (inlDist (branchPosterior P₁ q o₁))
           (inrDist (branchPosterior P₁ q o₁))).mp hstr⟩
 
-/-- Any mutual-information representation satisfies A7. -/
-theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
-    A7_IndependentBackgroundSeparability F := by
+/-- Any mutual-information representation satisfies the legacy background
+separability predicate. -/
+theorem MIRep_independentBackgroundSeparability
+    {F : PrefFamily.{v}} (hrep : MIRep F) :
+    IndependentBackgroundSeparability F := by
   constructor
   · intro A₁ A₂ O₁ O₂R O₂S _ _ _ _ _ _ _ _ _ _ q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂
     let prodPR := prodChannel P₁ R₂
@@ -907,13 +910,15 @@ theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodPS prodQS) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A7.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mp
+      exact (MIPrefFamily_independentBackgroundSeparability.1
+        q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodPR prodQR) (inlDist prodQ) (inrDist prodQ)).mp h)
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodPR prodQR) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A7.1 q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mpr
+      exact (MIPrefFamily_independentBackgroundSeparability.1
+        q₁ q₂ hq₁ hq₂ P₁ Q₁ R₂ S₂).mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodPS prodQS) (inlDist prodQ) (inrDist prodQ)).mp h)
   · intro A₁ A₂ O₁R O₁S O₂ _ _ _ _ _ _ _ _ _ _ q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂
@@ -926,13 +931,15 @@ theorem MIRep_A7 {F : PrefFamily.{v}} (hrep : MIRep F) :
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodSP prodSQ) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A7.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mp
+      exact (MIPrefFamily_independentBackgroundSeparability.2
+        q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mp
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodRP prodRQ) (inlDist prodQ) (inrDist prodQ)).mp h)
     · intro h
       apply (rel_iff_MIPrefFamily_of_MIRep hrep
         (blockChannel prodRP prodRQ) (inlDist prodQ) (inrDist prodQ)).mpr
-      exact (MIPrefFamily_A7.2 q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mpr
+      exact (MIPrefFamily_independentBackgroundSeparability.2
+        q₁ q₂ hq₁ hq₂ R₁ S₁ P₂ Q₂).mpr
         ((rel_iff_MIPrefFamily_of_MIRep hrep
           (blockChannel prodSP prodSQ) (inlDist prodQ) (inrDist prodQ)).mp h)
 
@@ -946,8 +953,7 @@ theorem MIRep_TraceAxioms.{v}
     a3 := MIRep_A3 hrep
     a4 := MIRep_A4 hrep
     a5 := MIRep_A5 hrep
-    a6 := MIRep_A6 hrep
-    a7 := MIRep_A7 hrep }
+    a6 := MIRep_A6 hrep }
 
 end DataProcessing
 

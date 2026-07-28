@@ -39,7 +39,7 @@ The scale coherence theorem derives:
 The proof uses:
 - Branch aggregation (Lemma branchagg)
 - Cocycle identity from tangent-space arguments
-- A7 (independent background separability) for the two-grouping argument
+- derived background inertness for the two-grouping argument
 - Product revelation and quasi-additivity
 -/
 
@@ -7439,15 +7439,17 @@ The scale coherence theorem states that given branch aggregation coefficients β
 
 1. **Cocycle**: β(q,s) = β(q,r) β(r,s) for nested supports
 2. **Factorization**: β(q,r) = a_q/a_r where a_q := 1/β(q₀, q) for fixed basepoint q₀
-3. **Universal scale**: The two-grouping argument (using A7) shows a_q = a is
-   independent of q across all full-support priors on all finite action sets
+3. **Universal scale**: The two-grouping argument (using derived background
+   inertness) shows a_q = a is independent of q across all full-support priors
+   on all finite action sets
 
 Paper proof sketch (Lemma scalecoherence, lines 2347-2500):
 1. Define H(q) := F_q(χ_q) (full revelation value) and Z(q) := 1 + κH(q)
 2. Product revelation: reveal A first, then B in each branch
 3. Compare with quasi-additivity to get a_{q⊗r}/a_r = Z(q)
 4. Symmetry gives a_q = C·Z(q) for universal C > 0
-5. Two-grouping argument via A7 forces κ = 0, hence Z ≡ 1
+5. Two-grouping argument via derived background inertness forces κ = 0, hence
+   Z ≡ 1
 6. Therefore a_q = C is universal
 -/
 
@@ -7462,7 +7464,8 @@ Paper: Lemmas chain, facescales, scalecoherence (lines 2108-2500).
 **Key mathematical content:**
 - Cocycle: β(q,s) = β(q,r) β(r,s)
 - Factorization: β(q,r) = a_q/a_r
-- Universal scale: a_q = a for all full-support q (via two-grouping + A7)
+- Universal scale: a_q = a for all full-support q (via two-grouping and
+  derived background inertness)
 
 This is a data-carrying structure because it provides the scale function.
 -/
@@ -7495,10 +7498,12 @@ noncomputable def scaleCoherence_of_assumption
   hscale.of_branch_aggregation F hbranch
 
 /--
-**Scale Coherence from All External Assumptions**
+**Legacy packaged scale-coherence constructor**
 
-Given all four external assumptions (Blackwell, Herstein-Milnor, Branch Aggregation,
-Scale Coherence) and TraceAxioms, derive a scale coherence structure.
+Given the older packaged Blackwell, Herstein--Milnor, branch-aggregation, and
+scale-coherence interfaces plus `TraceAxioms`, derive a scale coherence
+structure. This constructor is retained for compatibility and is not the
+final theorem route.
 
 This composes the first four sufficiency bridges:
 1. TraceAxioms → PosteriorLawSufficiency (via Blackwell)

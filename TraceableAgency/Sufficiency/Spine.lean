@@ -388,7 +388,9 @@ noncomputable def posteriorValueRep_of_HersteinMilnorConclusion
 
 /-- From the paper axioms to a posterior value representation using the cleaner
 theorem-shaped Herstein--Milnor interface: Lean proves the HM hypotheses, then
-the external theorem supplies the value conclusion. -/
+the external HM theorem supplies the value conclusion.  The Blackwell argument
+is a compatibility parameter here; the final route supplies the internally
+proved `finiteSamePosteriorLawBlackwellEquivalence`. -/
 noncomputable def posteriorValueRep_of_axioms_HMTheorem
     (F : PrefFamily.{u})
     (hblackwell : FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{u})
@@ -402,10 +404,11 @@ noncomputable def posteriorValueRep_of_axioms_HMTheorem
       F hblackwell hhm hax)
 
 /--
-**From Axioms to Value Representation (Combined Bridge)**
+**Legacy From-Axioms-to-Value Combined Bridge**
 
-Combines the Blackwell and Herstein-Milnor external assumptions to
-go directly from TraceAxioms to PosteriorValueRepresentation.
+Retains the older packaged Blackwell-replacement and direct HM interfaces.
+The public final route instead constructs Blackwell replacement internally
+and uses the generic HM theorem.
 
 Paper: Lemmas blockcoh--blackwell + postsep (lines 810-1196).
 -/
@@ -1040,10 +1043,11 @@ def FaddeevAssumption : Prop :=
       H_func q = α * H(q)
 
 /--
-**External Finite Blackwell Assumption**
+**Legacy finite Blackwell statement**
 
-The finite Blackwell theorem relates statistical sufficiency to garbling.
-This is closely related to the DPI assumptions already in External/Blackwell.lean.
+This older proposition states one direction of the finite Blackwell theorem.
+It is retained for compatibility and is not a public assumption; the stronger
+mutual-garbling result is proved in `External/Blackwell.lean`.
 
 Used in: Stage 1 (posterior-law sufficiency).
 Reference: Blackwell (1953).
