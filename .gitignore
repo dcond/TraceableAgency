@@ -13,9 +13,9 @@ lake-packages/
 *.out
 *.synctex.gz
 
-# The Lean development is pinned to the paper's v6 snapshot. Preserve later
+# The Lean development is pinned to the paper's v7 snapshot. Preserve other
 # local drafts without accidentally publishing them with this certificate.
 Paper/*
 !Paper/README.md
-!Paper/empowerment_v6.tex
-!Paper/empowerment_v6.pdf
+!Paper/empowerment_v7.tex
+!Paper/empowerment_v7.pdf

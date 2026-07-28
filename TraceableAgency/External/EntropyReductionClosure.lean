@@ -6,6 +6,7 @@ Authors: Daniele Condorelli
 import TraceableAgency.External.PreEntropyConstruction
 import TraceableAgency.External.CanonicalPosteriorValue
 import TraceableAgency.External.FiniteIntegralRepresentation
+import TraceableAgency.External.GenericHersteinMilnor
 
 /-!
 # Stage ER-C: Entropy Reduction from the Closed Pre-Entropy Spine
@@ -34,61 +35,61 @@ namespace TraceableAgency
 
 universe u
 
-/-- Auditable finite Herstein--Milnor boundary.
+/-- Assumption-free compatibility shell for the former Herstein--Milnor
+boundary.
 
 The selected posterior value is obtained from the preference-free
-`ClassicalHersteinMilnorMixtureTheoremAssumptions`, after Lean has derived all
-of its ordinal hypotheses and constructed the posterior-law quotient as an
-abstract convex mixture space.  The theorem field itself mentions no project
-objects. In particular, posterior-law continuity is not an input:
+`genericHersteinMilnorMixtureTheorem`, now proved in Lean for the exact
+sequentially-closed/interior-mixture schema, after Lean has derived all of its
+ordinal hypotheses and constructed the posterior-law quotient as an abstract
+convex mixture space.  Its private universe marker has a canonical default and
+contributes no mathematical assumption. In particular, posterior-law continuity
+is not an input:
 `posteriorLawContinuity_of_axioms` proves it from primitive A2 and A1/A3/A4.
 Lean constructs the required continuous barycentric coordinates by explicit
 finite vertex insertion and derives the spread/merge sandwich.
 
-The Blackwell field is the *pure* finite Blackwell equivalence theorem
-`FiniteSamePosteriorLawBlackwellEquivalenceAssumptions` (same posterior law at a
-full-support prior ⇒ the two experiments are mutual garblings/post-processings).
-The paper-specific block-comparison replacement package
-`FiniteBlackwellPosteriorAssumptions` is *not* an input here: it is reconstructed
-internally from this pure theorem plus the A4/A3/A1 replacement plumbing via
-`blackwellPosteriorReplacement_of_samePosteriorGarblings`.  This keeps the external
-boundary exactly at the classical Blackwell theorem. -/
+Finite Blackwell equivalence is not a field: the explicit
+`posteriorMatchingKernel` construction proves it internally.  The
+paper-specific block-comparison replacement package is then reconstructed
+from that theorem plus the A4/A3/A1 replacement plumbing. -/
 structure FinalHMInterface.{v} where
-  blackwell : FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{v}
-  hm_theorem : ClassicalHersteinMilnorMixtureTheoremAssumptions.{v}
+  private marker : ULift.{v} PUnit := ⟨PUnit.unit⟩
+
+/-- Canonical inhabitant of the assumption-free HM compatibility shell. -/
+def provedFinalHMInterface : FinalHMInterface.{u} := {}
 
 /-- Posterior-law sufficiency from the auditable final HM interface.
 
-The pure Blackwell equivalence theorem is first upgraded to the block-comparison
-replacement package by `blackwellPosteriorReplacement_of_samePosteriorGarblings`
-(A4/A3/A1 plumbing, proved internally), then fed to
-`from_axioms_to_posterior_of_blackwell`. -/
+The proved finite Blackwell equivalence theorem is upgraded to the
+block-comparison replacement package by internal A4/A3/A1 plumbing, then fed
+to `from_axioms_to_posterior_of_blackwell`. -/
 theorem posteriorLawSufficiency_of_FinalHMInterface
-    (hhm : FinalHMInterface.{u})
+    (_hhm : FinalHMInterface.{u})
     {F : PrefFamily.{u}}
     (hax : TraceAxioms F) :
     PosteriorLawSufficiency F :=
-  from_axioms_to_posterior_of_blackwell F
-    (blackwellPosteriorReplacement_of_samePosteriorGarblings hhm.blackwell) hax
+  posteriorLawSufficiency_of_axioms F hax
 
 /-- Posterior-law continuity is derived from the primitive ordinal axioms,
 not postulated by `FinalHMInterface`. -/
 theorem posteriorLawContinuity_of_FinalHMInterface
-    (hhm : FinalHMInterface.{u})
+    (_hhm : FinalHMInterface.{u})
     {F : PrefFamily.{u}}
     (hax : TraceAxioms F) :
     PosteriorLawContinuity F :=
   posteriorLawContinuity_of_axioms
-    F hhm.blackwell hax
+    F finiteSamePosteriorLawBlackwellEquivalence hax
 
 /-- Raw finite HM representative before the scale gauge is fixed. -/
 noncomputable def rawPosteriorValueRepresentation_of_FinalHMInterface
-    (hhm : FinalHMInterface.{u})
+    (_hhm : FinalHMInterface.{u})
     {F : PrefFamily.{u}}
     (hax : TraceAxioms F) :
     PosteriorValueRepresentation F :=
   posteriorValueRep_of_axioms_HMTheorem
-    F hhm.blackwell hhm.hm_theorem hax
+    F finiteSamePosteriorLawBlackwellEquivalence
+      genericHersteinMilnorMixtureTheorem hax
 
 /-- Canonical posterior value representative.
 
@@ -1486,7 +1487,7 @@ theorem MIRep_of_fullPreEntropyClosure_minimal_internalUniqueness
       (haff := haff) (hnorm := hnorm) (hax := hax))
 
 /-- Left-slice affine transform for the selected face-scale representative
-from HM public-mixture affinity, A7 same-order transport, internal finite
+from HM public-mixture affinity, derived background same-order transport, internal finite
 affine-utility uniqueness, and the singleton slice normalization. -/
 theorem finiteFaceScaleProductLeftSliceAffineTransform_of_HM
     {F : PrefFamily.{u}}
@@ -1497,7 +1498,7 @@ theorem finiteFaceScaleProductLeftSliceAffineTransform_of_HM
   faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
     (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
     (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-    (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+    (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
     hsingle
     classicalFiniteAffineUtilityUniquenessAssumptions
 
@@ -7023,7 +7024,7 @@ noncomputable def productQuasiAdditivity_of_FinalHM_positiveGaugeSourceProductDa
     hcurrentGauge htriple hsingleInteraction
 
 /-- Intercept positive-linearity for the constructed positive-gauge
-representative, derived from the HM left-slice theorem, A7 intercept
+representative, derived from the HM left-slice theorem, derived-background intercept
 same-order, HM public-mix affinity, and internal finite affine-utility
 uniqueness. -/
 theorem productInterceptPositiveLinear_of_FinalHM_positiveGauge
@@ -7074,7 +7075,7 @@ theorem productInterceptPositiveLinear_of_FinalHM_positiveGauge
             hhm)
           hsingleSlice)) :=
   faceScaleProductInterceptPositiveLinear_of_order_affinity_uniqueness
-    (faceScaleProductInterceptSameOrder_of_A7
+    (faceScaleProductInterceptSameOrder_of_backgroundInertness
       (faceScaleProductLeftSliceAffine_of_transform
         (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
           (integralRepresentationData_of_FinalHMInterface
@@ -7131,7 +7132,7 @@ theorem faceScaleProduct_value_swap_eq_of_selectedRelabeling
 /-- Product-slope affinity from selected relabeling.
 
 This is the same coefficient-swap argument as
-`faceScaleProductSlopeAffine_of_HM_A7_relabeling`, but it uses the selected
+`faceScaleProductSlopeAffine_of_HM_backgroundInertness_relabeling`, but it uses the selected
 product-normalized representative instead of the obsolete broad relabeling
 interface. -/
 theorem faceScaleProductSlopeAffine_of_selectedRelabeling
@@ -7249,7 +7250,7 @@ theorem productLift_value_affine_of_A5_HM
   classical
   have hcoord := faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces
   have hbaseA := faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces
-  have hsame := (faceScaleProductLeftSliceSameOrder_of_A7 hfaces).left_slice_same_order
+  have hsame := (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces).left_slice_same_order
   have hzeroB : hfaces.branch_result.branch_agg.value_rep.V q
       (experimentOfChannel (Channel.uninformativeChannelU A)) = 0 :=
     hfaces.branch_result.branch_agg.value_rep.zero_normalized q hq
@@ -7361,9 +7362,10 @@ theorem productLiftScale_spec
 /-- **Transparency identity: the product left-coefficient IS the proven-positive
 `productLiftScale`.**  The multi-pieces `leftCoeff` — whose normalization to `1` is
 exactly the `current_leftCoeff_normalized` field of `current_product_gauge` — equals
-`productLiftScale q r` (`> 0`).  Hence `current_product_gauge` is transparently the
-coherent gauge choice `productLiftScale ≡ 1`, a normalization of a value that A5/A7 +
-HM-uniqueness *prove* exists and is positive; it is not an opaque assumption. -/
+`productLiftScale q r` (`> 0`).  Hence `current_product_gauge` is transparently
+the coherent gauge choice `productLiftScale ≡ 1`, a normalization of a value
+that A5, derived background inertness, and HM uniqueness *prove* exists and is
+positive; it is not an opaque assumption. -/
 theorem leftCoeff_eq_productLiftScale
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
@@ -12731,7 +12733,7 @@ theorem cardinalGaugeProductInterceptFor
             hhm)
           (cardinalGaugeSingletonSliceFor hhm hax branch))) :=
   faceScaleProductInterceptPositiveLinear_of_order_affinity_uniqueness
-    (faceScaleProductInterceptSameOrder_of_A7
+    (faceScaleProductInterceptSameOrder_of_backgroundInertness
       (faceScaleProductLeftSliceAffine_of_transform
         (finiteFaceScaleProductLeftSliceAffineTransform_of_HM
           (integralRepresentationData_of_FinalHMInterface

@@ -1,17 +1,17 @@
 # Matched paper snapshot
 
 The Lean development in this repository formalizes the axioms and main theorem
-of `empowerment_v6`.
+of `empowerment_v7`.
 
-- [`empowerment_v6.tex`](empowerment_v6.tex) is the exact source snapshot used
+- [`empowerment_v7.tex`](empowerment_v7.tex) is the exact source snapshot used
   for the paper-to-Lean correspondence review.
-- [`empowerment_v6.pdf`](empowerment_v6.pdf) is the compiled 48-page paper.
+- [`empowerment_v7.pdf`](empowerment_v7.pdf) is the compiled 50-page paper.
 
 SHA-256:
 
 ```text
-1bdc07f0b672f90e5840397fbdac19c5220fec0e8f4275bf4c0a5db922da869a  empowerment_v6.tex
-5be728f11ccbc4bf06ced5d8c81d6ac84b3a5caafaaca4c20c8a57684f5987ce  empowerment_v6.pdf
+b6be0784355fe1aa37736b7ecc58bcb93d1e8dfc1fb4404a2781e34b4ace842b  empowerment_v7.tex
+4b9fc6107bf75d4ecba4e21f6e882445356973f82c0bd40855d23d580619a71b  empowerment_v7.pdf
 ```
 
 Later local drafts are intentionally excluded: this directory records the

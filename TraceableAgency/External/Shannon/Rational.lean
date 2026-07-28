@@ -1,0 +1,164 @@
+import TraceableAgency.External.Shannon.Uniform
+
+/-!
+# Shannon.Entropy.Rational
+
+Phase 2 of the characterization: rational probabilities.
+
+This module derives the entropy formula for distributions of the form
+`p_i = n_i / N` via grouped equiprobable refinement and the grouping axiom.
+It also includes a worked decomposition corresponding to Shannon's
+`(1/2, 1/3, 1/6)` narrative.
+-/
+namespace Shannon
+
+noncomputable section
+open Filter
+open scoped Topology
+
+/-! ## Phase 2: Rational Probabilities via Grouping -/
+
+lemma relabel_compose_rational_eq_uniform
+    {α : Type} [Fintype α]
+    (p : ProbDist α)
+    (n : α → ℕ)
+    (hpos : ∀ a, 0 < n a)
+    (N : ℕ)
+    (hN : 0 < N)
+    (hp : ∀ a, p a = (n a : ℝ) / (N : ℝ))
+    (e : Sigma (fun a : α => Fin (n a)) ≃ Fin N) :
+    relabelProb e
+      (composeProb p (fun a => uniformPNat ⟨n a, hpos a⟩))
+    = uniformPNat ⟨N, hN⟩ := by
+  ext x
+  have hN_ne : (N : ℝ) ≠ 0 := by exact_mod_cast (Nat.ne_of_gt hN)
+  have hn_ne : (n (e.symm x).1 : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.ne_of_gt (hpos (e.symm x).1))
+  simp [relabelProb, composeProb, uniformPNat, hp]
+  field_simp [hN_ne, hn_ne]
+
+lemma grouping_on_rational_counts
+    (H : {α : Type} → [Fintype α] → ProbDist α → ℝ)
+    (hH : ShannonEntropyAxioms H)
+    {α : Type} [Fintype α]
+    (p : ProbDist α)
+    (n : α → ℕ)
+    (hpos : ∀ a, 0 < n a)
+    (N : ℕ)
+    (hN : 0 < N)
+    (hsum : (∑ a, n a) = N)
+    (hp : ∀ a, p a = (n a : ℝ) / (N : ℝ)) :
+    Apos H ⟨N, hN⟩ = H p + ∑ a, p a * Apos H ⟨n a, hpos a⟩ := by
+  let q : (a : α) → ProbDist (Fin (n a)) := fun a => uniformPNat ⟨n a, hpos a⟩
+  have hgroup := hH.grouping p q
+  have hcard : Fintype.card (Sigma (fun a : α => Fin (n a))) = N := by
+    calc
+      Fintype.card (Sigma (fun a : α => Fin (n a)))
+          = ∑ a, Fintype.card (Fin (n a)) := by simp
+      _ = ∑ a, n a := by simp
+      _ = N := hsum
+  let e : Sigma (fun a : α => Fin (n a)) ≃ Fin N := Fintype.equivFinOfCardEq hcard
+  have hrelab : H (relabelProb e (composeProb p q)) = H (composeProb p q) :=
+    hH.relabelInvariant e (composeProb p q)
+  have hident :
+      relabelProb e (composeProb p q) = uniformPNat ⟨N, hN⟩ := by
+    simpa [q] using relabel_compose_rational_eq_uniform p n hpos N hN hp e
+  have hsumA :
+      (∑ a, p a * H (q a))
+        = ∑ a, p a * Apos H ⟨n a, hpos a⟩ := by
+    rfl
+  calc
+    Apos H ⟨N, hN⟩ =
+        H (relabelProb e (composeProb p q)) := by
+      rw [hident]
+      rfl
+    _ = H (composeProb p q) := hrelab
+    _ = H p + ∑ a, p a * H (q a) := hgroup
+    _ = H p + ∑ a, p a * Apos H ⟨n a, hpos a⟩ := by rw [hsumA]
+
+lemma entropyNat_of_rational_counts_aux
+    (H : {α : Type} → [Fintype α] → ProbDist α → ℝ)
+    (hH : ShannonEntropyAxioms H)
+    {α : Type} [Fintype α]
+    (p : ProbDist α)
+    (n : α → ℕ)
+    (hpos : ∀ a, 0 < n a)
+    (N : ℕ)
+    (hN : 0 < N)
+    (hsum : (∑ a, n a) = N)
+    (hp : ∀ a, p a = (n a : ℝ) / (N : ℝ)) :
+    H p
+      = K H * Real.log (N : ℝ)
+        - ∑ a, p a * (K H * Real.log (n a : ℝ)) := by
+  have hgroup :
+      Apos H ⟨N, hN⟩ = H p + ∑ a, p a * Apos H ⟨n a, hpos a⟩ :=
+    grouping_on_rational_counts H hH p n hpos N hN hsum hp
+  have hA_N : Apos H ⟨N, hN⟩ = K H * Real.log (N : ℝ) :=
+    Apos_eq_K_mul_log H hH ⟨N, hN⟩
+  have hA_n :
+      (∑ a, p a * Apos H ⟨n a, hpos a⟩)
+        = ∑ a, p a * (K H * Real.log (n a : ℝ)) := by
+    refine Finset.sum_congr rfl ?_
+    intro a _
+    simpa using congrArg (fun t => p a * t) (Apos_eq_K_mul_log H hH ⟨n a, hpos a⟩)
+  linarith [hgroup, hA_N, hA_n]
+
+lemma entropyNat_of_rational_counts
+    (H : {α : Type} → [Fintype α] → ProbDist α → ℝ)
+    (hH : ShannonEntropyAxioms H)
+    {α : Type} [Fintype α]
+    (p : ProbDist α)
+    (n : α → ℕ)
+    (hpos : ∀ a, 0 < n a)
+    (N : ℕ)
+    (hN : 0 < N)
+    (hsum : (∑ a, n a) = N)
+    (hp : ∀ a, p a = (n a : ℝ) / (N : ℝ)) :
+    H p = -K H * ∑ a, p a * Real.log (p a) := by
+  have hN_ne : (N : ℝ) ≠ 0 := by exact_mod_cast (Nat.ne_of_gt hN)
+  have h_main :
+      H p = K H * Real.log (N : ℝ) - ∑ a, p a * (K H * Real.log (n a : ℝ)) :=
+    entropyNat_of_rational_counts_aux H hH p n hpos N hN hsum hp
+  have hsum_scale :
+      (∑ a, p a * (K H * Real.log (n a : ℝ)))
+        = K H * (∑ a, p a * Real.log (n a : ℝ)) := by
+    calc
+      (∑ a, p a * (K H * Real.log (n a : ℝ)))
+          = ∑ a, K H * (p a * Real.log (n a : ℝ)) := by
+              refine Finset.sum_congr rfl ?_
+              intro a _
+              ring
+      _ = K H * (∑ a, p a * Real.log (n a : ℝ)) := by
+            rw [Finset.mul_sum]
+  have hlogp :
+      (∑ a, p a * Real.log (p a))
+        = (∑ a, p a * Real.log (n a : ℝ)) - Real.log (N : ℝ) := by
+    calc
+      (∑ a, p a * Real.log (p a))
+          = ∑ a, p a * (Real.log (n a : ℝ) - Real.log (N : ℝ)) := by
+              refine Finset.sum_congr rfl ?_
+              intro a _
+              rw [hp a]
+              have hn_ne : (n a : ℝ) ≠ 0 := by
+                exact_mod_cast (Nat.ne_of_gt (hpos a))
+              rw [Real.log_div hn_ne hN_ne]
+      _ = ∑ a, (p a * Real.log (n a : ℝ) - p a * Real.log (N : ℝ)) := by
+            refine Finset.sum_congr rfl ?_
+            intro a _
+            ring
+      _ = (∑ a, p a * Real.log (n a : ℝ)) - ∑ a, p a * Real.log (N : ℝ) := by
+            rw [Finset.sum_sub_distrib]
+      _ = (∑ a, p a * Real.log (n a : ℝ)) - (∑ a, p a) * Real.log (N : ℝ) := by
+            rw [Finset.sum_mul]
+      _ = (∑ a, p a * Real.log (n a : ℝ)) - Real.log (N : ℝ) := by
+            rw [prob_sum_eq_one p, one_mul]
+  calc
+    H p = K H * Real.log (N : ℝ) - ∑ a, p a * (K H * Real.log (n a : ℝ)) := h_main
+    _ = K H * Real.log (N : ℝ) - K H * (∑ a, p a * Real.log (n a : ℝ)) := by
+          rw [hsum_scale]
+    _ = -K H * ((∑ a, p a * Real.log (n a : ℝ)) - Real.log (N : ℝ)) := by ring
+    _ = -K H * (∑ a, p a * Real.log (p a)) := by rw [hlogp]
+
+end
+
+end Shannon

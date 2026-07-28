@@ -20,6 +20,7 @@ import TraceableAgency.Sufficiency.EntropyReduction
 import TraceableAgency.Sufficiency.Final
 import TraceableAgency.Sufficiency.Spine
 import TraceableAgency.External.HersteinMilnor
+import TraceableAgency.External.GenericHersteinMilnor
 import TraceableAgency.External.SupportRestriction
 import TraceableAgency.External.SelectedRelabeling
 import TraceableAgency.External.CardinalPermutationInvariance
@@ -31,7 +32,7 @@ import TraceableAgency.External.FullPreEntropyClosure
 import TraceableAgency.External.PreEntropyReady
 import TraceableAgency.External.PreEntropyConstruction
 import TraceableAgency.External.EntropyReductionClosure
-import TraceableAgency.External.Faddeev
+import TraceableAgency.External.GenericFaddeev
 import TraceableAgency.External.Blackwell
 import TraceableAgency.Main
 import TraceableAgency.MainTheorem

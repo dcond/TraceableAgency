@@ -1133,6 +1133,542 @@ theorem product_block_transfer_of_A5_A3
     rfl
   exact horig_to_unit.trans (hunit_to_product.trans hproduct)
 
+/-!
+## Derived background inertness
+
+Paper v7, Lemma `background`.  The old A7 independent-background axiom is
+derived here from A1, A3, A4, A5, and the weak/strict clauses of A6.  The proof
+is deliberately kept at the primitive preference level, before any product
+scale or cardinal product representation is constructed.
+-/
+
+/-- A pairwise comparison between first-coordinate product lifts is exactly
+the original first-coordinate comparison.  This is the A5 projection/embedding
+neutrality step of the v7 background-inertness proof, with reversible outcome
+padding supplied by A4 and pairwise replacement by A1/A3.  No support
+assumption is needed. -/
+theorem product_left_lifted_rel_iff_base
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    (q : Dist A) (r : Dist B) (P Q : Channel A O) :
+    F.rel
+        (blockChannel (leftProductLiftChannel (B := B) P)
+          (leftProductLiftChannel (B := B) Q))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel (blockChannel P Q) (inlDist q) (inrDist q) := by
+  have hlift_to_unit :
+      F.rel
+          (blockChannel (leftProductLiftChannel (B := B) P)
+            (leftProductLiftChannel (B := B) Q))
+          (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+        F.rel
+          (blockChannel (leftUnitOutcomeChannel P) (leftUnitOutcomeChannel Q))
+          (inlDist q) (inrDist q) :=
+    pairwise_product_block_replacement_from_weak_equiv F hax
+      (leftProductLiftChannel (B := B) P) (leftUnitOutcomeChannel P)
+      (leftProductLiftChannel (B := B) Q) (leftUnitOutcomeChannel Q)
+      (prodDist q r) q (prodDist q r) q
+      (leftProductLift_rel_leftUnitOutcome F hax P q r)
+      (leftUnitOutcome_rel_leftProductLift F hax P q r)
+      (leftProductLift_rel_leftUnitOutcome F hax Q q r)
+      (leftUnitOutcome_rel_leftProductLift F hax Q q r)
+  have hunit_to_base :
+      F.rel
+          (blockChannel (leftUnitOutcomeChannel P) (leftUnitOutcomeChannel Q))
+          (inlDist q) (inrDist q) ↔
+        F.rel (blockChannel P Q) (inlDist q) (inrDist q) :=
+    pairwise_product_block_replacement_from_weak_equiv F hax
+      (leftUnitOutcomeChannel P) P
+      (leftUnitOutcomeChannel Q) Q
+      q q q q
+      (leftUnitOutcome_rel_original F hax P q)
+      (original_rel_leftUnitOutcome F hax P q)
+      (leftUnitOutcome_rel_original F hax Q q)
+      (original_rel_leftUnitOutcome F hax Q q)
+  exact hlift_to_unit.trans hunit_to_base
+
+/-- Symmetric second-coordinate version of
+`product_left_lifted_rel_iff_base`. -/
+theorem product_right_lifted_rel_iff_base
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    (q : Dist A) (r : Dist B) (P Q : Channel B O) :
+    F.rel
+        (blockChannel (rightProductLiftChannel (A := A) P)
+          (rightProductLiftChannel (A := A) Q))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel (blockChannel P Q) (inlDist r) (inrDist r) := by
+  have hlift_to_unit :
+      F.rel
+          (blockChannel (rightProductLiftChannel (A := A) P)
+            (rightProductLiftChannel (A := A) Q))
+          (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+        F.rel
+          (blockChannel (rightUnitOutcomeChannel P) (rightUnitOutcomeChannel Q))
+          (inlDist r) (inrDist r) :=
+    pairwise_product_block_replacement_from_weak_equiv F hax
+      (rightProductLiftChannel (A := A) P) (rightUnitOutcomeChannel P)
+      (rightProductLiftChannel (A := A) Q) (rightUnitOutcomeChannel Q)
+      (prodDist q r) r (prodDist q r) r
+      (rightProductLift_rel_rightUnitOutcome F hax P q r)
+      (rightUnitOutcome_rel_rightProductLift F hax P q r)
+      (rightProductLift_rel_rightUnitOutcome F hax Q q r)
+      (rightUnitOutcome_rel_rightProductLift F hax Q q r)
+  have hunit_to_base :
+      F.rel
+          (blockChannel (rightUnitOutcomeChannel P) (rightUnitOutcomeChannel Q))
+          (inlDist r) (inrDist r) ↔
+        F.rel (blockChannel P Q) (inlDist r) (inrDist r) :=
+    pairwise_product_block_replacement_from_weak_equiv F hax
+      (rightUnitOutcomeChannel P) P
+      (rightUnitOutcomeChannel Q) Q
+      r r r r
+      (rightUnitOutcome_rel_original F hax P r)
+      (original_rel_rightUnitOutcome F hax P r)
+      (rightUnitOutcome_rel_original F hax Q r)
+      (original_rel_rightUnitOutcome F hax Q r)
+  exact hlift_to_unit.trans hunit_to_base
+
+/-- Outcome relabeling from “background first, foreground second” to the
+ordinary product-channel outcome order. -/
+def rightBackgroundFirstOutcomeEquiv (O Y : Type u) :
+    ((_ : PUnit.{u + 1} × Y) × (O × PUnit.{u + 1})) ≃ (O × Y) where
+  toFun x := (x.2.1, x.1.2)
+  invFun x := ⟨(PUnit.unit, x.2), (x.1, PUnit.unit)⟩
+  left_inv := by
+    intro x
+    rcases x with ⟨⟨u₁, y⟩, ⟨o, u₂⟩⟩
+    cases u₁
+    cases u₂
+    rfl
+  right_inv := by
+    intro x
+    rfl
+
+/-- The sequential channel that observes the right background first and then
+runs a constant left-coordinate continuation is the corresponding product
+channel, up to the canonical outcome relabeling. -/
+theorem relabel_rightBackgroundFirst_seq_eq_prod
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A]
+    [Fintype B] [DecidableEq B]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (P : Channel A O) (R : Channel B Y) :
+    Relabeling.relabelChannel (Equiv.refl (A × B))
+        (rightBackgroundFirstOutcomeEquiv O Y)
+        (seqComposeDep (rightProductLiftChannel (A := A) R)
+          (fun _ => O × PUnit.{u + 1})
+          (fun _ => leftProductLiftChannel (B := B) P)) =
+      prodChannel P R := by
+  ext ab oy
+  rcases ab with ⟨a, b⟩
+  rcases oy with ⟨o, y⟩
+  simp only [Relabeling.relabelChannel_apply]
+  change
+    rightProductLiftChannel (A := A) R (a, b) (PUnit.unit, y) *
+        leftProductLiftChannel (B := B) P (a, b) (o, PUnit.unit) =
+      prodChannel P R (a, b) (o, y)
+  simp [rightProductLiftChannel, leftProductLiftChannel,
+    Channel.uninformativeChannelU, prodChannel_apply_pair]
+  ring
+
+/-- A reached posterior after observing only the right background remains a
+product, with unchanged left marginal. -/
+theorem branchPosterior_rightProductLift_eq_prod
+    {A B Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B) (R : Channel B Y)
+    (uy : PUnit.{u + 1} × Y)
+    (hpos : BranchPositive (rightProductLiftChannel (A := A) R)
+      (prodDist q r) uy) :
+    branchPosterior (rightProductLiftChannel (A := A) R)
+        (prodDist q r) uy =
+      prodDist q (branchPosterior R r uy.2) := by
+  rcases uy with ⟨u₀, y⟩
+  cases u₀
+  have hmarg :
+      Channel.outcomeMarginal (rightProductLiftChannel (A := A) R)
+          (prodDist q r) (PUnit.unit, y) =
+        Channel.outcomeMarginal R r y := by
+    change
+      (∑ ab : A × B,
+          prodDist q r ab *
+            rightProductLiftChannel (A := A) R ab (PUnit.unit, y)) =
+        ∑ b : B, r b * R b y
+    rw [Fintype.sum_prod_type]
+    simp only [prodDist_apply_pair, rightProductLiftChannel,
+      prodChannel_apply_pair, Channel.uninformativeChannelU, one_mul]
+    calc
+      (∑ a : A, ∑ b : B, q a * r b * R b y) =
+          ∑ a : A, q a * (∑ b : B, r b * R b y) := by
+            apply Finset.sum_congr rfl
+            intro a _
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro b _
+            ring
+      _ = (∑ a : A, q a) * (∑ b : B, r b * R b y) := by
+            rw [Finset.sum_mul]
+      _ = ∑ b : B, r b * R b y := by rw [q.sum_eq_one, one_mul]
+  have hposR : BranchPositive R r y := by
+    change Channel.outcomeMarginal R r y > 0
+    rw [← hmarg]
+    exact hpos
+  have hpos' :
+      Channel.outcomeMarginal (rightProductLiftChannel (A := A) R)
+          (prodDist q r) (PUnit.unit, y) > 0 :=
+    hpos
+  have hposR' : Channel.outcomeMarginal R r y > 0 := hposR
+  unfold branchPosterior Channel.posterior
+  rw [dif_pos hpos', dif_pos hposR']
+  ext ab
+  rcases ab with ⟨a, b⟩
+  change
+    prodDist q r (a, b) *
+          rightProductLiftChannel (A := A) R (a, b) (PUnit.unit, y) /
+        Channel.outcomeMarginal (rightProductLiftChannel (A := A) R)
+          (prodDist q r) (PUnit.unit, y) =
+      q a * (r b * R b y / Channel.outcomeMarginal R r y)
+  rw [hmarg]
+  simp only [prodDist_apply_pair, rightProductLiftChannel,
+    prodChannel_apply_pair, Channel.uninformativeChannelU, one_mul]
+  ring
+
+/-- Every finite first-stage channel has at least one reached branch. -/
+theorem exists_branchPositive
+    {A O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype O] [DecidableEq O]
+    (P : Channel A O) (q : Dist A) :
+    ∃ o, BranchPositive P q o := by
+  classical
+  let m := Channel.outcomeMarginal P q
+  have hne : ∃ o : O, m o ≠ 0 := by
+    by_contra h
+    have hzero : ∀ o : O, m o = 0 := by
+      intro o
+      simpa using (not_exists.mp h o)
+    have hsum : (∑ o : O, m o) = 0 := by
+      apply Finset.sum_eq_zero
+      intro o _
+      exact hzero o
+    linarith [m.sum_eq_one]
+  obtain ⟨o, ho⟩ := hne
+  refine ⟨o, ?_⟩
+  change m o > 0
+  exact lt_of_le_of_ne (m.nonneg o) (Ne.symm ho)
+
+/-- Reversible outcome relabeling identifies a product-channel comparison with
+the comparison of its “right background first” sequential presentations. -/
+theorem product_left_background_rel_iff_sequential
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B)
+    (P Q : Channel A O) (R : Channel B Y) :
+    F.rel (blockChannel (prodChannel P R) (prodChannel Q R))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel
+        (blockChannel
+          (seqComposeDep (rightProductLiftChannel (A := A) R)
+            (fun _ => O × PUnit.{u + 1})
+            (fun _ => leftProductLiftChannel (B := B) P))
+          (seqComposeDep (rightProductLiftChannel (A := A) R)
+            (fun _ => O × PUnit.{u + 1})
+            (fun _ => leftProductLiftChannel (B := B) Q)))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+  let e := rightBackgroundFirstOutcomeEquiv O Y
+  let seqP :=
+    seqComposeDep (rightProductLiftChannel (A := A) R)
+      (fun _ => O × PUnit.{u + 1})
+      (fun _ => leftProductLiftChannel (B := B) P)
+  let seqQ :=
+    seqComposeDep (rightProductLiftChannel (A := A) R)
+      (fun _ => O × PUnit.{u + 1})
+      (fun _ => leftProductLiftChannel (B := B) Q)
+  have heqP :
+      Relabeling.relabelChannel (Equiv.refl (A × B)) e seqP =
+        prodChannel P R := by
+    simpa [e, seqP] using relabel_rightBackgroundFirst_seq_eq_prod P R
+  have heqQ :
+      Relabeling.relabelChannel (Equiv.refl (A × B)) e seqQ =
+        prodChannel Q R := by
+    simpa [e, seqQ] using relabel_rightBackgroundFirst_seq_eq_prod Q R
+  have hseqP_to_prodP :
+      F.rel (blockChannel seqP (prodChannel P R))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+    have h :=
+      hax.a4 seqP (Relabeling.outcomeEquivKernel e) (prodDist q r)
+    rw [Relabeling.postprocess_outcomeEquiv_eq_relabel, heqP] at h
+    exact h
+  have hprodP_to_seqP :
+      F.rel (blockChannel (prodChannel P R) seqP)
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+    have h :=
+      hax.a4 (prodChannel P R) (Relabeling.outcomeEquivKernel e.symm)
+        (prodDist q r)
+    have heqP' :
+        Relabeling.relabelChannel (Equiv.refl (A × B)) e.symm
+            (prodChannel P R) =
+          seqP := by
+      rw [← heqP]
+      simpa using
+        (Relabeling.relabelChannel_symm (Equiv.refl (A × B)) e seqP)
+    rw [Relabeling.postprocess_outcomeEquiv_eq_relabel, heqP'] at h
+    exact h
+  have hseqQ_to_prodQ :
+      F.rel (blockChannel seqQ (prodChannel Q R))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+    have h :=
+      hax.a4 seqQ (Relabeling.outcomeEquivKernel e) (prodDist q r)
+    rw [Relabeling.postprocess_outcomeEquiv_eq_relabel, heqQ] at h
+    exact h
+  have hprodQ_to_seqQ :
+      F.rel (blockChannel (prodChannel Q R) seqQ)
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+    have h :=
+      hax.a4 (prodChannel Q R) (Relabeling.outcomeEquivKernel e.symm)
+        (prodDist q r)
+    have heqQ' :
+        Relabeling.relabelChannel (Equiv.refl (A × B)) e.symm
+            (prodChannel Q R) =
+          seqQ := by
+      rw [← heqQ]
+      simpa using
+        (Relabeling.relabelChannel_symm (Equiv.refl (A × B)) e seqQ)
+    rw [Relabeling.postprocess_outcomeEquiv_eq_relabel, heqQ'] at h
+    exact h
+  simpa [seqP, seqQ] using
+    (pairwise_product_block_replacement_from_weak_equiv F hax
+      (prodChannel P R) seqP (prodChannel Q R) seqQ
+      (prodDist q r) (prodDist q r) (prodDist q r) (prodDist q r)
+      hprodP_to_seqP hseqP_to_prodP hprodQ_to_seqQ hseqQ_to_prodQ)
+
+/-- **Derived background inertness, first coordinate.**
+
+Adding the same statistically independent right background to both foreground
+channels preserves and reflects their comparison.  This is the stronger
+statement from paper v7; unlike the old A7, it identifies the product
+comparison with the background-free comparison itself. -/
+theorem derived_background_inertness_left
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B O Y : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype O] [DecidableEq O]
+    [Fintype Y] [DecidableEq Y]
+    (q : Dist A) (r : Dist B)
+    (P Q : Channel A O) (R : Channel B Y) :
+    F.rel (blockChannel (prodChannel P R) (prodChannel Q R))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel (blockChannel P Q) (inlDist q) (inrDist q) := by
+  let bg := rightProductLiftChannel (A := A) R
+  let O₂ : (PUnit.{u + 1} × Y) → Type u :=
+    fun _ => O × PUnit.{u + 1}
+  let contP : ∀ _ : PUnit.{u + 1} × Y, Channel (A × B) (O × PUnit.{u + 1}) :=
+    fun _ => leftProductLiftChannel (B := B) P
+  let contQ : ∀ _ : PUnit.{u + 1} × Y, Channel (A × B) (O × PUnit.{u + 1}) :=
+    fun _ => leftProductLiftChannel (B := B) Q
+  have htransport :=
+    product_left_background_rel_iff_sequential F hax q r P Q R
+  constructor
+  · intro hprod
+    have hseq :
+        F.rel (blockChannel (seqComposeDep bg O₂ contP)
+            (seqComposeDep bg O₂ contQ))
+          (inlDist (prodDist q r)) (inrDist (prodDist q r)) := by
+      simpa [bg, O₂, contP, contQ] using htransport.mp hprod
+    by_contra hbase
+    have hcomplete :=
+      (hax.a1.1 (blockChannel P Q)).1 (inlDist q) (inrDist q)
+    have hreverse_same :
+        F.rel (blockChannel P Q) (inrDist q) (inlDist q) :=
+      hcomplete.resolve_left hbase
+    have hQP :
+        F.rel (blockChannel Q P) (inlDist q) (inrDist q) :=
+      (Relabeling.block_swap_rel_of_axioms F hax P Q q q).mp
+        hreverse_same
+    have hbranches :
+        ∀ uy, BranchPositive bg (prodDist q r) uy →
+          F.rel (blockChannel (contQ uy) (contP uy))
+            (inlDist (branchPosterior bg (prodDist q r) uy))
+            (inrDist (branchPosterior bg (prodDist q r) uy)) := by
+      intro uy huy
+      have hpost :=
+        branchPosterior_rightProductLift_eq_prod q r R uy (by
+          simpa [bg] using huy)
+      rw [show branchPosterior bg (prodDist q r) uy =
+          prodDist q (branchPosterior R r uy.2) by
+            simpa [bg] using hpost]
+      exact
+        (product_left_lifted_rel_iff_base F hax q
+          (branchPosterior R r uy.2) Q P).mpr hQP
+    obtain ⟨uy, huy⟩ := exists_branchPositive bg (prodDist q r)
+    have hnotPQbranch :
+        ¬ F.rel (blockChannel (contP uy) (contQ uy))
+            (inlDist (branchPosterior bg (prodDist q r) uy))
+            (inrDist (branchPosterior bg (prodDist q r) uy)) := by
+      intro hPQ
+      have hpost :=
+        branchPosterior_rightProductLift_eq_prod q r R uy (by
+          simpa [bg] using huy)
+      have hPQ' :
+          F.rel
+              (blockChannel (leftProductLiftChannel (B := B) P)
+                (leftProductLiftChannel (B := B) Q))
+              (inlDist (prodDist q (branchPosterior R r uy.2)))
+              (inrDist (prodDist q (branchPosterior R r uy.2))) := by
+        simpa [bg, contP, contQ, hpost] using hPQ
+      exact hbase
+        ((product_left_lifted_rel_iff_base F hax q
+          (branchPosterior R r uy.2) P Q).mp hPQ')
+    have hstrictBranch :
+        F.strictRel (blockChannel (contQ uy) (contP uy))
+          (inlDist (branchPosterior bg (prodDist q r) uy))
+          (inrDist (branchPosterior bg (prodDist q r) uy)) := by
+      refine ⟨hbranches uy huy, ?_⟩
+      intro hreverse
+      exact hnotPQbranch
+        ((Relabeling.block_swap_rel_of_axioms F hax
+          (contQ uy) (contP uy)
+          (branchPosterior bg (prodDist q r) uy)
+          (branchPosterior bg (prodDist q r) uy)).mp hreverse)
+    have hstrictSeq :
+        F.strictRel (blockChannel (seqComposeDep bg O₂ contQ)
+            (seqComposeDep bg O₂ contP))
+          (inlDist (prodDist q r)) (inrDist (prodDist q r)) :=
+      hax.a6.2 O₂ (prodDist q r) bg contQ contP hbranches
+        ⟨uy, huy, hstrictBranch⟩
+    exact hstrictSeq.2
+      ((Relabeling.block_swap_rel_of_axioms F hax
+        (seqComposeDep bg O₂ contQ) (seqComposeDep bg O₂ contP)
+        (prodDist q r) (prodDist q r)).mpr hseq)
+  · intro hbase
+    have hbranches :
+        ∀ uy, BranchPositive bg (prodDist q r) uy →
+          F.rel (blockChannel (contP uy) (contQ uy))
+            (inlDist (branchPosterior bg (prodDist q r) uy))
+            (inrDist (branchPosterior bg (prodDist q r) uy)) := by
+      intro uy huy
+      have hpost :=
+        branchPosterior_rightProductLift_eq_prod q r R uy (by
+          simpa [bg] using huy)
+      rw [show branchPosterior bg (prodDist q r) uy =
+          prodDist q (branchPosterior R r uy.2) by
+            simpa [bg] using hpost]
+      exact
+        (product_left_lifted_rel_iff_base F hax q
+          (branchPosterior R r uy.2) P Q).mpr hbase
+    have hseq :
+        F.rel (blockChannel (seqComposeDep bg O₂ contP)
+            (seqComposeDep bg O₂ contQ))
+          (inlDist (prodDist q r)) (inrDist (prodDist q r)) :=
+      hax.a6.1 O₂ (prodDist q r) bg contP contQ hbranches
+    exact htransport.mpr (by
+      simpa [bg, O₂, contP, contQ] using hseq)
+
+/-- Swapping product coordinates sends a product prior to the reversed product
+prior. -/
+@[simp]
+theorem relabelDist_prodComm_background
+    {A B : Type u} [Fintype A] [Fintype B]
+    (q : Dist A) (r : Dist B) :
+    Relabeling.relabelDist (Equiv.prodComm A B) (prodDist q r) =
+      prodDist r q := by
+  ext ab
+  rcases ab with ⟨b, a⟩
+  simp [Relabeling.relabelDist, prodDist_apply_pair, mul_comm]
+
+/-- Swapping both action and outcome coordinates reverses a product channel. -/
+@[simp]
+theorem relabelChannel_prodComm_background
+    {A B O Y : Type u}
+    [Fintype A] [Fintype B] [Fintype O] [Fintype Y]
+    (P : Channel A O) (R : Channel B Y) :
+    Relabeling.relabelChannel (Equiv.prodComm A B) (Equiv.prodComm O Y)
+        (prodChannel P R) =
+      prodChannel R P := by
+  ext ba yo
+  rcases ba with ⟨b, a⟩
+  rcases yo with ⟨y, o⟩
+  simp [Relabeling.relabelChannel, prodChannel_apply_pair, mul_comm]
+
+/-- A right-coordinate product comparison is the relabeling of the
+corresponding left-coordinate comparison after swapping product coordinates. -/
+theorem product_right_comparison_relabel_to_left
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B X O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype X] [DecidableEq X]
+    [Fintype O] [DecidableEq O]
+    (q : Dist A) (r : Dist B)
+    (R : Channel A X) (P Q : Channel B O) :
+    F.rel (blockChannel (prodChannel R P) (prodChannel R Q))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel (blockChannel (prodChannel P R) (prodChannel Q R))
+        (inlDist (prodDist r q)) (inrDist (prodDist r q)) := by
+  have h :=
+    Relabeling.relabel_rel_of_axioms F hax
+      (Equiv.sumCongr (Equiv.prodComm A B) (Equiv.prodComm A B))
+      (Equiv.sumCongr (Equiv.prodComm X O) (Equiv.prodComm X O))
+      (blockChannel (prodChannel R P) (prodChannel R Q))
+      (inlDist (prodDist q r)) (inrDist (prodDist q r))
+  simpa only [Relabeling.relabel_blockChannel_sumCongr_eq,
+    relabelChannel_prodComm_background,
+    Relabeling.relabelDist_sumCongr_inl,
+    Relabeling.relabelDist_sumCongr_inr,
+    relabelDist_prodComm_background] using h
+
+/-- **Derived background inertness, second coordinate.**  This is the
+coordinate-swapped consequence of `derived_background_inertness_left`. -/
+theorem derived_background_inertness_right
+    (F : PrefFamily.{u}) (hax : TraceAxioms F)
+    {A B X O : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype X] [DecidableEq X]
+    [Fintype O] [DecidableEq O]
+    (q : Dist A) (r : Dist B)
+    (R : Channel A X) (P Q : Channel B O) :
+    F.rel (blockChannel (prodChannel R P) (prodChannel R Q))
+        (inlDist (prodDist q r)) (inrDist (prodDist q r)) ↔
+      F.rel (blockChannel P Q) (inlDist r) (inrDist r) :=
+  (product_right_comparison_relabel_to_left F hax q r R P Q).trans
+    (derived_background_inertness_left F hax r q P Q R)
+
+/-- The v6 A7 predicate is a theorem of the v7 axioms.  Full support is not
+used: the derivation actually establishes background inertness on boundary
+priors as well. -/
+theorem independentBackgroundSeparability_of_axioms
+    (F : PrefFamily.{u}) (hax : TraceAxioms F) :
+    IndependentBackgroundSeparability F := by
+  constructor
+  · intro A₁ A₂ O₁ O₂R O₂S _ _ _ _ _ _ _ _ _ _ q₁ q₂ _hq₁ _hq₂ P₁ Q₁ R₂ S₂
+    letI : Nonempty A₁ := Relabeling.nonempty_of_dist q₁
+    letI : Nonempty A₂ := Relabeling.nonempty_of_dist q₂
+    exact
+      (derived_background_inertness_left F hax q₁ q₂ P₁ Q₁ R₂).trans
+        (derived_background_inertness_left F hax q₁ q₂ P₁ Q₁ S₂).symm
+  · intro A₁ A₂ O₁R O₁S O₂ _ _ _ _ _ _ _ _ _ _ q₁ q₂ _hq₁ _hq₂ R₁ S₁ P₂ Q₂
+    letI : Nonempty A₁ := Relabeling.nonempty_of_dist q₁
+    letI : Nonempty A₂ := Relabeling.nonempty_of_dist q₂
+    exact
+      (derived_background_inertness_right F hax q₁ q₂ R₁ P₂ Q₂).trans
+        (derived_background_inertness_right F hax q₁ q₂ S₁ P₂ Q₂).symm
+
 /-- The same-prior product-lifted comparison is represented by the product-prior
 value functional. This is internal: it is exactly
 `PosteriorValueRepresentation.represents_block_comparisons` plus
@@ -1159,7 +1695,7 @@ theorem productLiftedComparison_represents
       (experimentOfChannel (leftProductLiftChannel (B := B) P))
       (experimentOfChannel (rightProductLiftChannel (A := A) Q))
 
-/-- A7, transported through the same-prior value representation, says that the
+/-- Derived background inertness, transported through the same-prior value representation, says that the
 value order between first-coordinate product experiments is independent of the
 second-coordinate background. This is the ordinal product-coordinate
 independence step of paper Lemma `coherentnorm`; the later cardinal bilinear
@@ -1209,9 +1745,11 @@ theorem product_left_coordinate_value_order_independent
           (experimentOfChannel (prodChannel P S)) ≥
         hs.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel Q S)) at hS'
-  exact hR'.symm.trans ((hax.a7.1 q r hq hr P Q R S).trans hS')
+  exact hR'.symm.trans
+    (((independentBackgroundSeparability_of_axioms F hax).1
+      q r hq hr P Q R S).trans hS')
 
-/-- Symmetric A7 value-order independence for second-coordinate product
+/-- Symmetric derived value-order independence for second-coordinate product
 experiments. -/
 theorem product_right_coordinate_value_order_independent
     (F : PrefFamily.{u}) (hax : TraceAxioms F) (hs : ScaleCoherenceStructure F)
@@ -1258,7 +1796,9 @@ theorem product_right_coordinate_value_order_independent
           (experimentOfChannel (prodChannel S P)) ≥
         hs.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel S Q)) at hS'
-  exact hR'.symm.trans ((hax.a7.2 q r hq hr R S P Q).trans hS')
+  exact hR'.symm.trans
+    (((independentBackgroundSeparability_of_axioms F hax).2
+      q r hq hr R S P Q).trans hS')
 
 /-- Product left-slice value functional:
 `P ↦ V_{q⊗r}(P⊗R)` for fixed full-support product prior and fixed
@@ -2486,7 +3026,7 @@ theorem faceScaleProductInterceptPublicMixAffinity_of_HM
   faceScaleProductInterceptPublicMixAffinity_of_posteriorLawValueAffine
     (finitePosteriorLawValueAffine_of_HM hhm) hslice
 
-/-- Face-scale version of the A7 product-coordinate order independence
+/-- Face-scale version of derived product-coordinate order independence
 theorem for first-coordinate product experiments.  Unlike the older
 `product_left_coordinate_value_order_independent`, this is stated before
 universal scale coherence and uses only the value representative already
@@ -2537,7 +3077,9 @@ theorem faceScaleProduct_left_coordinate_value_order_independent
           (experimentOfChannel (prodChannel P S)) ≥
         hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel Q S)) at hS'
-  exact hR'.symm.trans ((hax.a7.1 q r hq hr P Q R S).trans hS')
+  exact hR'.symm.trans
+    (((independentBackgroundSeparability_of_axioms F hax).1
+      q r hq hr P Q R S).trans hS')
 
 /-- Face-scale product left-slice with no-information background recovers the
 base first-coordinate order. -/
@@ -2619,9 +3161,9 @@ theorem faceScaleProduct_left_noInfo_value_order_iff_base
     exact hbase_rep
   exact hprod_rel.symm.trans (hproduct_to_unit.trans (hunit_to_base.trans hbase_rel))
 
-/-- A7 gives the face-scale first-coordinate slice order before universal
+/-- Derived background inertness gives the face-scale first-coordinate slice order before universal
 scale coherence. -/
-theorem faceScaleProductLeftSliceSameOrder_of_A7
+theorem faceScaleProductLeftSliceSameOrder_of_backgroundInertness
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F) :
     FiniteFaceScaleProductLeftSliceSameOrderAssumptionsFor hfaces where
@@ -2650,7 +3192,7 @@ noncomputable def faceScaleProductRightSliceValue
   hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
     (experimentOfChannel (prodChannel P R))
 
-/-- Face-scale A7 product-coordinate order independence for second-coordinate
+/-- Face-scale derived product-coordinate order independence for second-coordinate
 product experiments. -/
 theorem faceScaleProduct_right_coordinate_value_order_independent
     {F : PrefFamily.{u}} (hfaces : CoherentRelabelingFaceScalesStructure F)
@@ -2698,7 +3240,9 @@ theorem faceScaleProduct_right_coordinate_value_order_independent
           (experimentOfChannel (prodChannel S P)) ≥
         hfaces.branch_result.branch_agg.value_rep.V (prodDist q r)
           (experimentOfChannel (prodChannel S Q)) at hS'
-  exact hR'.symm.trans ((hax.a7.2 q r hq hr R S P Q).trans hS')
+  exact hR'.symm.trans
+    (((independentBackgroundSeparability_of_axioms F hax).2
+      q r hq hr R S P Q).trans hS')
 
 /-- Face-scale product right-slice with no-information first-coordinate
 background recovers the base second-coordinate order. -/
@@ -2780,9 +3324,9 @@ theorem faceScaleProduct_right_noInfo_value_order_iff_base
     exact hbase_rep
   exact hprod_rel.symm.trans (hproduct_to_unit.trans (hunit_to_base.trans hbase_rel))
 
-/-- A7 gives the face-scale second-coordinate slice order before universal
+/-- Derived background inertness gives the face-scale second-coordinate slice order before universal
 scale coherence. -/
-theorem faceScaleProductRightSliceSameOrder_of_A7
+theorem faceScaleProductRightSliceSameOrder_of_backgroundInertness
     {F : PrefFamily.{u}}
     (hfaces : CoherentRelabelingFaceScalesStructure F)
     (hax : TraceAxioms F)
@@ -2808,9 +3352,9 @@ theorem faceScaleProductRightSliceSameOrder_of_A7
   simpa [faceScaleProductRightSliceValue, rightProductLiftChannel] using
     hbackground.symm.trans hbase
 
-/-- Face-scale intercept same-order reconstructed from A7 right-slice order
+/-- Face-scale intercept same-order reconstructed from derived right-slice order
 and the internal intercept/no-information identity. -/
-theorem faceScaleProductInterceptSameOrder_of_A7
+theorem faceScaleProductInterceptSameOrder_of_backgroundInertness
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     (hslice : FiniteFaceScaleProductLeftSliceAffineAssumptionsFor hfaces) :
@@ -2823,12 +3367,12 @@ theorem faceScaleProductInterceptSameOrder_of_A7
       hslice hax q r hq hr S]
     simpa [faceScaleProductRightSliceValue, faceScaleProductLeftSliceValue]
       using
-        faceScaleProductRightSliceSameOrder_of_A7
+        faceScaleProductRightSliceSameOrder_of_backgroundInertness
           hfaces hax q r hq hr (Channel.uninformativeChannelU A) R S
 
 /-- Post-HM product representation reassembler.
 
-HM supplies all public-mixture fields, and A7 supplies the product-coordinate
+HM supplies all public-mixture fields, and derived background inertness supplies the product-coordinate
 same-order fields.  The remaining inputs are exactly the non-HM product
 representation pieces: second-coordinate affine uniqueness, slope affine
 identification, and triple-product coefficient extraction. -/
@@ -2844,7 +3388,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
             (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-              (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+              (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
               hsingle huniq)))
     (hslope :
       ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
@@ -2854,7 +3398,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
             (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-              (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+              (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
               hsingle huniq)))
     (hextract :
       ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
@@ -2864,21 +3408,21 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
             (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-              (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+              (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
               hsingle huniq
-              (faceScaleProductInterceptSameOrder_of_A7
+              (faceScaleProductInterceptSameOrder_of_backgroundInertness
                 (faceScaleProductLeftSliceAffine_of_transform
                   (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                     (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                     (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                    (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                    (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                     hsingle huniq)))
               (faceScaleProductInterceptPublicMixAffinity_of_HM hhm
                 (faceScaleProductLeftSliceAffine_of_transform
                   (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                     (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                     (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                    (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                    (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                     hsingle huniq)))
               (hsecond hsingle huniq)
               (hslope hsingle huniq)))
@@ -2887,21 +3431,21 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
           (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
             (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
             (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-            (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+            (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
             hsingle huniq
-            (faceScaleProductInterceptSameOrder_of_A7
+            (faceScaleProductInterceptSameOrder_of_backgroundInertness
               (faceScaleProductLeftSliceAffine_of_transform
                 (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                   (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                   (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                  (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                  (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                   hsingle huniq)))
             (faceScaleProductInterceptPublicMixAffinity_of_HM hhm
               (faceScaleProductLeftSliceAffine_of_transform
                 (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                   (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                   (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                  (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                  (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                   hsingle huniq)))
             (hsecond hsingle huniq)
             (hslope hsingle huniq))
@@ -2912,15 +3456,15 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
   base_publicMix := faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces
   coordinate_publicMix :=
     faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces
-  left_slice_same_order := faceScaleProductLeftSliceSameOrder_of_A7 hfaces
+  left_slice_same_order := faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces
   intercept_same_order := by
     intro hsingle huniq
-    exact faceScaleProductInterceptSameOrder_of_A7
+    exact faceScaleProductInterceptSameOrder_of_backgroundInertness
       (faceScaleProductLeftSliceAffine_of_transform
         (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
           (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
           (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-          (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+          (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
           hsingle huniq))
   intercept_publicMix := by
     intro hsingle huniq
@@ -2929,7 +3473,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM
         (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
           (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
           (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-          (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+          (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
           hsingle huniq))
   second_coordinate_uniqueness := hsecond
   slope_affine := hslope
@@ -2940,7 +3484,7 @@ extraction discharged internally.
 
 The remaining product-representation inputs are the genuinely coherent
 second-coordinate/slope identifications.  Public mixtures come from HM,
-same-order comes from A7, and triple coefficient extraction is now pure
+same-order comes from derived background inertness, and triple coefficient extraction is now pure
 face-scale algebra from product value associativity. -/
 theorem finiteFaceScaleProductRepresentationTheorem_of_HM_and_coeffExtraction
     (hhm : FinitePosteriorIntegralRepresentationData.{u})
@@ -2954,7 +3498,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_and_coeffExtraction
             (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-              (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+              (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
               hsingle huniq)))
     (hslope :
       ∀ (hsingle : FiniteFaceScaleSingletonSliceAffineAssumptionsFor hfaces)
@@ -2964,7 +3508,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_and_coeffExtraction
             (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
               (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
               (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-              (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+              (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
               hsingle huniq))) :
     FiniteFaceScaleProductRepresentationTheoremAssumptionsFor hfaces :=
   finiteFaceScaleProductRepresentationTheorem_of_HM hhm hfaces hsecond hslope
@@ -3053,7 +3597,7 @@ theorem V_channel_eq_zero_of_subsingleton
   V_eq_zero_of_subsingleton F hV q hq (experimentOfChannel P)
 
 /-- On a singleton first-coordinate, the product-left-slice value is constant
-in P. This uses A7 (background separability) with same-type channels. -/
+in P. This uses derived background inertness with same-type channels. -/
 theorem productLeftSliceValue_singleton_const_sameType
     {F : PrefFamily.{u}} (hax : TraceAxioms F) (hs : ScaleCoherenceStructure F)
     {A B O Y : Type u}
@@ -3090,8 +3634,12 @@ theorem productLeftSliceValue_singleton_const_sameType
     (prodDist q r) hprod
     (experimentOfChannel (prodChannel Q R))
     (experimentOfChannel (prodChannel P R))
-  have hA7_fwd := (hax.a7.1 q r hq hr P Q R (Channel.uninformativeChannelU B)).mpr
-  have hA7_bwd := (hax.a7.1 q r hq hr Q P R (Channel.uninformativeChannelU B)).mpr
+  have hbackground_fwd :=
+    ((independentBackgroundSeparability_of_axioms F hax).1
+      q r hq hr P Q R (Channel.uninformativeChannelU B)).mpr
+  have hbackground_bwd :=
+    ((independentBackgroundSeparability_of_axioms F hax).1
+      q r hq hr Q P R (Channel.uninformativeChannelU B)).mpr
   have hlift_pref : ExperimentPairPref F
       (experimentOfChannel (leftProductLiftChannel (B := B) P))
       (experimentOfChannel (leftProductLiftChannel (B := B) Q))
@@ -3109,13 +3657,13 @@ theorem productLeftSliceValue_singleton_const_sameType
       hs.branch_agg.value_rep.V (prodDist q r)
         (experimentOfChannel (prodChannel Q R)) := by
     rw [← hrepr_fwd]
-    exact hA7_fwd hlift_pref
+    exact hbackground_fwd hlift_pref
   have hge_bwd : hs.branch_agg.value_rep.V (prodDist q r)
       (experimentOfChannel (prodChannel Q R)) ≥
       hs.branch_agg.value_rep.V (prodDist q r)
         (experimentOfChannel (prodChannel P R)) := by
     rw [← hrepr_bwd]
-    exact hA7_bwd hlift_pref'
+    exact hbackground_bwd hlift_pref'
   linarith
 
 /-- On a singleton first-coordinate, any experiment `prodChannel P R` has the same
@@ -3304,7 +3852,7 @@ structure FiniteSingletonSliceAffineAssumptions.{v} where
 /-- The singleton slice affine assumption is provable internally:
 take a = 1, b = productLeftSliceValue for the canonical uninformative channel.
 Since V q (experimentOfChannel P) = 0 on singletons and the product-left-slice
-value is constant in P (by A7 + value zero), the identity holds trivially.
+value is constant in P (by derived background inertness and value zero), the identity holds trivially.
 
 Paper: Step 5 of Lemma coherentnorm (line 1663–1676 of empowerment_v5(1).tex). -/
 private theorem singletonSliceAffine_proof
@@ -6281,7 +6829,7 @@ theorem unscaled_cross_prior_block_rep_of_product_parts
 
 External assumptions for the paper's unscaled full-support cross-prior
 blockbridge, after internalizing the product-to-block transfer from A3/A4/A5
-and the A7 value-order coordinate-independence consequence. What remains
+and the derived value-order coordinate-independence consequence. What remains
 external is split into the paper's cardinal coherent-product pieces and the
 remaining HM/affine/product bridges: posterior-law value affinity, first-slice
 classical affine-utility uniqueness, second-coordinate intercept affine
@@ -6841,7 +7389,7 @@ representation theorem:
   `α(ν)=A_{p,r}+C_{p,r}y(ν)`.
 
 Both are proved from the single global classical finite affine-utility
-uniqueness theorem, A7 same-order, HM public mixtures, and — crucially for the
+uniqueness theorem, derived background same-order, HM public mixtures, and — crucially for the
 slope — exact posterior-value relabeling invariance under the product swap
 (`Equiv.prodComm`).  This is the Lean form of the paper's coordinate-swap
 scalar `d(p,r)` (empowerment_v5(1).tex, Lemma coherentnorm, Step 2).
@@ -7122,7 +7670,7 @@ revelation `id_A`, transport it across `Equiv.prodComm` to the swapped product,
 expand the swapped slice, and use intercept positive-linearity on both slices.
 Dividing by `H(q) ≠ 0` gives an affine dependence of the slope on `V_r(R)`, with
 positive constant coefficient `B_{r,q}`. -/
-theorem faceScaleProductSlopeAffine_of_HM_A7_relabeling
+theorem faceScaleProductSlopeAffine_of_HM_backgroundInertness_relabeling
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
@@ -7200,14 +7748,14 @@ are now discharged internally:
 * second-coordinate intercept uniqueness by
   `classicalFaceScaleSecondCoordinateAffineUniqueness_of_finiteAffineUtility`
   (HM public mixtures + the single global classical affine-utility theorem);
-* slope affinity by `faceScaleProductSlopeAffine_of_HM_A7_relabeling`
+* slope affinity by `faceScaleProductSlopeAffine_of_HM_backgroundInertness_relabeling`
   (intercept positive-linearity + exact posterior-value relabeling under the
   product swap).
 
 The remaining inputs are the accepted global classical/relabeling assumptions
 (`hhm`, `hrelV`), which are the same inputs already used throughout the product
 layer. -/
-theorem finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+theorem finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
     (hhm : FinitePosteriorIntegralRepresentationData.{u})
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     {F : PrefFamily.{u}}
@@ -7221,25 +7769,25 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabelin
           (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
             (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
             (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-            (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+            (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
             hsingle huniq))
         huniq)
     (fun hsingle huniq =>
-      faceScaleProductSlopeAffine_of_HM_A7_relabeling hrelV
+      faceScaleProductSlopeAffine_of_HM_backgroundInertness_relabeling hrelV
         (faceScaleProductInterceptPositiveLinear_of_order_affinity_uniqueness
-          (faceScaleProductInterceptSameOrder_of_A7
+          (faceScaleProductInterceptSameOrder_of_backgroundInertness
             (faceScaleProductLeftSliceAffine_of_transform
               (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                 (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                 (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                 hsingle huniq)))
           (faceScaleProductInterceptPublicMixAffinity_of_HM hhm
             (faceScaleProductLeftSliceAffine_of_transform
               (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                 (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                 (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                 hsingle huniq)))
           (classicalFaceScaleSecondCoordinateAffineUniqueness_of_finiteAffineUtility
             hhm
@@ -7247,7 +7795,7 @@ theorem finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabelin
               (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
                 (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
                 (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-                (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+                (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
                 hsingle huniq))
             huniq)))
 
@@ -7257,7 +7805,7 @@ This is the reassembled clean constructor after the Fable stage.  Compared with
 `InteractionCollapseUniversalScale_of_totalClosure`:
 
 * the product-representation input is discharged internally by
-  `finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling`
+  `finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling`
   (the slope/second-coordinate content is now proved, not assumed);
 * the opaque grouping-equation input is replaced by the repaired, faithful
   two-grouping weight equation `hgroup` plus the positive-slice-slope condition
@@ -7277,38 +7825,38 @@ noncomputable def InteractionCollapseUniversalScale_of_fableProductClosure
     (hgauge :
       FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
       FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
@@ -7323,7 +7871,7 @@ noncomputable def InteractionCollapseUniversalScale_of_fableProductClosure
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_totalClosure
     hfaces
-    (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+    (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
       hhm hrelV hfaces)
     hsingle huniq hgauge hrelV hinterSingle hcoordValue hcoordScale
     (finiteProductGroupingEquation_of_twoGroupingWeightEquation hgroup hpos)
@@ -7356,38 +7904,38 @@ noncomputable def InteractionCollapseUniversalScale_of_targetedFinalClosure
     (hgauge :
       FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
       FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
@@ -7399,14 +7947,14 @@ noncomputable def InteractionCollapseUniversalScale_of_targetedFinalClosure
     InteractionCollapseUniversalChainScaleStructure F :=
   InteractionCollapseUniversalScale_of_totalClosure
     hfaces
-    (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+    (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
       hhm hrelV hfaces)
     hsingle huniq hgauge hrelV hinterSingle hcoordValue hcoordScale
     (finiteProductGroupingEquation_of_weightRecursion hrelV
       (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
         (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
         (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-        (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+        (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
         hsingle huniq)
       hrec)
     hunivSingle hax

@@ -35,38 +35,38 @@ noncomputable def InteractionCollapseUniversalScale_of_preUniversalGR
     (hgauge :
       FiniteFaceScaleCurrentProductGaugeNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hinterSingle :
       FiniteFaceScaleSingletonInteractionNormalizationFor
         (faceScaleProductPairwiseBilinearity_of_closedLocalTheorems
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).base_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).coordinate_publicMix
-          (finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          (finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).left_slice_same_order
           hsingle huniq
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_same_order hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).intercept_publicMix hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).second_coordinate_uniqueness hsingle huniq)
-          ((finiteFaceScaleProductRepresentationTheorem_of_HM_A7_classical_relabeling
+          ((finiteFaceScaleProductRepresentationTheorem_of_HM_backgroundInertness_classical_relabeling
             hhm hrelV hfaces).slope_affine hsingle huniq)))
     (hcoordValue : FiniteCoordinateSupportFaceValueIdentificationFor hfaces)
     (hcoordScale : FiniteCoordinateSupportFaceScaleIdentificationFor hfaces)
@@ -85,7 +85,7 @@ noncomputable def InteractionCollapseUniversalScale_of_preUniversalGR
           (faceScaleProductLeftSliceAffineTransform_of_closedLocalTheorems
             (faceScaleBaseValuePublicMixAffinity_of_HM hhm hfaces)
             (faceScaleProductCoordinateMixtureAffinity_of_HM hhm hfaces)
-            (faceScaleProductLeftSliceSameOrder_of_A7 hfaces)
+            (faceScaleProductLeftSliceSameOrder_of_backgroundInertness hfaces)
             hsingle huniq)))
     hunivSingle hax
 

@@ -14,23 +14,49 @@ import TraceableAgency.MainTheorem
 
 open TraceableAgency
 
-#print MainCharacterizationWithMoreover_of_FinalHM
-#check MainCharacterizationWithMoreover_of_FinalHM
-#print axioms MainCharacterizationWithMoreover_of_FinalHM
+#print provedMainCharacterizationWithMoreover
+#check provedMainCharacterizationWithMoreover
+#print axioms provedMainCharacterizationWithMoreover
+#check provedMainCharacterization
+#check provedSufficiencyStatement
 #print MainCharacterizationWithMoreover
 #print MainCharacterization
 #print MIRep
 #print BlockSameScaleRep
 #print TraceAxioms
+#check derived_background_inertness_left
+#check derived_background_inertness_right
+#check independentBackgroundSeparability_of_axioms
+#print axioms derived_background_inertness_left
+#print axioms independentBackgroundSeparability_of_axioms
 #print ClassicalFaddeevTheoremAssumptions
 #print FiniteFaddeevStandardHypotheses
+#check GenericFaddeev.finiteFaddeev_characterization
+#check GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
+#print axioms GenericFaddeev.finiteFaddeev_characterization
+#print axioms GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
+#check GenericFaddeev.sequentiallyContinuous_fullSupport_of_binary
 #print FinalHMInterface
 #print FiniteSamePosteriorLawBlackwellEquivalenceAssumptions
+#check posteriorMatchingKernel
+#check experimentPostprocesses_of_samePosteriorLawExp
+#check finiteBlackwellEquivalence_of_samePosteriorLawExp
+#check finiteSamePosteriorLawBlackwellEquivalence
+#print axioms finiteBlackwellEquivalence_of_samePosteriorLawExp
+#print axioms finiteSamePosteriorLawBlackwellEquivalence
+#check finiteBlackwellPosteriorReplacement
+#check posteriorLawSufficiency_of_axioms
 #print FiniteAdaptedSimplexBarycentricGrid
 #print ClassicalHersteinMilnorMixtureTheoremAssumptions
 #print AbstractConvexMixtureSpace
 #print ContinuousIndependentWeakOrder
 #print AffineUtilityRepresentation
+#check hm_exists_indifferent_segment
+#check hmUtility_represents
+#check hmUtility_affine
+#check genericHersteinMilnorAffineUtility
+#check genericHersteinMilnorMixtureTheorem
+#print axioms genericHersteinMilnorMixtureTheorem
 #check AbstractConvexMixtureSpace.mix_self
 #check AbstractConvexMixtureSpace.mix_swap
 #print FinitePosteriorIntegralRepresentationAssumptions
@@ -77,8 +103,12 @@ if rg "\badmit\b" TraceableAgency; then
   echo "ERROR: found 'admit' in Lean source."
   exit 1
 fi
-if rg "^\s*axiom\s" TraceableAgency; then
+if rg "^\s*axiom\s+[A-Za-z_][A-Za-z0-9_']*\s*[:({]" TraceableAgency; then
   echo "ERROR: found declaration-level axiom in Lean source."
+  exit 1
+fi
+if rg "\.a7\b|a7\s*:|A7_IndependentBackgroundSeparability" TraceableAgency; then
+  echo "ERROR: found a surviving A7 field or legacy A7 declaration."
   exit 1
 fi
 if rg "reverse_binary|of_recursion|ClassicalFiniteHersteinMilnorTheoremAssumptions" TraceableAgency; then
