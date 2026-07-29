@@ -3,7 +3,21 @@ set -euo pipefail
 
 echo "== Lean/Lake versions =="
 lake --version
-lake env lean --version
+lean_version="$(lake env lean --version)"
+echo "$lean_version"
+if [[ "$lean_version" != "Lean (version 4.32.1,"* ]]; then
+  echo "ERROR: certificate verification requires the patched Lean 4.32.1 kernel."
+  exit 1
+fi
+
+echo
+echo "== Kernel-soundness source gate =="
+if rg \
+  "run_meta|opaqueDecl|addDecl(Core|WithoutChecking)?|mkSorry|sorryAx|debug\\.skipKernelTC|unsafeCast|Lean\\.trustCompiler" \
+  TraceableAgency; then
+  echo "ERROR: found a prohibited declaration-construction or kernel-bypass primitive."
+  exit 1
+fi
 
 echo
 echo "== Building project =="
@@ -115,5 +129,9 @@ if rg "reverse_binary|of_recursion|ClassicalFiniteHersteinMilnorTheoremAssumptio
   echo "ERROR: found a removed convention or project-shaped theorem boundary."
   exit 1
 fi
+
+echo
+echo "== Fresh independent kernel replay =="
+lake env leanchecker --fresh TraceableAgency.MainTheorem
 
 echo "Verification passed."
