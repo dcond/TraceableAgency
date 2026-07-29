@@ -324,7 +324,15 @@ The verification script prints the assembled theorem, its axioms, the expanded
 conclusion, the closed Faddeev and HM witnesses, and the key derived
 continuity, Blackwell, and canonical-transport results. It also checks that the
 Lean source contains no
-`sorry`, tactic `admit`, or declaration-level `axiom`.
+`sorry`, tactic `admit`, declaration-level `axiom`, or low-level declaration
+construction and kernel-bypass primitives. Finally, it replays
+`TraceableAgency.MainTheorem` using `leanchecker --fresh`.
+
+The repository pins Lean 4.32.1, which contains the fix for the malformed
+opaque-declaration kernel issue reported in
+[Lean issue #14484](https://github.com/leanprover/lean4/issues/14484). A clean
+build with this patched kernel is a regression test: a proof object depending
+on that issue is rejected while its declaration is checked.
 
 Expected theorem boundary:
 
