@@ -1,0 +1,514 @@
+% Body fragment.  It can be inserted into trace_tempered_choice_v3.tex after
+% \appendix, or compiled through theorem1_lean_faithful_appendix_preview.tex.
+
+\section{Proof of Theorem 1}\label{app:lean-faithful-main}
+
+The only substantial result imported from elsewhere in the paper is the
+pure-record characterisation in Appendix D.  We also use the ordinary
+mixture-space theorem: a complete and transitive mixture order that satisfies
+independence and admits calibration on every closed mixture segment has an
+affine representation.  The proof identifies the value of changing one
+deterministic terminal payoff and then telescopes.  An arbitrary joint channel
+is reduced to this case by sequentialisation.
+
+\subsection{Preliminaries}
+
+We first dispose of three pieces of bookkeeping.  They will be used without
+further comment.
+
+Recall that $(q,K)\succeq(p,L)$ denotes the paper's canonical two-block
+comparison.  For channels $E,G$ at a common prior $q$, write
+$E\succeq_q G$ for $(q,E)\succeq(q,G)$.  A \emph{finite experiment at $q$}
+is a finite payoff--record channel paired with that prior; its marked terminal
+law is denoted by $\eta_E$.
+
+\begin{lemma}[Blocks, supports, and dummies]\label{lf:lem:bookkeeping}
+Suppose Axioms \textup{(A1)--(A5)} hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item After identifying alternatives related by invertible action or record
+  relabellings, the derived comparison of pairs is complete and transitive.
+  If either member of a pair comparison is replaced by an indifferent
+  alternative, the comparison is unchanged.
+\item If $S=\supp q$, then $(q,K)$ is indifferent to the restriction of
+  $(q,K)$ to $S$.
+\item If $s\in\D(B)$ and $K^\uparrow(o,r\mid a,b):=K(o,r\mid a)$, then
+  \begin{equation}
+  (q\otimes s,K^\uparrow)\sim(q,K).
+  \label{lf:eq:dummy-ordinal}
+  \end{equation}
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Place any finite collection of alternatives in one finite block environment.
+Axiom~\textup{(A3)} removes unused blocks, and Axiom~\textup{(A1)} supplies
+completeness and transitivity there.  Invertible action and record relabellings
+are neutral by applying Axioms~\textup{(A4)} and~\textup{(A5)} in both
+directions.  In particular, swapping both tags identifies the two orientations
+of a two-block comparison.  This proves part \textup{(a)}; a three-block
+environment gives transitivity and a four-block environment gives replacement.
+
+For part \textup{(b)}, report an action in $S$ by its inclusion in $A$.  In the
+other direction, report $a\in S$ when the realised action is $a$, and choose an
+arbitrary element of $S$ off the support.  Both reports satisfy
+\eqref{eq:action-processing}; rows attached to null reported actions may be
+completed arbitrarily.  Axiom~\textup{(A5)} gives the two comparisons.
+
+For part \textup{(c)}, first project $(a,b)$ to $a$.  Conversely, given $a$,
+draw $b$ independently from $s$ and report $(a,b)$.  Again the two joint-law
+identities in \eqref{eq:action-processing} are exact, so Axiom~\textup{(A5)}
+applies in both directions.  Part \textup{(a)} completes both arguments.
+\end{proof}
+
+Fix for the moment a full-support prior $q\in\D(A)$.  For a joint channel $K$,
+write
+\[
+p_K(o,r):=\sum_a q(a)K(o,r\mid a),
+\qquad
+\pi^K_{or}(a):=\frac{q(a)K(o,r\mid a)}{p_K(o,r)}
+\]
+when $p_K(o,r)>0$, and define its \emph{marked terminal law}
+\begin{equation}
+\eta_K:=\sum_{(o,r):p_K(o,r)>0}
+p_K(o,r)\,\delta_{(o,\pi^K_{or})}.
+\label{lf:eq:marked-law}
+\end{equation}
+It records the terminal payoff and the posterior about the realised action.
+Write $I_q(E)$ for the mutual information between the action and the complete
+visible output of $E$ under $q$.  When the output is a first-stage record $Y$,
+we also write this quantity as $I_q(A;Y)$.
+
+\begin{lemma}[Terminal laws and affine fibres]\label{lf:lem:terminal-affine}
+Under Axioms \textup{(A1)--(A6)}, the following statements hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item If $q$ has full support and $\eta_K=\eta_L$, then
+  $(q,K)\sim(q,L)$.
+\item At every full-support $q$, the quotient of finite experiments by their
+  marked terminal laws has an affine representation $W_q$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We give the finite Blackwell argument behind part \textup{(a)}.  For a payoff
+$o$ and posterior $\pi$, let
+\[
+M_K(o,\pi):=
+\sum_{\substack{r:\,p_K(o,r)>0\\ \pi^K_{or}=\pi}} p_K(o,r).
+\]
+Equality of marked laws gives $M_K(o,\pi)=M_L(o,\pi)=:M(o,\pi)$.
+For $p_K(o,r)>0$, draw a record $s$ of $L$ according to
+\begin{equation}
+T(s\mid o,r):=
+\1_{\{p_L(o,s)>0,\,\pi^L_{os}=\pi^K_{or}\}}
+\frac{p_L(o,s)}{M(o,\pi^K_{or})}.
+\label{lf:eq:matching-processor}
+\end{equation}
+Choose an arbitrary probability row when $p_K(o,r)=0$.  This is a
+payoff-preserving record processor.  Bayes' formula gives
+\[
+q(a)K(o,r\mid a)=p_K(o,r)\pi^K_{or}(a).
+\]
+For a reached target record $s$, with posterior $\pi=\pi^L_{os}$, it follows
+that
+\[
+\sum_r K(o,r\mid a)T(s\mid o,r)
+=\frac{p_L(o,s)}{M(o,\pi)}
+  \frac{\pi(a)}{q(a)}M(o,\pi)
+=L(o,s\mid a).
+\]
+If $s$ is unreached, full support makes both sides zero.  Thus postprocessing
+$K$ by $T$ gives $L$.  The symmetric construction gives a
+processor from $L$ to $K$.  Axiom~\textup{(A4)} and
+Lemma~\ref{lf:lem:bookkeeping}\textup{(a)} give indifference.  For a boundary
+prior, Lemma~\ref{lf:lem:bookkeeping}\textup{(b)} first deletes the null
+actions.
+
+For part \textup{(b)}, take the quotient of actual finite marked experiments by
+equality of \eqref{lf:eq:marked-law}.  If $E$ and $G$ are two such experiments,
+their public mixture first draws a coin independent of the action, runs the
+selected experiment, and retains the coin in the record.  Its marked law is
+\begin{equation}
+\eta_{tE\oplus(1-t)G}=t\eta_E+(1-t)\eta_G.
+\label{lf:eq:public-mixture}
+\end{equation}
+Axiom~\textup{(A6)} gives, for $0<t<1$ and any third experiment $L$,
+\begin{equation}
+E\succeq_q L
+\quad\Longleftrightarrow\quad
+tE\oplus(1-t)G\succeq_q tL\oplus(1-t)G.
+\label{lf:eq:mixture-independence}
+\end{equation}
+For the reverse implication, if $E\not\succeq_q L$, completeness gives
+$L\succ_q E$; the strict part of Axiom~\textup{(A6)} makes the reverse public
+mixture strict.  If record
+alphabets differ, put them in a common disjoint union before invoking the
+axiom; part \textup{(a)} identifies the result with
+\eqref{lf:eq:public-mixture}.
+
+It remains only to check the Archimedean step.  A closed segment between two
+experiments, and any fixed comparator, can be realised on one fixed union of
+their finite record alphabets.  Its channel entries vary continuously with
+$t\in[0,1]$.
+Axiom~\textup{(A2)} therefore makes both contour sets along the segment closed.
+Completeness says that they cover $[0,1]$; when a target lies between the two
+endpoints, the sets contain opposite endpoints and connectedness makes them
+intersect.  Thus every such target is indifferent to a point of the segment.
+The mixture-space theorem now supplies an affine representative $W_q$.  This
+quotient is closed under every mixture and embedding used below.
+\end{proof}
+
+\subsection{The two common scales}
+
+\begin{lemma}[Material utility and a common affine scale]\label{lf:lem:material-scale}
+Under Axioms \textup{(A1)--(A7)}, there are outcomes $o^+,o^-$ and a
+nonconstant function $u:O\to\R$ such that
+\[
+u(o^+)=1,
+\qquad
+u(o^-)=0.
+\]
+The payoff-lottery order is represented by $\sum_o\ell(o)u(o)$.  The
+representatives in Lemma~\ref{lf:lem:terminal-affine} may be normalised so that
+\begin{equation}
+W_q(\ell)=\sum_o\ell(o)u(o).
+\label{lf:eq:payoff-normalisation}
+\end{equation}
+With this normalisation, adjoining a full-support independent dummy to a
+full-support prior preserves value, and for full-support $q,q'$,
+\begin{equation}
+(q,E)\succeq(q',G)
+\quad\Longleftrightarrow\quad
+W_q(E)\ge W_{q'}(G).
+\label{lf:eq:common-scale}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+On a singleton action set, terminal-law sufficiency identifies an experiment
+with its payoff lottery.  Public-mixture independence and continuity, proved as
+in Lemma~\ref{lf:lem:terminal-affine}, give an affine utility on $\D(O)$.
+Axiom~\textup{(A7)} supplies $o^+\succ o^-$.  Normalise their values to one
+and zero and let $u(o)$ be the value of the degenerate lottery at $o$.
+Affinity on the finite simplex gives expected utility.
+
+An action report may ignore its input and draw an arbitrary target prior.
+Axiom~\textup{(A5)}, applied in both directions, therefore makes this payoff
+lottery order independent of the prior and action alphabet.  Normalise each
+$W_q$ at the same two deterministic payoffs.  The payoff-lottery embedding is
+affine and order-reflecting, so positive-affine uniqueness gives
+\eqref{lf:eq:payoff-normalisation}.
+
+Dummy lifting between full-support fibres is likewise an affine order
+embedding.  Positive-affine uniqueness initially permits
+\[
+W_{q\otimes s}(E^\uparrow)=cW_q(E)+d,
+\qquad c>0.
+\]
+The two payoff anchors have values zero and one on both sides; hence $c=1$ and
+$d=0$.  To compare $E$ at $q$ with $G$ at $q'$, lift each to the common product
+prior $q\otimes q'$, using the other prior as the dummy.  Equation
+\eqref{lf:eq:dummy-ordinal}, the replacement part of
+Lemma~\ref{lf:lem:bookkeeping}, and the common product representative give
+\eqref{lf:eq:common-scale}.
+\end{proof}
+
+We now use the pure-record theorem proved in Appendix D.  Apply it to the
+constant-payoff lift
+\[
+K_P(o,r\mid a)=\1_{\{o=o^-\}}P(r\mid a).
+\]
+This lift commutes with block formation, record processing, action reporting,
+limits on each finite simplex, and compounding.  Thus Axioms
+\textup{(A1)} and \textup{(A8)} give the pure weak order and its positive
+orientation; Axiom \textup{(A2)} gives continuity; Axiom \textup{(A3)} gives
+block coherence; Axioms \textup{(A4)} and \textup{(A5)} give the two data
+processing conditions, including every null-row completion; and Axiom
+\textup{(A6)} gives branchwise continuation.  These are precisely the
+hypotheses of the pure-record theorem.  Its conclusion is that every
+within-channel and block-supported comparison between such lifts is ordered by
+$I_{q,P}(A;R)$.
+
+\begin{lemma}[The trace scale]\label{lf:lem:trace-scale}
+Under Axioms \textup{(A1)--(A8)}, there is one number $\lambda>0$, independent
+of the prior and all finite alphabets, such that every full-support,
+nontrivial action fibre and every experiment $E$ that pays $o^-$ surely satisfy
+\begin{equation}
+W_q(E)=\lambda I_q(E).
+\label{lf:eq:sure-low}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Fix a nontrivial full-support $q$.  On the constant-$o^-$ face, $W_q$ is
+affine by Lemma~\ref{lf:lem:terminal-affine}.  For any experiment $E$, the
+finite entropy identity
+\begin{equation}
+I_q(E)=\Sh(q)-\sum_{(o,\pi)\in\supp\eta_E}
+\eta_E(o,\pi)\Sh(\pi).
+\label{lf:eq:posterior-entropy}
+\end{equation}
+shows that mutual information depends only on the marked terminal law and is
+affine under public mixtures.  The pure-record theorem says that $W_q$ and
+$I_q$ represent the same nonconstant order on the constant-low face.
+Positive-affine uniqueness therefore gives
+\[
+W_q(K_P)=\lambda_q I_{q,P}+b_q,
+\qquad \lambda_q>0.
+\]
+The uninformative experiment has mutual information zero and, by
+\eqref{lf:eq:payoff-normalisation}, value $u(o^-)=0$.  Thus $b_q=0$.
+
+The coefficient does not depend on $q$.  Let $q$ and $q'$ be nontrivial
+full-support priors.  Lift full revelation at $q$ to $q\otimes q'$ by adding an
+independent dummy coordinate.  Normalised value and mutual information are both
+unchanged.  Since the common information value is $\Sh(q)>0$, cancellation
+gives $\lambda_{q\otimes q'}=\lambda_q$.  Lifting full revelation from the
+other coordinate gives $\lambda_{q\otimes q'}=\lambda_{q'}$.  Hence all such
+coefficients agree.  Equivalently, fix the uniform prior on a two-point dummy
+alphabet and call its coefficient $\lambda$.  Axiom~\textup{(A8)} fixes the
+strict orientation, so $\lambda>0$.
+
+Finally, any experiment that pays $o^-$ surely is a pure record experiment
+after the constant payoff coordinate is deleted; restoring that coordinate
+changes neither its marked terminal law nor its mutual information.  This
+proves \eqref{lf:eq:sure-low}.
+\end{proof}
+
+\subsection{The branch calculation}
+
+Let $q$ be full support on a nontrivial $A$ and let
+$P:A\to\D(Y)$ be a first-stage record channel.  Put
+\[
+m_y:=\sum_a q(a)P(y\mid a).
+\]
+For a deterministic payoff profile $g:Y\to O$, let $C(P,g)$ denote the
+compound that first runs $P$ and then pays $g(y)$ with no further record.
+Write $g_y^o$ for the profile that pays $o$ at $y$ and $o^-$ elsewhere.
+
+\begin{lemma}[The reached-branch payoff increment]\label{lf:lem:branch-increment}
+For every $y\in Y$ and $o\in O$,
+\begin{equation}
+W_q\bigl(C(P,g_y^o)\bigr)
+-W_q\bigl(C(P,o^-)\bigr)=m_y u(o).
+\label{lf:eq:branch-increment}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+If $m_y=0$, changing the payoff on branch $y$ does not change the marked
+terminal law, so both sides are zero.  Suppose $m_y>0$, and put
+\[
+r_y(a):=\frac{q(a)P(y\mid a)}{m_y},
+\qquad
+S_y:=\supp r_y.
+\]
+Let $\bar r_y$ be the full-support restriction of $r_y$ to $S_y$.  For a
+marked continuation $E$ on $S_y$, extend $E$ to $A$ through a support
+projection, insert it at branch $y$, and put the uninformative payoff $o^-$ at
+every other branch.  Denote the resulting experiment by $J_y(E)$.  If
+$a\notin S_y$, then $r_y(a)=0$; since $q(a)>0$ and $m_y>0$, the definition of
+$r_y$ gives $P(y\mid a)=0$.  Hence the continuation rows chosen outside $S_y$
+are never used on branch $y$.  Support restriction identifies their local
+versions as well, so the extension is independent of the chosen projection.
+
+Support restriction and Axiom~\textup{(A6)}, including its strict part, give
+\[
+E\succeq_{\bar r_y}G
+\quad\Longleftrightarrow\quad
+J_y(E)\succeq_q J_y(G).
+\]
+For the reverse implication, failure of the local weak comparison gives a
+strict reverse comparison by completeness, and strict branchwise consistency
+gives a strict reverse compound comparison.  Different continuation record
+alphabets are first put in a common disjoint union.  Moreover, $J_y$ commutes
+with public mixtures at the level of marked terminal laws.  Thus affine
+uniqueness gives constants $c_y>0,d_y$ such that
+\begin{equation}
+W_q(J_y(E))=c_y W_{\bar r_y}(E)+d_y.
+\label{lf:eq:insertion-affine}
+\end{equation}
+
+Suppose first that $S_y$ has at least two elements.  At payoff $o^-$, compare
+full revelation, $E^{\mathrm{id}}$, with an uninformative record, $E^0$.
+Lemma~\ref{lf:lem:trace-scale} gives the local difference
+\[
+W_{\bar r_y}(E^{\mathrm{id}})-W_{\bar r_y}(E^0)
+=\lambda\Sh(\bar r_y).
+\]
+The finite mutual-information chain rule for insertion is
+\begin{equation}
+I_q(J_y(E))=I_q(A;Y)+m_y I_{\bar r_y}(E).
+\label{lf:eq:insertion-chain}
+\end{equation}
+Support extension does not change the last term.  Both inserted experiments
+pay $o^-$ surely, so Lemma~\ref{lf:lem:trace-scale} and
+\eqref{lf:eq:insertion-chain} make their aggregate value difference
+$\lambda m_y\Sh(\bar r_y)$.  Equation
+\eqref{lf:eq:insertion-affine} makes the same difference
+$c_y\lambda\Sh(\bar r_y)$.  Since $\lambda>0$ and a nontrivial full-support
+distribution has positive entropy, $c_y=m_y$.
+
+Locally, deterministic payoffs $o$ and $o^-$ have values $u(o)$ and zero by
+\eqref{lf:eq:payoff-normalisation}.  Subtracting their two instances of
+\eqref{lf:eq:insertion-affine}, and identifying the resulting insertions with
+the two deterministic compounds in the statement, proves
+\eqref{lf:eq:branch-increment}.
+
+If $S_y$ is a singleton, append an independent full-support two-point dummy
+action to the first-stage action.  The reached posterior becomes the product of
+$r_y$ and the dummy prior and hence has nontrivial support.  The branch mass is
+still $m_y$, and Lemma~\ref{lf:lem:material-scale} says that both compound
+values are unchanged.  Apply the preceding argument in the product problem and
+remove the dummy.
+\end{proof}
+
+\begin{lemma}[Deterministic branch assembly]\label{lf:lem:deterministic-assembly}
+For every deterministic payoff profile $g:Y\to O$,
+\begin{equation}
+W_q(C(P,g))
+=\lambda I_q(A;Y)+\sum_y m_y u(g(y)).
+\label{lf:eq:deterministic-assembly}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+First observe that the increment from changing one branch is independent of
+the payoffs on the other branches.  Indeed, for any two backgrounds $g,h$, the
+two crossed public half-mixtures
+\[
+\tfrac12 C(P,g[y\mapsto o])
+\oplus\tfrac12 C(P,h[y\mapsto o^-])
+\]
+and
+\[
+\tfrac12 C(P,g[y\mapsto o^-])
+\oplus\tfrac12 C(P,h[y\mapsto o])
+\]
+have the same marked terminal law.  Away from $y$ they contain the same two
+payoff-posterior atoms; at $y$ they contain $o$ and $o^-$ with the same mass
+$m_y/2$.  Affinity of $W_q$ and cancellation of the two halves show that the
+two background-specific increments are equal.  Taking
+$h$ to be the all-low profile and applying
+Lemma~\ref{lf:lem:branch-increment}, then changing the finitely many branches
+one at a time, gives
+\begin{equation}
+W_q(C(P,g))-W_q(C(P,o^-))
+=\sum_y m_y u(g(y)).
+\label{lf:eq:telescope}
+\end{equation}
+The all-low compound pays $o^-$ surely and has exactly the information in the
+first-stage record.  Lemma~\ref{lf:lem:trace-scale} therefore gives
+$W_q(C(P,o^-))=\lambda I_q(A;Y)$.  Substitute this into
+\eqref{lf:eq:telescope}.
+\end{proof}
+
+\subsection{Proof of the theorem}
+
+\begin{proof}[Proof of Theorem 1]
+Assume first Axioms \textup{(A1)--(A8)}.  Let $q$ have full support on a
+nontrivial action set, and let $K:A\to\D(O\times R)$ be arbitrary.  Put
+$Y=O\times R$ and take as first stage
+\[
+P_K(y\mid a):=K(y\mid a),
+\qquad y=(o,r).
+\]
+After $y=(o,r)$, pay $o$ for sure and reveal nothing further.  Call the
+resulting compound $K^{\mathrm{seq}}$.  From $K$, the record processor sends
+$(o,r)$ to the sequential record $((o,r),\ast)$.  In the reverse direction it
+sends $((o,r),\ast)$ to $r$; inconsistent payoff-record pairs are unreached and
+may be completed arbitrarily.  Both processors preserve the actual payoff
+coordinate.  Hence Axiom~\textup{(A4)} gives
+$(q,K)\sim(q,K^{\mathrm{seq}})$.
+
+\begin{samepage}
+Apply Lemma~\ref{lf:lem:deterministic-assembly} with $g(o,r)=o$.  The two
+identities needed are
+\[
+I_q(A;Y)=I_{qK}(A;O,R)
+\]
+and
+\[
+\sum_{o,r}p_{qK}(o,r)u(o)=\E_{q,K}[u(O)],
+\]
+respectively.  Together with sequentialisation, they give
+\begin{equation}
+W_q(K)=\E_{q,K}[u(O)]+\lambda I_{qK}(A;O,R).
+\label{lf:eq:full-support-value}
+\end{equation}
+\end{samepage}
+
+If $A$ is a singleton, mutual information is zero and the marked terminal law
+is that of the induced payoff lottery.  Equation
+\eqref{lf:eq:payoff-normalisation} gives
+\eqref{lf:eq:full-support-value} directly.  If $q$ is on the boundary, put
+$S=\supp q$ and write $(q^S,K^S)$ for the restriction.  Then
+\begin{equation}
+(q,K)\sim(q^S,K^S),
+\qquad
+V(q,K)=V(q^S,K^S).
+\label{lf:eq:support-value}
+\end{equation}
+The first identity is Lemma~\ref{lf:lem:bookkeeping}\textup{(b)}; the second
+follows directly from the finite sums defining expected utility and mutual
+information.  Thus no representative $W_q$ is assigned to a boundary fibre.
+
+Restrict two arbitrary alternatives to their supports, apply
+\eqref{lf:eq:common-scale} and \eqref{lf:eq:full-support-value} there, and use
+\eqref{lf:eq:support-value} to transport the comparison back.  This gives
+\begin{equation}
+(q,K)\succeq(p,L)
+\quad\Longleftrightarrow\quad
+V(q,K)\ge V(p,L),
+\label{lf:eq:pair-value}
+\end{equation}
+with the same $u$ and $\lambda$.  Axiom~\textup{(A3)}, first by duplication and
+then by deletion of irrelevant blocks, turns \eqref{lf:eq:pair-value} into the
+within-channel representation and the finite-block moreover clause.  The
+construction made $u$ nonconstant and $\lambda>0$.  This proves the forward
+implication.
+
+Conversely, suppose that a nonconstant $u$ and a number $\lambda>0$ represent
+the family by $V$.  Axiom~\textup{(A1)} follows from the order on $\R$.
+Expected utility and mutual information are jointly continuous in $(K,q)$ on
+each finite simplex; for the latter, use the entropy formula and $0\log0=0$.
+Hence the set of triples $(K,q,p)$ for which $V(q,K)\ge V(p,K)$ is closed,
+which is Axiom~\textup{(A2)}.  A block-supported prior has a constant block
+label, which changes neither term of $V$; this proves Axiom~\textup{(A3)} and
+reduces every pair comparison below to the corresponding two values.
+
+A payoff-preserving record processor leaves the payoff marginal unchanged and
+weakly lowers $I(A;O,R)$ by data processing.  This proves
+Axiom~\textup{(A4)}.  Under an action report, equation
+\eqref{eq:action-processing} again leaves the payoff-record marginal unchanged,
+and the joint law forms the Markov chain
+\[
+(O,R)-A-B.
+\]
+Thus $I(B;O,R)\le I(A;O,R)$, proving Axiom~\textup{(A5)}.  This argument uses
+the undivided joint-law equation and so also covers every completion on a null
+reported action.
+
+For a compound channel, the two finite chain rules are
+\begin{align*}
+\E[u(O)]
+  &=\sum_{y:m(y)>0} m(y)\E_{q_y,K^y}[u(O)],\\
+I(A;Y,O,R)
+  &=I(A;Y)+\sum_{y:m(y)>0} m(y)I_{q_y,K^y}(A;O,R).
+\end{align*}
+The first-stage term is common to two continuation profiles.  Their aggregate
+value difference is therefore
+\[
+\sum_{y:m(y)>0} m(y)\bigl[V(q_y,K^y)-V(q_y,L^y)\bigr].
+\]
+Branchwise weak improvement makes this sum nonnegative, and a strict
+improvement on a reached branch makes it positive.  This is precisely
+Axiom~\textup{(A6)}.
+
+Because $u$ is nonconstant, two deterministic payoffs are strictly ranked; the
+trace term is zero on a singleton action set.  This gives
+Axiom~\textup{(A7)}.  At a constant payoff, full revelation has
+value $u(o)+\lambda\Sh(q)$ and an uninformative record has value $u(o)$.
+Full support on a nontrivial finite action set implies $\Sh(q)>0$; hence
+Axiom~\textup{(A8)}.  The same block calculation used above gives the moreover
+clause with the original witnesses $u$ and $\lambda$.
+\end{proof}

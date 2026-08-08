@@ -1,0 +1,78 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+  hypertexnames=false,
+  pdftitle={Trace-Tempered Choice: A Lean-Faithful Proof of Theorem 1},
+  pdfauthor={Daniele Condorelli}
+}
+\setlength{\emergencystretch}{2em}
+\interfootnotelinepenalty=10000
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\D}{\Delta}
+\newcommand{\E}{\mathbb E}
+\newcommand{\I}{I}
+\newcommand{\Sh}{H}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\1}{\mathbf 1}
+
+% The main paper defines and labels these two transformations before the
+% appendix.  The preview supplies compact copies so that the fragment compiles
+% and reads on its own.
+\newcommand{\recordprocessingtag}{A.1}
+\newcommand{\actionprocessingtag}{A.2}
+\newcommand{\eqrefrecordprocessing}{\eqref{eq:record-processing}}
+\newcommand{\eqrefactionprocessing}{\eqref{eq:action-processing}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Trace-Tempered Choice}\par
+\vspace{0.4em}
+{\large A Lean-faithful proof of Theorem 1}\par
+\vspace{0.6em}
+Daniele Condorelli
+\end{center}
+
+\paragraph{Standing notation.}
+All payoff, action, and record alphabets are finite, and action and record
+alphabets are nonempty.  The primitive relations, common-payoff block
+environments, and Axioms \textup{(A1)--(A8)} are those in the paper.  A
+payoff-preserving record processor $T$ and an action report $S$ satisfy,
+respectively,
+\begin{align}
+(KT)(o,r'\mid a)
+  &=\sum_r K(o,r\mid a)T(r'\mid o,r),
+  \label{eq:record-processing}\\
+(qS)(b)\widehat K(o,r\mid b)
+  &=\sum_a q(a)S(b\mid a)K(o,r\mid a).
+  \label{eq:action-processing}
+\end{align}
+The second identity is imposed without division and hence leaves rows at null
+reported actions unrestricted.
+
+\appendix
+\input{theorem1_lean_faithful_appendix}
+
+\end{document}
