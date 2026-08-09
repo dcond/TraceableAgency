@@ -13,12 +13,10 @@ lake-packages/
 *.out
 *.synctex.gz
 
-# Keep the historical v7 snapshot and the authoritative v3 theorem package;
-# preserve unrelated local paper drafts without publishing them accidentally.
+# Keep only the authoritative v3 theorem package; preserve unrelated local
+# paper drafts without publishing them accidentally.
 Paper/*
 !Paper/README.md
-!Paper/empowerment_v7.tex
-!Paper/empowerment_v7.pdf
 !Paper/trace_tempered_choice_v3.tex
 !Paper/trace_tempered_choice_v3.pdf
 !Paper/appendix_a_pure_trace.tex
