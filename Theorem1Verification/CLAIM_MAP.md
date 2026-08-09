@@ -134,7 +134,7 @@ checked steps correspond to the informal proof as follows.
 
 | Informal proof role | Lean declarations |
 |---|---|
-| Apply the pure-trace characterization (Appendix B) to constant-payoff experiments | `inducedPure_traceAxioms`, `inducedPure_MIRep`, `constantPayoff_pairWeak_iff_mutualInfo` in `PureTrace.lean`; ultimately `TraceableAgency.provedMainCharacterizationWithMoreover` |
+| Apply the pure-trace characterization (Appendix A) to constant-payoff experiments | `inducedPure_traceAxioms_of_components`, `inducedPure_MIRep_of_components`, and `inducedPure_blockSameScale_of_components` in `PureTrace.lean`, together with `constantPayoff_pairWeak_iff_mutualInfo` in `TraceScaleTools.lean`; ultimately `TraceableAgency.provedMainCharacterizationWithMoreover` |
 | Obtain affine utilities on marked terminal laws and normalize them on the common material scale | `normalizedMarkedAffineUtilityRepresentation`, `normalizedMarkedUtility_payoffLottery` |
 | Identify one common positive information coefficient across finite full-support priors | `globalTraceLambda`, `globalTraceLambda_pos`, `normalizedMarkedUtility_constantLow_eq_globalTraceLambda_mul_mutualInfo` |
 | Delete zero-prior actions without changing behavior or value | `pairWeak_iff_supportRestriction`, `traceTemperedValue_restrictToSupport` |

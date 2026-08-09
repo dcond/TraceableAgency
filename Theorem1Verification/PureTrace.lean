@@ -1019,38 +1019,84 @@ theorem inducedPure_a6
 /-! ## Closed pure-trace proposition -/
 
 /-- A1--A6 and A8 induce the exact pure axiom bundle consumed by the already
-formalized pure-trace proposition in Appendix B. -/
+formalized pure-trace proposition in Appendix A. -/
+theorem inducedPure_traceAxioms_of_components
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) (o : O)
+    (h1 : A1_WeakOrder F)
+    (h2 : A2_Continuity F)
+    (h3 : A3_BlockComparisonCoherence F)
+    (h4 : A4_RecordDataProcessing F)
+    (h5 : A5_ActionDataProcessing F)
+    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h8 : A8_PositiveTraceOrientation F) :
+    TraceAxioms (inducedPureTraceFamily F o) where
+  a1 := ⟨inducedPure_a1_weakOrder F o h1,
+    inducedPure_a1_localNontriviality F o h1 h3 h4 h8⟩
+  a2 := inducedPure_a2 F o h2
+  a3 := ⟨inducedPure_a3_duplication F o h3,
+    inducedPure_a3_finiteBlock F o h1 h3 h4 h5⟩
+  a4 := inducedPure_a4 F o h4
+  a5 := inducedPure_a5 F o h5
+  a6 := inducedPure_a6 F o h6
+
+/-- Compatibility wrapper for callers that already carry the full main-text
+axiom bundle.  Material relevance A7 is not used by the pure-trace result. -/
 theorem inducedPure_traceAxioms
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h : TraceTemperedAxioms F) :
-    TraceAxioms (inducedPureTraceFamily F o) where
-  a1 := ⟨inducedPure_a1_weakOrder F o h.a1,
-    inducedPure_a1_localNontriviality F o h.a1 h.a3 h.a4 h.a8⟩
-  a2 := inducedPure_a2 F o h.a2
-  a3 := ⟨inducedPure_a3_duplication F o h.a3,
-    inducedPure_a3_finiteBlock F o h.a1 h.a3 h.a4 h.a5⟩
-  a4 := inducedPure_a4 F o h.a4
-  a5 := inducedPure_a5 F o h.a5
-  a6 := inducedPure_a6 F o h.a6
+    TraceAxioms (inducedPureTraceFamily F o) :=
+  inducedPure_traceAxioms_of_components F o
+    h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Kernel-checked invocation of the pure-trace proposition at a constant payoff. -/
+theorem inducedPure_MIRep_of_components
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) (o : O)
+    (h1 : A1_WeakOrder F)
+    (h2 : A2_Continuity F)
+    (h3 : A3_BlockComparisonCoherence F)
+    (h4 : A4_RecordDataProcessing F)
+    (h5 : A5_ActionDataProcessing F)
+    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h8 : A8_PositiveTraceOrientation F) :
+    MIRep (inducedPureTraceFamily F o) :=
+  (provedMainCharacterizationWithMoreover (inducedPureTraceFamily F o)).1.1
+    (inducedPure_traceAxioms_of_components F o h1 h2 h3 h4 h5 h6 h8)
+
+/-- Compatibility wrapper for the complete main-text axiom bundle. -/
 theorem inducedPure_MIRep
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h : TraceTemperedAxioms F) :
     MIRep (inducedPureTraceFamily F o) :=
-  (provedMainCharacterizationWithMoreover (inducedPureTraceFamily F o)).1.1
-    (inducedPure_traceAxioms F o h)
+  inducedPure_MIRep_of_components F o
+    h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Same-scale general-block conclusion supplied by the same closed theorem. -/
+theorem inducedPure_blockSameScale_of_components
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) (o : O)
+    (h1 : A1_WeakOrder F)
+    (h2 : A2_Continuity F)
+    (h3 : A3_BlockComparisonCoherence F)
+    (h4 : A4_RecordDataProcessing F)
+    (h5 : A5_ActionDataProcessing F)
+    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h8 : A8_PositiveTraceOrientation F) :
+    BlockSameScaleRep (inducedPureTraceFamily F o) :=
+  (provedMainCharacterizationWithMoreover (inducedPureTraceFamily F o)).2
+    (inducedPure_traceAxioms_of_components F o h1 h2 h3 h4 h5 h6 h8)
+
+/-- Compatibility wrapper for the complete main-text axiom bundle. -/
 theorem inducedPure_blockSameScale
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h : TraceTemperedAxioms F) :
     BlockSameScaleRep (inducedPureTraceFamily F o) :=
-  (provedMainCharacterizationWithMoreover (inducedPureTraceFamily F o)).2
-    (inducedPure_traceAxioms F o h)
+  inducedPure_blockSameScale_of_components F o
+    h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Constant-payoff within-channel comparisons are exactly ranked by mutual
 information. -/

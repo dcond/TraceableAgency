@@ -1,4 +1,4 @@
-# Paper snapshots and Theorem 1 supplement
+# Paper snapshots and Theorem 1 proof
 
 ## Historical matched snapshot
 
@@ -15,38 +15,35 @@ b6be0784355fe1aa37736b7ecc58bcb93d1e8dfc1fb4404a2781e34b4ace842b  empowerment_v7
 4b9fc6107bf75d4ecba4e21f6e882445356973f82c0bd40855d23d580619a71b  empowerment_v7.pdf
 ```
 
-## Current Theorem 1 proof supplement
+## Current paper
 
-The current paper source is [`trace_tempered_choice_v3.tex`](trace_tempered_choice_v3.tex).
-Its proof supplement is
-[`theorem1_lean_faithful_appendix.pdf`](theorem1_lean_faithful_appendix.pdf),
-with source split as follows:
+The authoritative source is
+[`trace_tempered_choice_v3.tex`](trace_tempered_choice_v3.tex), which states
+Axioms (A1)--(A8) once in the main text and inputs exactly three proof
+appendices:
 
-- [`theorem1_lean_faithful_appendix.tex`](theorem1_lean_faithful_appendix.tex)
-  is Appendix A: the Lean-faithful proof of the unique Theorem 1.
-- [`theorem1_pure_trace_appendix.tex`](theorem1_pure_trace_appendix.tex) is
-  Appendix B: the auxiliary pure-trace characterization and its full paper
-  proof. It is generated verbatim from marked regions of v3.
-- [`theorem1_lean_faithful_appendix_preview.tex`](theorem1_lean_faithful_appendix_preview.tex)
-  is the standalone compilation wrapper.
-- [`extract_lean_faithful_pure_trace.sh`](extract_lean_faithful_pure_trace.sh)
-  regenerates Appendix B after the marked v3 source changes.
+- [`appendix_a_pure_trace.tex`](appendix_a_pure_trace.tex) proves the
+  pure-trace lemma on constant-payoff lifts.  It uses the main-text axioms
+  directly and introduces no second axiom system.
+- [`appendix_b_main_theorem.tex`](appendix_b_main_theorem.tex) combines the
+  pure-trace lemma with the material scale, branch calibration, payoff
+  telescope, and sequentialisation to prove Theorem 1.
+- [`appendix_c_auxiliary_results.tex`](appendix_c_auxiliary_results.tex)
+  collects the sign, uniqueness, matching, independence, and choice-result
+  proofs that are not used in proving Theorem 1.
 
-The exact closed Lean input for Appendix B is
-`TraceableAgency.provedMainCharacterizationWithMoreover`. Its statement is
-`(TraceAxioms F ↔ MIRep F) ∧ (TraceAxioms F → BlockSameScaleRep F)`. Appendix
-A uses that proposition on the constant-payoff restriction, then carries out
-the common-scale, deterministic-branch, payoff-telescope, and
-sequentialization steps for Theorem 1. Appendix B preserves the paper's scalar
-algebra order for readability; it explicitly records where the kernel proof
-chooses its canonical representative earlier.
-
-Regenerate and compile the supplement with:
+The compiled paper is
+[`trace_tempered_choice_v3.pdf`](trace_tempered_choice_v3.pdf).  Build it with:
 
 ```sh
-./Paper/extract_lean_faithful_pure_trace.sh
 cd Paper
 latexmk -pdf -interaction=nonstopmode -halt-on-error \
-  -jobname=theorem1_lean_faithful_appendix \
-  theorem1_lean_faithful_appendix_preview.tex
+  trace_tempered_choice_v3.tex
 ```
+
+The pure-trace engine used in Appendix A is kernel-checked by
+`TraceableAgency.provedMainCharacterizationWithMoreover` and imported into the
+material model by `Theorem1Verification/PureTrace.lean`.  The Appendix B
+dependency chain is documented in
+`Theorem1Verification/PAPER_PROOF_ROADMAP.md` and culminates in the checked
+declaration `trace_tempered_choice_v3_theorem1`.

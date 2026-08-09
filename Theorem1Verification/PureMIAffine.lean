@@ -9,7 +9,7 @@ import TraceableAgency.Behaviour.MIPreference
 /-!
 # Mutual information as an affine utility on posterior laws
 
-The pure-trace conclusion in Appendix B is ordinal.  To align its cardinal scale with the
+The pure-trace conclusion in Appendix A is ordinal.  To align its cardinal scale with the
 marked-terminal representative, this file supplies the canonical affine
 representative on the already constructed posterior-law quotient: mutual
 information itself.
