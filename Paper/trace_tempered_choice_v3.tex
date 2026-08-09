@@ -485,18 +485,20 @@ $\widehat K$ satisfying \eqref{eq:action-processing},
 Nor does she gain when her action is reported noisily, holding the payoff lottery fixed.
 
 \item[(A6) Branchwise continuation consistency.]
-For every first-stage record channel $P:A\to\D(Y)$, all continuation profiles $\{K^y\}$ and $\{L^y\}$, and every
-$q\in\D(A)$: if
+For every finite family of record alphabets $(R_y)_{y\in Y}$, every first-stage record channel
+$P:A\to\D(Y)$, every pair of continuation profiles $K^y,L^y:A\to\D(O\times R_y)$, and every $q\in\D(A)$: if
 \[
  (q_y,K^y)\succeq(q_y,L^y)
  \quad\text{for every reached }y,
 \]
-then
+\begin{samepage}then
 \[
  \bigl(q,\,P\triangleright\{K^y\}\bigr)\succeq\bigl(q,\,P\triangleright\{L^y\}\bigr),
 \]
-strictly if one reached branch comparison is strict.
+strictly if one reached branch comparison is strict.\end{samepage}
 
+The two profiles share the continuation record alphabet within each branch, although $R_y$ may vary across branches;
+their channels are otherwise unrestricted.
 In a compound environment the branching variable is a record, and payoffs arrive only in the continuations.  The
 axiom is a sure-thing principle across the branches of an interim record: a profile weakly better on every reached
 branch is weakly better overall, with unreached branches unrestricted exactly as Savage's null events are.

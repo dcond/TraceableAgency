@@ -3,7 +3,7 @@
 ## Source and verification boundary
 
 - Informal source: `Paper/trace_tempered_choice_v3.tex` in the repository root.
-- Result: Theorem 1, `thm:main`, lines 539--562.
+- Result: Theorem 1, `thm:main`, lines 543--566.
 - Lean statement: `TraceTemperedChoiceVerification.Theorem1Statement` in
   `Statements.lean`.
 - Kernel-checked proof:
@@ -22,11 +22,11 @@
 
 | Informal text | Source lines | Lean declaration |
 |---|---:|---|
-| Fixed finite payoff alphabet `O`, `|O| >= 2` | 326--327 | Outer `O` quantifier and `2 <= Fintype.card O` in `Theorem1Statement` |
-| Nonempty finite actions `A` and records `R` | 326--330 | `FixedPayoffPrefFamily.rel`; every paper-relevant `A`/`R` binder has `Fintype`, `DecidableEq`, and `Nonempty` |
-| Joint channel `K : A -> Delta(O x R)` | 327--330 | `Channel A (O × R)` |
-| Primitive within-channel relation on `Delta(A)` | 332--338 | `FixedPayoffPrefFamily.rel` |
-| Strict/symmetric parts | 391--393 | `FixedPayoffPrefFamily.strictRel`, `indiffRel`, `pairStrict`, `pairIndiff` |
+| Fixed finite payoff alphabet `O`, `|O| >= 2` | 328--329 | Outer `O` quantifier and `2 <= Fintype.card O` in `Theorem1Statement` |
+| Nonempty finite actions `A` and records `R` | 328--330 | `FixedPayoffPrefFamily.rel`; every paper-relevant `A`/`R` binder has `Fintype`, `DecidableEq`, and `Nonempty` |
+| Joint channel `K : A -> Delta(O x R)` | 329--332 | `Channel A (O × R)` |
+| Primitive within-channel relation on `Delta(A)` | 334--340 | `FixedPayoffPrefFamily.rel` |
+| Strict/symmetric parts | 389--394 | `FixedPayoffPrefFamily.strictRel`, `indiffRel`, `pairStrict`, `pairIndiff` |
 
 The family has a genuinely fixed payoff coordinate.  It is not the existing
 pure-record `TraceableAgency.PrefFamily`, whose entire output type varies and
@@ -36,10 +36,10 @@ has no distinguished payoff projection.
 
 | Informal text | Source lines | Lean declaration |
 |---|---:|---|
-| Two-block `K sqcup L` with common payoff and tagged records | 364--381 | `commonPayoffBlockChannel` |
-| Copies `q^0`, `p^1` | 373--381 | `leftBlockDist`, `rightBlockDist` |
-| Pair shorthand `(q,K) >= (p,L)` | 387--393 | `pairWeak` |
-| Arbitrary finite block family and copies `q_i^i` | 383--385 | `commonPayoffBlockFamilyChannel`, `commonPayoffBlockEmbed` |
+| Two-block `K sqcup L` with common payoff and tagged records | 366--383 | `commonPayoffBlockChannel` |
+| Copies `q^0`, `p^1` | 375--383 | `leftBlockDist`, `rightBlockDist` |
+| Pair shorthand `(q,K) >= (p,L)` | 389--394 | `pairWeak` |
+| Arbitrary finite block family and copies `q_i^i` | 385--387 | `commonPayoffBlockFamilyChannel`, `commonPayoffBlockEmbed` |
 
 The repository's generic block constructor has output
 `(O × R) ⊕ (O × S)`.  The paper uses `O × (R ⊕ S)`, because only the record is
@@ -51,30 +51,29 @@ encoding, not a change in the visible random variable.
 
 | Informal clause | Source lines | Lean declaration |
 |---|---:|---|
-| A1 weak order | 345--346 | `A1_WeakOrder` |
-| A2 closed graph in `(K,q,p)` for fixed alphabets | 348--354 | `A2_Continuity` |
-| A3 duplication | 420--426 | `A3_BlockComparisonCoherence.duplication` |
-| A3 irrelevant blocks | 427--433 | `A3_BlockComparisonCoherence.irrelevant_blocks` |
-| Record processor and `KT` | 442--447 | `RecordProcessor`, `payoffPreservingRecordKernel`, `recordPostprocess` |
-| A4 record data processing | 470--475 | `A4_RecordDataProcessing` |
-| Action report, pushforward, and completion equation | 448--457 | `IsActionReportCompletion` |
-| A5 action data processing | 477--483 | `A5_ActionDataProcessing` |
-| Compound channel, reached branch, posterior | 458--466 | `commonPayoffCompound`, existing `BranchPositive`, existing `branchPosterior` |
-| A6 weak branchwise implication | 485--495 | `A6_BranchwiseContinuationConsistency_Weak` |
-| A6 reached-branch strictness | 496 | `A6_BranchwiseContinuationConsistency_Strict` |
-| A7 material relevance | 502--508 | `A7_MaterialRelevance` |
-| A8 positive trace orientation | 510--517 | `A8_PositiveTraceOrientation` |
-| Combined hypotheses | 542 | `TraceTemperedAxioms` |
+| A1 weak order | 347--348 | `A1_WeakOrder` |
+| A2 closed graph in `(K,q,p)` for fixed alphabets | 350--356 | `A2_Continuity` |
+| A3 duplication | 422--428 | `A3_BlockComparisonCoherence.duplication` |
+| A3 irrelevant blocks | 429--435 | `A3_BlockComparisonCoherence.irrelevant_blocks` |
+| Record processor and `KT` | 442--449 | `RecordProcessor`, `payoffPreservingRecordKernel`, `recordPostprocess` |
+| A4 record data processing | 472--477 | `A4_RecordDataProcessing` |
+| Action report, pushforward, and completion equation | 450--458 | `IsActionReportCompletion` |
+| A5 action data processing | 479--485 | `A5_ActionDataProcessing` |
+| Compound channel, reached branch, posterior | 460--468 | `commonPayoffCompound`, existing `BranchPositive`, existing `branchPosterior` |
+| A6 weak branchwise implication | 487--497 | `A6_BranchwiseContinuationConsistency_Weak` |
+| A6 reached-branch strictness | 498 | `A6_BranchwiseContinuationConsistency_Strict` |
+| A7 material relevance | 506--512 | `A7_MaterialRelevance` |
+| A8 positive trace orientation | 514--521 | `A8_PositiveTraceOrientation` |
+| Combined hypotheses | 546 | `TraceTemperedAxioms` |
 
 ### A6 reading
 
 Both continuation profiles use the same branch-dependent record family
-`Rec y`.  This is the weakest faithful reading of v3: the construction directly
-before A6 introduces `K^y : A -> Delta(O × R_y)`, and A6 then quantifies over
-profiles `{K^y}` and `{L^y}` without introducing a second record family.  It
-also agrees with the checked pure-record formalization's explicitly named
-paper-faithful A6.  Allowing unrelated record families for the two profiles is
-a useful stronger formulation, but it is not silently imposed here.
+`Rec y`.  V3 now states this explicitly by quantifying one finite family
+`(R_y)` and channels `K^y, L^y : A -> Delta(O × R_y)`.  This exactly matches
+the checked full-payoff and pure-record declarations.  Allowing unrelated
+record families for the two profiles is a stronger formulation and is not
+assumed by Theorem 1.
 
 ### Continuity reading
 
@@ -99,12 +98,12 @@ the row of `Khat` unrestricted.  A5 quantifies over every such completion.
 
 | Informal text | Source lines | Lean declaration |
 |---|---:|---|
-| Induced visible distribution and MI | 525--537 | Existing `mutualInfo q K` with visible type `O × R` |
-| Expected material utility | 536--537, 550 | `expectedPayoffUtility` |
-| `V = E[u(O)] + lambda I(A;O,R)` | 543--551 | `traceTemperedValue` |
-| One `u,lambda` for every `A,R,K,q,p` | 543--552 | Existential binders precede `WithinChannelRepresentation` in `Theorem1Statement` |
-| `u` nonconstant, `lambda > 0` | 543 | Explicit conjuncts in `Theorem1Statement` |
-| Same-scale finite-block moreover clause | 554--560 | `SameWitnessBlockRepresentation` and second conjunct of `Theorem1Statement` |
+| Induced visible distribution and MI | 529--541 | Existing `mutualInfo q K` with visible type `O × R` |
+| Expected material utility | 554 | `expectedPayoffUtility` |
+| `V = E[u(O)] + lambda I(A;O,R)` | 547--555 | `traceTemperedValue` |
+| One `u,lambda` for every `A,R,K,q,p` | 547--556 | Existential binders precede `WithinChannelRepresentation` in `Theorem1Statement` |
+| `u` nonconstant, `lambda > 0` | 547 | Explicit conjuncts in `Theorem1Statement` |
+| Same-scale finite-block moreover clause | 558--565 | `SameWitnessBlockRepresentation` and second conjunct of `Theorem1Statement` |
 
 `mutualInfo` is defined in the imported checked development using Lean's
 natural logarithm.  The paper permits any one fixed logarithm base; changing
