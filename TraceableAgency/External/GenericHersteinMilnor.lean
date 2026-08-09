@@ -117,9 +117,31 @@ def HMIndiff {X : Type u} (R : X → X → Prop) (x y : X) : Prop :=
 def HMStrict {X : Type u} (R : X → X → Prop) (x y : X) : Prop :=
   R x y ∧ ¬ R y x
 
+/-- The exact order-theoretic input used by the calibration construction.
+
+The generic Herstein--Milnor proof needs continuity only to obtain an
+indifferent point on each closed anchor segment.  Once those points are
+available, completeness, transitivity, and mixture independence suffice for
+the rest of the construction.  Keeping this smaller interface separate lets
+applications prove segment calibration directly without manufacturing a
+global sequential-closedness statement. -/
+structure HMCalibratableWeakOrder
+    {X : Type u} (M : AbstractConvexMixtureSpace X)
+    (R : X → X → Prop) : Prop where
+  complete : ∀ x y, R x y ∨ R y x
+  transitive : ∀ x y z, R x y → R y z → R x z
+  independence :
+    ∀ (x y z : X) (t : Set.Ioo (0 : ℝ) 1),
+      R x y ↔ R (M.mix t x z) (M.mix t y z)
+  segment_calibration :
+    ∀ (high target low : X),
+      R high target → R target low →
+        ∃ t : HMUnitInterval,
+          HMIndiff R target (hmSegment M t high low)
+
 theorem hm_refl
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     (x : X) :
     R x x := by
   rcases hR.complete x x with h | h
@@ -128,7 +150,7 @@ theorem hm_refl
 
 theorem hm_indiff_refl
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     (x : X) :
     HMIndiff R x x :=
   ⟨hm_refl hR x, hm_refl hR x⟩
@@ -141,7 +163,7 @@ theorem hm_indiff_symm
 
 theorem hm_indiff_trans
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x y z : X} (hxy : HMIndiff R x y) (hyz : HMIndiff R y z) :
     HMIndiff R x z :=
   ⟨hR.transitive x y z hxy.1 hyz.1,
@@ -149,7 +171,7 @@ theorem hm_indiff_trans
 
 theorem hm_rel_congr
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x x' y y' : X}
     (hxx' : HMIndiff R x x') (hyy' : HMIndiff R y y') :
     R x y ↔ R x' y' := by
@@ -163,7 +185,7 @@ theorem hm_rel_congr
 
 theorem hm_strict_of_indiff_left
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x x' y : X} (hxx' : HMIndiff R x x') (hxy : HMStrict R x y) :
     HMStrict R x' y := by
   constructor
@@ -173,7 +195,7 @@ theorem hm_strict_of_indiff_left
 
 theorem hm_strict_of_indiff_right
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x y y' : X} (hyy' : HMIndiff R y y') (hxy : HMStrict R x y) :
     HMStrict R x y' := by
   constructor
@@ -183,7 +205,7 @@ theorem hm_strict_of_indiff_right
 
 theorem hm_strict_trans
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x y z : X} (hxy : HMStrict R x y) (hyz : HMStrict R y z) :
     HMStrict R x z := by
   constructor
@@ -195,7 +217,7 @@ theorem hm_strict_trans
 with the same background. -/
 theorem hm_indiff_mix_iff
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     (x y z : X) (t : Set.Ioo (0 : ℝ) 1) :
     HMIndiff R x y ↔
       HMIndiff R (M.mix t x z) (M.mix t y z) := by
@@ -209,7 +231,7 @@ theorem hm_indiff_mix_iff
 
 theorem hm_strict_mix
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x y : X} (hxy : HMStrict R x y) (z : X)
     (t : Set.Ioo (0 : ℝ) 1) :
     HMStrict R (M.mix t x z) (M.mix t y z) := by
@@ -221,7 +243,7 @@ theorem hm_strict_mix
 /-- Mixtures respect indifference in both arguments. -/
 theorem hm_mix_indiff_congr
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x x' y y' : X} (hxx' : HMIndiff R x x')
     (hyy' : HMIndiff R y y') (t : Set.Ioo (0 : ℝ) 1) :
     HMIndiff R (M.mix t x y) (M.mix t x' y') := by
@@ -310,11 +332,35 @@ theorem hm_exists_indifferent_segment
   · exact hnotUpper h
   · exact hnotLower h
 
+/-- Sequentially closed independent weak orders are calibratable.  This is
+the compatibility bridge from the original generic HM interface to the
+smaller interface used by the proof below. -/
+theorem HMCalibratableWeakOrder.ofContinuous
+    {X : Type u} {M : AbstractConvexMixtureSpace X}
+    {R : X → X → Prop}
+    (hR : ContinuousIndependentWeakOrder M R) :
+    HMCalibratableWeakOrder M R where
+  complete := hR.complete
+  transitive := hR.transitive
+  independence := hR.independence
+  segment_calibration := by
+    intro high target low hhigh hlow
+    exact hm_exists_indifferent_segment M R hR high target low hhigh hlow
+
+/-- Convenience coercion for contexts in which the mixture space and relation
+are already fixed by the expected `HMCalibratableWeakOrder` type. -/
+instance continuousIndependentWeakOrderToHMCalibratableWeakOrder
+    {X : Type u} {M : AbstractConvexMixtureSpace X}
+    {R : X → X → Prop} :
+    Coe (ContinuousIndependentWeakOrder M R)
+      (HMCalibratableWeakOrder M R) :=
+  ⟨HMCalibratableWeakOrder.ofContinuous⟩
+
 /-- Every nonzero point on a segment from a strictly better endpoint is
 strictly better than the low endpoint. -/
 theorem hm_segment_strict_low
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     {high low : X} (hhl : HMStrict R high low)
     (t : HMUnitInterval) (ht0 : 0 < t.1) :
     HMStrict R (hmSegment M t high low) low := by
@@ -334,7 +380,7 @@ theorem hm_segment_strict_low
 below that endpoint. -/
 theorem hm_segment_strict_high
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     {high low : X} (hhl : HMStrict R high low)
     (t : HMUnitInterval) (ht1 : t.1 < 1) :
     HMStrict R high (hmSegment M t high low) := by
@@ -359,7 +405,7 @@ theorem hm_segment_strict_high
 in its scalar coefficient. -/
 theorem hm_segment_strict_mono
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     {high low : X} (hhl : HMStrict R high low)
     (s t : HMUnitInterval) (hst : s.1 < t.1) :
     HMStrict R (hmSegment M t high low) (hmSegment M s high low) := by
@@ -394,7 +440,7 @@ theorem hm_segment_strict_mono
 the right-hand coefficient argument. -/
 theorem hm_segment_rel_iff
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     {high low : X} (hhl : HMStrict R high low)
     (s t : HMUnitInterval) :
     R (hmSegment M s high low) (hmSegment M t high low) ↔
@@ -412,7 +458,7 @@ theorem hm_segment_rel_iff
 
 theorem hm_indifferent_segment_unique
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     {high low target : X} (hhl : HMStrict R high low)
     {s t : HMUnitInterval}
     (hs : HMIndiff R target (hmSegment M s high low))
@@ -433,16 +479,16 @@ theorem hm_indifferent_segment_unique
 argument. -/
 noncomputable def hmBetweenCoefficient
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (high target low : X)
     (hhigh : R high target) (hlow : R target low) :
     HMUnitInterval :=
   Classical.choose
-    (hm_exists_indifferent_segment M R hR high target low hhigh hlow)
+    (hR.segment_calibration high target low hhigh hlow)
 
 theorem hmBetweenCoefficient_spec
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (high target low : X)
     (hhigh : R high target) (hlow : R target low) :
     HMIndiff R target
@@ -450,11 +496,11 @@ theorem hmBetweenCoefficient_spec
         (hmBetweenCoefficient M R hR high target low hhigh hlow)
         high low) :=
   Classical.choose_spec
-    (hm_exists_indifferent_segment M R hR high target low hhigh hlow)
+    (hR.segment_calibration high target low hhigh hlow)
 
 theorem hmBetweenCoefficient_unique
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (high target low : X)
     (hhigh : R high target) (hlow : R target low)
     (hhl : HMStrict R high low)
@@ -466,7 +512,7 @@ theorem hmBetweenCoefficient_unique
 
 theorem hm_reverse_rel_of_not_strict
     {X : Type u} {M : AbstractConvexMixtureSpace X}
-    {R : X → X → Prop} (hR : ContinuousIndependentWeakOrder M R)
+    {R : X → X → Prop} (hR : HMCalibratableWeakOrder M R)
     {x y : X} (hnot : ¬ HMStrict R x y) :
     R y x := by
   rcases hR.complete x y with hxy | hyx
@@ -478,7 +524,7 @@ theorem hm_reverse_rel_of_not_strict
 indifferent to that anchor after dilution by the low anchor. -/
 noncomputable def hmUpperWeight
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hxa : HMStrict R x a) :
     HMUnitInterval :=
@@ -486,7 +532,7 @@ noncomputable def hmUpperWeight
 
 theorem hmUpperWeight_spec
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hxa : HMStrict R x a) :
     HMIndiff R a
@@ -495,7 +541,7 @@ theorem hmUpperWeight_spec
 
 theorem hmUpperWeight_mem_Ioo
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hxa : HMStrict R x a) :
     (hmUpperWeight M R hR a b hab x hxa).1 ∈ Set.Ioo (0 : ℝ) 1 := by
@@ -520,7 +566,7 @@ theorem hmUpperWeight_mem_Ioo
 low anchor indifferent to that low anchor. -/
 noncomputable def hmLowerRawCoefficient
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     HMUnitInterval :=
@@ -529,7 +575,7 @@ noncomputable def hmLowerRawCoefficient
 /-- Weight on the low alternative itself in the lower-anchor calibration. -/
 noncomputable def hmLowerWeight
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     HMUnitInterval := by
@@ -538,7 +584,7 @@ noncomputable def hmLowerWeight
 
 theorem hmLowerRawCoefficient_spec
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     HMIndiff R b
@@ -548,7 +594,7 @@ theorem hmLowerRawCoefficient_spec
 
 theorem hmLowerRawCoefficient_mem_Ioo
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     (hmLowerRawCoefficient M R hR a b hab x hbx).1 ∈
@@ -572,7 +618,7 @@ theorem hmLowerRawCoefficient_mem_Ioo
 
 theorem hmLowerWeight_mem_Ioo
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     (hmLowerWeight M R hR a b hab x hbx).1 ∈
@@ -586,7 +632,7 @@ theorem hmLowerWeight_mem_Ioo
 
 theorem hmLowerWeight_spec
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x) :
     let q := hmLowerWeight M R hR a b hab x hbx
@@ -612,7 +658,7 @@ theorem hmLowerWeight_spec
 their dilution weights. -/
 theorem hm_upper_rel_iff_weight_le
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x y : X) (hxa : HMStrict R x a) (hya : HMStrict R y a) :
     R x y ↔
@@ -647,7 +693,7 @@ theorem hm_upper_rel_iff_weight_le
 their self-weights in the lower calibration. -/
 theorem hm_lower_rel_iff_weight_ge
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x y : X) (hbx : HMStrict R b x) (hby : HMStrict R b y) :
     R x y ↔
@@ -711,7 +757,7 @@ theorem hm_lower_rel_iff_weight_ge
 /-- Comparison for two points between the normalized anchors. -/
 theorem hm_middle_rel_iff_coefficient_ge
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x y : X) (hax : R a x) (hxb : R x b)
     (hay : R a y) (hyb : R y b) :
@@ -732,7 +778,7 @@ theorem hm_middle_rel_iff_coefficient_ge
 the anchors receive values `1` and `0`. -/
 noncomputable def hmUtility
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X) : ℝ := by
   classical
   by_cases hxa : HMStrict R x a
@@ -745,7 +791,7 @@ noncomputable def hmUtility
 
 theorem hmUtility_of_upper
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hxa : HMStrict R x a) :
     hmUtility M R hR a b hab x =
@@ -754,7 +800,7 @@ theorem hmUtility_of_upper
 
 theorem hmUtility_of_lower
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hbx : HMStrict R b x) :
     hmUtility M R hR a b hab x =
@@ -766,7 +812,7 @@ theorem hmUtility_of_lower
 
 theorem hmUtility_of_middle
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hnotUpper : ¬ HMStrict R x a)
     (hnotLower : ¬ HMStrict R b x) :
@@ -778,7 +824,7 @@ theorem hmUtility_of_middle
 
 theorem hmUtility_gt_one_of_upper
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hxa : HMStrict R x a) :
     1 < hmUtility M R hR a b hab x := by
@@ -788,7 +834,7 @@ theorem hmUtility_gt_one_of_upper
 
 theorem hmUtility_le_one_of_not_upper
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hnotUpper : ¬ HMStrict R x a) :
     hmUtility M R hR a b hab x ≤ 1 := by
@@ -805,7 +851,7 @@ theorem hmUtility_le_one_of_not_upper
 
 theorem hmUtility_lt_zero_of_lower
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hbx : HMStrict R b x) :
     hmUtility M R hR a b hab x < 0 := by
@@ -817,7 +863,7 @@ theorem hmUtility_lt_zero_of_lower
 
 theorem hmUtility_nonneg_of_not_lower
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x : X)
     (hnotLower : ¬ HMStrict R b x) :
     0 ≤ hmUtility M R hR a b hab x := by
@@ -833,7 +879,7 @@ theorem hmUtility_nonneg_of_not_lower
 /-- The normalized calibration represents the weak order globally. -/
 theorem hmUtility_represents
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b) (x y : X) :
     R x y ↔ hmUtility M R hR a b hab x ≥
       hmUtility M R hR a b hab y := by
@@ -964,7 +1010,7 @@ theorem hm_mix_segments
 mixes with the midpoint exactly as its scalar value does. -/
 theorem hm_middle_dilution
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hnotUpper : ¬ HMStrict R x a)
     (hnotLower : ¬ HMStrict R b x)
@@ -998,7 +1044,7 @@ theorem hm_middle_dilution
 calibrating weight. -/
 theorem hm_upper_dilution
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hxa : HMStrict R x a)
     (lam : Set.Ioo (0 : ℝ) 1) (c : HMUnitInterval)
@@ -1067,7 +1113,7 @@ theorem hm_upper_dilution
 calibrating anchor. -/
 theorem hm_lower_dilution
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (hbx : HMStrict R b x)
     (lam : Set.Ioo (0 : ℝ) 1) (c : HMUnitInterval)
@@ -1135,7 +1181,7 @@ equivalent after a small common dilution to the standard segment point with
 the correspondingly diluted scalar value. -/
 theorem hm_dilution
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (x : X) (lam : Set.Ioo (0 : ℝ) 1) (c : HMUnitInterval)
     (hc : c.1 =
@@ -1225,7 +1271,7 @@ by one common positive weight, then invokes uniqueness on the strict anchor
 segment and cancels that weight. -/
 theorem hmUtility_affine
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R)
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R)
     (a b : X) (hab : HMStrict R a b)
     (t : Set.Ioo (0 : ℝ) 1) (x y : X) :
     hmUtility M R hR a b hab (M.mix t x y) =
@@ -1314,11 +1360,12 @@ theorem hmUtility_affine
               (1 - t.1) * hmUtility M R hR a b hab y) := by ring
   exact mul_left_cancel₀ (ne_of_gt lam.2.1) hscaled
 
-/-- Exact generic Herstein--Milnor representation theorem for this
-development's sequentially closed/interior-mixture schema. -/
-theorem genericHersteinMilnorAffineUtility
+/-- Exact generic Herstein--Milnor representation theorem from segment
+calibration.  This is the smallest hypothesis actually consumed by the
+standard-sequence construction. -/
+theorem genericHersteinMilnorAffineUtility_of_calibratable
     {X : Type u} (M : AbstractConvexMixtureSpace X)
-    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R) :
+    (R : X → X → Prop) (hR : HMCalibratableWeakOrder M R) :
     Nonempty (AffineUtilityRepresentation M R) := by
   classical
   by_cases hstrict : ∃ a b : X, HMStrict R a b
@@ -1346,6 +1393,15 @@ theorem genericHersteinMilnorAffineUtility
           intro t x y
           simp
       }⟩
+
+/-- Exact generic Herstein--Milnor representation theorem for this
+development's original sequentially closed/interior-mixture schema. -/
+theorem genericHersteinMilnorAffineUtility
+    {X : Type u} (M : AbstractConvexMixtureSpace X)
+    (R : X → X → Prop) (hR : ContinuousIndependentWeakOrder M R) :
+    Nonempty (AffineUtilityRepresentation M R) :=
+  genericHersteinMilnorAffineUtility_of_calibratable M R
+    (HMCalibratableWeakOrder.ofContinuous hR)
 
 /-- A closed Lean term inhabiting the formerly external generic HM theorem
 assumption.  In particular, downstream results may use this theorem without
