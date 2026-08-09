@@ -14,9 +14,9 @@ written in v3**.  It follows the same four-part architecture—terminal laws,
 affine cardinalization, material/trace calibration, and branch assembly—but it
 changes several arguments and supplies cases that the paper compresses.  The
 largest difference is substantive at the level of intermediate lemmas: Lean
-does not use or separately prove the arbitrary-continuation recursion displayed
-as equation `branch-recursion` in v3.  Instead it proves exactly the narrower
-branch result needed for Theorem 1:
+does not use or separately prove the arbitrary-continuation recursion labelled
+`branch-recursion` in an earlier v3 draft.  Instead it proves exactly the
+narrower branch result needed for Theorem 1:
 
 1. insertion of a continuation into one reached branch is a positive-affine
    map on the relevant terminal-law quotient;
@@ -43,8 +43,16 @@ The revised Appendix A and the Lean development prove the same proposition and
 expose the same interfaces to Theorem 1: posterior-law sufficiency, an affine
 representative on each fixed-prior fibre, a common cross-prior scale, coherent
 support faces, branch additivity, and finally the mutual-information formula.
-They are not translations line by line, because the two presentations order
-the middle calibration arguments differently.
+They are not translations line by line.  In particular, the Lean pure-trace
+development proves a global posterior-law continuity theorem by a finite
+spread/merge sandwich and then constructs a finite posterior-integral
+representation.  The shortened paper proof needs neither intermediate result:
+it verifies only the fixed-alphabet segment closedness required by the
+Herstein--Milnor theorem, and later obtains branch coefficients directly from
+the common tangent space of Bayes-plausible laws.  Thus the public pure-trace
+statement and the interface consumed by Appendix B are kernel-checked, while
+these shorter intermediate paper arguments are an alternative derivation
+rather than line-by-line Lean declarations.
 
 The Lean dependency order selects an exactly relabelling-natural canonical
 posterior value first.  It then constructs the branch, cocycle, and cardinal
@@ -82,15 +90,15 @@ earlier prose version:
    full-support representative on its positive support, so support coherence
    remains definitional.
 
-After these repairs, the difference is organizational rather than
-mathematical.  For a human reading the proof sequentially, the five-stage paper
-version is clearer: product calibration is a self-contained scalar-algebra
-block, followed by the probabilistic branch argument.  Lean's order remains
-the clearer audit trail and should be used to check dependencies.  At the level
-of the full paper, the best organization is therefore to keep the complete
-pure-trace engine in Appendix A and the seven-page Theorem 1 spine in Appendix B,
-rather than interleaving forty pages of pure-trace calibration with the
-material-payoff proof.
+After these repairs, the two routes have the same statement and downstream
+interfaces but different intermediate constructions.  For a human reading the
+proof sequentially, the five-stage paper version is clearer: product
+calibration is a self-contained scalar-algebra block, followed by the
+probabilistic branch argument.  Lean's order remains the clearer audit trail
+for dependencies.  In the current build the complete pure-trace part occupies
+seventeen pages, followed by the compact Theorem 1 completion in Appendix B;
+keeping those two parts separate is clearer than interleaving pure-trace scale
+calibration with the material-payoff proof.
 
 ## Exact theorem being proved
 
@@ -639,8 +647,8 @@ W_q(P,g)
 \tag{DP}
 \]
 
-Equation (DP), not the stronger arbitrary-continuation recursion from v3, is
-the decisive assembly lemma in the checked proof.
+Equation (DP), not the stronger arbitrary-continuation recursion from the
+earlier v3 draft, is the decisive assembly lemma in the checked proof.
 
 ### 9. Sequentialize an arbitrary payoff-record channel
 
@@ -826,7 +834,7 @@ the checked route as follows.
    ordinal Appendix A comparison remains available at every constant payoff,
    and the final representation then covers every payoff.
 
-5. It replaces the arbitrary-continuation branch-recursion lemma as a
+5. It replaces the stronger arbitrary-continuation branch recursion as a
    dependency of Theorem 1 with Steps 6–8 above: support-face affine insertion,
    entropy calibration of its slope, the dummy treatment of singleton reached
    supports, zero-mass branches, crossed-mixture background independence, and
@@ -872,9 +880,10 @@ branch-insertion and deterministic-telescope route checked in Lean.
 
 ## Trust boundary and scope
 
-`Axioms.lean` declares no extra mathematical axiom.  The proof imports the
-kernel-checked pure-trace characterization of Appendix A and otherwise derives every
-mathematical step in Lean.  The standard declarations reported by
+`Axioms.lean` declares no extra mathematical axiom.  The proof imports a
+kernel-checked pure-trace theorem with the same statement and common-scale
+block conclusion as Appendix A, and otherwise derives every mathematical step
+in Lean.  The standard declarations reported by
 `#print axioms`—propositional extensionality, classical choice, and quotient
 soundness—are Lean/Mathlib foundations used by the construction, not additional
 behavioral or information-theoretic assumptions.

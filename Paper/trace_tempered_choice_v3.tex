@@ -61,10 +61,9 @@ channel, and a branchwise sure-thing principle characterize
   \E[u(O)]+\lambda \I(A;O,R),\qquad \lambda>0.
 \]
 No primitive payoff--trace separability axiom is required.  It is derived from the temporal asymmetry of the domain:
-records may arrive first, while payoff is terminal.  The proof isolates that derivation in a calibrated branch-recursion
-lemma.  A complete proof of the mutual-information characterization for the pure-trace restriction is included as an
-appendix, so the paper is logically independent of earlier versions of the traceability paper.  Every primitive axiom is
-shown to be independent of the others.
+records may arrive first, while payoff is terminal.  The proof isolates that derivation in a calibrated branch-insertion
+and finite-telescope argument.  Appendix~A proves the mutual-information characterization on the pure-trace restriction
+as the first part of the single proof of the theorem.  Every primitive axiom is shown to be independent of the others.
 \end{abstract}
 
 \tableofcontents
@@ -223,8 +222,8 @@ be strictly ranked.  Axiom~\textup{(A8)} requires full revelation of a genuinely
 preferred to an uninformative record when payoff is fixed.  The first makes $u$ nonconstant; the second selects
 $\lambda>0$.  Neither imposes a numerical scale.
 
-A sketch of the proof follows the theorem in Section~\ref{sec:theorem}; complete arguments, including a self-contained proof of the
-pure-record characterisation on which the trace component rests, are in the Appendix.
+A sketch of the proof follows the theorem in Section~\ref{sec:theorem}; the complete argument is divided between the
+pure-trace proof in Appendix~A and the completion of Theorem~1 in Appendix~B.
 
 % ===============================================================
 \section{Related Literature}
@@ -581,7 +580,7 @@ thereby identified with its \emph{terminal law}, the joint distribution of reali
 \emph{Step 2: cardinalisation.}  A public coin is a first stage that reveals nothing, so every branch posterior
 equals $q$.  Axiom~\textup{(A6)} applied to such stages yields mixture independence over terminal laws
 (Lemma~\ref{lf:lem:terminal-affine}), and with continuity, Axiom~\textup{(A2)}, the mixture-space theorem gives a
-continuous affine representation on each fixed-prior fibre.  All cardinal content enters here: every other axiom
+affine representation on each fixed-prior fibre.  All cardinal content enters here: every other axiom
 is an ordinal, environment-by-environment condition.
 
 \emph{Step 3: two scales.}  On singleton action sets the affine representation is expected utility, nonconstant by

@@ -41,7 +41,8 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error \
   trace_tempered_choice_v3.tex
 ```
 
-The pure-trace engine used in Appendix A is kernel-checked by
+The pure-trace statement and common-scale block interface proved in Appendix A
+are also kernel-checked by
 `TraceableAgency.provedMainCharacterizationWithMoreover` and imported into the
 material model by `Theorem1Verification/PureTrace.lean`.  The Appendix B
 dependency chain is documented in
