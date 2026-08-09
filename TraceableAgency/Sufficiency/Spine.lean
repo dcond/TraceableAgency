@@ -12,48 +12,31 @@ import TraceableAgency.External.HersteinMilnor
 /-!
 # Sufficiency Proof Spine
 
-This file defines the abstract architecture for the sufficiency direction of
-Theorem 1: TraceAxioms F → MIRep F.
+This file defines the historical abstract interfaces for the sufficiency
+direction `TraceAxioms F → MIRep F`.  They remain available for compatibility
+and for stating intermediate concepts, but the public theorem no longer uses
+the old assumption-bundle assembly below.
 
-The proof follows the paper's roadmap (empowerment_v5.tex, lines 801-820):
+The closed paper-faithful route is implemented in the neighbouring modules:
 
-1. **Posterior-law sufficiency**: Block comparisons and Blackwell equivalence
-   imply that only the induced posterior law matters (Lemmas blockcoh--blackwell).
+1. `Posterior` and `Affine` descend preferences to the fixed-prior
+   posterior-law quotient and apply primitive A2 only to the closed segments
+   required by Herstein--Milnor.
+2. `ProductGauge` selects the canonical relabelling/support-compatible
+   representative and derives product quasi-additivity and its positive slice
+   factors.
+3. `Branch` derives branch aggregation, its tangent cocycle, and the normalized
+   chain rule directly from that selected value.
+4. `FaceCoherence` proves the nested-face cardinal cocycle and performs the
+   scale-only cardinal alignment; `Scales` compares product and sequential
+   scales and collapses the interaction coefficient.
+5. `EntropyReduction` applies the resulting grouping recursion and the proved
+   finite Faddeev theorem; `Final` assembles `MIRep F`.
 
-2. **Posterior-separable representation**: Public-coin independence gives affine
-   structure; Herstein--Milnor yields a posterior-separable integral representation
-   (Lemmas plsuff--actionbase).
-
-3. **Branch aggregation**: Branchwise monotonicity (A6) implies cardinal branch
-   aggregation with path-independent coefficients (Lemma branchagg).
-
-4. **Scale coherence**: The branch-coefficient cocycle, normalised chain rule,
-   face-scale alignment, and a two-grouping argument collapse the interaction
-   term to give a universal chain scale (Lemmas chain--scalecoherence).
-
-5. **Entropy reduction and cross-prior bridge**: Full revelation defines entropy,
-   channels have entropy-reduction values, and a separate scaled block bridge
-   handles cross-prior comparisons.
-
-6. **Faddeev**: The derived recursion is Faddeev's, so H = α·Shannon
-   (Lemma faddeevsketch).
-
-7. **Mutual information representation**: Entropy reduction gives MIRep F
-   (Lemma globalsketch).
-
-## External Assumptions
-
-This architecture uses explicit, named external assumptions:
-- Finite Blackwell posterior-law replacement
-- Herstein--Milnor posterior value representation
-- Branch aggregation
-- Scale coherence
-- Entropy reduction
-- Cross-prior block representation
-- Faddeev entropy characterisation
-- Boundary extension from full support
-
-These are NOT proved here but are bundled in documented structures.
+In particular, that public dependency chain does not construct a
+posterior-separable integrand and does not use the global posterior-law
+continuity or `FinalHMInterface` compatibility route.  This fact is checked
+transitively by `Theorem1Verification.PaperFaithfulDependencyAudit`.
 
 ## What This File Provides
 
