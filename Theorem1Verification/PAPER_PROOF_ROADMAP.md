@@ -59,32 +59,6 @@ through explicit equivalences; it also separates the positive-product gauge,
 the raw branch scale, and the final cardinal scale in their types.  The paper
 can suppress those coercions once the relevant bijections are stated.
 
-This audit found and repaired three genuine proof-presentation defects in the
-earlier prose version:
-
-1. The simultaneous data-processing calculation applied action processing
-   before record processing.  The corrected construction first forms the
-   record-processed channel and then applies action processing, with the
-   supplied channel taken as the exact Bayesian completion, including all null
-   rows.
-2. The product calculation treated the two bracketings of a Cartesian product
-   as literally identical.  It now transports through the canonical
-   associating bijection, after the zero/full-revelation normalisation has made
-   relabeling equality exact.
-3. The product gauge was not explicitly propagated to boundary priors.  The
-   post-gauge boundary representative is now defined from the gauged
-   full-support representative on its positive support, so support coherence
-   remains definitional.
-
-After these repairs and the Lean refactor, the two routes have the same
-intermediate construction as well as the same statement and downstream
-interface.  The five-stage organization remains clearer for a human reader:
-product calibration is a self-contained scalar-algebra block, the branch and
-face argument is a geometric block, and the product/sequential comparison is
-performed only when both scales exist.  Keeping Appendix A separate from the
-material-payoff completion in Appendix B avoids interleaving two logically
-independent calibrations.
-
 ## Exact theorem being proved
 
 Fix a finite payoff set \(O\), with at least two elements.  For every nonempty
