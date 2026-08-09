@@ -9,14 +9,19 @@ assumptions, one payoff index and one strictly positive trace coefficient shared
 across all finite environments, and the same-witness finite-block “moreover”
 clause.
 
-The Lean proof is **not a line-by-line formalization of the proof currently
-written in v3**.  It follows the same four-part architecture—terminal laws,
-affine cardinalization, material/trace calibration, and branch assembly—but it
-changes several arguments and supplies cases that the paper compresses.  The
-largest difference is substantive at the level of intermediate lemmas: Lean
-does not use or separately prove the arbitrary-continuation recursion labelled
-`branch-recursion` in an earlier v3 draft.  Instead it proves exactly the
-narrower branch result needed for Theorem 1:
+The current Lean proof is not a sentence-by-sentence transcription of the
+paper, but it is now a faithful formal counterpart at the level that matters
+for a paper proof: the same objects are constructed in the same dependency
+order, and each substantive paper lemma has a kernel-checked Lean endpoint.
+The pure-trace route no longer detours through global posterior-law continuity,
+a posterior-separable integrand, or the historical `FinalHMInterface` assembly.
+Those declarations remain in the repository for compatibility but are absent
+from the transitive dependency closure of the public theorem.
+
+The material-payoff completion likewise follows the narrower verified branch
+argument adopted in the current paper, rather than the stronger
+arbitrary-continuation recursion labelled `branch-recursion` in an earlier v3
+draft:
 
 1. insertion of a continuation into one reached branch is a positive-affine
    map on the relevant terminal-law quotient;
@@ -27,51 +32,32 @@ narrower branch result needed for Theorem 1:
 5. every joint payoff-record channel is reduced to that deterministic-payoff
    form by an exact sequentialization.
 
-Thus the kernel check validates Theorem 1, but should not be described as a
-kernel check of every intermediate assertion, every claimed minimal axiom set,
-or the exact prose proof in v3.  The roadmap below is the proof that the paper
-can safely be rewritten to follow the verified dependency chain.
-
-That rewrite is now incorporated directly in the current paper.  Appendix A
-contains the complete pure-trace argument, Appendix B follows the verified
-dependency chain to complete Theorem 1, and Appendix C collects auxiliary
-results that are not used in the theorem proof.
+The kernel check therefore validates Theorem 1 and the complete dependency
+chain used in its current proof.  It should not be overstated as a check of
+unused auxiliary assertions or of every advertised minimal subset of the
+axioms.  Appendix A contains the single pure-trace proof, Appendix B wraps that
+result into Theorem 1, and Appendix C collects auxiliary results not used in
+the theorem proof.
 
 ## Audit of the pure-trace proof against Lean
 
-The revised Appendix A and the Lean development prove the same proposition and
-expose the same interfaces to Theorem 1: posterior-law sufficiency, an affine
-representative on each fixed-prior fibre, a common cross-prior scale, coherent
-support faces, branch additivity, and finally the mutual-information formula.
-They are not translations line by line.  In particular, the Lean pure-trace
-development proves a global posterior-law continuity theorem by a finite
-spread/merge sandwich and then constructs a finite posterior-integral
-representation.  The shortened paper proof needs neither intermediate result:
-it verifies only the fixed-alphabet segment closedness required by the
-Herstein--Milnor theorem, and later obtains branch coefficients directly from
-the common tangent space of Bayes-plausible laws.  Thus the public pure-trace
-statement and the interface consumed by Appendix B are kernel-checked, while
-these shorter intermediate paper arguments are an alternative derivation
-rather than line-by-line Lean declarations.
+The revised Appendix A and the public Lean dependency chain now agree stage by
+stage:
 
-The Lean dependency order selects an exactly relabelling-natural canonical
-posterior value first.  It then constructs the branch, cocycle, and cardinal
-face scales using finite atomic posterior laws, and only afterwards applies the
-product coboundary gauge.  This order is particularly good for auditing: every
-normalisation is introduced before any theorem that consumes it, and the exact
-associator, swap, unit, and support-face transports are explicit declarations.
+| Paper step | Kernel-checked Lean endpoint |
+|---|---|
+| Descend to the fixed-prior posterior-law quotient and use A2 only to close one finite-alphabet segment | `directPosteriorLawMixtureRel`; `directPosteriorLawMixtureRel_segment_calibration`; `finiteHersteinMilnorConclusion_direct_of_axioms` |
+| Select the canonical zero/full-revelation normalization, propagate it to support faces, and fix the independent-product coboundary gauge | `paperCanonicalPosteriorValue`; `posteriorProductGaugeData_of_axioms`; `PosteriorProductGaugeData.product_quasi_add` |
+| Obtain direct branch aggregation and the full-support scalar cocycle from affine tangents, without choosing a posterior integrand | `directBranchChain_of_posteriorValue` |
+| Prove that the boundary defect is prior-independent, invariant within a support face, multiplicative over nested canonical faces, and hence a cardinal coboundary | `directGeneralFaceDefect`; `directCardinalFaceDefect_cocycle`; `directCardinalFaceDefectCocycle`; `directCoherentRelabelingFaceScales` |
+| Compare product and sequential revelation scales, derive the two-grouping equation, and force the interaction coefficient to vanish | `paperScaleComparisonCore`; `interactionCollapse_of_paperScaleComparison` |
+| Apply the grouping recursion and the proved finite Faddeev theorem to obtain entropy reduction and mutual information | `MIRep_of_paperInteractionCollapse`; `MIRep_of_TraceAxioms_paperReduction` |
 
-Appendix A keeps the paper's product calculation before the branch
-calculation.  After fibrewise affine cardinalisation it normalises no
-information to zero and full revelation to one.  Those two anchors make action
-relabeling exact.  The product bilinear form can then be compared across the
-canonical associator and coordinate swap without an unidentified scalar.  A
-relabeling-invariant coboundary gauge makes the two linear product coefficients
-one; boundary representatives are then redefined by exact transport from the
-newly gauged positive-support representative.  Only after this product and
-cross-prior calibration does the paper derive branch coefficients, their
-cocycle, support compatibility, the vanishing interaction, and Faddeev's
-entropy formula.
+The remaining differences are formal bookkeeping rather than different
+mathematics.  Lean names every support subtype and transports distributions
+through explicit equivalences; it also separates the positive-product gauge,
+the raw branch scale, and the final cardinal scale in their types.  The paper
+can suppress those coercions once the relevant bijections are stated.
 
 This audit found and repaired three genuine proof-presentation defects in the
 earlier prose version:
@@ -90,15 +76,14 @@ earlier prose version:
    full-support representative on its positive support, so support coherence
    remains definitional.
 
-After these repairs, the two routes have the same statement and downstream
-interfaces but different intermediate constructions.  For a human reading the
-proof sequentially, the five-stage paper version is clearer: product
-calibration is a self-contained scalar-algebra block, followed by the
-probabilistic branch argument.  Lean's order remains the clearer audit trail
-for dependencies.  In the current build the complete pure-trace part occupies
-seventeen pages, followed by the compact Theorem 1 completion in Appendix B;
-keeping those two parts separate is clearer than interleaving pure-trace scale
-calibration with the material-payoff proof.
+After these repairs and the Lean refactor, the two routes have the same
+intermediate construction as well as the same statement and downstream
+interface.  The five-stage organization remains clearer for a human reader:
+product calibration is a self-contained scalar-algebra block, the branch and
+face argument is a geometric block, and the product/sequential comparison is
+performed only when both scales exist.  Keeping Appendix A separate from the
+material-payoff completion in Appendix B avoids interleaving two logically
+independent calibrations.
 
 ## Exact theorem being proved
 

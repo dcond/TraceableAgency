@@ -11,9 +11,12 @@
   `Proof.lean`.
 - Checked Appendix engine imported by `Axioms.lean`:
   `TraceableAgency.provedMainCharacterizationWithMoreover` from
-  `TraceableAgency/MainTheorem.lean`, lines 109--114.  This is the closed
-  pure-record characterization used at constant payoff.  No new Lean axiom or
-  theorem-interface assumption is declared here.
+  `TraceableAgency/MainTheorem.lean`.  Its sufficiency direction now closes
+  through `SufficiencyStatement_of_paperReduction` and
+  `MIRep_of_TraceAxioms_paperReduction`: the direct pure-trace reduction used
+  at constant payoff.  No new Lean axiom or theorem-interface assumption is
+  declared here, and the public theorem does not transitively use the older
+  posterior-integral / `FinalHMInterface` route.
 
 ## Domain correspondence
 
@@ -134,7 +137,7 @@ checked steps correspond to the informal proof as follows.
 
 | Informal proof role | Lean declarations |
 |---|---|
-| Apply the pure-trace characterization (Appendix A) to constant-payoff experiments | `inducedPure_traceAxioms_of_components`, `inducedPure_MIRep_of_components`, and `inducedPure_blockSameScale_of_components` in `PureTrace.lean`, together with `constantPayoff_pairWeak_iff_mutualInfo` in `TraceScaleTools.lean`; ultimately `TraceableAgency.provedMainCharacterizationWithMoreover` |
+| Apply the pure-trace characterization (Appendix A) to constant-payoff experiments | The Appendix engine follows `finiteHersteinMilnorConclusion_direct_of_axioms` (fixed-prior quotient and direct HM), `paperCanonicalPosteriorValue` (canonical normalization), `posteriorProductGaugeData_of_axioms` (independent-product gauge), `directBranchChain_of_posteriorValue` (direct tangent branch scalar), `directCardinalFaceDefectCocycle` and `directCoherentRelabelingFaceScales` (nested-face/cardinality coherence), and `MIRep_of_paperInteractionCollapse` / `MIRep_of_TraceAxioms_paperReduction` (grouping recursion and mutual information).  The main proof then uses `inducedPure_traceAxioms_of_components`, `inducedPure_MIRep_of_components`, and `inducedPure_blockSameScale_of_components` in `PureTrace.lean`, together with `constantPayoff_pairWeak_iff_mutualInfo` in `TraceScaleTools.lean`; ultimately `TraceableAgency.provedMainCharacterizationWithMoreover`. |
 | Obtain affine utilities on marked terminal laws and normalize them on the common material scale | `normalizedMarkedAffineUtilityRepresentation`, `normalizedMarkedUtility_payoffLottery` |
 | Identify one common positive information coefficient across finite full-support priors | `globalTraceLambda`, `globalTraceLambda_pos`, `normalizedMarkedUtility_constantLow_eq_globalTraceLambda_mul_mutualInfo` |
 | Delete zero-prior actions without changing behavior or value | `pairWeak_iff_supportRestriction`, `traceTemperedValue_restrictToSupport` |
@@ -157,11 +160,25 @@ positive support and then lifted back exactly.  No counterexample was found.
 
 `Axioms.lean` declares no extra axiom.  Lean's `#print axioms` command reports
 only the standard dependencies `propext`, `Classical.choice`, and `Quot.sound`
-for `trace_tempered_choice_v3_theorem1`.  The verification sources contain no
-`sorry`, `admit`, opaque placeholder, or unsafe declaration.  The checked
-build target is:
+for `MIRep_of_TraceAxioms_paperReduction`,
+`provedMainCharacterizationWithMoreover`, and
+`trace_tempered_choice_v3_theorem1`.
+
+`PaperFaithfulDependencyAudit.lean` recursively follows declaration bodies and
+types.  It reports closure sizes 21,218, 21,221, 39,749, and 40,564 for,
+respectively, the direct MI endpoint, the public pure-trace sufficiency
+statement, the public characterization, and Theorem 1, with zero occurrences
+of the forbidden posterior-integral, global posterior-law continuity,
+`marginalValue`, old all-representatives relabelling, or `FinalHMInterface`
+declarations on every path.
+
+The changed proof path contains no `sorry`, `admit`, unchecked hole, new axiom,
+opaque placeholder, or unsafe declaration.  Both checked build targets are:
 
 ```text
+lake build
+Build completed successfully (8634 jobs).
+
 lake build Theorem1Verification
-Build completed successfully (8667 jobs).
+Build completed successfully (8677 jobs).
 ```
