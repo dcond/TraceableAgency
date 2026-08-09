@@ -32,14 +32,14 @@ kernel check of every intermediate assertion, every claimed minimal axiom set,
 or the exact prose proof in v3.  The roadmap below is the proof that the paper
 can safely be rewritten to follow the verified dependency chain.
 
-That rewrite is now incorporated in
-`Paper/theorem1_lean_faithful_appendix.tex` as Appendix A.  The complete
-pure-trace argument is preserved as Appendix B, generated from the marked v3
-source by `Paper/extract_lean_faithful_pure_trace.sh`.
+That rewrite is now incorporated directly in the current paper.  Appendix A
+contains the complete pure-trace argument, Appendix B follows the verified
+dependency chain to complete Theorem 1, and Appendix C collects auxiliary
+results that are not used in the theorem proof.
 
 ## Audit of the pure-trace proof against Lean
 
-The revised Appendix B and the Lean development prove the same proposition and
+The revised Appendix A and the Lean development prove the same proposition and
 expose the same interfaces to Theorem 1: posterior-law sufficiency, an affine
 representative on each fixed-prior fibre, a common cross-prior scale, coherent
 support faces, branch additivity, and finally the mutual-information formula.
@@ -53,7 +53,7 @@ product coboundary gauge.  This order is particularly good for auditing: every
 normalisation is introduced before any theorem that consumes it, and the exact
 associator, swap, unit, and support-face transports are explicit declarations.
 
-Appendix B keeps the paper's product calculation before the branch
+Appendix A keeps the paper's product calculation before the branch
 calculation.  After fibrewise affine cardinalisation it normalises no
 information to zero and full revelation to one.  Those two anchors make action
 relabeling exact.  The product bilinear form can then be compared across the
@@ -87,8 +87,8 @@ mathematical.  For a human reading the proof sequentially, the five-stage paper
 version is clearer: product calibration is a self-contained scalar-algebra
 block, followed by the probabilistic branch argument.  Lean's order remains
 the clearer audit trail and should be used to check dependencies.  At the level
-of the full paper, the best organization is therefore to keep the seven-page
-Theorem 1 spine in Appendix A and the complete pure-trace engine in Appendix B,
+of the full paper, the best organization is therefore to keep the complete
+pure-trace engine in Appendix A and the seven-page Theorem 1 spine in Appendix B,
 rather than interleaving forty pages of pure-trace calibration with the
 material-payoff proof.
 
@@ -387,7 +387,7 @@ W_q(E)\ge W_p(G).
 Support restriction handles boundary priors.  Formula (B) is the common-scale
 block bridge needed at the end of the theorem.
 
-### 5. Import the pure-record characterization from Appendix B
+### 5. Import the pure-record characterization from Appendix A
 
 Fix the normalized low outcome \(o^-\), and lift every pure record experiment
 \(P:A\to\Delta(R)\) to the constant-payoff channel
@@ -398,7 +398,9 @@ K_P(o,r\mid a)
 \]
 
 On this restriction, the eight axioms induce the pure-record hypotheses used
-in Appendix B.  In Lean this is the theorem `inducedPure_traceAxioms`; the
+in Appendix A.  In Lean this is the theorem
+`inducedPure_traceAxioms_of_components`; it takes exactly A1--A6 and A8, with
+no A7 hypothesis.  The
 ordinal conclusion and finite-block same-scale conclusion are obtained by a
 direct application of the already checked
 `provedMainCharacterizationWithMoreover`.  Thus, on every fixed-prior fibre,
@@ -410,7 +412,7 @@ I_q(A;R_P)\ge I_q(A;R_Q).
 \tag{MI-order}
 \]
 
-This is where the hard Appendix B result is fully used.  It is not replaced by
+This is where the hard Appendix A result is fully used.  It is not replaced by
 an informal information-theoretic convention.
 
 Mutual information is itself affine under public mixtures of posterior laws.
@@ -797,53 +799,50 @@ Define each primitive relation by numerical comparison of \(V\).  Then:
 This proves the reverse implication.  The Lean development checks the data
 processing and chain-rule identities rather than taking them as hidden axioms.
 
-## What should change in the v3 paper proof
+## How the current v3 paper follows the checked proof
 
-The current four-step proof sketch is accurate at the architectural level and
-can remain after modest wording changes.  The appendix proof should be revised
-as follows.
+The main-text four-step sketch gives the architecture.  Appendix B implements
+the checked route as follows.
 
-1. Retain terminal-law sufficiency, but include the explicit finite matching
+1. It retains terminal-law sufficiency and includes the explicit finite matching
    processor, the zero-mass-class convention, and the four-block replacement
-   argument.  State support restriction separately.
+   argument.  It states support restriction separately.
 
-2. Replace the direct appeal to a continuous affine representative on the
+2. It replaces the direct appeal to a continuous affine representative on the
    whole abstract \(\mathcal E_q\) by the quotient of attainable finite marked
    experiments and the fixed-alphabet segment-calibration argument.  One may
    still mention the implementation formula as intuition, but it is not a
    dependency of the verified proof.
 
-3. Construct the material payoff affine index first, normalize low and high
-   anchors to \(0\) and \(1\), and then normalize every marked fibre by those
-   anchors.  Prove dummy invariance numerically by affine uniqueness.
+3. It constructs the material payoff affine index first, normalizes low and high
+   anchors to \(0\) and \(1\), and then normalizes every marked fibre by those
+   anchors.  It proves dummy invariance numerically by affine uniqueness.
 
-4. In the pure-trace proposition, invoke Appendix B for the ordinal mutual-information
-   order.  Replace the global \(\varphi\)/erasure-interval argument by
+4. It invokes Appendix A for the ordinal mutual-information order.  It replaces
+   the global \(\varphi\)/erasure-interval argument by
    fixed-fibre affine uniqueness plus product-dummy alignment of the
    coefficients.  This mirrors the checked proof exactly and is shorter.  The
    cardinal identity is first calibrated at the normalized low payoff; the
-   ordinal Appendix B comparison remains available at every constant payoff,
+   ordinal Appendix A comparison remains available at every constant payoff,
    and the final representation then covers every payoff.
 
-5. Replace the existing arbitrary-continuation branch-recursion lemma as a
+5. It replaces the arbitrary-continuation branch-recursion lemma as a
    dependency of Theorem 1 with Steps 6–8 above: support-face affine insertion,
    entropy calibration of its slope, the dummy treatment of singleton reached
    supports, zero-mass branches, crossed-mixture background independence, and
    finite deterministic-payoff telescoping.
 
-6. Retain sequentialization, but show the copy and delete processors explicitly
-   and split off the singleton-action case before using the nontrivial branch
+6. It retains sequentialization, shows the copy and delete processors explicitly,
+   and splits off the singleton-action case before using the nontrivial branch
    argument.
 
-7. In the converse, retain the direct verification but state the two chain
+7. In the converse, it retains the direct verification and states the two chain
    rules and the exact null-row handling for action reports.
 
-The stronger recursion formula currently printed in v3 is consistent with the
-final representation and therefore follows after Theorem 1 has been proved.
-What the kernel-checked development does not certify is the current use of that
-formula as an intermediate lemma by the prose argument given there.  The safest
-paper revision is to use the narrower verified route above and, if desired,
-state full recursion later as a corollary of the representation.
+The stronger arbitrary-continuation recursion formula is consistent with the
+final representation and follows after Theorem 1 has been proved, but it is
+not used as an intermediate dependency.  Appendix B uses only the narrower
+branch-insertion and deterministic-telescope route checked in Lean.
 
 ## Lean correspondence
 
@@ -856,7 +855,7 @@ state full recursion later as a corollary of the representation.
 | Public-mixture independence and HM calibration | `MarkedHM.lean`: `markedPairWeak_publicMix_independence`, `markedTerminalMixtureRel_independence`, `markedTerminalMixtureRel_segment_calibration`, `markedTerminalHMCalibratableWeakOrder` |
 | Material expected utility | `MaterialUtility.lean`: `payoffLotteryAffineUtility_exists`, `materialPayoffUtility`, `materialAffineUtility_eq_expected` |
 | Normalized common fibre scale | `NormalizedMarked.lean`; `CommonMarkedScale.lean`: `pairWeak_markedExperiments_iff_normalizedMarkedUtility` |
-| Appendix B pure-trace input | `PureTrace.lean`: `inducedPure_traceAxioms`, `inducedPure_MIRep`, `inducedPure_blockSameScale` |
+| Appendix A pure-trace input | `PureTrace.lean`: `inducedPure_traceAxioms_of_components`, `inducedPure_MIRep_of_components`, `inducedPure_blockSameScale_of_components` |
 | Affine MI and global trace coefficient | `PureMIAffine.lean`, `PureMarkedEmbedding.lean`; `GlobalTraceScale.lean`: `traceLambdaAtPrior_eq_globalTraceLambda`, `globalTraceLambda_pos` |
 | Surely-low formula | `ConstantLowGeneral.lean`: `normalizedMarkedUtility_eq_globalTraceLambda_mul_mutualInfo_of_sureLow` |
 | Branch insertion and support face | `BranchInsertion.lean`: `normalizedMarkedUtility_branchInsertion`; `SupportBranchInsertion.lean`: `normalizedMarkedUtility_supportBranchInsertion` |
@@ -874,7 +873,7 @@ state full recursion later as a corollary of the representation.
 ## Trust boundary and scope
 
 `Axioms.lean` declares no extra mathematical axiom.  The proof imports the
-kernel-checked pure-trace characterization of Appendix B and otherwise derives every
+kernel-checked pure-trace characterization of Appendix A and otherwise derives every
 mathematical step in Lean.  The standard declarations reported by
 `#print axioms`—propositional extensionality, classical choice, and quotient
 soundness—are Lean/Mathlib foundations used by the construction, not additional
@@ -882,6 +881,6 @@ behavioral or information-theoretic assumptions.
 
 This roadmap concerns only Theorem 1.  It does not assert that later uniqueness
 or comparative-statics results in v3 have been formalized.  Nor does it claim
-that the current standalone minimal-axiom annotations of each paper lemma have
+that every individual minimal-axiom claim for each auxiliary paper lemma has
 been checked.  It records the dependency chain that is sufficient, faithful to
 the theorem’s hypotheses and conclusion, and accepted by the Lean kernel.

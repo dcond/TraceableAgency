@@ -1,16 +1,6 @@
-% Appendix A of the Lean-faithful supplement.  The preview driver appends the
-% self-contained pure-trace statement and proof from trace_tempered_choice_v3
-% as Appendix B, so the two documents share one source for that long proof.
+\section{Completion of the representation theorem}\label{app:main-proof}
 
-\section{Lean-faithful proof of Theorem 1}\label{app:lean-faithful-main}
-
-The proof has one substantial auxiliary input: the pure-trace proposition
-stated next and proved from the primitive pure-record conditions in
-Appendix~\ref{lf:app:pure-trace}.  Everything after that input is the calibrated
-assembly used by the checked Lean proof.  We also use the ordinary
-mixture-space theorem: a complete and transitive mixture order that satisfies
-independence and admits calibration on every closed mixture segment has an
-affine representation.
+Appendix~\ref{lf:app:pure-trace} proves the one substantial auxiliary input: the pure-trace lemma on the constant-payoff domain.  This appendix combines that result with the affine material scale, calibrates deterministic payoff branches, and completes Theorem~\ref{thm:main}.  We also use the ordinary mixture-space theorem: a complete and transitive mixture order satisfying independence and segment calibration has an affine representation.
 
 The logical order is therefore
 \[
@@ -21,7 +11,7 @@ The logical order is therefore
 \boxed{\substack{\text{terminal-law quotient and}\\
                   \text{affine material scale}}}
 &&
-\boxed{\substack{\text{pure-trace proposition (Appendix B) and}\\
+\boxed{\substack{\text{pure-trace lemma (Appendix A) and}\\
                   \text{one common trace scale}}}\\[-0.2em]
 \searrow && \swarrow
 \end{array}\\[-0.3em]
@@ -35,45 +25,6 @@ material scale.  The right branch is proved once on the constant-payoff
 domain.  They meet in the deterministic branch calculation, which aligns
 material increments with the trace scale and telescopes across all reached
 branches.
-
-\subsection{The auxiliary pure-trace proposition}
-
-Appendix~\ref{lf:app:pure-trace} defines the pure-record domain, the block
-comparison notation, Conditions \textup{(P1)--(P5)}, and the mutual information
-$I_{q,P}(A;X)$.  The exact input is stated here for use before it is proved;
-Appendix~\ref{lf:app:pure-trace} states it formally as
-Proposition~\ref{pt:prop:main}.  Thus there is one auxiliary proposition, not
-two separately numbered copies, and Theorem~1 remains the unique theorem of
-the joint payoff--record model.
-
-\begin{quote}
-\noindent\textbf{Pure-trace proposition.}
-For a family $\{\succeq_P\}_P$ on all finite record channels described in
-Appendix~\ref{lf:app:pure-trace}, the following are equivalent.
-\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
-\item The family satisfies Conditions \textup{(P1)--(P5)}.
-\item For every pair of finite sets $A,X$, every channel
-  $P:A\to\D(X)$, and all $q,q'\in\D(A)$,
-  \[
-  q\succeq_Pq'
-  \quad\Longleftrightarrow\quad
-  I_{q,P}(A;X)\ge I_{q',P}(A;X).
-  \]
-\end{enumerate}
-Moreover, on every finite block environment
-$\bigsqcup_{k\in K}P_k$, all block-supported cross-channel comparisons use
-that same information scale: for distinct $i,j\in K$ and all
-$q_i\in\D(A_i)$, $q_j\in\D(A_j)$,
-\[
-q_i^i\succeq_{\bigsqcup_{k\in K}P_k}q_j^j
-\quad\Longleftrightarrow\quad
-I_{q_i,P_i}(A_i;X_i)\ge I_{q_j,P_j}(A_j;X_j).
-\]
-\end{quote}
-
-Appendix~\ref{lf:app:pure-trace} proves both directions and the moreover
-clause.  Appendix~A uses only \textup{(i)$\Rightarrow$(ii)} and its common-scale
-clause, applied to the constant-payoff lift.
 
 \subsection{Preliminaries}
 
@@ -468,7 +419,7 @@ $W_q(C(P,o^-))=\lambda I_q(A;Y)$.  Substitute this into
 
 \subsection{Proof of the theorem}
 
-\begin{proof}[Proof of Theorem 1]
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
 Assume first Axioms \textup{(A1)--(A8)}.  Let $q$ have full support on a
 nontrivial action set, and let $K:A\to\D(O\times R)$ be arbitrary.  Put
 $Y=O\times R$ and take as first stage

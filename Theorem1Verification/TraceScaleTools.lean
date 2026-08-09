@@ -8,8 +8,8 @@ import Theorem1Verification.PairOrder
 /-!
 # Two-alternative surface of the pure-trace scale
 
-`PureTrace` exposes the pure-trace conclusion (Appendix B of the current
-Lean-faithful supplement) for arbitrary finite block
+`PureTrace` exposes the pure-trace conclusion (Appendix A of the current
+paper) for arbitrary finite block
 families.  The theorem below specializes it to the material model's primitive
 two-alternative `pairWeak` notation without assuming a block convention.
 -/
