@@ -2,7 +2,7 @@
 
 ## Source and verification boundary
 
-- Informal source: `Paper/trace_tempered_choice_v3.tex` in the repository root.
+- Informal source: `Paper/trace_tempered_choice_v3.tex` in this repository.
 - Result: Theorem 1, `thm:main`, lines 543--566.
 - Lean statement: `TraceTemperedChoiceVerification.Theorem1Statement` in
   `Statements.lean`.
@@ -106,10 +106,10 @@ the row of `Khat` unrestricted.  A5 quantifies over every such completion.
 | Same-scale finite-block moreover clause | 558--565 | `SameWitnessBlockRepresentation` and second conjunct of `Theorem1Statement` |
 
 `mutualInfo` is defined in the imported checked development using Lean's
-natural logarithm.  The paper permits any one fixed logarithm base; changing
-base multiplies mutual information by a positive constant, which is absorbed
-by the existential positive `lambda`.  Thus choosing natural logs neither
-strengthens nor weakens the result.
+natural logarithm.  The paper permits any one fixed base greater than one.
+For such a base, changing base multiplies mutual information by a positive
+constant, which is absorbed by the existential positive `lambda`.  Thus
+choosing natural logs neither strengthens nor weakens the result.
 
 The same-witness clause uses one existentially chosen `u,lambda` for both the
 within-channel representation and all block comparisons.  This is the weakest
@@ -176,8 +176,10 @@ opaque placeholder, or unsafe declaration.  Both checked build targets are:
 
 ```text
 lake build
-Build completed successfully (8634 jobs).
-
 lake build Theorem1Verification
-Build completed successfully (8677 jobs).
+Build completed successfully.
 ```
+
+The default target includes `Theorem1Verification`; the explicit second
+command records the exact certification target without relying on that
+project default.

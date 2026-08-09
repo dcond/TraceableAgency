@@ -2,7 +2,30 @@
 
 Lean 4 formalization of the main characterization theorem for traceable agency preferences over finite stochastic environments.
 
-## Matched Paper
+## Current verified result: v3 Theorem 1
+
+The current full-payoff result is Theorem 1 of
+[`Paper/trace_tempered_choice_v3.tex`](Paper/trace_tempered_choice_v3.tex),
+with its compiled PDF, three proof appendices, and a kernel-checked Lean proof.
+The reader-facing verification package is indexed in
+[`Theorem1Verification/README.md`](Theorem1Verification/README.md).  In
+particular:
+
+- [`FORMALIZATION_CERTIFICATE.md`](Theorem1Verification/FORMALIZATION_CERTIFICATE.md)
+  expands the paper and Lean statements in mathematical notation, matches
+  Axioms (A1)--(A8) one by one, and states the exact trust boundary;
+- [`CLAIM_MAP.md`](Theorem1Verification/CLAIM_MAP.md) gives source-line and
+  declaration-level correspondence;
+- [`PAPER_PROOF_ROADMAP.md`](Theorem1Verification/PAPER_PROOF_ROADMAP.md)
+  gives the complete human proof route following the checked dependencies;
+- `Statements.lean`, `Proof.lean`, and the deliberately empty `Axioms.lean`
+  are the formal deliverables.
+
+The final declaration is
+`TraceTemperedChoiceVerification.trace_tempered_choice_v3_theorem1`, with
+exact type `TraceTemperedChoiceVerification.Theorem1Statement`.
+
+## Historical matched paper
 
 The formalization is pinned to version 7 of the paper:
 
@@ -11,10 +34,10 @@ The formalization is pinned to version 7 of the paper:
 - [snapshot hashes and correspondence note](Paper/README.md).
 
 The source snapshot is byte-for-byte identical to the copy used in the
-paper-to-Lean review. Later local paper drafts are deliberately not part of
-this certificate.
+original pure-record paper-to-Lean review.  It remains the historical source
+for the pure-trace engine used by the current v3 proof.
 
-## Main Theorem
+## Pure-record engine
 
 The public assembled theorem is:
 
@@ -317,10 +340,28 @@ Run:
 
 ```bash
 lake build
+./scripts/check_theorem1_certificate.sh
+```
+
+The default build now includes both the pure-record library and the full v3
+Theorem 1 verification target.  The v3 certificate script checks the artifact
+hash manifest, source hygiene, the exact public theorem boundary, the
+compile-time axiom whitelist and dependency audit, and a fresh kernel replay.
+
+Expected current theorem boundary:
+
+```lean
+TraceTemperedChoiceVerification.trace_tempered_choice_v3_theorem1 :
+  TraceTemperedChoiceVerification.Theorem1Statement
+```
+
+The historical pure-record certificate remains available separately:
+
+```bash
 ./scripts/check_certificate.sh
 ```
 
-The verification script prints the assembled theorem, its axioms, the expanded
+The historical script prints the assembled pure-record theorem, its axioms, the expanded
 conclusion, the closed Faddeev and HM witnesses, and the key derived
 continuity, Blackwell, and canonical-transport results. It also checks that the
 Lean source contains no
@@ -334,7 +375,7 @@ opaque-declaration kernel issue reported in
 build with this patched kernel is a regression test: a proof object depending
 on that issue is rejected while its declaration is checked.
 
-Expected theorem boundary:
+Expected historical pure-record theorem boundary:
 
 ```lean
 TraceableAgency.provedMainCharacterizationWithMoreover :
@@ -350,16 +391,16 @@ Expected `#print axioms` output:
 These are Lean/mathlib foundational dependencies, not unproved mathematical
 premises.
 
-## Remaining Formalization Frontier
+## Historical pure-record formalization status
 
-The project is closed at the mathematical theorem boundary: the main result is
-kernel-checked from the paper's A1-A6 definitions with no external theorem
-parameter. Finite same-posterior-law Blackwell equivalence, the exact generic
+The pure-record engine is closed at its mathematical theorem boundary: its
+A1--A6 characterization is kernel-checked with no external theorem parameter.
+Finite same-posterior-law Blackwell equivalence, the exact generic
 Herstein--Milnor theorem, and the exact finite Faddeev theorem are all
 formalized. No adapted-triangulation, posterior-continuity, relabeling,
 support, normalization, scale-coherence, data-processing,
 representative-selection, or classical-characterization assumption remains at
-the public theorem boundary.
+that boundary.
 
 Further work would be maintenance rather than completion: shortening the long
 internal proof files, eliminating linter warnings, and upstreaming generally

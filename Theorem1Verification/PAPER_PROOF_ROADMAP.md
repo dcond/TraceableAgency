@@ -115,8 +115,8 @@ V(q,K)
 
 The same pair \((u,\lambda)\) must represent comparisons between priors
 supported on distinct blocks of every finite common-payoff block environment.
-Lean uses natural logarithms in mutual information.  Changing the logarithm
-base only rescales the positive constant \(\lambda\).
+Lean uses natural logarithms in mutual information.  Changing to any other
+base greater than one only rescales the positive constant \(\lambda\).
 
 The formal treatment takes the weakest literal reading of the “moreover”
 clause: under the axioms, there exist particular witnesses \(u,\lambda\) that

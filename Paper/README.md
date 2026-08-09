@@ -41,6 +41,16 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error \
   trace_tempered_choice_v3.tex
 ```
 
+The self-contained verification package is indexed at
+[`../Theorem1Verification/README.md`](../Theorem1Verification/README.md).
+Its principal reader-facing files are the exact axiom/statement
+[`FORMALIZATION_CERTIFICATE.md`](../Theorem1Verification/FORMALIZATION_CERTIFICATE.md),
+the source-to-declaration [`CLAIM_MAP.md`](../Theorem1Verification/CLAIM_MAP.md),
+and the detailed [`PAPER_PROOF_ROADMAP.md`](../Theorem1Verification/PAPER_PROOF_ROADMAP.md).
+The formal boundary is split into `Statements.lean`, the empty `Axioms.lean`,
+and `Proof.lean`; run `lake build Theorem1Verification` from the repository
+root to check the proof and both compile-time audits.
+
 The pure-trace statement and common-scale block interface proved in Appendix A
 are also kernel-checked by
 `TraceableAgency.provedMainCharacterizationWithMoreover` and imported into the
