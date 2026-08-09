@@ -344,9 +344,9 @@ def A5_ActionDataProcessing
     IsActionReportCompletion K q S Khat →
     pairWeak F q K (Channel.actionPushforward q S) Khat
 
-/-- Paper-faithful weak part of A6.  Both continuation profiles share the same
-branch-dependent record family `Rec`; allowing two unrelated families would be
-a stronger premise than the weakest reading of v3. -/
+/-- Paper-faithful weak part of A6.  As v3 now states explicitly, both
+continuation profiles share the same branch-dependent record family `Rec`;
+allowing two unrelated families would be a stronger premise. -/
 def A6_BranchwiseContinuationConsistency_Weak
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=

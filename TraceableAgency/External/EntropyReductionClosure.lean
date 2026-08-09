@@ -10656,6 +10656,25 @@ theorem preUniversalBlockRevealChainRule_of_branchChain_supportRead_productScale
   reference_Z_eq_one := href.reference_Z_eq_one
 
 /-- Grouping recursion with block posteriors read on support faces. -/
+theorem finitePreUniversalGroupingWeightRecursion_of_blockReveal_supportRead_productScale_and_Zpositive
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (hboundaryValue : FiniteBoundaryValueSupportReadFor hfaces)
+    (hpos : FiniteProductScaleZPositiveAssumptionsFor hfaces hprod)
+    (hvalue : FiniteBlockSupportFaceValueSupportReadFor hfaces)
+    (hscale : FiniteBlockSupportFaceScaleSupportReadFor hfaces)
+    (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
+    (href : FiniteProductReferenceZNormalizationFor hfaces hprod) :
+    FinitePreUniversalGroupingWeightRecursionAssumptionsFor hfaces hprod :=
+  finitePreUniversalGroupingWeightRecursion_of_blockReveal
+    (finitePreUniversalBlockRevealValue_of_productQuasiAdditivity hprod)
+    (preUniversalBlockRevealChainRule_of_branchChain_supportRead_productScale
+      hboundaryValue hvalue hscale hlink href)
+    hpos
+
+/-- Backward-compatible specialization using the historical slice-transform
+proof of product-slope positivity. -/
 theorem finitePreUniversalGroupingWeightRecursion_of_blockReveal_supportRead_productScale
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
@@ -10667,11 +10686,9 @@ theorem finitePreUniversalGroupingWeightRecursion_of_blockReveal_supportRead_pro
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod)
     (href : FiniteProductReferenceZNormalizationFor hfaces hprod) :
     FinitePreUniversalGroupingWeightRecursionAssumptionsFor hfaces hprod :=
-  finitePreUniversalGroupingWeightRecursion_of_blockReveal
-    (finitePreUniversalBlockRevealValue_of_productQuasiAdditivity hprod)
-    (preUniversalBlockRevealChainRule_of_branchChain_supportRead_productScale
-      hboundaryValue hvalue hscale hlink href)
-    (productScaleZpositive_of_sliceTransform hprod haff)
+  finitePreUniversalGroupingWeightRecursion_of_blockReveal_supportRead_productScale_and_Zpositive
+    hboundaryValue (productScaleZpositive_of_sliceTransform hprod haff)
+    hvalue hscale hlink href
 
 /-- Reference-free version of the pre-universal weight recursion.  The old
 package also carried `Z(q_ref)=1`; the field below is the real recursion content
@@ -10766,12 +10783,12 @@ private theorem weightRecursion_algebra_of_groupingGR_noReference
 
 /-- Support-read grouping recursion without assuming the reference `Z`
 normalization. -/
-theorem finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supportRead_productScale
+theorem finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supportRead_productScale_and_Zpositive
     {F : PrefFamily.{u}}
     {hfaces : CoherentRelabelingFaceScalesStructure F}
     {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
     (hboundaryValue : FiniteBoundaryValueSupportReadFor hfaces)
-    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hpos : FiniteProductScaleZPositiveAssumptionsFor hfaces hprod)
     (hvalue : FiniteBlockSupportFaceValueSupportReadFor hfaces)
     (hscale : FiniteBlockSupportFaceScaleSupportReadFor hfaces)
     (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod) :
@@ -10980,15 +10997,11 @@ theorem finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supp
               (fullRevelationValueForFaceScales hfaces (f k) /
                 productScaleZForFaceScales hfaces hprod hax (f k)))
         hcoarse
-    have hsigma_pos :=
-      productScaleZpositive_of_sliceTransform hprod haff
-        |>.Z_pos hax (sigmaDist p f) hsigma
-    have hp_pos :=
-      productScaleZpositive_of_sliceTransform hprod haff |>.Z_pos hax p hp
+    have hsigma_pos := hpos.Z_pos hax (sigmaDist p f) hsigma
+    have hp_pos := hpos.Z_pos hax p hp
     have hf_pos :
         ∀ k, 0 < productScaleZForFaceScales hfaces hprod hax (f k) :=
-      fun k => productScaleZpositive_of_sliceTransform hprod haff
-        |>.Z_pos hax (f k) (hf k)
+      fun k => hpos.Z_pos hax (f k) (hf k)
     simpa [productScaleZForFaceScales] using
       weightRecursion_algebra_of_groupingGR_noReference
         p (hprod.kappa hax)
@@ -10999,6 +11012,23 @@ theorem finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supp
         (by simpa [productScaleZForFaceScales] using hp_pos)
         (fun k => by simpa [productScaleZForFaceScales] using hf_pos k)
         (by simpa [productScaleZForFaceScales] using hGR)
+
+/-- Backward-compatible specialization of the reference-free grouping
+recursion.  The proof itself only needs positivity of `Z`; the historical
+slice-transform package is one way, but not the only way, to establish it. -/
+theorem finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supportRead_productScale
+    {F : PrefFamily.{u}}
+    {hfaces : CoherentRelabelingFaceScalesStructure F}
+    {hprod : FiniteProductQuasiAdditivityForFaceScales hfaces}
+    (hboundaryValue : FiniteBoundaryValueSupportReadFor hfaces)
+    (haff : FiniteFaceScaleProductLeftSliceAffineTransformAssumptionsFor hfaces)
+    (hvalue : FiniteBlockSupportFaceValueSupportReadFor hfaces)
+    (hscale : FiniteBlockSupportFaceScaleSupportReadFor hfaces)
+    (hlink : FiniteProductRevelationScaleLinkAssumptionsFor hfaces hprod) :
+    FinitePreUniversalGroupingWeightRecursionNoReferenceFor hfaces hprod :=
+  finitePreUniversalGroupingWeightRecursionNoReference_of_blockReveal_supportRead_productScale_and_Zpositive
+    hboundaryValue (productScaleZpositive_of_sliceTransform hprod haff)
+    hvalue hscale hlink
 
 /-- Reference-free two-grouping evaluations. -/
 structure FiniteProductTwoGroupingWeightEquationNoReferenceFor

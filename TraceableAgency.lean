@@ -15,6 +15,7 @@ import TraceableAgency.Sufficiency.Posterior
 import TraceableAgency.Sufficiency.Affine
 import TraceableAgency.Sufficiency.ProductGauge
 import TraceableAgency.Sufficiency.Branch
+import TraceableAgency.Sufficiency.FaceCoherence
 import TraceableAgency.Sufficiency.Scales
 import TraceableAgency.Sufficiency.EntropyReduction
 import TraceableAgency.Sufficiency.Final

@@ -1,7 +1,7 @@
 name = "TraceableAgency"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["TraceableAgency"]
+defaultTargets = ["TraceableAgency", "Theorem1Verification"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`

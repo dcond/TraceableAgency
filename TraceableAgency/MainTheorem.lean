@@ -6,6 +6,7 @@ Authors: Daniele Condorelli
 import TraceableAgency.Main
 import TraceableAgency.External.GenericFaddeev
 import TraceableAgency.External.EntropyReductionClosure
+import TraceableAgency.Sufficiency.Final
 
 /-!
 # Main Theorem Assembly and Audit Boundary
@@ -20,15 +21,15 @@ weak orders and interior mixtures is proved in
 `TraceableAgency.External.GenericHersteinMilnor`.
 Finite same-posterior-law Blackwell equivalence is proved internally by an
 explicit posterior-class matching kernel.
-Posterior-law continuity is derived in Lean from the ordinal axioms A1--A4
-(including primitive A2); the continuous barycentric grid and spread/merge
-approximation are constructed explicitly in Lean. Finite posterior-law extensionality is
-also proved internally by interpolation on the finite supports. The representative's
-support restriction, relabelling covariance, and cardinal scale alignment are
-also derived internally after canonical full-revelation normalization.  No
-support/relabel convention or constructed-representative package occurs at the
-public theorem boundary. Both finite data-processing inequalities are proved
-internally from concavity of Shannon entropy.
+The public sufficiency route applies primitive A2 only to the fixed-alphabet
+segments needed by the finite Herstein--Milnor argument.  It then constructs
+the canonical representative, product gauge, direct branch chain, nested-face
+cardinal cocycle, universal scale, and Shannon entropy reduction in the same
+order as the paper proof.  No posterior-integral representative, global
+posterior-law continuity theorem, support/relabel convention, or
+constructed-representative package occurs at the public theorem boundary.
+Both finite data-processing inequalities are proved internally from concavity
+of Shannon entropy.
 -/
 
 set_option linter.style.header false
@@ -70,26 +71,34 @@ theorem MainCharacterizationWithMoreover_of_FinalHM
       (SufficiencyStatement_of_FinalHM hfad hhm)
       blockScaleFromMIRepStatement
 
-/-- Compatibility theorem with Herstein--Milnor discharged internally and the
-Faddeev audit schema supplied explicitly. The closed public theorem below
-supplies its proved inhabitant. -/
+/-- Paper-faithful sufficiency with the finite Herstein--Milnor, product,
+branch, face-coherence, and entropy-reduction stages discharged internally. -/
 theorem SufficiencyStatement_of_Faddeev
     (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
     SufficiencyStatement.{u} :=
-  SufficiencyStatement_of_FinalHM hfad provedFinalHMInterface
+  SufficiencyStatement_of_paperReduction hfad
 
-/-- Main characterization with the exact generic HM schema proved in Lean. -/
+/-- Main characterization through the paper-faithful pure-trace reduction. -/
 theorem MainCharacterization_of_Faddeev
     (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
-    MainCharacterization.{u} :=
-  MainCharacterization_of_FinalHM hfad provedFinalHMInterface
+    MainCharacterization.{u} := by
+  intro F
+  constructor
+  · exact (SufficiencyStatement_of_Faddeev hfad) F
+  · exact BenchmarkStatement_of_MIRep F
 
 /-- Public convention-free characterization, including the moreover clause.
-Its sole external mathematical input is Faddeev's entropy theorem. -/
+Its explicit parameter is Faddeev's entropy theorem; the closed theorem below
+uses the kernel-checked finite proof of that theorem. -/
 theorem MainCharacterizationWithMoreover_of_Faddeev
     (hfad : ClassicalFaddeevTheoremAssumptions.{u}) :
-    MainCharacterizationWithMoreover.{u} :=
-  MainCharacterizationWithMoreover_of_FinalHM hfad provedFinalHMInterface
+    MainCharacterizationWithMoreover.{u} := by
+  apply main_characterization_from_spine
+  · exact SufficiencyStatement_of_Faddeev hfad
+  · exact BenchmarkStatement_of_MIRep
+  · exact blockScaleStatement_from_sufficiency
+      (SufficiencyStatement_of_Faddeev hfad)
+      blockScaleFromMIRepStatement
 
 /-! ## Closed public theorem surface -/
 
