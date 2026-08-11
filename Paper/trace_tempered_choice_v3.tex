@@ -378,7 +378,7 @@ The agent cares about material outcomes, and not only about their trace.
 \item[(A8) Positive trace orientation.]
 For $o\in O$, let $K^{\mathrm{id}}_o:A\to\D(O\times A)$ reveal the action, $K^{\mathrm{id}}_o(o,a\mid a)=1$, and
 let $K^0_o:A\to\D(O\times\{\ast\})$ reveal nothing, $K^0_o(o,\ast\mid a)=1$.  For every finite $A$ with
-$|A|\ge2$ and every full-support $q\in\D(A)$,
+$|A|\ge2$, every full-support $q\in\D(A)$, and every $o\in O$,
 \[
  (q,K^{\mathrm{id}}_o)\succ(q,K^{0}_o).
 \]
@@ -474,7 +474,7 @@ positive sign, and Lemma~\ref{lf:lem:trace-scale} puts these comparisons on the 
 weighted by the reached probabilities; the weights are pinned down by comparing branches with terminal payoffs
 of known value (Lemmas~\ref{lf:lem:branch-increment} and~\ref{lf:lem:deterministic-assembly}).  Now
 sequentialise an arbitrary channel: announce $(o,r)$ as a first-stage record, then deliver $o$ terminally.  The
-result is a record processing of the original, so Axiom~\textup{(A4)} makes the two indifferent, and branch
+sequentialised channel and the original are record processings of one another, so Axiom~\textup{(A4)} makes them indifferent, and branch
 aggregation gives $\E_{qK}[u(O)]+\lambda\I_{qK}(A;O,R)$.
 
 \subsection{Uniqueness}
