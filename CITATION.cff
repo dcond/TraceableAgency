@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this formalization, please cite both the software and the paper."
+title: "TraceableAgency: Lean verification of Trace-Tempered Choice"
+type: software
+authors:
+  - family-names: Condorelli
+    given-names: Daniele
+repository-code: "https://github.com/dcond/TraceableAgency"
+url: "https://github.com/dcond/TraceableAgency"
+license: Apache-2.0
+version: 3.0.0
+date-released: 2026-08-11
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Condorelli
+      given-names: Daniele
+  title: "A Preference for Traceable Agency: An Axiomatization of Expected Utility plus Mutual Information"
+  year: 2026
+  url: "https://github.com/dcond/TraceableAgency/blob/main/Paper/trace_tempered_choice_v3.pdf"

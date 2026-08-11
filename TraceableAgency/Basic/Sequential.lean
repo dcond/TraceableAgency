@@ -16,8 +16,6 @@ Two-stage composition P₁ ▷ {Q^o} where:
 The combined channel produces outcomes in Σ o, Y o (dependent sum).
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 universe u v

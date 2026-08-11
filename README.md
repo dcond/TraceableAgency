@@ -1,103 +1,77 @@
 # TraceableAgency
 
+[![Theorem 1 certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml)
+
 Lean 4 verification of Theorem 1 in *A Preference for Traceable Agency: An
-Axiomatization of Expected Utility plus Mutual Information* (v3).
+Axiomatization of Expected Utility plus Mutual Information* (version 3).
 
-## Verified result
-
-The public theorem is:
+## Verified theorem
 
 ```lean
-TraceTemperedChoiceVerification.trace_tempered_choice_v3_theorem1 :
-  TraceTemperedChoiceVerification.Theorem1Statement
+TraceableAgency.Theorem1.trace_tempered_choice_v3_theorem1 :
+  TraceableAgency.Theorem1.Theorem1Statement
 ```
 
-For every finite payoff alphabet `O` with at least two elements and every
-preference family `F`, the statement proves:
+For every finite payoff alphabet with at least two elements, the theorem proves
+that Axioms (A1)--(A8) are equivalent to representation by expected payoff
+utility plus a strictly positive global multiple of mutual information. The
+same witnesses also represent every finite block-supported cross-channel
+comparison.
 
-1. Axioms (A1)--(A8) are equivalent to representation by expected payoff
-   utility plus a strictly positive multiple of mutual information, with one
-   nonconstant payoff index and one global information coefficient.
-2. Under those axioms, the same witnesses represent every finite
-   block-supported cross-channel comparison on the same scale.
+The project declares no additional mathematical axiom. The final theorem's
+recursively collected kernel foundations are exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
 
-The formal proposition preserves the paper's quantifier order and includes
-the same-witness “moreover” clause as a separate conjunct.
+## Repository layout
 
-## Paper
+| Path | Role |
+|---|---|
+| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Statement and proof of the paper's Theorem 1 |
+| [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization used by the proof |
+| [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
+| [`TraceableAgency/Vendor/Shannon/`](TraceableAgency/Vendor/Shannon/) | Vendored finite Shannon theorem, with its own provenance and licence |
+| [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Compile-time kernel-axiom and dependency audits |
+| [`Certificate/`](Certificate/) | Claim map, formalization certificate, proof roadmap, and byte manifest |
+| [`Paper/`](Paper/) | Authoritative TeX sources and reproducible PDF |
 
-- [`Paper/trace_tempered_choice_v3.tex`](Paper/trace_tempered_choice_v3.tex) —
-  authoritative source.
-- [`Paper/trace_tempered_choice_v3.pdf`](Paper/trace_tempered_choice_v3.pdf) —
-  compiled 55-page paper.
-- [`Paper/appendix_a_pure_trace.tex`](Paper/appendix_a_pure_trace.tex) —
-  pure-trace part of the single proof.
-- [`Paper/appendix_b_main_theorem.tex`](Paper/appendix_b_main_theorem.tex) —
-  completion of Theorem 1.
-- [`Paper/appendix_c_auxiliary_results.tex`](Paper/appendix_c_auxiliary_results.tex)
-  — auxiliary results not used to prove Theorem 1.
-
-The axioms occur once in the main text.  Appendix A uses them rather than
-introducing or repeating a second axiom system.
-
-## Verification package
-
-The reader-facing package is in
-[`Theorem1Verification/`](Theorem1Verification/README.md):
-
-- [`Statements.lean`](Theorem1Verification/Statements.lean) — exact formal
-  statement, definitions, and Axioms (A1)--(A8).
-- [`Proof.lean`](Theorem1Verification/Proof.lean) — final kernel proof.
-- [`Axioms.lean`](Theorem1Verification/Axioms.lean) — deliberately empty of
-  extra mathematical axioms.
-- [`FORMALIZATION_CERTIFICATE.md`](Theorem1Verification/FORMALIZATION_CERTIFICATE.md)
-  — mathematical translation of the paper statement, every axiom, the Lean
-  declarations, and the complete trust boundary.
-- [`CLAIM_MAP.md`](Theorem1Verification/CLAIM_MAP.md) — paper text to Lean
-  declaration correspondence.
-- [`PAPER_PROOF_ROADMAP.md`](Theorem1Verification/PAPER_PROOF_ROADMAP.md) —
-  detailed human proof route following the checked dependency chain.
-- [`CERTIFICATE_SHA256SUMS`](Theorem1Verification/CERTIFICATE_SHA256SUMS) —
-  exact hashes for the complete project Lean source closure, paper artifacts,
-  certificate machinery, and pinned toolchain/dependencies.
-
-`TraceableAgency/` contains the checked finite probability, information
-theory, affine-representation, entropy-characterization, and pure-trace
-machinery used internally by the final proof.  It is supporting source, not a
-second public theorem package.
-
-## Trust boundary
-
-The project declares no additional mathematical axiom.  The recursively
-collected kernel dependencies of the final theorem are exactly:
-
-```text
-propext
-Classical.choice
-Quot.sound
-```
-
-The certificate separately documents the two presentation translations used
-to compare paper and Lean: finite closed-graph versus sequential closedness,
-and ratio-form versus entropy-form mutual information.
-
-The build fails if an audited endpoint acquires any kernel axiom outside the
-three-item whitelist or reaches a superseded stronger dependency route.
+The compatibility umbrella
+[`TraceableAgency/PureTrace/Compatibility.lean`](TraceableAgency/PureTrace/Compatibility.lean)
+is not imported by the public theorem. The transitive dependency audit also
+rejects every superseded stronger route, including compatibility declarations
+that remain colocated with live implementation lemmas.
 
 ## Reproduce
 
-The repository pins Lean and mathlib in `lean-toolchain` and
-`lake-manifest.json`.  From the repository root, run:
+The repository pins Lean and mathlib. From the repository root:
 
 ```bash
-lake build
+lake exe cache get
+lake build TraceableAgency
+lake build TraceableAgency.Audit
+./scripts/build_paper.sh --check
 ./scripts/check_theorem1_certificate.sh
 ```
 
-The certificate script verifies the artifact manifest, rejects proof holes
-and project axioms, builds the exact theorem target, prints the public
-statement and axiom dependencies, and replays the proof with
+The certificate checks the complete repository manifest, rejects proof holes
+and project axioms, builds the statement and proof, runs both compile-time
+audits, checks the reproducible PDF, and replays the final proof with
 `leanchecker --fresh`.
 
-The same script is configured in
-`.github/workflows/theorem1-certificate.yml` for GitHub Actions.
+GitHub Actions runs the paper and Lean checks on separate fresh runners.  Its
+Lean job performs the complete kernel build and both recursive audits; the
+additional resource-intensive `leanchecker --fresh` replay is reserved for the
+full local command above.
+
+## Paper and correspondence
+
+- [Paper source](Paper/trace_tempered_choice_v3.tex)
+- [Compiled paper](Paper/trace_tempered_choice_v3.pdf)
+- [Formalization certificate](Certificate/FORMALIZATION_CERTIFICATE.md)
+- [Claim map](Certificate/CLAIM_MAP.md)
+- [Proof roadmap](Certificate/PAPER_PROOF_ROADMAP.md)
+
+## Citation and licence
+
+Citation metadata is in [`CITATION.cff`](CITATION.cff). Lean source is licensed
+under Apache-2.0; the paper remains © Daniele Condorelli and is not relicensed
+by the source-code licence.

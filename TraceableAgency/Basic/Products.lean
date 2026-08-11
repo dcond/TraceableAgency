@@ -12,8 +12,6 @@ Product distributions q₁ ⊗ q₂ and product channels P₁ ⊗ P₂ for
 statistically independent components and derived background inertness.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 variable {A₁ A₂ O₁ O₂ : Type*}

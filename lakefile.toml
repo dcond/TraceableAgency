@@ -1,12 +1,19 @@
 name = "TraceableAgency"
-version = "0.1.0"
-keywords = ["math"]
-defaultTargets = ["TraceableAgency", "Theorem1Verification"]
+version = "3.0.0"
+keywords = ["math", "decision-theory", "information-theory", "formal-verification"]
+defaultTargets = ["TraceableAgency"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+autoImplicit = false
 relaxedAutoImplicit = false
-weak.linter.mathlibStandardSet = true
+weak.linter.mathlibStandardSet = false
+weak.linter.defProp = false
+weak.linter.overlappingInstances = false
+weak.linter.unnecessarySimpa = false
+weak.linter.unusedSectionVars = false
+weak.linter.unusedSimpArgs = false
+weak.linter.unusedVariables = false
 maxSynthPendingDepth = 3
 
 [[require]]
@@ -16,6 +23,3 @@ rev = "v4.32.1"
 
 [[lean_lib]]
 name = "TraceableAgency"
-
-[[lean_lib]]
-name = "Theorem1Verification"

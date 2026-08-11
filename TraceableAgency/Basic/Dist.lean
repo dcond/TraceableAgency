@@ -3,7 +3,9 @@ Copyright (c) 2026 Daniele Condorelli. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
-import Mathlib
+import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Tactic.Positivity
+import Mathlib.Topology.Algebra.Ring.Real
 
 /-!
 # Finite Probability Distributions
@@ -11,8 +13,6 @@ import Mathlib
 Custom finite probability distribution type for the traceable agency formalization.
 Avoids full MeasureTheory; uses finite vectors with sum-to-one constraint.
 -/
-
-set_option linter.style.header false
 
 open Filter Topology
 

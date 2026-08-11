@@ -15,8 +15,6 @@ import TraceableAgency.Basic.Convergence
 Standard identities for entropy and mutual information with block constructions.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 universe u
@@ -87,7 +85,7 @@ theorem entropy_pos_of_fullSupport_nontrivial {A : Type*} [Fintype A] [Decidable
   have ha_lt_one : q a < 1 := by
     have hsum := q.sum_eq_one
     by_contra hge
-    push_neg at hge
+    push Not at hge
     have ha_ge_one : q a ≥ 1 := hge
     have hb_le : q b ≤ ∑ x, q x - q a := by
       have : q b ≤ ∑ x ∈ Finset.univ.erase a, q x :=
@@ -402,11 +400,11 @@ theorem entropyTerm_mul {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
   by_cases hx0 : x ≤ 0
   · have hx_eq : x = 0 := le_antisymm hx0 hx
     simp [hx_eq]
-  · push_neg at hx0
+  · push Not at hx0
     by_cases hy0 : y ≤ 0
     · have hy_eq : y = 0 := le_antisymm hy0 hy
       simp [hy_eq]
-    · push_neg at hy0
+    · push Not at hy0
       have hxy : x * y > 0 := mul_pos hx0 hy0
       rw [if_neg (not_le_of_gt hx0), if_neg (not_le_of_gt hy0), if_neg (not_le_of_gt hxy)]
       rw [Real.log_mul (ne_of_gt hx0) (ne_of_gt hy0)]
@@ -424,7 +422,7 @@ theorem entropy_prodDist (q₁ : Dist A₁) (q₂ : Dist A₂) :
     rw [prodDist_apply_pair, entropyTerm_mul (q₁.nonneg a₁) (q₂.nonneg a₂)]
   simp_rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.sum_mul]
   rw [q₁.sum_eq_one, q₂.sum_eq_one]
-  ring
+  ring_nf
 
 /-- A row of a product channel has entropy equal to the sum of the component entropies. -/
 theorem entropy_prodChannel_row (P₁ : Channel A₁ O₁) (P₂ : Channel A₂ O₂)
