@@ -3,6 +3,7 @@ Copyright (c) 2026 Daniele Condorelli. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
+import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import TraceableAgency.Basic.Dist
 
 /-!
@@ -10,8 +11,6 @@ import TraceableAgency.Basic.Dist
 
 Finite Shannon entropy H(q), taking the zero-probability contribution to be `0`.
 -/
-
-set_option linter.style.header false
 
 namespace TraceableAgency
 
@@ -31,7 +30,7 @@ theorem entropyTerm_nonneg (p : ℝ) (hp : 0 ≤ p) (hp1 : p ≤ 1) : 0 ≤ entr
   unfold entropyTerm
   split_ifs with h
   · exact le_refl 0
-  · push_neg at h
+  · push Not at h
     have hlog : Real.log p ≤ 0 := Real.log_nonpos hp hp1
     nlinarith
 
@@ -57,7 +56,7 @@ theorem entropyTerm_eq_negMulLog {p : ℝ} (hp : 0 ≤ p) :
   by_cases hp0 : p ≤ 0
   · have hp_eq : p = 0 := le_antisymm hp0 hp
     simp [hp_eq]
-  · push_neg at hp0
+  · push Not at hp0
     rw [if_neg (not_le.mpr hp0)]
 
 /-- Continuity of entropyTerm: the map p ↦ entropyTerm(p) is continuous.
@@ -70,7 +69,7 @@ theorem continuous_entropyTerm : Continuous entropyTerm := by
     apply h_negMulLog_cont.congr
     filter_upwards [eventually_ge_nhds hp] with q hq
     exact (entropyTerm_eq_negMulLog hq).symm
-  · push_neg at hp
+  · push Not at hp
     have hp_eq : entropyTerm p = 0 := by unfold entropyTerm; simp [hp]
     have h_negMulLog_0 : Real.negMulLog 0 = 0 := Real.negMulLog_zero
     rw [Metric.continuousAt_iff]
@@ -87,7 +86,7 @@ theorem continuous_entropyTerm : Continuous entropyTerm := by
         specialize hball₁ hdist_q_0
         simp only [h_negMulLog_0] at hball₁
         exact hball₁
-      · push_neg at hq
+      · push Not at hq
         have hq_eq : entropyTerm q = 0 := by unfold entropyTerm; simp [le_of_lt hq]
         rw [hp_eq, hq_eq, Real.dist_eq, sub_zero, abs_zero]
         exact hε
@@ -108,7 +107,7 @@ theorem continuous_entropyTerm : Continuous entropyTerm := by
         specialize hball₁ hdist_q_0
         simp only [h_negMulLog_0] at hball₁
         exact hball₁
-      · push_neg at hq
+      · push Not at hq
         have hq_eq : entropyTerm q = 0 := by unfold entropyTerm; simp [le_of_lt hq]
         rw [hp_eq, hq_eq, Real.dist_eq, sub_zero, abs_zero]
         exact hε
@@ -135,7 +134,7 @@ variable [DecidableEq A]
 /-- Entropy is continuous: q ↦ H(q) is a continuous function on Dist A. -/
 theorem continuous_entropy : Continuous (entropy : Dist A → ℝ) := by
   unfold entropy
-  apply continuous_finset_sum
+  apply continuous_finsetSum
   intro a _
   exact continuous_entropyTerm.comp (Dist.continuous_prob_apply a)
 

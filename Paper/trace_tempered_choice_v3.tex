@@ -1,3 +1,6 @@
+\pdfinfoomitdate=1
+\pdftrailerid{}
+\pdfsuppressptexinfo=15
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
@@ -51,7 +54,7 @@ beyond encouragement.  A Lean~4 verification of the main theorem is available at
 \url{https://github.com/dcond/TraceableAgency}.  All claims, errors, and omissions remain the sole responsibility
 of the author.}}
 \author{Daniele Condorelli\\University of Warwick}
-\date{Draft of \today}
+\date{Draft of 11 August 2026}
 
 \begin{document}
 \maketitle
@@ -212,9 +215,11 @@ Axioms are imposed on the family $\{\succeq_K\}_K$.
 \begin{description}[leftmargin=*,style=sameline]
 
 \item[(A1) Weak order.]
+\label{ax:weak-order}
 For every finite joint channel $K$, $\succeq_K$ is complete and transitive on $\D(A)$.
 
 \item[(A2) Continuity.]
+\label{ax:continuity}
 For each fixed triple of alphabets $(A,O,R)$, the set
 \[
  \{(K,q,p):q\succeq_Kp\}
@@ -271,6 +276,7 @@ lotteries in this one four-action environment.}
 \begin{description}[leftmargin=*,style=sameline]
 
 \item[(A3) Block-comparison coherence.]
+\label{ax:block-coherence}
 \emph{Duplication:} for every $K:A\to\D(O\times R)$ and all $q,p\in\D(A)$,
 \[
  q\succeq_Kp
@@ -315,6 +321,7 @@ posterior weights of $a$ given $b$.  Both transformations preserve the $O$-margi
 \begin{description}[leftmargin=*,style=sameline]
 
 \item[(A4) Record data processing.]
+\label{ax:record-processing}
 For every $K:A\to\D(O\times R)$, every record processor $T$, and every $q\in\D(A)$,
 \[
  (q,K)\succeq(q,KT).
@@ -322,6 +329,7 @@ For every $K:A\to\D(O\times R)$, every record processor $T$, and every $q\in\D(A
 The agent never gains when her record is garbled.
 
 \item[(A5) Action data processing.]
+\label{ax:action-processing}
 For every $K:A\to\D(O\times R)$, every action report $S:A\to\D(B)$, every $q\in\D(A)$, and every channel
 $\widehat K$ satisfying \eqref{eq:action-processing},
 \[
@@ -351,6 +359,7 @@ with $K^y$, the other with $L^y$.
 \begin{description}[leftmargin=*,style=sameline]
 
 \item[(A6) Branchwise continuation consistency.]
+\label{ax:branch-consistency}
 For every finite family of record alphabets $(R_y)_{y\in Y}$, every first-stage record channel
 $P:A\to\D(Y)$, every pair of continuation profiles $K^y,L^y:A\to\D(O\times R_y)$, and every $q\in\D(A)$: if
 \[
@@ -368,6 +377,7 @@ reached branch is weakly better overall, and unreached branches are unrestricted
 events are.  The branching event is always a record, never a payoff.
 
 \item[(A7) Material relevance.]
+\label{ax:material-relevance}
 For $o\in O$, let $K_o:\{\ast\}\to\D(O\times\{\ast\})$ deliver $o$ with an uninformative record,
 $K_o(o,\ast\mid\ast)=1$.  For some $o^+,o^-\in O$,
 \[
@@ -376,6 +386,7 @@ $K_o(o,\ast\mid\ast)=1$.  For some $o^+,o^-\in O$,
 The agent cares about material outcomes, and not only about their trace.
 
 \item[(A8) Positive trace orientation.]
+\label{ax:positive-trace}
 For $o\in O$, let $K^{\mathrm{id}}_o:A\to\D(O\times A)$ reveal the action, $K^{\mathrm{id}}_o(o,a\mid a)=1$, and
 let $K^0_o:A\to\D(O\times\{\ast\})$ reveal nothing, $K^0_o(o,\ast\mid a)=1$.  For every finite $A$ with
 $|A|\ge2$, every full-support $q\in\D(A)$, and every $o\in O$,

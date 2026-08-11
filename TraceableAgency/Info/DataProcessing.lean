@@ -14,8 +14,6 @@ proved here from finite entropy concavity.  No information-theoretic theorem
 is assumed.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 universe u
