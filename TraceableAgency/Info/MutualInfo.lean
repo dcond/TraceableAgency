@@ -15,8 +15,6 @@ Mutual information I(A;O) = H(O) - Σ_a q(a) * H(P(·|a))
 This is the information about the action A contained in the outcome O.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 variable {A O : Type*} [Fintype A] [Fintype O]

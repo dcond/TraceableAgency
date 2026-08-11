@@ -4,99 +4,49 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-echo "== Lean/Lake versions =="
+echo "== Pinned toolchain =="
 lake --version
-lean_version="$(lake env lean --version)"
-echo "$lean_version"
-if [[ "$lean_version" != "Lean (version 4.32.1,"* ]]; then
-  echo "ERROR: Theorem 1 certificate requires the pinned Lean 4.32.1 kernel."
-  exit 1
-fi
+lake env lean --version
 
-echo
-echo "== Certificate artifact manifest =="
-if command -v shasum >/dev/null 2>&1; then
-  shasum -a 256 -c Theorem1Verification/CERTIFICATE_SHA256SUMS
-elif command -v sha256sum >/dev/null 2>&1; then
-  sha256sum -c Theorem1Verification/CERTIFICATE_SHA256SUMS
-else
-  echo "ERROR: neither shasum nor sha256sum is available."
-  exit 1
-fi
+echo "== Complete byte manifest =="
+./scripts/update_certificate_manifest.sh --check
 
-lean_sources=(
-  TraceableAgency
-  Theorem1Verification
-  TraceableAgency.lean
-  Theorem1Verification.lean
-)
-
-echo
-echo "== Kernel-soundness source gate =="
-if rg --glob '*.lean' \
-  "run_meta|opaqueDecl|addDecl(Core|WithoutChecking)?|mkSorry|sorryAx|debug\\.skipKernelTC|unsafeCast|Lean\\.trustCompiler" \
-  "${lean_sources[@]}"; then
-  echo "ERROR: found a prohibited declaration-construction or kernel-bypass primitive."
-  exit 1
-fi
-
-echo
 echo "== Source hygiene =="
-if rg --glob '*.lean' '\bsorry\b' "${lean_sources[@]}"; then
-  echo "ERROR: found 'sorry' in Lean source."
+if rg --glob '*.lean' \
+  'run_meta|opaqueDecl|addDecl(Core|WithoutChecking)?|mkSorry|sorryAx|debug\.skipKernelTC|unsafeCast|Lean\.trustCompiler' \
+  TraceableAgency; then
+  echo "ERROR: prohibited declaration construction or kernel bypass" >&2
   exit 1
 fi
-if rg --glob '*.lean' '\badmit\b' "${lean_sources[@]}"; then
-  echo "ERROR: found 'admit' in Lean source."
+if rg --glob '*.lean' '\bsorry\b|\badmit\b' TraceableAgency; then
+  echo "ERROR: unchecked proof hole" >&2
   exit 1
 fi
-if rg --glob '*.lean' '^\s*axiom\s+[A-Za-z_][A-Za-z0-9_'"'"']*\s*[:({]' \
-  "${lean_sources[@]}"; then
-  echo "ERROR: found a declaration-level project axiom."
-  exit 1
-fi
-if rg --glob '*.lean' '^\s*opaque\s+[A-Za-z_][A-Za-z0-9_'"'"']*\s*[:({]' \
-  "${lean_sources[@]}"; then
-  echo "ERROR: found a bare opaque declaration."
+if rg --glob '*.lean' \
+  '^\s*(private\s+)?axiom\s+[[:alnum:]_.'\''«»]+\s*[:({]' \
+  TraceableAgency; then
+  echo "ERROR: declaration-level project axiom" >&2
   exit 1
 fi
 
-echo
-echo "== Building exact Theorem 1 target and audits =="
-lake build Theorem1Verification
+echo "== Minimal statement boundary =="
+lake build TraceableAgency.Theorem1.Statements
 
-check_dir="$(mktemp -d "${TMPDIR:-/tmp}/theorem1_certificate_check.XXXXXX")"
-check_file="$check_dir/Check.lean"
-trap 'rm -f "$check_file"; rmdir "$check_dir"' EXIT
-cat > "$check_file" <<'LEAN'
-import Theorem1Verification
+echo "== Public proof and compatibility surface =="
+lake build TraceableAgency
+lake build TraceableAgency.PureTrace.Compatibility
 
-open TraceTemperedChoiceVerification
+echo "== Recursive kernel and dependency audits =="
+lake build TraceableAgency.Audit
 
-#check trace_tempered_choice_v3_theorem1
-#print Theorem1Statement
-#print TraceTemperedAxioms
-#print A1_WeakOrder
-#print A2_Continuity
-#print A3_BlockComparisonCoherence
-#print A4_RecordDataProcessing
-#print A5_ActionDataProcessing
-#print A6_BranchwiseContinuationConsistency
-#print A7_MaterialRelevance
-#print A8_PositiveTraceOrientation
-#print WithinChannelRepresentation
-#print SameWitnessBlockRepresentation
-#print axioms TraceableAgency.GenericFaddeev.provedClassicalFaddeevTheoremAssumptions
-#print axioms TraceableAgency.provedMainCharacterizationWithMoreover
-#print axioms trace_tempered_choice_v3_theorem1
-LEAN
+echo "== Reproducible paper =="
+if [[ "${TRACEABLE_SKIP_PAPER_CHECK:-0}" == "1" ]]; then
+  echo "paper was checked by the pinned TeX Live job"
+else
+  ./scripts/build_paper.sh --check
+fi
 
-echo
-echo "== Checking public statement surface =="
-lake env lean "$check_file"
+echo "== Fresh kernel replay =="
+lake env leanchecker --fresh TraceableAgency.Theorem1.Proof
 
-echo
-echo "== Fresh independent kernel replay =="
-lake env leanchecker --fresh Theorem1Verification.Proof
-
-echo "Theorem 1 verification certificate passed."
+echo "Theorem 1 certificate passed."

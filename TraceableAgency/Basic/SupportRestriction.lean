@@ -17,8 +17,6 @@ conditional entropy sums, and mutual information. Preference invariance under
 support restriction is paper-specific and is not proved here.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 universe u

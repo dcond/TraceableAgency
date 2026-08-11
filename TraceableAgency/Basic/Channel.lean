@@ -3,6 +3,7 @@ Copyright (c) 2026 Daniele Condorelli. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Daniele Condorelli
 -/
+import Mathlib.Algebra.BigOperators.Field
 import TraceableAgency.Basic.Dist
 
 /-!
@@ -12,9 +13,9 @@ Finite channels P : A → Dist O as row-stochastic matrices.
 Includes joint laws, marginals, posteriors, and basic channel operations.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
+
+universe u
 
 variable {A O A' O' : Type*}
 variable [Fintype A] [Fintype O]

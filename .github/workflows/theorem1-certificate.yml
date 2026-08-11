@@ -10,15 +10,41 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: theorem1-certificate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:
-      - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install Lean and restore mathlib cache
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
         with:
           auto-config: false
+          build: false
           use-mathlib-cache: true
+          use-github-cache: true
+
+      - name: Rebuild the paper with pinned TeX Live
+        uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
+        with:
+          root_file: trace_tempered_choice_v3.tex
+          working_directory: Paper
+          texlive_version: 2026
+        env:
+          SOURCE_DATE_EPOCH: 1786406400
+          FORCE_SOURCE_DATE: 1
+          TZ: UTC
+
+      - name: Check reproducible PDF
+        run: git diff --exit-code -- Paper/trace_tempered_choice_v3.pdf
+
       - name: Check the paper-faithful kernel certificate
+        env:
+          TRACEABLE_SKIP_PAPER_CHECK: 1
         run: ./scripts/check_theorem1_certificate.sh

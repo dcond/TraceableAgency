@@ -12,13 +12,4 @@ lake-packages/
 *.log
 *.out
 *.synctex.gz
-
-# Keep only the authoritative v3 theorem package; preserve unrelated local
-# paper drafts without publishing them accidentally.
-Paper/*
-!Paper/README.md
-!Paper/trace_tempered_choice_v3.tex
-!Paper/trace_tempered_choice_v3.pdf
-!Paper/appendix_a_pure_trace.tex
-!Paper/appendix_b_main_theorem.tex
-!Paper/appendix_c_auxiliary_results.tex
+Paper/.build/

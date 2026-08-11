@@ -15,8 +15,6 @@ is implemented using Sum types for two blocks.
 For general finite block environments ⨆_{k∈K} P_k, we use Sigma types.
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 variable {A B O Y : Type*}

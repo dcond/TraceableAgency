@@ -18,8 +18,6 @@ Used in Axiom A2 (Continuity).
 - `PosteriorLawConvergesAtExp` is genuine weak convergence: convergence for all Continuous φ
 -/
 
-set_option linter.style.header false
-
 namespace TraceableAgency
 
 open Filter Topology
