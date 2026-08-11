@@ -1,7 +1,7 @@
 # TraceableAgency
 
-Lean 4 verification of Theorem 1 in *Trace-Tempered Choice: A Self-Contained
-Axiomatisation with Explicit Payoffs and Records* (v3).
+Lean 4 verification of Theorem 1 in *A Preference for Traceable Agency: An
+Axiomatization of Expected Utility plus Mutual Information* (v3).
 
 ## Verified result
 
@@ -29,7 +29,7 @@ the same-witness “moreover” clause as a separate conjunct.
 - [`Paper/trace_tempered_choice_v3.tex`](Paper/trace_tempered_choice_v3.tex) —
   authoritative source.
 - [`Paper/trace_tempered_choice_v3.pdf`](Paper/trace_tempered_choice_v3.pdf) —
-  compiled 54-page paper.
+  compiled 55-page paper.
 - [`Paper/appendix_a_pure_trace.tex`](Paper/appendix_a_pure_trace.tex) —
   pure-trace part of the single proof.
 - [`Paper/appendix_b_main_theorem.tex`](Paper/appendix_b_main_theorem.tex) —
