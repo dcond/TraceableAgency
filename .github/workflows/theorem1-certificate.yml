@@ -15,20 +15,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
+  paper:
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-
-      - name: Install Lean and restore mathlib cache
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
-        with:
-          auto-config: false
-          build: false
-          use-mathlib-cache: true
-          use-github-cache: true
 
       - name: Rebuild the paper with pinned TeX Live
         uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
@@ -43,6 +35,21 @@ jobs:
 
       - name: Check reproducible PDF
         run: git diff --exit-code -- Paper/trace_tempered_choice_v3.pdf
+
+  kernel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install Lean and restore mathlib cache
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+        with:
+          auto-config: false
+          build: false
+          use-mathlib-cache: true
+          use-github-cache: false
 
       - name: Check the paper-faithful kernel certificate
         env:
