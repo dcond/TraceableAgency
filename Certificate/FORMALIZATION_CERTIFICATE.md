@@ -439,6 +439,11 @@ The standalone script `scripts/check_theorem1_certificate.sh` additionally:
 - runs the recursive axiom and dependency audits; and
 - replays `TraceableAgency.Theorem1.Proof` with `leanchecker --fresh`.
 
+The default invocation performs every item in this list.  GitHub Actions uses
+fresh runners for the paper and Lean jobs, performs the complete Lean kernel
+build and both recursive audits, and omits only the redundant resource-heavy
+fresh replay.  That replay remains part of the full local certificate.
+
 Run:
 
 ```bash

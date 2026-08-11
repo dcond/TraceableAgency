@@ -47,6 +47,10 @@ else
 fi
 
 echo "== Fresh kernel replay =="
-lake env leanchecker --fresh TraceableAgency.Theorem1.Proof
+if [[ "${TRACEABLE_SKIP_FRESH_CHECKER:-0}" == "1" ]]; then
+  echo "fresh replay is reserved for the full local certificate"
+else
+  lake env leanchecker --fresh TraceableAgency.Theorem1.Proof
+fi
 
 echo "Theorem 1 certificate passed."

@@ -57,6 +57,11 @@ and project axioms, builds the statement and proof, runs both compile-time
 audits, checks the reproducible PDF, and replays the final proof with
 `leanchecker --fresh`.
 
+GitHub Actions runs the paper and Lean checks on separate fresh runners.  Its
+Lean job performs the complete kernel build and both recursive audits; the
+additional resource-intensive `leanchecker --fresh` replay is reserved for the
+full local command above.
+
 ## Paper and correspondence
 
 - [Paper source](Paper/trace_tempered_choice_v3.tex)

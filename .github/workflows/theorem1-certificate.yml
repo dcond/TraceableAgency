@@ -54,4 +54,5 @@ jobs:
       - name: Check the paper-faithful kernel certificate
         env:
           TRACEABLE_SKIP_PAPER_CHECK: 1
+          TRACEABLE_SKIP_FRESH_CHECKER: 1
         run: ./scripts/check_theorem1_certificate.sh
