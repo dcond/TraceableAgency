@@ -38,22 +38,22 @@ $Q:B\to\Delta(Y)$, their independent product is
 
 For $q\in\D(A)$ and $P:A\to\D(X)$, write
 \[
-m_{q,P}(x):=\sum_a q(a)P(x\mid a),
+m_{qP}(x):=\sum_a q(a)P(x\mid a),
 \qquad
-r_x^{q,P}(a):=\frac{q(a)P(x\mid a)}{m_{q,P}(x)}
-\quad\text{when }m_{q,P}(x)>0,
+r_x^{qP}(a):=\frac{q(a)P(x\mid a)}{m_{qP}(x)}
+\quad\text{when }m_{qP}(x)>0,
 \]
 and define the finite posterior law
 \[
-\mu_{q,P}:=
-\sum_{x:m_{q,P}(x)>0}m_{q,P}(x)\,\delta_{r_x^{q,P}}.
+\mu_{qP}:=
+\sum_{x:m_{qP}(x)>0}m_{qP}(x)\,\delta_{r_x^{qP}}.
 \]
 Let $\Id_A$ be full revelation and $U_A$ the one-record uninformative
 channel.  With logarithms in the fixed base used in the main text, put
 \[
-I_{q,P}(A;X)
-:=\Sh(m_{q,P})-\sum_a q(a)\Sh(P(\cdot\mid a))
-=\Sh(q)-\int_{\D(A)}\Sh(r)\,d\mu_{q,P}(r).
+I_{qP}(A;X)
+:=\Sh(m_{qP})-\sum_a q(a)\Sh(P(\cdot\mid a))
+=\Sh(q)-\int_{\D(A)}\Sh(r)\,d\mu_{qP}(r).
 \]
 
 \begin{proposition}[Pure-trace lemma]\label{pt:prop:main}
@@ -64,7 +64,7 @@ $P:A\to\D(X)$ and every $q,q'\in\D(A)$,
 \[
 q\succeq_Pq'
 \quad\Longleftrightarrow\quad
-I_{q,P}(A;X)\ge I_{q',P}(A;X).
+I_{qP}(A;X)\ge I_{q'P}(A;X).
 \]
 The same numerical scale represents every block-supported comparison: for
 every nonempty finite family $\{P_i:A_i\to\D(X_i)\}_{i\in J}$ of channels
@@ -73,7 +73,7 @@ and priors $q_i\in\D(A_i)$ and $q_j\in\D(A_j)$,
 \[
 q_i^i\succeq_{\bigsqcup_{k\in J}P_k}q_j^j
 \quad\Longleftrightarrow\quad
-I_{q_i,P_i}(A_i;X_i)\ge I_{q_j,P_j}(A_j;X_j).
+I_{q_iP_i}(A_i;X_i)\ge I_{q_jP_j}(A_j;X_j).
 \]
 \end{proposition}
 
@@ -120,7 +120,7 @@ supported probability measures on $\Delta(A)$, and let
  \mathcal M_q:=\{\mu\in\mathsf X_A:b(\mu)=q\}.
 \]
 Thus $\mathcal M_q$ is the mixture set of finite Bayes-plausible posterior
-laws with prior $q$, and $\mu_{q,P}\in\mathcal M_q$ for every finite channel
+laws with prior $q$, and $\mu_{qP}\in\mathcal M_q$ for every finite channel
 $P$.
 
 \begin{lemma}[Coherent comparisons across blocks]\label{pt:lem:blockcoh}
@@ -162,7 +162,7 @@ environment.
 Fix a full-support $q\in\Delta(A)$.  If finite channels
 $P:A\to\Delta(X)$ and $Q:A\to\Delta(Y)$ satisfy
 \[
- \mu_{q,P}=\mu_{q,Q},
+ \mu_{qP}=\mu_{qQ},
 \]
 then they are mutually obtainable by record post-processing.  Consequently
 \[
@@ -183,9 +183,9 @@ zero-probability records.  Put
 \]
 For every posterior $s$ occurring with positive probability, let
 \[
- X_s:=\{x:m_P(x)>0,\ r_x^{q,P}=s\},
+ X_s:=\{x:m_P(x)>0,\ r_x^{qP}=s\},
  \qquad
- Y_s:=\{y:m_Q(y)>0,\ r_y^{q,Q}=s\}.
+ Y_s:=\{y:m_Q(y)>0,\ r_y^{qQ}=s\}.
 \]
 Equality of posterior laws gives the common positive mass
 \[
@@ -241,7 +241,7 @@ then
  C_\mu(k\mid a):=\frac{\lambda_ks_k(a)}{q(a)}
  \label{pt:eq:canonical-implementation}
 \end{equation}
-defines a channel and $\mu_{q,C_\mu}=\mu$.
+defines a channel and $\mu_{qC_\mu}=\mu$.
 
 For channels $P:A\to\Delta(X)$ and $R:A\to\Delta(Z)$ and
 $t\in[0,1]$, let $tP\oplus(1-t)R$ be the publicly tagged mixture: it
@@ -249,7 +249,7 @@ reports which component was selected as well as that component's record.  Its
 posterior law is
 \begin{equation}
  \mu_{q,tP\oplus(1-t)R}
- =t\mu_{q,P}+(1-t)\mu_{q,R}.
+ =t\mu_{qP}+(1-t)\mu_{qR}.
  \label{pt:eq:public-posterior-mixture}
 \end{equation}
 
@@ -304,7 +304,7 @@ such that, for all finite channels $P,Q$ on $A$,
 \begin{equation}
  (q,P)\succeq(q,Q)
  \quad\Longleftrightarrow\quad
- F_q(\mu_{q,P})\ge F_q(\mu_{q,Q}).
+ F_q(\mu_{qP})\ge F_q(\mu_{qQ}).
  \label{pt:eq:fibre-representation}
 \end{equation}
 If $|A|\ge2$, $F_q$ is unique up to a positive affine transformation.  If
@@ -388,7 +388,7 @@ Every channel $P$ can be record-postprocessed to the uninformative channel by
 deleting its record.  Axiom~\textup{(A4)} and
 \eqref{pt:eq:fibre-representation} therefore imply
 \[
- F_q(\mu_{q,P})\ge F_q(\delta_q).
+ F_q(\mu_{qP})\ge F_q(\delta_q).
 \]
 Every law in $\mathcal M_q$ is implemented by
 \eqref{pt:eq:canonical-implementation}, so $\delta_q$ is a minimum of $F_q$
@@ -621,7 +621,7 @@ For finite posterior laws define
 \]
 Bayes' rule gives
 \begin{equation}
- \mu_{p\otimes r,P\otimes R}=\mu_{p,P}\otimes\mu_{r,R}.
+ \mu_{p\otimes r,P\otimes R}=\mu_{pP}\otimes\mu_{rR}.
 \tag{PL}\label{pt:eq:productlaw}
 \end{equation}
 
@@ -768,7 +768,7 @@ $P,Q$ on the respective action sets,
 \begin{equation}
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- G_q(\mu_{q,P})\ge G_r(\mu_{r,Q}).
+ G_q(\mu_{qP})\ge G_r(\mu_{r,Q}).
 \tag{BC}\label{pt:eq:blockcomp}
 \end{equation}
 \end{lemma}
@@ -777,7 +777,7 @@ $P,Q$ on the respective action sets,
 First suppose that $q,r$ have full support.  By~\eqref{pt:eq:QA} and
 $G_q(\delta_q)=G_r(\delta_r)=0$,
 \[
- G_{q\otimes r}(\mu_{q,P}\otimes\delta_r)=G_q(\mu_{q,P}),
+ G_{q\otimes r}(\mu_{qP}\otimes\delta_r)=G_q(\mu_{qP}),
  \qquad
  G_{q\otimes r}(\delta_q\otimes\mu_{r,Q})=G_r(\mu_{r,Q}).
 \]
@@ -837,7 +837,7 @@ reaches $r$.  If a first-stage channel $P_1$ has reached branches of masses
 $m_x$ and posteriors $r_x$, then every continuation profile satisfies
 \begin{equation}
  G_q(\mu_{q,P_1\triangleright\{Q^x\}})
- =G_q(\mu_{q,P_1})+
+ =G_q(\mu_{qP_1})+
  \sum_{x:m_x>0}m_x\beta_A(q,r_x)
  G_{r_x}(\mu_{r_x,Q^x}).
 \tag{BA}\label{pt:eq:branchaggregation}
@@ -911,7 +911,7 @@ For the aggregation formula, put $B_x:=\operatorname{supp}(r_x)$ and
 \]
 The compound law differs from the first-stage law by
 \[
- \mu_{q,P_1\triangleright\{Q^x\}}-\mu_{q,P_1}
+ \mu_{q,P_1\triangleright\{Q^x\}}-\mu_{qP_1}
  =\sum_{x:m_x>0}m_x\,i_{B_x}
    (\nu_x-\delta_{(r_x)_{B_x}}).
 \]
@@ -949,7 +949,7 @@ coefficient for reaching the face $\iota(B)$.  Hence the representatives
 satisfy the exact chain rule
 \begin{equation}
  V_q(\mu_{q,P_1\triangleright\{Q^x\}})
- =V_q(\mu_{q,P_1})
+ =V_q(\mu_{qP_1})
   +\sum_{x:m_x>0}m_xV_{r_x}(\mu_{r_x,Q^x}).
 \tag{CR}\label{pt:eq:chainrule}
 \end{equation}
@@ -1045,7 +1045,7 @@ Consequently the final representatives $V_q=G_q/C$ satisfy both
  V_{p\otimes r}(\mu\otimes\nu)
    &=V_p(\mu)+V_r(\nu),\tag{PA}\label{pt:eq:PArecovered}\\
  V_q(\mu_{q,P_1\triangleright\{Q^x\}})
-   &=V_q(\mu_{q,P_1})+\sum_{x:m_x>0}m_x
+   &=V_q(\mu_{qP_1})+\sum_{x:m_x>0}m_x
      V_{r_x}(\mu_{r_x,Q^x}).\tag{CR$'$}\label{pt:eq:final-chain}
 \end{align}
 The cross-prior bridge of Lemma~\ref{pt:lem:blockbridge} is valid with $V$
@@ -1207,9 +1207,9 @@ so $\mathcal H(q)=H_G(q)/C$, with boundary priors read on their support.
 Then every finite channel
 $P:A\to\Delta(X)$ satisfies
 \begin{equation}
- V_q(\mu_{q,P})
- =\mathcal H(q)-\sum_{x:m_{q,P}(x)>0}
-    m_{q,P}(x)\mathcal H(r_x^{\,q,P}).
+ V_q(\mu_{qP})
+ =\mathcal H(q)-\sum_{x:m_{qP}(x)>0}
+    m_{qP}(x)\mathcal H(r_x^{\,q,P}).
 \tag{ER}\label{pt:eq:entropy-reduction}
 \end{equation}
 Moreover,
@@ -1218,7 +1218,7 @@ Moreover,
 \]
 for a single $\alpha>0$.  Consequently
 \[
- V_q(\mu_{q,P})=\alpha I_{q,P}(A;X).
+ V_q(\mu_{qP})=\alpha I_{qP}(A;X).
 \tag{MI}\label{pt:eq:value-MI}
 \]
 \end{lemma}
@@ -1230,8 +1230,8 @@ The final posterior law is $\chi_q$, while the continuation after record $x$
 has full-revelation law $\chi_{r_x}$ on the support of $r_x$.  The exact
 chain rule~\eqref{pt:eq:final-chain} therefore gives
 \[
- \mathcal H(q)=V_q(\mu_{q,P})
- +\sum_{x:m_{q,P}(x)>0}m_{q,P}(x)\mathcal H(r_x),
+ \mathcal H(q)=V_q(\mu_{qP})
+ +\sum_{x:m_{qP}(x)>0}m_{qP}(x)\mathcal H(r_x),
 \]
 which is~\eqref{pt:eq:entropy-reduction}.  A boundary prior is reduced to its
 support; null action rows and null records affect neither side.
@@ -1331,10 +1331,10 @@ bijections, expansibility, vanishing on point masses, and
 for some $\alpha\ge0$.  Axiom~\textup{(A8)} forces $\alpha>0$.
 Substitution in~\eqref{pt:eq:entropy-reduction} gives
 \[
- V_q(\mu_{q,P})
- =\alpha\left(\Sh(q)-\sum_x m_{q,P}(x)
+ V_q(\mu_{qP})
+ =\alpha\left(\Sh(q)-\sum_x m_{qP}(x)
                     \Sh(r_x^{\,q,P})\right)
- =\alpha I_{q,P}(A;X),
+ =\alpha I_{qP}(A;X),
 \]
 where the sum is over positive-mass records.  This proves
 \eqref{pt:eq:value-MI}.
@@ -1348,7 +1348,7 @@ $(r,Q)$,
 \[
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- I_{q,P}\ge I_{r,Q},
+ I_{qP}\ge I_{r,Q},
 \tag{BMI}\label{pt:eq:final-block-MI}
 \]
 including boundary priors by support restriction.  For one fixed channel,
@@ -1360,7 +1360,7 @@ Axiom~\textup{(A3)} deletes all irrelevant blocks and
 supported on block $i$ has a constant block tag, so
 \[
  I_{q_i^i,\,\bigsqcup_{k\in J}P_k}
- =I_{q_i,P_i},
+ =I_{q_iP_i},
 \]
 and similarly for block $j$.  This is exactly the stated common-scale block
 comparison.

@@ -27,24 +27,10 @@ latexmk -pdf -interaction=nonstopmode -halt-on-error \
   trace_tempered_choice_v3.tex
 ```
 
-## Formal correspondence
-
-The complete verification package is indexed at
-[`../Theorem1Verification/README.md`](../Theorem1Verification/README.md).
-
-- [`FORMALIZATION_CERTIFICATE.md`](../Theorem1Verification/FORMALIZATION_CERTIFICATE.md)
-  translates the theorem, Axioms (A1)--(A8), and the representation into the
-  exact Lean declarations and states the trust boundary.
-- [`CLAIM_MAP.md`](../Theorem1Verification/CLAIM_MAP.md) maps paper source
-  lines to declarations.
-- [`PAPER_PROOF_ROADMAP.md`](../Theorem1Verification/PAPER_PROOF_ROADMAP.md)
-  gives the detailed human proof route corresponding to the kernel proof.
-- `Statements.lean`, the deliberately empty `Axioms.lean`, and `Proof.lean`
-  form the public verification boundary.
-
-From the repository root, run:
-
-```bash
-lake build
-./scripts/check_theorem1_certificate.sh
-```
+The pure-trace statement and common-scale block interface proved in Appendix A
+are also kernel-checked by
+`TraceableAgency.provedMainCharacterizationWithMoreover` and imported into the
+material model by `Theorem1Verification/PureTrace.lean`.  The Appendix B
+dependency chain is documented in
+`Theorem1Verification/PAPER_PROOF_ROADMAP.md` and culminates in the checked
+declaration `trace_tempered_choice_v3_theorem1`.

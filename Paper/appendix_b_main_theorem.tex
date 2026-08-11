@@ -241,7 +241,7 @@ processing conditions, including every null-row completion; and Axiom
 \textup{(A6)} gives branchwise continuation.  These are precisely the
 hypotheses of Proposition~\ref{pt:prop:main}.  Its conclusion is that every
 within-channel and block-supported comparison between such lifts is ordered by
-$I_{q,P}(A;R)$.
+$I_{qP}(A;R)$.
 
 \begin{lemma}[The trace scale]\label{lf:lem:trace-scale}
 Under Axioms \textup{(A1)--(A8)}, there is one number $\lambda>0$, independent
@@ -267,7 +267,7 @@ affine under public mixtures.  Proposition~\ref{pt:prop:main} says that $W_q$ an
 $I_q$ represent the same nonconstant order on the constant-low face.
 Positive-affine uniqueness therefore gives
 \[
-W_q(K_P)=\lambda_q I_{q,P}+b_q,
+W_q(K_P)=\lambda_q I_{qP}+b_q,
 \qquad \lambda_q>0.
 \]
 The uninformative experiment has mutual information zero and, by
@@ -443,11 +443,11 @@ I_q(A;Y)=I_{qK}(A;O,R)
 \]
 and
 \[
-\sum_{o,r}p_{qK}(o,r)u(o)=\E_{q,K}[u(O)],
+\sum_{o,r}p_{qK}(o,r)u(o)=\E_{qK}[u(O)],
 \]
 respectively.  Together with sequentialisation, they give
 \begin{equation}
-W_q(K)=\E_{q,K}[u(O)]+\lambda I_{qK}(A;O,R).
+W_q(K)=\E_{qK}[u(O)]+\lambda I_{qK}(A;O,R).
 \label{lf:eq:full-support-value}
 \end{equation}
 \end{samepage}
@@ -506,9 +506,9 @@ reported action.
 For a compound channel, the two finite chain rules are
 \begin{align*}
 \E[u(O)]
-  &=\sum_{y:m(y)>0} m(y)\E_{q_y,K^y}[u(O)],\\
+  &=\sum_{y:m(y)>0} m(y)\E_{q_yK^y}[u(O)],\\
 I(A;Y,O,R)
-  &=I(A;Y)+\sum_{y:m(y)>0} m(y)I_{q_y,K^y}(A;O,R).
+  &=I(A;Y)+\sum_{y:m(y)>0} m(y)I_{q_yK^y}(A;O,R).
 \end{align*}
 The first-stage term is common to two continuation profiles.  Their aggregate
 value difference is therefore
