@@ -1,4 +1,4 @@
-# Trace-Tempered Choice v3
+# A Preference for Traceable Agency
 
 This directory contains the paper certified by the Lean development.
 
@@ -6,7 +6,7 @@ This directory contains the paper certified by the Lean development.
 
 - [`trace_tempered_choice_v3.tex`](trace_tempered_choice_v3.tex) — source.
 - [`trace_tempered_choice_v3.pdf`](trace_tempered_choice_v3.pdf) — compiled
-  54-page paper.
+  55-page paper.
 
 The source states Axioms (A1)--(A8) once in the main text and inputs exactly
 three proof appendices:

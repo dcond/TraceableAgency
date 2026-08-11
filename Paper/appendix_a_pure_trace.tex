@@ -768,7 +768,7 @@ $P,Q$ on the respective action sets,
 \begin{equation}
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- G_q(\mu_{qP})\ge G_r(\mu_{r,Q}).
+ G_q(\mu_{qP})\ge G_r(\mu_{rQ}).
 \tag{BC}\label{pt:eq:blockcomp}
 \end{equation}
 \end{lemma}
@@ -779,7 +779,7 @@ $G_q(\delta_q)=G_r(\delta_r)=0$,
 \[
  G_{q\otimes r}(\mu_{qP}\otimes\delta_r)=G_q(\mu_{qP}),
  \qquad
- G_{q\otimes r}(\delta_q\otimes\mu_{r,Q})=G_r(\mu_{r,Q}).
+ G_{q\otimes r}(\delta_q\otimes\mu_{rQ})=G_r(\mu_{rQ}).
 \]
 The two laws on the left lie in the same fibre and are implemented by
 $P\otimes U_B$ and $U_A\otimes Q$, so the affine fibre representation
@@ -1209,7 +1209,7 @@ $P:A\to\Delta(X)$ satisfies
 \begin{equation}
  V_q(\mu_{qP})
  =\mathcal H(q)-\sum_{x:m_{qP}(x)>0}
-    m_{qP}(x)\mathcal H(r_x^{\,q,P}).
+    m_{qP}(x)\mathcal H(r_x^{\,qP}).
 \tag{ER}\label{pt:eq:entropy-reduction}
 \end{equation}
 Moreover,
@@ -1333,7 +1333,7 @@ Substitution in~\eqref{pt:eq:entropy-reduction} gives
 \[
  V_q(\mu_{qP})
  =\alpha\left(\Sh(q)-\sum_x m_{qP}(x)
-                    \Sh(r_x^{\,q,P})\right)
+                    \Sh(r_x^{\,qP})\right)
  =\alpha I_{qP}(A;X),
 \]
 where the sum is over positive-mass records.  This proves
@@ -1348,7 +1348,7 @@ $(r,Q)$,
 \[
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- I_{qP}\ge I_{r,Q},
+ I_{qP}\ge I_{rQ},
 \tag{BMI}\label{pt:eq:final-block-MI}
 \]
 including boundary priors by support restriction.  For one fixed channel,
