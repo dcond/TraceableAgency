@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 paper_dir="$repo_root/Paper"
-paper_name="trace_tempered_choice_v3"
+paper_name="trace_tempered_choice_v4"
 mode="${1:---check}"
 
 case "$mode" in
@@ -17,7 +17,7 @@ esac
 build_dir="$(mktemp -d "${TMPDIR:-/tmp}/traceable-agency-paper.XXXXXX")"
 trap 'rm -rf "$build_dir"' EXIT
 
-export SOURCE_DATE_EPOCH=1786406400
+export SOURCE_DATE_EPOCH=1786579200
 export FORCE_SOURCE_DATE=1
 export TZ=UTC
 export LC_ALL=C

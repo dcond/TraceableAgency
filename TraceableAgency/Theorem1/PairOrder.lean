@@ -9,7 +9,7 @@ import TraceableAgency.Theorem1.PureTrace
 # Orientation of cross-environment block comparisons
 
 The paper defines the reverse comparison inside the same oriented block
-environment.  This file proves, from A4/A5 rather than from an informal
+environment.  This file proves, from A6/A7 rather than from an informal
 relabeling convention, that it agrees with swapping the two pair arguments.
 -/
 
@@ -97,8 +97,8 @@ theorem sameBlock_reverse_iff_pairWeak_swap
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     F.rel (commonPayoffBlockChannel K L)
@@ -177,8 +177,8 @@ theorem pairStrict_iff_pairWeak_not_swap
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     pairStrict F q K p L ↔
@@ -201,7 +201,7 @@ theorem pairWeak_complete
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     pairWeak F q K p L ∨ pairWeak F p L q K := by
@@ -225,7 +225,7 @@ open PairTripleBlock
 /-- Cross-environment pair comparison is transitive.  The proof puts all
 three alternatives in one explicit three-block environment, so no relabelling
 or cross-environment convention is used. -/
-theorem pairWeak_transitive
+theorem pairWeak_transitive_of_structural
     {O A B C R S T : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -234,7 +234,8 @@ theorem pairWeak_transitive
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     [Fintype T] [DecidableEq T] [Nonempty T]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S))
     (s : TraceableAgency.Dist C) (M : Channel C (O × T)) :
@@ -291,17 +292,34 @@ theorem pairWeak_transitive
   have hmr : (middle : PairTripleBlock.{u}) ≠ right := by decide
   have hlr : (left : PairTripleBlock.{u}) ≠ right := by decide
   have hxy : F.rel Big x y := by
-    have hc := (h.a3.irrelevant_blocks Act Rec Ch left middle hlm q p).2
+    have hc := (h3.irrelevant_blocks Act Rec Ch left middle hlm q p).2
       (by simpa [Act, Rec, Ch] using hqp)
     simpa [Big, x, y] using hc
   have hyz : F.rel Big y z := by
-    have hc := (h.a3.irrelevant_blocks Act Rec Ch middle right hmr p s).2
+    have hc := (h3.irrelevant_blocks Act Rec Ch middle right hmr p s).2
       (by simpa [Act, Rec, Ch] using hps)
     simpa [Big, y, z] using hc
-  have hxz : F.rel Big x z := (h.a1 Big).2 x y z hxy hyz
-  have hc := (h.a3.irrelevant_blocks Act Rec Ch left right hlr q s).1
+  have hxz : F.rel Big x z := (h1 Big).2 x y z hxy hyz
+  have hc := (h3.irrelevant_blocks Act Rec Ch left right hlr q s).1
     (by simpa [Big, x, z] using hxz)
   simpa [Act, Rec, Ch] using hc
+
+/-- Cross-environment transitivity packaged for the representation proof. -/
+theorem pairWeak_transitive
+    {O A B C R S T : Type u}
+    [Fintype O] [DecidableEq O]
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    [Fintype R] [DecidableEq R] [Nonempty R]
+    [Fintype S] [DecidableEq S] [Nonempty S]
+    [Fintype T] [DecidableEq T] [Nonempty T]
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
+    (q : TraceableAgency.Dist A) (K : Channel A (O × R))
+    (p : TraceableAgency.Dist B) (L : Channel B (O × S))
+    (s : TraceableAgency.Dist C) (M : Channel C (O × T)) :
+    pairWeak F q K p L → pairWeak F p L s M → pairWeak F q K s M :=
+  pairWeak_transitive_of_structural F h.a1 h.a3 q K p L s M
 
 /-- Fixed-action specialization used by each marked-terminal fibre. -/
 theorem pairWeak_transitive_sameAction
@@ -311,7 +329,7 @@ theorem pairWeak_transitive_sameAction
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     [Fintype T] [DecidableEq T] [Nonempty T]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist A) (L : Channel A (O × S))
     (s : TraceableAgency.Dist A) (M : Channel A (O × T)) :
@@ -324,7 +342,7 @@ theorem pairWeak_refl
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R)) :
     pairWeak F q K q K := by
   have hself : F.rel K q q := by

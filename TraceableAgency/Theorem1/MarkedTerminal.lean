@@ -531,7 +531,7 @@ def MarkedPairWeak
 /-- A payoff-preserving record simulation gives the corresponding weak block
 comparison by A4. -/
 theorem pairWeak_of_markedRecordPostprocesses
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (q : TraceableAgency.Dist A)
     (E E' : MarkedTerminalExperiment O A)
     (hpost : MarkedExperimentRecordPostprocesses E E') :
@@ -563,7 +563,7 @@ def MarkedPairIndifferent
 /-- Equal marked terminal laws at full support are indifferent in both
 oriented pair comparisons. -/
 theorem markedPairIndifferent_of_sameMarkedTerminalLaw
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E E' : MarkedTerminalExperiment O A)
     (hsame : SameMarkedTerminalLaw q E E') :
@@ -598,7 +598,7 @@ representative makes the cross-experiment pair comparison independent of the
 chosen representatives. -/
 theorem marked_pairWeak_replacement_from_weakEquiv
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     (q r : TraceableAgency.Dist A)
     (E E' G G' : MarkedTerminalExperiment O A)
     (hleftForward : MarkedPairWeak F q E q E')
@@ -724,8 +724,8 @@ theorem marked_pairWeak_replacement_from_weakEquiv
 law representatives in both arguments. -/
 theorem pairWeak_respects_sameMarkedTerminalLaw
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
     (q r : TraceableAgency.Dist A) (hq : q.FullSupport) (hr : r.FullSupport)
     (E E' G G' : MarkedTerminalExperiment O A)
     (hleft : SameMarkedTerminalLaw q E E')

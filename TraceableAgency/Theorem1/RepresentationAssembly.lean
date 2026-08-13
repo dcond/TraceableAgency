@@ -29,7 +29,7 @@ utility is exactly expected material utility plus the common trace multiple of
 mutual information. -/
 def FullSupportNormalizedValueFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) : Prop :=
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : Prop :=
   ∀ {A R : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
@@ -43,7 +43,7 @@ def FullSupportNormalizedValueFormula
 comparison, including boundary priors. -/
 theorem pairWeak_iff_traceTemperedValue_of_fullSupportNormalizedValueFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (hvalue : FullSupportNormalizedValueFormula F h)
     {A B R S : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -81,11 +81,11 @@ theorem pairWeak_iff_traceTemperedValue_of_fullSupportNormalizedValueFormula
     traceTemperedValue_restrictToSupport,
     traceTemperedValue_restrictToSupport]
 
-/-- A3 duplication converts the cross-channel representation into the
+/-- A5 duplication converts the cross-channel representation into the
 within-channel clause, with the same material index and trace multiplier. -/
 theorem withinChannelRepresentation_of_fullSupportNormalizedValueFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (hvalue : FullSupportNormalizedValueFormula F h) :
     WithinChannelRepresentation F (materialPayoffUtility F h)
       (globalTraceLambda F h) := by
@@ -94,11 +94,11 @@ theorem withinChannelRepresentation_of_fullSupportNormalizedValueFormula
   exact pairWeak_iff_traceTemperedValue_of_fullSupportNormalizedValueFormula
     F h hvalue q K p K
 
-/-- A3 irrelevant-block coherence converts the cross-channel representation
+/-- A5 irrelevant-block coherence converts the cross-channel representation
 directly into the theorem's finite-block "moreover" clause. -/
 theorem sameWitnessBlockRepresentation_of_fullSupportNormalizedValueFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (hvalue : FullSupportNormalizedValueFormula F h) :
     SameWitnessBlockRepresentation F (materialPayoffUtility F h)
       (globalTraceLambda F h) := by
@@ -111,7 +111,7 @@ theorem sameWitnessBlockRepresentation_of_fullSupportNormalizedValueFormula
 formula, retaining exactly the same witnesses. -/
 theorem representationClauses_of_fullSupportNormalizedValueFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (hvalue : FullSupportNormalizedValueFormula F h) :
     WithinChannelRepresentation F (materialPayoffUtility F h)
         (globalTraceLambda F h) ∧

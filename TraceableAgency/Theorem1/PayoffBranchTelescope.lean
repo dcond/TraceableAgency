@@ -73,7 +73,7 @@ hypothesis supplies the increment from changing each branch away from a
 constant baseline.  The conclusion aggregates those increments for the full
 payoff profile. -/
 theorem normalizedMarkedUtility_payoffBranch_telescope
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (o0 : O) (payoff : Y → O)
     (increment : Y → ℝ)
@@ -137,9 +137,10 @@ theorem normalizedMarkedUtility_payoffBranch_telescope
         linarith
   simpa [V] using hs Finset.univ
 
-/-- Expected-utility-shaped specialization of finite branch telescoping. -/
+/-- Expected-utility-shaped specialization relative to a possibly nonzero
+baseline payoff. -/
 theorem normalizedMarkedUtility_payoffBranch_sum
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (o0 : O) (payoff : Y → O) (u : O → ℝ)
     (hsingle : ∀ target : Y,
@@ -148,16 +149,19 @@ theorem normalizedMarkedUtility_payoffBranch_sum
             (updateBranchPayoff (fun _ ↦ o0) target (payoff target))) -
         normalizedMarkedUtility F h q hq
           (payoffBranchExperiment P (fun _ ↦ o0)) =
-        Channel.outcomeMarginal P q target * u (payoff target)) :
+        Channel.outcomeMarginal P q target *
+          (u (payoff target) - u o0)) :
     normalizedMarkedUtility F h q hq
         (payoffBranchExperiment P payoff) =
-      normalizedMarkedUtility F h q hq
+        normalizedMarkedUtility F h q hq
           (payoffBranchExperiment P (fun _ ↦ o0)) +
         ∑ target : Y,
-          Channel.outcomeMarginal P q target * u (payoff target) := by
+          Channel.outcomeMarginal P q target *
+            (u (payoff target) - u o0) := by
   exact normalizedMarkedUtility_payoffBranch_telescope
     F h q hq P o0 payoff
-      (fun target ↦ Channel.outcomeMarginal P q target * u (payoff target))
+      (fun target ↦ Channel.outcomeMarginal P q target *
+        (u (payoff target) - u o0))
       hsingle
 
 end TraceableAgency.Theorem1

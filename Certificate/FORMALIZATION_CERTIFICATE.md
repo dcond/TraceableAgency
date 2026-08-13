@@ -1,415 +1,230 @@
-# Formalization certificate: `trace_tempered_choice_v3`, Theorem 1
+# Formalization certificate: `trace_tempered_choice_v4`, Theorem 1
 
 ## Certified result
 
 The authoritative informal result is Theorem 1 (`thm:main`) in
-`Paper/trace_tempered_choice_v3.tex`.  Its formal statement and proof are:
+`Paper/trace_tempered_choice_v4.tex`. Its formal statement and public proof are:
 
 ```lean
-TraceableAgency.Theorem1.Theorem1Statement
+TraceableAgency.Theorem1.Theorem1StatementV4
 
-TraceableAgency.Theorem1.trace_tempered_choice_v3_theorem1 :
-  TraceableAgency.Theorem1.Theorem1Statement
+TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV4
 ```
 
-The second declaration has exactly the first declaration as its type.  The
-proof therefore cannot silently strengthen the hypotheses, weaken the
-conclusion, change the order of quantifiers, or prove a nearby proposition.
-
-This certificate concerns Theorem 1 and its same-scale block clause only.  It
-does not certify every later corollary in v3 or every advertised minimal-axiom
-subset for auxiliary lemmas.
+The proof declaration has exactly the displayed proposition as its type. This
+certificate covers Theorem 1 and its same-witness finite-block clause. It does
+not claim formal verification of the paper-only auxiliary results in Appendix
+C.
 
 ## Exact mathematical statement
 
-Fix a finite payoff alphabet \(O\) with \(|O|\ge 2\).  A primitive family
-\(F\) assigns, for every nonempty finite action alphabet \(A\), nonempty
-finite record alphabet \(R\), and channel
+Fix a finite payoff alphabet (O) with (|O|ge2). For every nonempty finite
+action alphabet (A), record alphabet (R), and joint channel
+
 
 \[
-K:A\longrightarrow\Delta(O\times R),
+K:A\to\Delta(O\times R),
 \]
 
-a binary relation \(\succeq_K\) on \(\Delta(A)\).  Put
-
-\[
-\mathsf{Ax}(F)
- :=\mathsf{A1}(F)\wedge\cdots\wedge\mathsf{A8}(F).
-\]
-
-For \(u:O\to\mathbb R\), \(\lambda\in\mathbb R\),
-\(q\in\Delta(A)\), and \(K:A\to\Delta(O\times R)\), define
+the primitive family (F) supplies a relation (succeq_K) on
+(Delta(A)). For (u:O\to\mathbb R) and (lambda\in\mathbb R), define
 
 \[
 V_{u,\lambda}(q,K)
- =\sum_a q(a)\sum_{o,r}K(o,r\mid a)u(o)
-  +\lambda I_{qK}(A;O,R).
+=\sum_a q(a)\sum_{o,r}K(o,r\mid a)u(o)
++\lambda I_{qK}(A;O,R).
 \]
 
-Let \(\mathsf{Within}(F,u,\lambda)\) mean that, simultaneously for every
-nonempty finite \(A,R\), every \(K\), and every
-\(q,p\in\Delta(A)\),
+Lean proves that the exact v4 Axioms A1--A8 are equivalent to the existence of
+one nonconstant (u), one (lambda>0), and simultaneous representation of
+every within-channel comparison by (V_{u,lambda}). It also proves that some
+same witnesses represent all comparisons between alternatives supported on
+distinct blocks of every finite common-payoff block environment.
 
-\[
-q\succeq_Kp
-\quad\Longleftrightarrow\quad
-V_{u,\lambda}(q,K)\ge V_{u,\lambda}(p,K).
-\]
+`mutualInfoLikelihoodRatio` formalizes the displayed finite
+likelihood-ratio sum, setting every zero-joint-mass summand to zero.
+`mutualInfoLikelihoodRatio_eq_mutualInfo` proves that formula equal to Lean's
+entropy-difference definition of `mutualInfo`, without an additional axiom.
 
-Let \(\mathsf{Blocks}(F,u,\lambda)\) mean that the same \(u,\lambda\)
-represent every comparison between lotteries supported on two distinct blocks
-of every finite common-payoff block environment.  Lean proves, for every such
-\(O\) and every \(F\),
+These are the two conjuncts of `Theorem1StatementV4`, respectively expressed
+through `WithinChannelRepresentation` and `SameWitnessBlockRepresentation`.
 
-\[
-\mathsf{Ax}(F)
-\quad\Longleftrightarrow\quad
-\exists u,\lambda:\
-  u\text{ is nonconstant},\ \lambda>0,\
-  \mathsf{Within}(F,u,\lambda),
-\tag{T1}
-\]
+## Domain and comparison environments
 
-and also
+`FixedPayoffPrefFamily O` fixes the payoff alphabet across the family while
+allowing arbitrary nonempty finite action and record alphabets. `DecidableEq`
+is finite computational structure, not a behavioral premise.
 
-\[
-\mathsf{Ax}(F)
-\quad\Longrightarrow\quad
-\exists u,\lambda:\
-  u\text{ is nonconstant},\ \lambda>0,\
-  \mathsf{Within}(F,u,\lambda)\wedge
-  \mathsf{Blocks}(F,u,\lambda).
-\tag{M}
-\]
+Cross-channel notation is derived, not primitive. `pairWeak F q K p L`
+compares the supported copies of (q) and (p) inside one explicit block
+channel. Only record tags are added; `sumPayoffRecordEquiv` and
+`sigmaPayoffRecordEquiv` retain the same payoff coordinate.
 
-Formula (M) is the weakest literal reading of the paper's "represented on the
-same scale" clause: at least one representing pair \(u,\lambda\) works for
-both kinds of comparison.  It does not claim that every possible representing
-pair does so, and it does not choose new witnesses separately for each
-environment.
+## Exact v4 axioms
 
-In Lean, (T1) and (M) are the two conjuncts of `Theorem1Statement`.
+### A1 — weak order
 
-## Domain and derived comparison notation
+`A1_WeakOrder`: every fixed joint channel carries a complete and transitive
+relation on its action lotteries.
 
-The fixed payoff coordinate is not a record label.  The two-block channel for
-\(K:A\to\Delta(O\times R)\) and
-\(L:B\to\Delta(O\times S)\) has output type
-\(O\times(R\sqcup S)\): only the record is tagged.  The expression
+### A2 — continuity
 
-\[
-(q,K)\succeq(p,L)
-\]
+`A2_Continuity`: for fixed finite alphabets, coordinatewise convergence of the
+channel and both lotteries preserves a weak comparison. On finite Euclidean
+simplexes this is the paper's closed-graph formulation.
 
-is not a second primitive preference.  It abbreviates the comparison between
-the left- and right-block copies of \(q\) and \(p\) inside that one block
-channel.  Lean's `commonPayoffBlockChannel`, `leftBlockDist`,
-`rightBlockDist`, and `pairWeak` implement exactly this construction.
+### A3 — fixed-channel material relevance
 
-All paper action and record alphabets are nonempty.  Lean's `Fintype` and
-`Nonempty` express finite nonempty sets.  `DecidableEq` is finite computational
-structure used to evaluate sums and tagged constructions; every finite set
-admits it, and it is not a behavioral premise.
+`A3_MaterialRelevance`: there are distinct (o^+,o^-) such that, inside the
+canonical two-action no-record channel delivering those outcomes surely, the
+pure (o^+) lottery is strictly preferred to the pure (o^-) lottery.
 
-Lean writes the payoff, action, and record types in one arbitrary universe
-`u`.  This is bookkeeping, not a restriction on finite alphabets: every finite
-set is equivalent to some `Fin n`, and finite types can be transported or
-universe-lifted without changing any of the displayed distributions,
-channels, or comparisons.
+This is a single within-channel comparison. The older cross-environment
+material condition is not assumed by v4.
 
-## Axioms (A1)--(A8): paper mathematics to Lean
+### A4 — fixed-channel trace relevance at one payoff
 
-### A1 - weak order
+`A4_TraceRelevance`: there is one payoff (o_*) and one canonical four-action
+channel. Its left pair reveals the selected Boolean action, while its right
+pair emits an independent fair Boolean record. The fair revealing lottery is
+strictly preferred to the fair nonrevealing lottery in that same channel.
 
-Paper mathematics: for every nonempty finite \(A,R\) and every
-\(K:A\to\Delta(O\times R)\), the relation \(\succeq_K\) is complete and
-transitive on \(\Delta(A)\).
+The existential payoff is deliberately singular. v4 does not assume positive
+trace orientation at every payoff.
 
-Lean declaration: `A1_WeakOrder`.
+### A5 — block-comparison coherence
 
-There is no added independence, Archimedean, mixture, or nontriviality field in
-full-payoff A1.
+`A5_BlockComparisonCoherence` contains exactly `duplication` and
+`irrelevant_blocks`, connecting primitive within-channel comparisons to
+supported comparisons in explicit finite block environments.
 
-### A2 - continuity
+### A6 — record data processing
 
-Paper mathematics: for each fixed \(A,O,R\),
+`A6_RecordDataProcessing`: a stochastic rewrite of the explicit record cannot
+improve an alternative. `RecordProcessor` may depend on realized payoff and
+record but `payoffPreservingRecordKernel` copies the payoff unchanged.
 
-\[
-G=\{(K,q,p):q\succeq_Kp\}
-\]
+### A7 — action data processing
 
-is closed in the finite Euclidean product of channel and simplex coordinates.
-
-Lean declaration: `A2_Continuity`.  It says that whenever \(K_n\to K\),
-\(q_n\to q\), and \(p_n\to p\) coordinatewise and
-\(q_n\succeq_{K_n}p_n\) for every \(n\), then
-\(q\succeq_Kp\).
-
-This is the same axiom under a standard finite-dimensional translation, not a
-stronger continuity assumption.  The channel and simplex spaces are subsets
-of a finite product of real coordinate spaces; coordinate convergence is the
-product/Euclidean convergence, the space is metrizable, and in a metric space
-a set is closed exactly when it is sequentially closed.  This topology bridge
-is mathematical infrastructure used to read the paper statement; it is not a
-separate behavioral hypothesis, and it is not claimed here as a separately
-named Lean theorem.
-
-### A3 - block-comparison coherence
-
-Paper duplication clause:
-
-\[
-q\succeq_Kp
-\quad\Longleftrightarrow\quad
-(q,K)\succeq(p,K).
-\]
-
-Paper irrelevant-block clause: for every finite block family, distinct
-\(i,j\), and \(q_i\in\Delta(A_i),q_j\in\Delta(A_j)\),
-
-\[
-q_i^i\succeq_{\bigsqcup_kK_k}q_j^j
-\quad\Longleftrightarrow\quad
-(q_i,K_i)\succeq(q_j,K_j).
-\]
-
-Lean declaration: `A3_BlockComparisonCoherence`, with fields `duplication`
-and `irrelevant_blocks`.  The Lean general block output is reassociated by a
-canonical finite equivalence so that the payoff coordinate remains common.
-
-### A4 - record data processing
-
-A record processor is a stochastic kernel \(T(r'\mid o,r)\) which may depend
-on the realized payoff but copies that payoff unchanged.  It produces
-
-\[
-(KT)(o,r'\mid a)=\sum_rK(o,r\mid a)T(r'\mid o,r).
-\]
-
-The axiom is
-
-\[
-(q,K)\succeq(q,KT)
-\]
-
-for every admissible (A,R,R',K,T,q).
-
-Lean declarations: `RecordProcessor`, `payoffPreservingRecordKernel`,
-`recordPostprocess`, and `A4_RecordDataProcessing`.
-
-### A5 - action data processing
-
-For every stochastic report \(S:A\to\Delta(B)\), let
-
-\[
-(qS)(b)=\sum_aq(a)S(b\mid a).
-\]
-
-For every channel \(\widehat K:B\to\Delta(O\times R)\) satisfying the
-undivided joint-law equation
+`A7_ActionDataProcessing`: a stochastic processor of the realized action
+cannot improve an alternative for every completion satisfying
 
 \[
 (qS)(b)\widehat K(o,r\mid b)
-=\sum_aq(a)S(b\mid a)K(o,r\mid a)
-\quad\text{for all }b,o,r,
+=\sum_a q(a)S(b\mid a)K(o,r\mid a).
 \]
 
-the axiom is
+`IsActionProcessorCompletion` is this undivided equation. At a zero-mass
+processed action, nonnegativity makes the right side zero and leaves the
+completion row unrestricted. Lean quantifies over every such completion.
+
+### A8 — branchwise continuation consistency
+
+`A8_BranchwiseContinuationConsistency` combines weak and strict clauses. The
+two continuation profiles share one branch-dependent record family. Unreached
+branches are ignored; weak improvement is required at every reached branch,
+and one reached strict improvement yields a strict compound comparison.
+
+### Bundle boundary
+
+`TraceTemperedAxiomsV4` contains exactly these eight predicates, in this
+numbering. It has no representation, posterior-continuity, Faddeev,
+Herstein--Milnor, normalization, reachability, scale, or selection field.
+
+## Fixed-channel relevance bridge
+
+Appendix A's bridge is formalized in `RelevanceBridge.lean`.
+
+`materialRelevance_bridge` proves, under A1 and A5--A7, that fixed A3 is
+equivalent to strict comparison between the corresponding one-action sure
+payoff environments. Exact action processors collapse each pure support and
+reinsert it. The reverse proof also derives distinctness from strictness.
+
+`traceRelevance_bridge` proves, under A1 and A5--A8,
 
 \[
-(q,K)\succeq(qS,\widehat K).
+\mathrm{A4}(F)
+\quad\Longleftrightarrow\quad
+\exists o_*\;\mathrm{PositiveTraceOrientationAt}(F,o_*).
 \]
 
-Lean declarations: `IsActionReportCompletion` and
-`A5_ActionDataProcessing`.  If ((qS)(b)=0), nonnegativity makes the right
-side zero, and the equation leaves that row of \(\widehat K\) unrestricted.
-Both the paper and Lean quantify over every such completion; Lean does not
-insert a canonical null-row convention.
+The forward construction proceeds as follows.
 
-### A6 - branchwise continuation consistency
+1. Exact action processors extract fair binary full revelation and a fair
+   independent record from the fixed four-action channel.
+2. Two distinct actions are embedded in any nontrivial finite alphabet;
+   exact processors and payoff-preserving record rewrites transport the strict
+   comparison to the embedded fair prior.
+3. From an arbitrary full-support prior, `binaryReachChannel` creates a
+   positive branch whose posterior is that embedded fair prior.
+4. A8 makes the compound comparison strict; A6 garbles full revelation to the
+   revealing compound and the nonrevealing compound to silence.
 
-Quantify one finite family of nonempty record alphabets
-\((R_y)_{y\in Y}\), a first-stage channel \(P:A\to\Delta(Y)\), and two
-continuation profiles
+All channels, processors, branch masses, posteriors, and null completions are
+defined and proved in Lean. A2 is not used. Most importantly, every step keeps
+the same payoff (o_*). The converse uses the fair binary prior, generates an
+independent fair record from silence, and reinserts the two supports into the
+fixed four-action channel.
+
+`TraceTemperedBridgeAxioms F ostar` is a proof-facing `Prop` indexed by the
+chosen trace anchor. `traceTemperedBridgeAxioms_of_v4` returns an existentially
+indexed bundle, so extraction never moves data from a proposition into a
+computational type and introduces no choice principle beyond the final proof's
+audited foundations.
+
+## Material and trace anchors remain separate
+
+Material normalization chooses `materialHighOutcome` and
+`materialLowOutcome` from A3's environment form and constructs the nonconstant
+index `materialPayoffUtility`.
+
+The trace proof is indexed independently by `traceAnchor = ostar`. Pure-trace
+identification is invoked only on constant-(o_*) experiments. The global
+formula on that face is
 
 \[
-K^y,L^y:A\longrightarrow\Delta(O\times R_y).
+W_q(E)=u(o_*)+\lambda I_q(E).
 \]
 
-Thus \(K^y\) and \(L^y\) share the record type within branch \(y\), while
-\(R_y\) may vary with \(y\).  Define
+This is formalized by the constant-trace-anchor modules, including
+`GlobalTraceScale.lean` and `ConstantTraceAnchorGeneral.lean`. A reached branch
+of mass (m) changed from (o_*) to (o) has increment
 
 \[
-m(y)=\sum_aq(a)P(y\mid a),\qquad
-q_y(a)=\frac{q(a)P(y\mid a)}{m(y)}
+m\,[u(o)-u(o_*)],
 \]
 
-when \(m(y)>0\).  If
+proved by `positiveBranchPayoffIncrement_of_nontrivialSupport` and closed for
+all positive branches by `positiveBranchPayoffIncrementFormula`. There is no
+identification of (o_*) with the low material anchor.
 
-\[
-(q_y,K^y)\succeq(q_y,L^y)
-\quad\text{for every }y\text{ with }m(y)>0,
-\]
+Finite telescoping uses (sum_y m_y=1), so the intercept (u(o_*)) cancels
+correctly and yields expected utility without an artificial zero baseline.
 
-then
+## Forward and converse closure
 
-\[
-(q,P\triangleright\{K^y\})
-\succeq
-(q,P\triangleright\{L^y\}).
-\]
+`fullSupportNormalizedValueFormula_of_positiveBranchPayoffIncrement` derives
+the trace-tempered value formula for arbitrary channels at full-support
+priors. Support restriction handles boundary priors without assigning them a
+new normalized representative.
 
-If at least one reached branch comparison is strict, the compound comparison
-is strict.
+`representationClauses_of_fullSupportNormalizedValueFormula` produces the
+within-channel and same-witness block conclusions. `theorem1V4Clauses` combines
+this with the relevance bridge.
 
-Lean declarations: `commonPayoffCompound`,
-`A6_BranchwiseContinuationConsistency_Weak`,
-`A6_BranchwiseContinuationConsistency_Strict`, and their conjunction
-`A6_BranchwiseContinuationConsistency`.
+For the converse, the benchmark module proves weak order, continuity, block
+coherence, both data-processing axioms, branch consistency, material
+nonconstancy, and positive entropy of full revelation. It constructs the
+proof-facing v4 bridge directly at one fixed trace anchor, then the reverse
+relevance bridge gives the exact fixed A3/A4 channels. In particular, the A4
+benchmark has mutual-information values (log 2) and (0), so
+(lambda>0) supplies strictness.
 
-This is the weaker common-record-family A6 now stated explicitly in v3.  Lean
-does not assume the stronger rule allowing unrelated record families for the
-two profiles.  When a proof construction begins with different finite record
-types, it first embeds both into a common tagged sum and only then invokes A6.
+## Trust boundary and reproducibility
 
-### A7 - material relevance
-
-For a one-action, uninformative-record channel \(K_o\) delivering payoff
-\(o\) surely, there exist \(o^+,o^-\in O\) such that
-
-\[
-(\delta_*,K_{o^+})\succ(\delta_*,K_{o^-}).
-\]
-
-Lean declarations: `deterministicPayoffChannel` and
-`A7_MaterialRelevance`.
-
-### A8 - positive trace orientation
-
-For every finite \(A\) with \(|A|\ge2\), every full-support
-\(q\in\Delta(A)\), and every fixed \(o\in O\), let
-\(K_o^{\mathrm{id}}\) reveal the action in its record and let \(K_o^0\) have
-an uninformative record.  The axiom is
-
-\[
-(q,K_o^{\mathrm{id}})\succ(q,K_o^0).
-\]
-
-Lean declarations: `fullRevealAtPayoff`, `uninformativeAtPayoff`, and
-`A8_PositiveTraceOrientation`.  `Nontrivial A` is the finite-type form of
-\(|A|\ge2\).
-
-### The bundle contains nothing else
-
-`TraceTemperedAxioms` has exactly eight fields, named `a1` through `a8`, with
-the predicates above.  There is no posterior-continuity, affine-utility,
-Faddeev, Herstein-Milnor, relabeling, support-face, normalization, scale,
-background-independence, or representative-selection field.
-
-## Conclusion: paper mathematics to Lean
-
-`expectedPayoffUtility` is exactly
-
-\[
-\sum_aq(a)\sum_{o,r}K(o,r\mid a)u(o).
-\]
-
-`traceTemperedValue` adds `lambda * mutualInfo q K`, where the visible output
-type passed to `mutualInfo` is the whole pair \(O\times R\).
-
-Lean defines mutual information in the entropy/noise form.  Writing
-\(z=(o,r)\) and \(m(z)=\sum_aq(a)K(z\mid a)\), that definition is
-
-\[
-H(m)-\sum_aq(a)H(K(\cdot\mid a)).
-\]
-
-Finite distributivity and
-\(\log(x/y)=\log x-\log y\) on positive terms give
-
-\[
-\begin{aligned}
-H(m)-\sum_aq(a)H(K(\cdot\mid a))
-&=\sum_{a,z}q(a)K(z\mid a)
-  \bigl(\log K(z\mid a)-\log m(z)\bigr)\\
-&=\sum_{a,o,r}q(a)K(o,r\mid a)
-  \log\frac{K(o,r\mid a)}{p_{qK}(o,r)}.
-\end{aligned}
-\]
-
-Terms with \(q(a)K(o,r\mid a)=0\) are zero.  If a term is positive, then
-both \(K(o,r\mid a)\) and \(p_{qK}(o,r)\) are positive, so the logarithmic
-identity applies.  If the marginal is zero, every corresponding joint term is
-zero.  Thus the entropy form used by Lean and the ratio form displayed in the
-paper are the same finite functional; this algebraic translation adds no
-assumption.  It is not advertised as a separately named bridge theorem in the
-current Lean source.
-
-Lean uses the natural logarithm.  For any paper base \(b>1\),
-\(I_b=I_{\ln}/\ln b\), so replacing \(\lambda\) by
-\(\lambda\ln b>0\) leaves the represented value unchanged.  V3 states the
-necessary condition \(b>1\) explicitly.
-
-`IsConstantPayoffIndex` means \(\exists c,\forall o,u(o)=c\); its negation is
-exactly that \(u\) is nonconstant.  The witnesses \(u,\lambda\) are chosen
-outside every \(A,R,K,q,p\) quantifier, so the scale is global rather than
-environment-specific.
-
-## Why the pure-trace input adds no assumption
-
-The full proof invokes the checked pure-record theorem at a constant payoff.
-`inducedPureConditions_of_components` constructs every induced pure-trace
-condition from the full main-text axioms:
-
-| Induced pure-trace condition | Constructed from full axioms |
-|---|---|
-| weak order | A1 |
-| local nontriviality | A1, A3, A4, A8 |
-| continuity | A2 |
-| duplication | A3 |
-| finite-block coherence | A1, A3, A4, A5 |
-| record processing | A4 |
-| action processing | A5 |
-| branch consistency | A6 |
-
-A7 is not needed for the pure-record theorem; it is used in the full-payoff
-assembly to obtain a nonconstant material index.  The table is a construction
-map, not a claim that every listed set is axiom-minimal.
-
-The imported declaration
-`TraceableAgency.provedPureTraceCharacterization` is a closed theorem.
-Its Faddeev input is supplied by the proved Lean term
-`TraceableAgency.GenericFaddeev.provedClassicalFaddeevTheoremAssumptions`.
-There is no
-Faddeev, Herstein-Milnor, or other theorem-interface parameter at the final
-Theorem 1 boundary.
-
-## What is assumed and what is proved
-
-For the forward implication, the mathematical inputs are exactly:
-
-1. the finite nonempty domain conditions and \(|O|\ge2\);
-2. the primitive preference family \(F\); and
-3. Axioms (A1)--(A8), packaged by `TraceTemperedAxioms F`.
-
-Everything else in the representation proof is a theorem or construction in
-the transitive Lean dependency closure.  In particular, terminal-law
-sufficiency, support deletion, mixture independence, affine cardinalization,
-material-scale normalization, the pure mutual-information characterization,
-global scale alignment, branch-mass calibration, singleton and zero-mass
-cases, payoff telescoping, sequentialization, and the finite-block conclusion
-are proved rather than postulated.
-
-For the reverse implication, Lean assumes the displayed representation with a
-nonconstant \(u\) and positive \(\lambda\), then proves all eight predicates;
-the endpoint is `traceTemperedAxioms_of_representation`.
-
-## Kernel and dependency certificate
-
-`Axioms.lean` deliberately contains no axiom, theorem-interface parameter, or
-mathematical declaration.  `TraceableAgency/Audit/Axioms.lean` uses
-`Lean.collectAxioms` and fails the build if any audited public endpoint depends
-on a kernel axiom outside this explicit whitelist:
+There are no `sorry`, `admit`, or declaration-level project axioms on the
+certified path. The recursive axiom audit permits exactly:
 
 ```text
 propext
@@ -417,56 +232,8 @@ Classical.choice
 Quot.sound
 ```
 
-These are Lean/Mathlib logical foundations, not behavioral,
-information-theoretic, or representation-theorem premises.  It would be
-incorrect to say that the proof uses no logical foundations; the precise claim
-is that it uses no project axiom or mathematical premise beyond the theorem's
-displayed hypotheses.
-
-`TraceableAgency/Audit/Dependencies.lean` recursively follows declaration types and
-bodies from the direct mutual-information endpoint, the closed pure
-characterization, and Theorem 1.  The build fails if that path reaches the
-superseded posterior-integral, global posterior-law-continuity,
-`marginalValue`, old all-representatives relabeling, or `FinalHMInterface`
-route.
-
-The standalone script `scripts/check_theorem1_certificate.sh` additionally:
-
-- verifies `Certificate/SHA256SUMS`;
-- builds the minimal statement, public theorem, and compatibility targets;
-- rejects `sorry`, `admit`, declaration-level project axioms, and named
-  kernel-bypass primitives throughout the project source;
-- runs the recursive axiom and dependency audits; and
-- replays `TraceableAgency.Theorem1.Proof` with `leanchecker --fresh`.
-
-The default invocation performs every item in this list.  GitHub Actions uses
-fresh runners for the paper and Lean jobs, performs the complete Lean kernel
-build and both recursive audits, and omits only the redundant resource-heavy
-fresh replay.  That replay remains part of the full local certificate.
-
-Run:
-
-```bash
-lake build TraceableAgency.Theorem1
-./scripts/check_theorem1_certificate.sh
-```
-
-The detailed proof dependency sequence is in `PAPER_PROOF_ROADMAP.md`; exact
-stable-label correspondence is in `CLAIM_MAP.md`; byte identities are in
-`Certificate/SHA256SUMS`.
-
-## Certificate verdict
-
-Within the explicitly stated finite-domain conditions and Lean's disclosed
-logical foundations:
-
-1. the formal theorem has the same quantifier order, A1--A8 hypotheses,
-   representation, positivity/nonconstancy requirements, and same-witness
-   block conclusion as v3 Theorem 1;
-2. the two non-definitional presentation bridges - finite closedness versus
-   sequential closedness, and entropy-form versus ratio-form mutual
-   information - are exact finite mathematical identities described above,
-   not extra behavioral assumptions;
-3. no project axiom, hidden theorem interface, `sorry`, `admit`, or unchecked
-   proof hole lies on the final dependency path; and
-4. the result is accepted by the pinned Lean kernel.
+The dependency audit rejects superseded stronger proof routes.
+`TraceableAgency/Audit/V4Certificate.lean` checks and prints the exact public
+declaration and its axioms. `scripts/check_theorem1_certificate.sh` checks the
+byte manifest, source hygiene, complete Lean build, audits, reproducible v4
+PDF, and a fresh `leanchecker` replay.

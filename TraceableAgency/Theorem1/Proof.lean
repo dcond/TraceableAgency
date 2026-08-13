@@ -8,23 +8,21 @@ import TraceableAgency.Theorem1.PositiveBranchIncrement
 import TraceableAgency.Theorem1.TheoremClosure
 
 /-!
-# Kernel proof of Trace-Tempered Choice, Theorem 1
+# Kernel proof of Trace-Tempered Choice v4, Theorem 1
 
-This file contains the single final theorem corresponding to
-`trace_tempered_choice_v3`, Theorem 1.  All mathematical assumptions are the
-behavioral hypotheses packaged in `TraceTemperedAxioms`; `Axioms.lean`
-declares no extra axiom.
+All mathematical assumptions are the eight v4 behavioral hypotheses;
+`Axioms.lean` declares no extra axiom.
 -/
 
-namespace TraceableAgency.Theorem1
+/-! The stable public v4 verification namespace used by the certificate. -/
+namespace TraceTemperedChoiceVerification
 
 universe u
 
-/-- Theorem 1 of `trace_tempered_choice_v3`, including the same-witness finite
-block moreover clause. -/
-theorem trace_tempered_choice_v3_theorem1 : Theorem1Statement.{u} := by
-  apply theorem1Statement_of_positiveBranchPayoffIncrement
-  intro O _instFintype _instDecidableEq _hcard F h
-  exact positiveBranchPayoffIncrementFormula F h
+/-- Theorem 1 of `trace_tempered_choice_v4`, including its same-witness
+finite-block moreover clause. -/
+theorem trace_tempered_choice_v4_theorem1 :
+    TraceableAgency.Theorem1.Theorem1StatementV4.{u} := by
+  exact TraceableAgency.Theorem1.theorem1StatementV4
 
-end TraceableAgency.Theorem1
+end TraceTemperedChoiceVerification

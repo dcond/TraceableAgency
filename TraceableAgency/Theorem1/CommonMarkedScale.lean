@@ -75,7 +75,7 @@ theorem rightIndependentDummyMarkedMixtureMap_payoffLottery
 extension.  Affine uniqueness and the common material anchors eliminate the
 otherwise arbitrary positive affine change of scale. -/
 theorem normalizedMarkedAffineUtility_independentDummy
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (x : MarkedTerminalMixtureSpace (O := O) (A := A) q) :
@@ -124,7 +124,7 @@ theorem normalizedMarkedAffineUtility_independentDummy
 /-- The normalized quotient utility is preserved exactly by a left dummy
 extension. -/
 theorem normalizedMarkedAffineUtility_rightIndependentDummy
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (x : MarkedTerminalMixtureSpace (O := O) (A := B) r) :
@@ -173,7 +173,7 @@ theorem normalizedMarkedAffineUtility_rightIndependentDummy
 /-- Raw normalized marked utility is invariant under adjoining an independent
 right dummy action. -/
 theorem normalizedMarkedUtility_independentDummy
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (E : MarkedTerminalExperiment O A) :
@@ -188,7 +188,7 @@ theorem normalizedMarkedUtility_independentDummy
 /-- Raw normalized marked utility is invariant under adjoining an independent
 left dummy action. -/
 theorem normalizedMarkedUtility_rightIndependentDummy
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (E : MarkedTerminalExperiment O B) :
@@ -205,7 +205,7 @@ theorem normalizedMarkedUtility_rightIndependentDummy
 /-- Every full-support cross-alphabet comparison of bundled marked
 experiments is represented by the same normalized numerical utility. -/
 theorem pairWeak_markedExperiments_iff_normalizedMarkedUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hp : p.FullSupport)
     (E : MarkedTerminalExperiment O A)

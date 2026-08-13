@@ -74,12 +74,12 @@ theorem actionPushforward_redrawFromOneAction
 
 /-- Collapsing the same-action terminal continuation to its literal one-action
 form satisfies A5's exact joint-law equation. -/
-theorem collapseTerminal_isActionReportCompletion
+theorem collapseTerminal_isActionProcessorCompletion
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     (q : TraceableAgency.Dist A) (y : O × R) :
-    IsActionReportCompletion (sequentialTerminalContinuation (A := A) y) q
+    IsActionProcessorCompletion (sequentialTerminalContinuation (A := A) y) q
       (collapseToOneActionKernel (A := A))
       (sequentialTerminalOneAction y) := by
   intro b z
@@ -94,12 +94,12 @@ theorem collapseTerminal_isActionReportCompletion
 
 /-- Redrawing `q` from the literal one-action continuation recovers the
 same-action continuation and satisfies A5's exact joint-law equation. -/
-theorem redrawTerminal_isActionReportCompletion
+theorem redrawTerminal_isActionProcessorCompletion
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     (q : TraceableAgency.Dist A) (y : O × R) :
-    IsActionReportCompletion (sequentialTerminalOneAction y)
+    IsActionProcessorCompletion (sequentialTerminalOneAction y)
       (TraceableAgency.Dist.pure PUnit.unit)
       (redrawFromOneActionKernel q)
       (sequentialTerminalContinuation (A := A) y) := by
@@ -118,7 +118,7 @@ theorem terminalContinuation_pairWeakEquiv_oneAction
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (y : O × R) :
     pairWeak F q (sequentialTerminalContinuation (A := A) y)
         (TraceableAgency.Dist.pure PUnit.unit)
@@ -130,13 +130,13 @@ theorem terminalContinuation_pairWeakEquiv_oneAction
   · have hh := h5 (sequentialTerminalContinuation (A := A) y) q
       (collapseToOneActionKernel (A := A))
       (sequentialTerminalOneAction y)
-      (collapseTerminal_isActionReportCompletion q y)
+      (collapseTerminal_isActionProcessorCompletion q y)
     simpa [actionPushforward_collapseToOneAction] using hh
   · have hh := h5 (sequentialTerminalOneAction y)
       (TraceableAgency.Dist.pure PUnit.unit)
       (redrawFromOneActionKernel q)
       (sequentialTerminalContinuation (A := A) y)
-      (redrawTerminal_isActionReportCompletion q y)
+      (redrawTerminal_isActionProcessorCompletion q y)
     simpa [actionPushforward_redrawFromOneAction] using hh
 
 /-! ## The sequentialized channel and its two record processors -/
@@ -241,7 +241,7 @@ theorem sequentialization_pairWeakEquiv
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R)) :
     letI : Nonempty O := payoffNonemptyOfChannel K
     pairWeak F q K q (sequentializedChannel K) ∧
@@ -256,7 +256,7 @@ theorem sequentialization_pairWeakEquiv
     exact hh
 
 /-- In the paper's same oriented block, sequentialization is genuine
-indifference.  A1/A3/A5 enter only to identify the reverse oriented pair
+indifference.  A1/A5/A7 enter only to identify the reverse oriented pair
 comparison with the reverse comparison inside this block. -/
 theorem sequentialization_pairIndiff
     {O A R : Type u}
@@ -264,8 +264,8 @@ theorem sequentialization_pairIndiff
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R)) :
     letI : Nonempty O := payoffNonemptyOfChannel K
     pairIndiff F q K q (sequentializedChannel K) := by

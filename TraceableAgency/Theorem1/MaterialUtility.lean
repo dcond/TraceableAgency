@@ -12,7 +12,7 @@ import TraceableAgency.PureTrace.Support.GenericHersteinMilnor
 
 This file cardinalizes the singleton-action order on ordinary payoff
 lotteries.  The public-mixture independence used by Herstein--Milnor is
-derived from A6; A2 supplies the closed-segment calibration.  The normalized
+derived from A8; A2 supplies the closed-segment calibration.  The normalized
 affine representative is then expanded over the finite payoff simplex and
 transported to arbitrary action alphabets by the exact A5 reports.
 -/
@@ -61,7 +61,7 @@ theorem payoffLotteryMixtureSpace_mix
   rfl
 
 theorem payoffLotteryRel_complete
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell m : TraceableAgency.Dist O) :
     payoffLotteryRel F ell m ∨ payoffLotteryRel F m ell :=
   pairWeak_complete F h
@@ -69,7 +69,7 @@ theorem payoffLotteryRel_complete
     singletonActionPrior (singletonPayoffLotteryChannel m)
 
 theorem payoffLotteryRel_transitive
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell m n : TraceableAgency.Dist O) :
     payoffLotteryRel F ell m → payoffLotteryRel F m n →
       payoffLotteryRel F ell n :=
@@ -173,7 +173,7 @@ theorem recordPostprocess_markedPayoffMix_insert
     TraceableAgency.Dist.pure_apply]
 
 theorem payoffCompoundMix_mutualPairWeak_marked
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell n : TraceableAgency.Dist O) :
     pairWeak F singletonActionPrior
@@ -195,7 +195,7 @@ theorem payoffCompoundMix_mutualPairWeak_marked
 /-- The A6 compound and the ordinary, unmarked mixed payoff lottery are
 mutually weakly equivalent. -/
 theorem payoffCompoundMix_mutualPairWeak_ordinary
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell n : TraceableAgency.Dist O) :
     pairWeak F singletonActionPrior
@@ -241,7 +241,7 @@ theorem payoffMixFirstStage_left_positive
 /-- The weak clause of A6 lifts a payoff-lottery comparison through the
 visible public coin. -/
 theorem payoffCompoundMix_pairWeak_of_base
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
     (ell m n : TraceableAgency.Dist O)
     (hbase : payoffLotteryRel F ell m) :
@@ -271,7 +271,7 @@ theorem payoffCompoundMix_pairWeak_of_base
 /-- The strict clause of A6 lifts a strict payoff-lottery comparison through
 the positive left branch of the visible public coin. -/
 theorem payoffCompoundMix_pairStrict_of_base
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
     (ell m n : TraceableAgency.Dist O)
     (hbase : HMStrict (payoffLotteryRel F) ell m) :
@@ -332,7 +332,7 @@ theorem payoffCompoundMix_pairStrict_of_base
 /-- A6, including its strict clause, gives the two-way public-mixture
 independence required by Herstein--Milnor. -/
 theorem payoffLotteryRel_independence
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell m n : TraceableAgency.Dist O) (t : Set.Ioo (0 : ℝ) 1) :
     payoffLotteryRel F ell m ↔
       payoffLotteryRel F
@@ -443,7 +443,7 @@ theorem payoffLotteryBlockChannel_converges
 /-- A2 closes the payoff-lottery order for pointwise probability-coordinate
 convergence. -/
 theorem payoffLotteryRel_sequentiallyClosed
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ellseq : ℕ → TraceableAgency.Dist O) (ell : TraceableAgency.Dist O)
     (mseq : ℕ → TraceableAgency.Dist O) (m : TraceableAgency.Dist O)
     (hell : payoffLotteryMixtureSpace.Converges ellseq ell)
@@ -470,7 +470,7 @@ theorem payoffLotteryRel_sequentiallyClosed
     simpa [payoffLotteryRel, pairWeak] using hrel k
 
 noncomputable def payoffLotteryContinuousIndependentWeakOrder
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     ContinuousIndependentWeakOrder payoffLotteryMixtureSpace
       (payoffLotteryRel F) where
   complete := payoffLotteryRel_complete F h
@@ -481,7 +481,7 @@ noncomputable def payoffLotteryContinuousIndependentWeakOrder
 /-- This is the exact A2 closed-segment calibration consumed by the generic
 Herstein--Milnor construction. -/
 theorem payoffLotteryRel_segmentCalibration
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (high target low : TraceableAgency.Dist O)
     (hhigh : payoffLotteryRel F high target)
     (hlow : payoffLotteryRel F target low) :
@@ -494,7 +494,7 @@ theorem payoffLotteryRel_segmentCalibration
     high target low hhigh hlow
 
 noncomputable def payoffLotteryCalibratableWeakOrder
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     HMCalibratableWeakOrder payoffLotteryMixtureSpace
       (payoffLotteryRel F) where
   complete := payoffLotteryRel_complete F h
@@ -505,7 +505,7 @@ noncomputable def payoffLotteryCalibratableWeakOrder
 /-! ## Affine cardinalization and A7 normalization -/
 
 theorem payoffLotteryAffineUtility_exists
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     Nonempty
       (AffineUtilityRepresentation payoffLotteryMixtureSpace
         (payoffLotteryRel F)) :=
@@ -515,16 +515,16 @@ theorem payoffLotteryAffineUtility_exists
 
 /-- The high material outcome selected from the A7 witness. -/
 noncomputable def materialHighOutcome
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) : O :=
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
   Classical.choose h.a7
 
 /-- The low material outcome paired with `materialHighOutcome` by A7. -/
 noncomputable def materialLowOutcome
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) : O :=
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
   Classical.choose (Classical.choose_spec h.a7)
 
 theorem materialChosenAnchors_pairStrict
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     pairStrict F singletonActionPrior
         (deterministicPayoffChannel (materialHighOutcome F h))
       singletonActionPrior
@@ -532,7 +532,7 @@ theorem materialChosenAnchors_pairStrict
   Classical.choose_spec (Classical.choose_spec h.a7)
 
 theorem materialChosenAnchors_HMStrict
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     HMStrict (payoffLotteryRel F)
       (TraceableAgency.Dist.pure (materialHighOutcome F h))
       (TraceableAgency.Dist.pure (materialLowOutcome F h)) := by
@@ -559,7 +559,7 @@ theorem materialChosenAnchors_HMStrict
 /-- An arbitrary affine representative supplied by the kernel-checked generic
 Herstein--Milnor theorem. -/
 noncomputable def materialRawAffineUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     AffineUtilityRepresentation payoffLotteryMixtureSpace
       (payoffLotteryRel F) :=
   Classical.choice (payoffLotteryAffineUtility_exists F h)
@@ -567,7 +567,7 @@ noncomputable def materialRawAffineUtility
 /-- The canonical material representative, normalized to assign the chosen
 A7 low/high outcomes values zero and one. -/
 noncomputable def materialAffineUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     AffineUtilityRepresentation payoffLotteryMixtureSpace
       (payoffLotteryRel F) :=
   normalizeAffineUtility (materialRawAffineUtility F h)
@@ -578,13 +578,13 @@ noncomputable def materialAffineUtility
 /-- The common material payoff index, obtained by evaluating the normalized
 lottery representative at degenerate lotteries. -/
 noncomputable def materialPayoffUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) : O → ℝ :=
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : O → ℝ :=
   fun o => (materialAffineUtility F h).utility
     (TraceableAgency.Dist.pure o)
 
 @[simp]
 theorem materialPayoffUtility_high
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     materialPayoffUtility F h (materialHighOutcome F h) = 1 := by
   exact normalizeAffineUtility_high
     (materialRawAffineUtility F h)
@@ -594,14 +594,14 @@ theorem materialPayoffUtility_high
 
 @[simp]
 theorem materialAffineUtility_high
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     (materialAffineUtility F h).utility
         (TraceableAgency.Dist.pure (materialHighOutcome F h)) = 1 :=
   materialPayoffUtility_high F h
 
 @[simp]
 theorem materialPayoffUtility_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     materialPayoffUtility F h (materialLowOutcome F h) = 0 := by
   exact normalizeAffineUtility_low
     (materialRawAffineUtility F h)
@@ -611,26 +611,26 @@ theorem materialPayoffUtility_low
 
 @[simp]
 theorem materialAffineUtility_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     (materialAffineUtility F h).utility
         (TraceableAgency.Dist.pure (materialLowOutcome F h)) = 0 :=
   materialPayoffUtility_low F h
 
 theorem materialPayoffUtility_high_ne_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     materialPayoffUtility F h (materialHighOutcome F h) ≠
       materialPayoffUtility F h (materialLowOutcome F h) := by
   simp
 
 theorem materialHighOutcome_ne_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     materialHighOutcome F h ≠ materialLowOutcome F h := by
   intro heq
   have hu := materialPayoffUtility_high_ne_low F h
   exact hu (congrArg (materialPayoffUtility F h) heq)
 
 theorem materialPayoffUtility_nonconstant
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     ¬ IsConstantPayoffIndex (materialPayoffUtility F h) := by
   rintro ⟨c, hc⟩
   have hhigh := hc (materialHighOutcome F h)
@@ -639,10 +639,10 @@ theorem materialPayoffUtility_nonconstant
   rw [materialPayoffUtility_low] at hlow
   linarith
 
-/-- The very same chosen A7 anchors are strict at every pair of priors and
+/-- The very same chosen material anchors are strict at every pair of priors and
 finite nonempty action alphabets. -/
 theorem materialChosenAnchors_strict_everyPrior
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -854,7 +854,7 @@ termination_by (payoffLotterySupport ell).card
 decreasing_by exact hcard
 
 theorem materialAffineUtility_eq_expected
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell : TraceableAgency.Dist O) :
     (materialAffineUtility F h).utility ell =
       payoffLotteryExpected (materialPayoffUtility F h) ell := by
@@ -867,7 +867,7 @@ theorem materialAffineUtility_eq_expected
 /-- Exact A5 reports identify the cross-environment payoff-lottery order with
 the canonical singleton order. -/
 theorem pairWeak_payoffLottery_iff_singletonRel
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -905,7 +905,7 @@ theorem pairWeak_payoffLottery_iff_singletonRel
       hleft hsingleP
 
 theorem payoffLotteryRel_iff_expectedMaterialUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell m : TraceableAgency.Dist O) :
     payoffLotteryRel F ell m ↔
       payoffLotteryExpected (materialPayoffUtility F h) ell ≥
@@ -918,7 +918,7 @@ theorem payoffLotteryRel_iff_expectedMaterialUtility
 on the same normalized material scale, for arbitrary priors and finite
 nonempty action alphabets. -/
 theorem pairWeak_payoffLottery_iff_expectedMaterialUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -932,7 +932,7 @@ theorem pairWeak_payoffLottery_iff_expectedMaterialUtility
     payoffLotteryRel_iff_expectedMaterialUtility F h ell m]
 
 theorem pairWeak_payoffLottery_iff_expectedPayoffUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     {A B : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
