@@ -473,11 +473,11 @@ theorem a2_continuity_of_representation
   intro n
   exact (hrep (Kseq n) (qseq n) (pseq n)).mp (hrel n)
 
-theorem a3_blockCoherence_of_representation
+theorem a5_blockCoherence_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hrep : WithinChannelRepresentation F u lambda) :
-    A3_BlockComparisonCoherence F := by
+    A5_BlockComparisonCoherence F := by
   constructor
   · intro A R _ _ _ _ _ _ K q p
     rw [hrep, pairWeak_iff_value_ge hrep]
@@ -548,12 +548,12 @@ theorem expectedPayoffUtility_recordPostprocess
   unfold expectedUtilityAlong
   simp_rw [payoffPreservingRecordKernel_expected u T]
 
-theorem a4_recordDataProcessing_of_representation
+theorem a6_recordDataProcessing_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
-    A4_RecordDataProcessing F := by
+    A6_RecordDataProcessing F := by
   intro A R S _ _ _ _ _ _ _ _ _ K T q
   rw [pairWeak_iff_value_ge hrep]
   unfold traceTemperedValue
@@ -595,12 +595,12 @@ theorem expectedPayoffUtility_actionProcessor
   rw [outcomeMarginal_bayesPushforwardCompletion K q S Khat
     (bayesCompletion_of_actionProcessorCompletion K q S Khat hcompletion)]
 
-theorem a5_actionDataProcessing_of_representation
+theorem a7_actionDataProcessing_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
-    A5_ActionDataProcessing F := by
+    A7_ActionDataProcessing F := by
   intro A B R _ _ _ _ _ _ _ _ _ K q S Khat hcompletion
   rw [pairWeak_iff_value_ge hrep]
   unfold traceTemperedValue
@@ -707,11 +707,11 @@ theorem traceTemperedValue_commonCompound
   rw [Finset.sum_add_distrib, Finset.mul_sum]
   ring_nf
 
-theorem a6_branchwiseConsistency_of_representation
+theorem a8_branchwiseConsistency_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hrep : WithinChannelRepresentation F u lambda) :
-    A6_BranchwiseContinuationConsistency F := by
+    A8_BranchwiseContinuationConsistency F := by
   constructor
   · intro A Y _ _ _ _ _ _ Rec _ _ _ P K L q hbranch
     rw [pairWeak_iff_value_ge hrep]
@@ -889,12 +889,12 @@ theorem traceTemperedValue_deterministicPayoffChannel
   exact traceTemperedValue_uninformativeAtPayoff u lambda
     (TraceableAgency.Dist.pure PUnit.unit) o
 
-theorem a7_materialRelevance_of_representation
+theorem materialRelevanceEnvironment_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hnonconstant : ¬ IsConstantPayoffIndex u)
     (hrep : WithinChannelRepresentation F u lambda) :
-    A7_MaterialRelevance F := by
+    MaterialRelevanceEnvironment F := by
   classical
   have hpair : ∃ x y : O, u x ≠ u y := by
     by_contra hpairs
@@ -922,13 +922,14 @@ theorem a7_materialRelevance_of_representation
       traceTemperedValue_deterministicPayoffChannel]
     exact hgt
 
-theorem a8_positiveTraceOrientation_of_representation
+theorem positiveTraceOrientationAt_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
+    (ostar : O)
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
-    A8_PositiveTraceOrientation F := by
-  intro A _ _ _ q hq o
+    PositiveTraceOrientationAt F ostar := by
+  intro A _ _ _ q hq
   rw [pairStrict_iff_value_gt hrep,
     traceTemperedValue_fullRevealAtPayoff,
     traceTemperedValue_uninformativeAtPayoff]
@@ -937,26 +938,9 @@ theorem a8_positiveTraceOrientation_of_representation
 
 /-! ## Complete benchmark package -/
 
-theorem traceTemperedAxioms_of_representation
-    {O : Type u} [Fintype O] [DecidableEq O]
-    {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
-    (hnonconstant : ¬ IsConstantPayoffIndex u)
-    (hlambda : 0 < lambda)
-    (hrep : WithinChannelRepresentation F u lambda) :
-    TraceTemperedAxioms F where
-  a1 := a1_weakOrder_of_representation hrep
-  a2 := a2_continuity_of_representation hrep
-  a3 := a3_blockCoherence_of_representation hrep
-  a4 := a4_recordDataProcessing_of_representation hlambda hrep
-  a5 := a5_actionDataProcessing_of_representation hlambda hrep
-  a6 := a6_branchwiseConsistency_of_representation hrep
-  a7 := a7_materialRelevance_of_representation hnonconstant hrep
-  a8 := a8_positiveTraceOrientation_of_representation hlambda hrep
-
-/-- The represented value satisfies the exact fixed-channel v4 axioms.  The
-historical benchmark calculation supplies structural processing and positive
-entropy; the relevance bridge converts those facts back to the fixed A3/A4
-channels. -/
+/-- The represented value constructs the proof-facing bridge directly and
+then recovers the exact fixed-channel v4 axioms.  Its chosen trace anchor is
+kept fixed throughout the bridge. -/
 theorem traceTemperedAxiomsV4_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
@@ -964,19 +948,18 @@ theorem traceTemperedAxiomsV4_of_representation
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
     TraceTemperedAxiomsV4 F := by
-  have hv3 := traceTemperedAxioms_of_representation
-    hnonconstant hlambda hrep
-  obtain ⟨_traceAnchor, hbridge⟩ := traceTemperedBridgeAxioms_of_v3 F hv3
+  have hmaterial : MaterialRelevanceEnvironment F :=
+    materialRelevanceEnvironment_of_representation hnonconstant hrep
+  obtain ⟨ostar, ominus, hstrict⟩ := hmaterial
+  have hbridge : TraceTemperedBridgeAxioms F ostar :=
+    { a1 := a1_weakOrder_of_representation hrep
+      a2 := a2_continuity_of_representation hrep
+      a3 := a5_blockCoherence_of_representation hrep
+      a4 := a6_recordDataProcessing_of_representation hlambda hrep
+      a5 := a7_actionDataProcessing_of_representation hlambda hrep
+      a6 := a8_branchwiseConsistency_of_representation hrep
+      a7 := ⟨ostar, ominus, hstrict⟩
+      a8 := positiveTraceOrientationAt_of_representation ostar hlambda hrep }
   exact traceTemperedAxiomsV4_of_bridge F hbridge
-
-theorem representation_implies_axioms_and_sameWitnessBlockRepresentation
-    {O : Type u} [Fintype O] [DecidableEq O]
-    {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
-    (hnonconstant : ¬ IsConstantPayoffIndex u)
-    (hlambda : 0 < lambda)
-    (hrep : WithinChannelRepresentation F u lambda) :
-    TraceTemperedAxioms F ∧ SameWitnessBlockRepresentation F u lambda :=
-  ⟨traceTemperedAxioms_of_representation hnonconstant hlambda hrep,
-    sameWitnessBlockRepresentation_of_representation hrep⟩
 
 end TraceableAgency.Theorem1

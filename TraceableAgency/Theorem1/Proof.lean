@@ -11,19 +11,8 @@ import TraceableAgency.Theorem1.TheoremClosure
 # Kernel proof of Trace-Tempered Choice v4, Theorem 1
 
 All mathematical assumptions are the eight v4 behavioral hypotheses;
-`Axioms.lean` declares no extra axiom.  The historical v3 entry point is kept
-as a compatibility corollary.
+`Axioms.lean` declares no extra axiom.
 -/
-
-namespace TraceableAgency.Theorem1
-
-universe u
-
-/-- Historical v3 compatibility theorem. -/
-theorem trace_tempered_choice_v3_theorem1 : Theorem1Statement.{u} := by
-  exact theorem1StatementV3
-
-end TraceableAgency.Theorem1
 
 /-! The stable public v4 verification namespace used by the certificate. -/
 namespace TraceTemperedChoiceVerification

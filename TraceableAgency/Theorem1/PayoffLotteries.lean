@@ -327,7 +327,7 @@ theorem payoffLottery_pairWeak
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (ell : TraceableAgency.Dist O)
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
     pairWeak F q (payoffLotteryChannel ell)
@@ -343,7 +343,7 @@ theorem payoffLottery_mutualPairWeak
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (ell : TraceableAgency.Dist O)
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
     pairWeak F q (payoffLotteryChannel ell)
@@ -357,7 +357,7 @@ theorem payoffLottery_mutualPairWeak_singleton
     {O A : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (ell : TraceableAgency.Dist O) (q : TraceableAgency.Dist A) :
     pairWeak F q (payoffLotteryChannel ell)
         singletonActionPrior (singletonPayoffLotteryChannel ell) ∧
@@ -470,7 +470,7 @@ theorem markedPayoffMix_mutualPairWeak
     {O A : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell m : TraceableAgency.Dist O) (q : TraceableAgency.Dist A) :
     pairWeak F q (markedPayoffMixChannel t ht0 ht1 ell m)
@@ -490,8 +490,8 @@ theorem rel_markedPayoffMix_iff_mixedPayoffLottery
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell m : TraceableAgency.Dist O)
     (q r : TraceableAgency.Dist A) :
@@ -524,8 +524,8 @@ theorem pairStrict_transport_of_structural
     [Fintype T] [DecidableEq T] [Nonempty T]
     [Fintype U] [DecidableEq U] [Nonempty U]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S))
     (q' : TraceableAgency.Dist C) (K' : Channel C (O × T))

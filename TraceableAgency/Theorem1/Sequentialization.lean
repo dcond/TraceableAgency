@@ -118,7 +118,7 @@ theorem terminalContinuation_pairWeakEquiv_oneAction
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (y : O × R) :
     pairWeak F q (sequentialTerminalContinuation (A := A) y)
         (TraceableAgency.Dist.pure PUnit.unit)
@@ -241,7 +241,7 @@ theorem sequentialization_pairWeakEquiv
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R)) :
     letI : Nonempty O := payoffNonemptyOfChannel K
     pairWeak F q K q (sequentializedChannel K) ∧
@@ -264,8 +264,8 @@ theorem sequentialization_pairIndiff
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R)) :
     letI : Nonempty O := payoffNonemptyOfChannel K
     pairIndiff F q K q (sequentializedChannel K) := by

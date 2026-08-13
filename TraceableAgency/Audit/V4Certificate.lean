@@ -18,6 +18,7 @@ exact public theorem and the two relevance bridges.
 #check TraceableAgency.Theorem1.traceRelevance_bridge
 #check TraceableAgency.Theorem1.traceTemperedBridgeAxioms_of_v4
 #check TraceableAgency.Theorem1.traceTemperedAxiomsV4_of_representation
+#check TraceableAgency.mutualInfoLikelihoodRatio_eq_mutualInfo
 
 #print TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1
 #print axioms TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1

@@ -82,40 +82,4 @@ theorem theorem1StatementV4 : Theorem1StatementV4.{u} := by
   intro O _instFintype _instDecidableEq _hcard F
   exact theorem1V4Clauses F
 
-/-- Compatibility closure for the historical v3 bundle. -/
-theorem theorem1V3Clauses
-    {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) :
-    (TraceTemperedAxiomsV3 F ↔
-      ∃ (u : O → ℝ) (lambda : ℝ),
-        ¬ IsConstantPayoffIndex u ∧
-        0 < lambda ∧
-        WithinChannelRepresentation F u lambda) ∧
-    (TraceTemperedAxiomsV3 F →
-      ∃ (u : O → ℝ) (lambda : ℝ),
-        ¬ IsConstantPayoffIndex u ∧
-        0 < lambda ∧
-        WithinChannelRepresentation F u lambda ∧
-        SameWitnessBlockRepresentation F u lambda) := by
-  constructor
-  · constructor
-    · intro hv3
-      obtain ⟨_traceAnchor, hbridge⟩ :=
-        traceTemperedBridgeAxioms_of_v3 F hv3
-      obtain ⟨u, lambda, hnonconstant, hlambda, hwithin, _hblock⟩ :=
-        traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
-      exact ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
-    · rintro ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
-      exact traceTemperedAxioms_of_representation
-        hnonconstant hlambda hwithin
-  · intro hv3
-    obtain ⟨_traceAnchor, hbridge⟩ :=
-      traceTemperedBridgeAxioms_of_v3 F hv3
-    exact traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
-
-/-- Historical statement retained as a proved compatibility theorem. -/
-theorem theorem1StatementV3 : Theorem1StatementV3.{u} := by
-  intro O _instFintype _instDecidableEq _hcard F
-  exact theorem1V3Clauses F
-
 end TraceableAgency.Theorem1

@@ -15,7 +15,7 @@ TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1 :
 The proof declaration has exactly the displayed proposition as its type. This
 certificate covers Theorem 1 and its same-witness finite-block clause. It does
 not claim formal verification of the paper-only auxiliary results in Appendix
-C. Historical v3 declarations are retained only for source compatibility.
+C.
 
 ## Exact mathematical statement
 
@@ -41,6 +41,11 @@ one nonconstant (u), one (lambda>0), and simultaneous representation of
 every within-channel comparison by (V_{u,lambda}). It also proves that some
 same witnesses represent all comparisons between alternatives supported on
 distinct blocks of every finite common-payoff block environment.
+
+`mutualInfoLikelihoodRatio` formalizes the displayed finite
+likelihood-ratio sum, setting every zero-joint-mass summand to zero.
+`mutualInfoLikelihoodRatio_eq_mutualInfo` proves that formula equal to Lean's
+entropy-difference definition of `mutualInfo`, without an additional axiom.
 
 These are the two conjuncts of `Theorem1StatementV4`, respectively expressed
 through `WithinChannelRepresentation` and `SameWitnessBlockRepresentation`.
@@ -210,8 +215,9 @@ this with the relevance bridge.
 
 For the converse, the benchmark module proves weak order, continuity, block
 coherence, both data-processing axioms, branch consistency, material
-nonconstancy, and positive entropy of full revelation. The reverse relevance
-bridge then gives the exact fixed A3/A4 channels. In particular, the A4
+nonconstancy, and positive entropy of full revelation. It constructs the
+proof-facing v4 bridge directly at one fixed trace anchor, then the reverse
+relevance bridge gives the exact fixed A3/A4 channels. In particular, the A4
 benchmark has mutual-information values (log 2) and (0), so
 (lambda>0) supplies strictness.
 

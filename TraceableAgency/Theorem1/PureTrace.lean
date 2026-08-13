@@ -305,7 +305,7 @@ D, now with the material payoff coordinate kept untagged. -/
 theorem fixed_pairwiseReplacement_from_weakEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     {A B R S : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -398,8 +398,8 @@ interchangeable. -/
 theorem fixed_rel_iff_of_mutualRecordProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
     {A R S : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
@@ -436,8 +436,8 @@ four-block replacement lemma, rather than assumed as a convention. -/
 theorem fixed_rel_iff_actionEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h5 : A7_ActionDataProcessing F)
     {A B R : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -690,8 +690,8 @@ theorem inducedPureNontriviality
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
     (h8 : PositiveTraceOrientationAt F o) :
     ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nontrivial A]
       (q : TraceableAgency.Dist A), q.FullSupport →
@@ -769,7 +769,7 @@ theorem inducedPureClosedGraph
 theorem inducedPureDuplication
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h3 : A3_BlockComparisonCoherence F) :
+    (h3 : A5_BlockComparisonCoherence F) :
     ∀ {A R : Type u}
       [Fintype A] [DecidableEq A]
       [Fintype R] [DecidableEq R]
@@ -790,7 +790,7 @@ blocks is handled separately below. -/
 theorem inducedPureFiniteBlockNonempty
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h3 : A3_BlockComparisonCoherence F) :
+    (h3 : A5_BlockComparisonCoherence F) :
     ∀ {I : Type u} [Fintype I] [DecidableEq I]
       (Act Rec : I → Type u)
       [∀ i, Fintype (Act i)] [∀ i, DecidableEq (Act i)]
@@ -823,9 +823,9 @@ theorem inducedPureFiniteBlock
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F) :
     ∀ {I : Type u} [Fintype I] [DecidableEq I]
       (Act Rec : I → Type u)
       [∀ i, Fintype (Act i)] [∀ i, DecidableEq (Act i)]
@@ -933,7 +933,7 @@ theorem inducedPureFiniteBlock
 theorem inducedPureRecordProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h4 : A4_RecordDataProcessing F) :
+    (h4 : A6_RecordDataProcessing F) :
     TraceableAgency.PureTraceRecordProcessing
       (inducedPureTraceFamily F o) := by
   intro A R S _ _ _ _ _ _ P T q
@@ -949,7 +949,7 @@ theorem inducedPureRecordProcessing
 theorem inducedPureActionProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h5 : A5_ActionDataProcessing F) :
+    (h5 : A7_ActionDataProcessing F) :
     TraceableAgency.PureTraceActionProcessing
       (inducedPureTraceFamily F o) := by
   intro A B R _ _ _ _ _ _ _ P q S Phat hcompl
@@ -967,7 +967,7 @@ theorem inducedPureActionProcessing
 theorem inducedPureBranchContinuation
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h6 : A6_BranchwiseContinuationConsistency F) :
+    (h6 : A8_BranchwiseContinuationConsistency F) :
     TraceableAgency.PureTraceBranchContinuationMonotonicity
       (inducedPureTraceFamily F o) := by
   constructor
@@ -1025,10 +1025,10 @@ theorem inducedPureConditions_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceConditions (inducedPureTraceFamily F o) where
   weakOrder := ⟨inducedPureWeakOrder F o h1,
@@ -1056,10 +1056,10 @@ theorem inducedPureRepresentation_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceMIRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).1.1
@@ -1080,10 +1080,10 @@ theorem inducedPureBlocks_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceBlockRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).2

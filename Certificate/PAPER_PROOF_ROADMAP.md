@@ -192,10 +192,11 @@ finite block comparisons. The witnesses are exactly
 ## 9. Converse
 
 `Benchmark.lean` evaluates the represented value under blocks, record
-processing, exact action processing, and compounds. It proves all structural
-axioms and the old semantic relevance forms directly from nonconstant `u` and
-`lambda > 0`; the reverse relevance bridge returns to the exact fixed A3/A4
-channels.
+processing, exact action processing, and compounds. From nonconstant `u` and
+`lambda > 0`, it proves the structural axioms and constructs
+`TraceTemperedBridgeAxioms F ostar` directly at one selected material outcome.
+`traceTemperedAxiomsV4_of_bridge` then returns to the exact fixed A3/A4
+channels without passing through another axiom bundle.
 
 At A3 the two fixed pure lotteries have distinct utility values and zero
 mutual information. At A4 the fair revealing and nonrevealing lotteries both

@@ -99,7 +99,7 @@ preserves their cross-channel comparison. -/
 theorem pairWeak_iff_of_pairwiseWeakEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     {A A' B B' R R' S S' : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype A'] [DecidableEq A'] [Nonempty A']

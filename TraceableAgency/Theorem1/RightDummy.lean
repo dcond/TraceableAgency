@@ -58,7 +58,7 @@ theorem actionRelabel_pairWeak_neutrality
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h5 : A5_ActionDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h5 : A7_ActionDataProcessing F)
     (e : A ≃ B) (K : Channel A (O × R))
     (q : TraceableAgency.Dist A) :
     let K' := Relabeling.relabelChannel e (Equiv.refl (O × R)) K
