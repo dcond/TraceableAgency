@@ -116,7 +116,7 @@ theorem independentDummyMarkedMixtureMap_affine
 /-- The left dummy map is an exact order embedding of marked-law quotient
 orders. -/
 theorem independentDummyMarkedMixtureMap_rel_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (x y : MarkedTerminalMixtureSpace (O := O) (A := A) q) :
@@ -210,7 +210,7 @@ theorem rightIndependentDummyMarkedMixtureMap_affine
 /-- The right dummy map is an exact order embedding of marked-law quotient
 orders. -/
 theorem rightIndependentDummyMarkedMixtureMap_rel_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport)
     (x y : MarkedTerminalMixtureSpace (O := O) (A := B) r) :

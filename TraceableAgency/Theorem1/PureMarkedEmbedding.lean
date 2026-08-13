@@ -183,16 +183,16 @@ theorem constantPayoffMarkedEmbedding_mix
       exact sameMarkedTerminalLaw_constantPayoff_publicMix
         q o t.1 t.2.1 t.2.2 E G
 
-/-- At fixed payoff, the constant-payoff affine map is an order embedding of
-the mutual-information order into the marked-terminal preference order. -/
+/-- At the v4 trace anchor, the constant-payoff affine map is an order
+embedding of the mutual-information order into the marked-terminal order. -/
 theorem constantPayoffMarkedEmbedding_order_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (q : TraceableAgency.Dist A) (hq : q.FullSupport) (o : O)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
+    (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (x y : PosteriorLawMixtureSpace q) :
     pureMIRel q x y ↔
       markedTerminalMixtureRel F h q hq
-        (constantPayoffMarkedEmbedding q o x)
-        (constantPayoffMarkedEmbedding q o y) := by
+        (constantPayoffMarkedEmbedding q h.traceAnchor x)
+        (constantPayoffMarkedEmbedding q h.traceAnchor y) := by
   induction x using Quotient.inductionOn with
   | _ E =>
     induction y using Quotient.inductionOn with
@@ -206,16 +206,16 @@ theorem constantPayoffMarkedEmbedding_order_iff
       letI : Nonempty G.OutcomeType :=
         Relabeling.nonempty_of_dist (G.P (Classical.choice inferInstance))
       change mutualInfo q E.P ≥ mutualInfo q G.P ↔
-        pairWeak F q (constantPayoffLift o E.P)
-          q (constantPayoffLift o G.P)
+        pairWeak F q (constantPayoffLift h.traceAnchor E.P)
+          q (constantPayoffLift h.traceAnchor G.P)
       exact (constantPayoff_pairWeak_iff_mutualInfo
-        F h o q E.P q G.P).symm
+        F h q E.P q G.P).symm
 
 /-- Pull the marked Herstein--Milnor representative back through the fixed
 payoff affine order embedding. -/
 noncomputable def constantPayoffMarkedPullbackAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (q : TraceableAgency.Dist A) (hq : q.FullSupport) (o : O) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
+    (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     AffineUtilityRepresentation
       (posteriorLawAbstractConvexMixtureSpace q) (pureMIRel q) :=
   pullbackAffineUtility
@@ -223,8 +223,8 @@ noncomputable def constantPayoffMarkedPullbackAffineUtilityRepresentation
     (markedTerminalAbstractConvexMixtureSpace q)
     (pureMIRel q) (markedTerminalMixtureRel F h q hq)
     (markedTerminalAffineUtilityRepresentation F h q hq)
-    (constantPayoffMarkedEmbedding q o)
-    (constantPayoffMarkedEmbedding_order_iff F h q hq o)
-    (constantPayoffMarkedEmbedding_mix q o)
+    (constantPayoffMarkedEmbedding q h.traceAnchor)
+    (constantPayoffMarkedEmbedding_order_iff F h q hq)
+    (constantPayoffMarkedEmbedding_mix q h.traceAnchor)
 
 end TraceableAgency.Theorem1

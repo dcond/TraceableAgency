@@ -201,7 +201,7 @@ theorem supportExtendMarkedMixtureMap_affine
 /-- Pair comparison on the full-support face is exactly the ambient boundary
 comparison of the support-extended experiments. -/
 theorem markedPairWeak_supportExtend_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (r : TraceableAgency.Dist A)
     (E G : MarkedTerminalExperiment O (supportSubtype r)) :
     MarkedPairWeak F r.restrictToSupport E r.restrictToSupport G ↔

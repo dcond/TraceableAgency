@@ -193,7 +193,7 @@ def pairIndiff
   F.rel C (leftBlockDist q) (rightBlockDist p) ∧
     F.rel C (rightBlockDist p) (leftBlockDist q)
 
-/-! ## Record processing, action reporting, and compounding -/
+/-! ## Record processing, action processing, and compounding -/
 
 /-- A payoff-preserving record processor.  Its stochastic record rewrite may
 depend on the realized payoff, as required by equation (record-processing). -/
@@ -231,10 +231,10 @@ noncomputable def recordPostprocess
     Channel A (O × S) :=
   Channel.postprocess K (payoffPreservingRecordKernel T)
 
-/-- Exact joint-law equation for the paper's action report.  It also records
-that the axiom ranges over every completion on a zero-probability reported
+/-- Exact joint-law equation for the paper's action processor.  It also records
+that the axiom ranges over every completion on a zero-probability processed
 action. -/
-def IsActionReportCompletion
+def IsActionProcessorCompletion
     {O A B R : Type u}
     [Fintype O] [Fintype A]
     [Fintype B] [DecidableEq B] [Fintype R]
@@ -264,7 +264,7 @@ noncomputable def commonPayoffCompound
     (compoundPayoffRecordEquiv Y O Rec)
     (seqComposeDep P (fun y => O × Rec y) K)
 
-/-! ## Axioms A1--A8 -/
+/-! ## V4 axioms A1--A8 -/
 
 /-- A1: every fixed joint channel carries a complete and transitive order. -/
 def A1_WeakOrder
@@ -294,8 +294,8 @@ def A2_Continuity
     (∀ n, F.rel (Kseq n) (qseq n) (pseq n)) →
     F.rel K q p
 
-/-- A3: duplication and irrelevant-block coherence. -/
-structure A3_BlockComparisonCoherence
+/-- A5: duplication and irrelevant-block coherence. -/
+structure A5_BlockComparisonCoherence
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop where
   duplication :
@@ -319,9 +319,9 @@ structure A3_BlockComparisonCoherence
           (commonPayoffBlockEmbed Act j qj)
         ↔ pairWeak F qi (K i) qj (K j)
 
-/-- A4: garbling the explicit record, conditional on payoff if desired, cannot
+/-- A6: garbling the explicit record, conditional on payoff if desired, cannot
 improve a pair. -/
-def A4_RecordDataProcessing
+def A6_RecordDataProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A R S : Type u}
@@ -331,9 +331,9 @@ def A4_RecordDataProcessing
     (K : Channel A (O × R)) (T : RecordProcessor O R S) (q : TraceableAgency.Dist A),
     pairWeak F q K q (recordPostprocess K T)
 
-/-- A5: a stochastic report of the realized action cannot improve a pair,
+/-- A7: a stochastic processor of the realized action cannot improve a pair,
 for every channel satisfying the exact joint-law completion equation. -/
-def A5_ActionDataProcessing
+def A7_ActionDataProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A B R : Type u}
@@ -342,13 +342,13 @@ def A5_ActionDataProcessing
     [Fintype R] [DecidableEq R] [Nonempty R]
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A)
     (S : Channel.ActionKernel A B) (Khat : Channel B (O × R)),
-    IsActionReportCompletion K q S Khat →
+    IsActionProcessorCompletion K q S Khat →
     pairWeak F q K (Channel.actionPushforward q S) Khat
 
-/-- Paper-faithful weak part of A6.  As v3 now states explicitly, both
+/-- Paper-faithful weak part of A8.  Both
 continuation profiles share the same branch-dependent record family `Rec`;
 allowing two unrelated families would be a stronger premise. -/
-def A6_BranchwiseContinuationConsistency_Weak
+def A8_BranchwiseContinuationConsistency_Weak
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A Y : Type u}
@@ -365,10 +365,10 @@ def A6_BranchwiseContinuationConsistency_Weak
     pairWeak F q (commonPayoffCompound Rec P K)
       q (commonPayoffCompound Rec P L)
 
-/-- Strict part of A6: a strict comparison in at least one reached branch,
+/-- Strict part of A8: a strict comparison in at least one reached branch,
 in addition to weak improvement in every reached branch, makes the compound
 comparison strict. -/
-def A6_BranchwiseContinuationConsistency_Strict
+def A8_BranchwiseContinuationConsistency_Strict
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A Y : Type u}
@@ -388,12 +388,12 @@ def A6_BranchwiseContinuationConsistency_Strict
     pairStrict F q (commonPayoffCompound Rec P K)
       q (commonPayoffCompound Rec P L)
 
-/-- A6 with its weak and strict clauses. -/
-def A6_BranchwiseContinuationConsistency
+/-- A8 with its weak and strict clauses. -/
+def A8_BranchwiseContinuationConsistency
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
-  A6_BranchwiseContinuationConsistency_Weak F ∧
-    A6_BranchwiseContinuationConsistency_Strict F
+  A8_BranchwiseContinuationConsistency_Weak F ∧
+    A8_BranchwiseContinuationConsistency_Strict F
 
 /-- One-action, uninformative-record channel delivering payoff `o` surely. -/
 noncomputable def deterministicPayoffChannel
@@ -420,8 +420,91 @@ noncomputable def uninformativeAtPayoff
 def IsConstantPayoffIndex {O : Type u} (u : O → ℝ) : Prop :=
   ∃ c : ℝ, ∀ o : O, u o = c
 
-/-- A7: at least two deterministic material outcomes are strictly ranked. -/
-def A7_MaterialRelevance
+/-! Canonical benchmark alphabets are lifted so that they inhabit the same
+universe as the fixed payoff alphabet. -/
+
+abbrev RelevanceBit : Type u := ULift.{u, 0} Bool
+
+/-- The fixed two-action material benchmark from v4 A3.  The lifted action
+`true` delivers `oplus`; lifted `false` delivers `ominus`; neither leaves a
+record. -/
+noncomputable def materialRelevanceBenchmarkChannel
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (oplus ominus : O) : Channel RelevanceBit (O × PUnit) :=
+  fun a => TraceableAgency.Dist.pure
+    (if a.down then oplus else ominus, PUnit.unit)
+
+/-- The pure lottery selecting the preferred material-benchmark action. -/
+noncomputable def materialRelevanceBetterPrior :
+    TraceableAgency.Dist RelevanceBit :=
+  TraceableAgency.Dist.pure (ULift.up true)
+
+/-- The pure lottery selecting the inferior material-benchmark action. -/
+noncomputable def materialRelevanceWorsePrior :
+    TraceableAgency.Dist RelevanceBit :=
+  TraceableAgency.Dist.pure (ULift.up false)
+
+/-- A3 (v4): two distinct sure outcomes are strictly ranked inside the one
+fixed two-action, no-record benchmark channel. -/
+def A3_MaterialRelevance
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) : Prop :=
+  ∃ oplus ominus : O, oplus ≠ ominus ∧
+    F.strictRel (materialRelevanceBenchmarkChannel oplus ominus)
+      materialRelevanceBetterPrior materialRelevanceWorsePrior
+
+/-- The fair distribution on the two records/actions used in v4 A4. -/
+noncomputable def traceRelevanceFairPrior :
+    TraceableAgency.Dist RelevanceBit :=
+  TraceableAgency.Dist.uniform
+
+/-- The fixed four-action trace benchmark from v4 A4, encoded by
+`RelevanceBit ⊕ RelevanceBit`.  The left two actions reveal their Boolean
+label; both right actions emit an independent fair record.  Every row pays
+`ostar`. -/
+noncomputable def traceRelevanceBenchmarkChannel
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (ostar : O) :
+      Channel (RelevanceBit ⊕ RelevanceBit) (O × RelevanceBit) :=
+  fun a =>
+    match a with
+    | Sum.inl b => TraceableAgency.Dist.pure (ostar, b)
+    | Sum.inr _ =>
+        { prob := fun z => if z.1 = ostar then traceRelevanceFairPrior z.2 else 0
+          nonneg := fun z => by
+            split_ifs
+            · exact (traceRelevanceFairPrior).nonneg z.2
+            · exact le_rfl
+          sum_eq_one := by
+            rw [Fintype.sum_prod_type, Finset.sum_eq_single ostar]
+            · simpa using (traceRelevanceFairPrior).sum_eq_one
+            · intro o _ ho
+              simp [ho]
+            · simp }
+
+/-- The fair lottery over the two revealing actions in the v4 A4 channel. -/
+noncomputable def traceRelevanceRevealingPrior :
+    TraceableAgency.Dist (RelevanceBit ⊕ RelevanceBit) :=
+  inlDist traceRelevanceFairPrior
+
+/-- The fair lottery over the two uninformative actions in the v4 A4 channel. -/
+noncomputable def traceRelevanceUnrevealingPrior :
+    TraceableAgency.Dist (RelevanceBit ⊕ RelevanceBit) :=
+  inrDist traceRelevanceFairPrior
+
+/-- A4 (v4): inside one fixed four-action constant-payoff channel, the fair
+lottery whose record identifies the action is strictly preferred to the fair
+lottery whose record is independent of the action. -/
+def A4_TraceRelevance
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) : Prop :=
+  ∃ ostar : O,
+    F.strictRel (traceRelevanceBenchmarkChannel ostar)
+      traceRelevanceRevealingPrior traceRelevanceUnrevealingPrior
+
+/-- Environment form of material relevance used after the v4 relevance
+bridge. -/
+def MaterialRelevanceEnvironment
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∃ oplus ominus : O,
@@ -430,30 +513,57 @@ def A7_MaterialRelevance
       (TraceableAgency.Dist.pure PUnit.unit)
       (deterministicPayoffChannel ominus)
 
-/-- A8: for every genuinely uncertain full-support action lottery and every
-constant payoff, full revelation is strictly preferred to no record. -/
-def A8_PositiveTraceOrientation
+/-- Environment form of trace relevance at one fixed payoff.  The bridge
+transports the v4 A4 benchmark across full-support priors and nontrivial finite
+action alphabets without changing `ostar`. -/
+def PositiveTraceOrientationAt
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) : Prop :=
+    (F : FixedPayoffPrefFamily O) (ostar : O) : Prop :=
   ∀ {A : Type u}
     [Fintype A] [DecidableEq A] [Nontrivial A]
     (q : TraceableAgency.Dist A), q.FullSupport →
-    ∀ o : O,
-      pairStrict F q (fullRevealAtPayoff (A := A) o)
-        q (uninformativeAtPayoff (A := A) o)
+      pairStrict F q (fullRevealAtPayoff (A := A) ostar)
+        q (uninformativeAtPayoff (A := A) ostar)
 
-/-- The eight behavioral conditions in Theorem 1. -/
-structure TraceTemperedAxioms
+/-- The exact v4 axiom bundle, in the paper's v4 numbering. -/
+structure TraceTemperedAxiomsV4
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop where
   a1 : A1_WeakOrder F
   a2 : A2_Continuity F
-  a3 : A3_BlockComparisonCoherence F
-  a4 : A4_RecordDataProcessing F
-  a5 : A5_ActionDataProcessing F
-  a6 : A6_BranchwiseContinuationConsistency F
-  a7 : A7_MaterialRelevance F
-  a8 : A8_PositiveTraceOrientation F
+  a3 : A3_MaterialRelevance F
+  a4 : A4_TraceRelevance F
+  a5 : A5_BlockComparisonCoherence F
+  a6 : A6_RecordDataProcessing F
+  a7 : A7_ActionDataProcessing F
+  a8 : A8_BranchwiseContinuationConsistency F
+
+/-! ### Proof-facing bridge bundle
+
+The long representation proof is written in semantic dependency order.  The
+relevance bridge supplies this bundle from v4: material relevance is in its
+environment form, while trace relevance carries one explicit, separate
+anchor.  No mathematical hypothesis is added here. -/
+
+structure TraceTemperedBridgeAxioms
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) (traceAnchor : O) : Prop where
+  a1 : A1_WeakOrder F
+  a2 : A2_Continuity F
+  a3 : A5_BlockComparisonCoherence F
+  a4 : A6_RecordDataProcessing F
+  a5 : A7_ActionDataProcessing F
+  a6 : A8_BranchwiseContinuationConsistency F
+  a7 : MaterialRelevanceEnvironment F
+  a8 : PositiveTraceOrientationAt F traceAnchor
+
+/-- Recover the external trace-anchor index without eliminating any proof
+object. -/
+def TraceTemperedBridgeAxioms.traceAnchor
+    {O : Type u} [Fintype O] [DecidableEq O]
+    {F : FixedPayoffPrefFamily O} {traceAnchor : O}
+    (_h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
+  traceAnchor
 
 /-! ## Represented value and theorem conclusion -/
 
@@ -508,23 +618,20 @@ def SameWitnessBlockRepresentation
     traceTemperedValue u lambda qi (K i) ≥
       traceTemperedValue u lambda qj (K j)
 
-/-- Exact single-proposition reading of Theorem 1.
-
-The payoff alphabet is chosen first and is required to have at least two
-elements.  The first conjunct is the displayed equivalence.  The second is the
-weakest literal reading of the "moreover" clause: under the axioms there are
-particular witnesses `u, lambda` that simultaneously represent within-channel
-and block-supported cross-channel comparisons. -/
-def Theorem1Statement : Prop :=
+/-- Exact v4 statement of Theorem 1.  Material and trace relevance are the two
+fixed-channel axioms, and trace relevance is assumed at a single payoff.  The
+same global witnesses represent both within-channel and finite block-supported
+comparisons. -/
+def Theorem1StatementV4 : Prop :=
   ∀ (O : Type u) [Fintype O] [DecidableEq O],
     2 ≤ Fintype.card O →
     ∀ F : FixedPayoffPrefFamily O,
-      (TraceTemperedAxioms F ↔
+      (TraceTemperedAxiomsV4 F ↔
         ∃ (u : O → ℝ) (lambda : ℝ),
           ¬ IsConstantPayoffIndex u ∧
           0 < lambda ∧
           WithinChannelRepresentation F u lambda) ∧
-      (TraceTemperedAxioms F →
+      (TraceTemperedAxiomsV4 F →
         ∃ (u : O → ℝ) (lambda : ℝ),
           ¬ IsConstantPayoffIndex u ∧
           0 < lambda ∧

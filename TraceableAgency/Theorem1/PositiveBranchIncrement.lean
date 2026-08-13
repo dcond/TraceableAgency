@@ -28,7 +28,7 @@ universe u
 increment, without any nontriviality assumption on its posterior support. -/
 theorem positiveBranchPayoffIncrementFormula
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     PositiveBranchPayoffIncrementFormula F h := by
   classical
   intro A Y _ _ _ _ _ _ _ q hq P target htarget o
@@ -61,10 +61,10 @@ theorem positiveBranchPayoffIncrementFormula
     normalizedMarkedUtility_payoffBranch_independentDummy
       F h q s hq hs P
         (updateBranchPayoff
-          (fun _ : Y ↦ materialLowOutcome F h) target o),
+          (fun _ : Y ↦ h.traceAnchor) target o),
     normalizedMarkedUtility_payoffBranch_independentDummy
       F h q s hq hs P
-        (fun _ : Y ↦ materialLowOutcome F h),
+        (fun _ : Y ↦ h.traceAnchor),
     branchMass_independentDummyFirstStage P q s target] at hlift
   exact hlift
 

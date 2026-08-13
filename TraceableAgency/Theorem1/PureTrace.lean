@@ -229,7 +229,7 @@ theorem constantPayoffLift_actionRelabel
   ext b z
   rfl
 
-/-! ## Exact action-report completion -/
+/-! ## Exact action-processor completion -/
 
 theorem bayesCompletion_jointEquation
     {A B R : Type u}
@@ -269,7 +269,7 @@ theorem constantPayoffLift_actionCompletion
     (o : O) (P : Channel A R) (q : TraceableAgency.Dist A)
     (S : Channel.ActionKernel A B) (Phat : Channel B R)
     (hcompl : Channel.IsBayesPushforwardCompletion P q S Phat) :
-    IsActionReportCompletion (constantPayoffLift o P) q S
+    IsActionProcessorCompletion (constantPayoffLift o P) q S
       (constantPayoffLift o Phat) := by
   intro b z
   rcases z with ⟨o', r⟩
@@ -305,7 +305,7 @@ D, now with the material payoff coordinate kept untagged. -/
 theorem fixed_pairwiseReplacement_from_weakEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     {A B R S : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -398,8 +398,8 @@ interchangeable. -/
 theorem fixed_rel_iff_of_mutualRecordProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
     {A R S : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
@@ -417,7 +417,7 @@ theorem fixed_rel_iff_of_mutualRecordProcessing
   · simpa [hLK] using h4 L U r
 
 /-- The positive-row Bayesian completion equation is equivalent to the exact
-joint-law equation once zero reported rows are handled by nonnegativity. -/
+joint-law equation once zero processed rows are handled by nonnegativity. -/
 theorem actionCompletion_isExact
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]
@@ -427,7 +427,7 @@ theorem actionCompletion_isExact
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A)
     (S : Channel.ActionKernel A B) (Khat : Channel B (O × R))
     (hcompl : Channel.IsBayesPushforwardCompletion K q S Khat) :
-    IsActionReportCompletion K q S Khat := by
+    IsActionProcessorCompletion K q S Khat := by
   exact bayesCompletion_jointEquation K q S Khat hcompl
 
 /-- A deterministic relabeling of actions preserves every within-channel
@@ -436,8 +436,8 @@ four-block replacement lemma, rather than assumed as a convention. -/
 theorem fixed_rel_iff_actionEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h5 : A7_ActionDataProcessing F)
     {A B R : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
@@ -657,7 +657,7 @@ theorem postprocess_activeInclusion
       exact hjk (congrArg Sigma.fst heq)
     rw [TraceableAgency.Dist.pure_apply_ne _ _ hne.symm, mul_zero]
 
-/-! ## Direct transfers of A1, A2, A4, A5, A6, and A3 duplication -/
+/-! ## Direct transfers of A1, A2, A6, A7, A8, and A5 duplication -/
 
 theorem inducedPureWeakOrder
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -690,9 +690,9 @@ theorem inducedPureNontriviality
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h8 : A8_PositiveTraceOrientation F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h8 : PositiveTraceOrientationAt F o) :
     ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nontrivial A]
       (q : TraceableAgency.Dist A), q.FullSupport →
       let P_id : Channel A A := Channel.idChannel
@@ -700,7 +700,7 @@ theorem inducedPureNontriviality
       let blockP := blockChannel P_id P_uninf
       (inducedPureTraceFamily F o).strictRel blockP (inlDist q) (inrDist q) := by
   intro A _ _ _ q hq
-  have h := h8 q hq o
+  have h := h8 q hq
   let e := Relabeling.blockUnitPUnitOutcomeEquiv A
   let P0 : Channel (A ⊕ A) (A ⊕ Unit) :=
     blockChannel (Channel.idChannel : Channel A A)
@@ -769,7 +769,7 @@ theorem inducedPureClosedGraph
 theorem inducedPureDuplication
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h3 : A3_BlockComparisonCoherence F) :
+    (h3 : A5_BlockComparisonCoherence F) :
     ∀ {A R : Type u}
       [Fintype A] [DecidableEq A]
       [Fintype R] [DecidableEq R]
@@ -790,7 +790,7 @@ blocks is handled separately below. -/
 theorem inducedPureFiniteBlockNonempty
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h3 : A3_BlockComparisonCoherence F) :
+    (h3 : A5_BlockComparisonCoherence F) :
     ∀ {I : Type u} [Fintype I] [DecidableEq I]
       (Act Rec : I → Type u)
       [∀ i, Fintype (Act i)] [∀ i, DecidableEq (Act i)]
@@ -823,9 +823,9 @@ theorem inducedPureFiniteBlock
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F) :
     ∀ {I : Type u} [Fintype I] [DecidableEq I]
       (Act Rec : I → Type u)
       [∀ i, Fintype (Act i)] [∀ i, DecidableEq (Act i)]
@@ -933,7 +933,7 @@ theorem inducedPureFiniteBlock
 theorem inducedPureRecordProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h4 : A4_RecordDataProcessing F) :
+    (h4 : A6_RecordDataProcessing F) :
     TraceableAgency.PureTraceRecordProcessing
       (inducedPureTraceFamily F o) := by
   intro A R S _ _ _ _ _ _ P T q
@@ -949,7 +949,7 @@ theorem inducedPureRecordProcessing
 theorem inducedPureActionProcessing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h5 : A5_ActionDataProcessing F) :
+    (h5 : A7_ActionDataProcessing F) :
     TraceableAgency.PureTraceActionProcessing
       (inducedPureTraceFamily F o) := by
   intro A B R _ _ _ _ _ _ _ P q S Phat hcompl
@@ -967,7 +967,7 @@ theorem inducedPureActionProcessing
 theorem inducedPureBranchContinuation
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h6 : A6_BranchwiseContinuationConsistency F) :
+    (h6 : A8_BranchwiseContinuationConsistency F) :
     TraceableAgency.PureTraceBranchContinuationMonotonicity
       (inducedPureTraceFamily F o) := by
   constructor
@@ -1025,11 +1025,11 @@ theorem inducedPureConditions_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
-    (h8 : A8_PositiveTraceOrientation F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h8 : PositiveTraceOrientationAt F o) :
     PureTraceConditions (inducedPureTraceFamily F o) where
   weakOrder := ⟨inducedPureWeakOrder F o h1,
     inducedPureNontriviality F o h1 h3 h4 h8⟩
@@ -1044,10 +1044,10 @@ theorem inducedPureConditions_of_components
 axiom bundle.  Material relevance A7 is not used by the pure-trace result. -/
 theorem inducedPureConditions
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (o : O)
-    (h : TraceTemperedAxioms F) :
-    PureTraceConditions (inducedPureTraceFamily F o) :=
-  inducedPureConditions_of_components F o
+    (F : FixedPayoffPrefFamily O)
+    {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
+    PureTraceConditions (inducedPureTraceFamily F h.traceAnchor) :=
+  inducedPureConditions_of_components F h.traceAnchor
     h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Kernel-checked invocation of the pure-trace proposition at a constant payoff. -/
@@ -1056,11 +1056,11 @@ theorem inducedPureRepresentation_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
-    (h8 : A8_PositiveTraceOrientation F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h8 : PositiveTraceOrientationAt F o) :
     PureTraceMIRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).1.1
     (inducedPureConditions_of_components F o h1 h2 h3 h4 h5 h6 h8)
@@ -1068,10 +1068,10 @@ theorem inducedPureRepresentation_of_components
 /-- Compatibility wrapper for the complete main-text axiom bundle. -/
 theorem inducedPureRepresentation
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (o : O)
-    (h : TraceTemperedAxioms F) :
-    PureTraceMIRepresentation (inducedPureTraceFamily F o) :=
-  inducedPureRepresentation_of_components F o
+    (F : FixedPayoffPrefFamily O)
+    {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
+    PureTraceMIRepresentation (inducedPureTraceFamily F h.traceAnchor) :=
+  inducedPureRepresentation_of_components F h.traceAnchor
     h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Same-scale general-block conclusion supplied by the same closed theorem. -/
@@ -1080,11 +1080,11 @@ theorem inducedPureBlocks_of_components
     (F : FixedPayoffPrefFamily O) (o : O)
     (h1 : A1_WeakOrder F)
     (h2 : A2_Continuity F)
-    (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F)
-    (h5 : A5_ActionDataProcessing F)
-    (h6 : A6_BranchwiseContinuationConsistency F)
-    (h8 : A8_PositiveTraceOrientation F) :
+    (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F)
+    (h5 : A7_ActionDataProcessing F)
+    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h8 : PositiveTraceOrientationAt F o) :
     PureTraceBlockRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).2
     (inducedPureConditions_of_components F o h1 h2 h3 h4 h5 h6 h8)
@@ -1092,10 +1092,10 @@ theorem inducedPureBlocks_of_components
 /-- Compatibility wrapper for the complete main-text axiom bundle. -/
 theorem inducedPureBlocks
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (o : O)
-    (h : TraceTemperedAxioms F) :
-    PureTraceBlockRepresentation (inducedPureTraceFamily F o) :=
-  inducedPureBlocks_of_components F o
+    (F : FixedPayoffPrefFamily O)
+    {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
+    PureTraceBlockRepresentation (inducedPureTraceFamily F h.traceAnchor) :=
+  inducedPureBlocks_of_components F h.traceAnchor
     h.a1 h.a2 h.a3 h.a4 h.a5 h.a6 h.a8
 
 /-- Constant-payoff within-channel comparisons are exactly ranked by mutual
@@ -1105,20 +1105,19 @@ theorem constantPayoff_rel_iff_mutualInfo
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (o : O) (P : Channel A R)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
+    (P : Channel A R)
     (q p : TraceableAgency.Dist A) :
-    F.rel (constantPayoffLift o P) q p ↔
+    F.rel (constantPayoffLift h.traceAnchor P) q p ↔
       mutualInfo q P ≥ mutualInfo p P := by
   simpa [inducedPureTraceFamily] using
-    (inducedPureRepresentation F o h P q p)
+    (inducedPureRepresentation F h P q p)
 
 /-- The same pure-trace scale ranks every constant-payoff, block-supported
 cross-channel comparison. -/
 theorem constantPayoff_blockRepresentation
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (o : O)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     {I : Type u} [Fintype I] [DecidableEq I] [Nonempty I]
     (Act Rec : I → Type u)
     [∀ i, Fintype (Act i)] [∀ i, DecidableEq (Act i)]
@@ -1130,11 +1129,11 @@ theorem constantPayoff_blockRepresentation
     (qi : TraceableAgency.Dist (Act i))
     (qj : TraceableAgency.Dist (Act j)) :
     F.rel (commonPayoffBlockFamilyChannel Act Rec
-          (fun k => constantPayoffLift o (P k)))
+          (fun k => constantPayoffLift h.traceAnchor (P k)))
         (commonPayoffBlockEmbed Act i qi)
         (commonPayoffBlockEmbed Act j qj) ↔
       mutualInfo qi (P i) ≥ mutualInfo qj (P j) := by
-  have hh := inducedPureBlocks F o h
+  have hh := inducedPureBlocks F h
     Act Rec P i j hij qi qj
   simpa [inducedPureTraceFamily, commonPayoffBlockEmbed,
     constantPayoffLift_blockFamilyChannel] using hh

@@ -99,7 +99,7 @@ preserves their cross-channel comparison. -/
 theorem pairWeak_iff_of_pairwiseWeakEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     {A A' B B' R R' S S' : Type u}
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype A'] [DecidableEq A'] [Nonempty A']
@@ -188,7 +188,7 @@ theorem pairWeak_ambient_to_support
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A) :
     pairWeak F q K q.restrictToSupport (Channel.restrictToSupport K q) := by
   have hh := h.a5 K q (supportProjectKernel q)
@@ -203,7 +203,7 @@ theorem pairWeak_support_to_ambient
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A) :
     pairWeak F q.restrictToSupport (Channel.restrictToSupport K q) q K := by
   have hh := h.a5 (Channel.restrictToSupport K q) q.restrictToSupport
@@ -222,7 +222,7 @@ theorem pairWeak_iff_supportRestriction
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     pairWeak F q K p L ↔
@@ -244,7 +244,7 @@ theorem rel_iff_supportRestriction
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (K : Channel A (O × R))
     (q p : TraceableAgency.Dist A) :
     F.rel K q p ↔
@@ -319,7 +319,7 @@ theorem actionPushforward_dummyRedraw
       TraceableAgency.Dist.pure_apply_ne _ _ hne]
 
 /-- Forgetting the dummy coordinate has `K` as its exact A5 completion. -/
-theorem dummyProjection_isActionReportCompletion
+theorem dummyProjection_isActionProcessorCompletion
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -327,7 +327,7 @@ theorem dummyProjection_isActionReportCompletion
     [Fintype R] [DecidableEq R] [Nonempty R]
     (K : Channel A (O × R))
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B) :
-    IsActionReportCompletion (independentDummyChannel (B := B) K)
+    IsActionProcessorCompletion (independentDummyChannel (B := B) K)
       (independentDummyPrior q r)
       (dummyProjectionKernel (A := A) (B := B)) K := by
   intro a z
@@ -357,7 +357,7 @@ theorem dummyProjection_isActionReportCompletion
 
 /-- Independently redrawing the dummy coordinate has the dummy lift as its
 exact A5 completion. -/
-theorem dummyRedraw_isActionReportCompletion
+theorem dummyRedraw_isActionProcessorCompletion
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -365,7 +365,7 @@ theorem dummyRedraw_isActionReportCompletion
     [Fintype R] [DecidableEq R] [Nonempty R]
     (K : Channel A (O × R))
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B) :
-    IsActionReportCompletion K q (dummyRedrawKernel r)
+    IsActionProcessorCompletion K q (dummyRedrawKernel r)
       (independentDummyChannel (B := B) K) := by
   intro ab z
   rcases ab with ⟨a, b⟩
@@ -388,7 +388,7 @@ theorem independentDummy_pairWeak_neutrality
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (K : Channel A (O × R))
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B) :
     pairWeak F q K (independentDummyPrior q r)
@@ -398,12 +398,12 @@ theorem independentDummy_pairWeak_neutrality
   constructor
   · have hh := h.a5 K q (dummyRedrawKernel r)
       (independentDummyChannel (B := B) K)
-      (dummyRedraw_isActionReportCompletion K q r)
+      (dummyRedraw_isActionProcessorCompletion K q r)
     simpa [actionPushforward_dummyRedraw] using hh
   · have hh := h.a5 (independentDummyChannel (B := B) K)
       (independentDummyPrior q r)
       (dummyProjectionKernel (A := A) (B := B)) K
-      (dummyProjection_isActionReportCompletion K q r)
+      (dummyProjection_isActionProcessorCompletion K q r)
     simpa [actionPushforward_dummyProjection] using hh
 
 /-- Replacing both compared objects by arbitrary independent dummy lifts does
@@ -417,7 +417,7 @@ theorem pairWeak_iff_independentDummy
     [Fintype D] [DecidableEq D] [Nonempty D]
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (r : TraceableAgency.Dist B)
     (p : TraceableAgency.Dist C) (L : Channel C (O × S))
@@ -443,7 +443,7 @@ theorem rel_iff_independentDummy
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (K : Channel A (O × R))
     (q p : TraceableAgency.Dist A) (r : TraceableAgency.Dist B) :
     F.rel K q p ↔

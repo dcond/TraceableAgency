@@ -55,7 +55,7 @@ def auditedRoots : List Name :=
   [ ``TraceableAgency.pureTraceRepresentation_of_conditions
   , ``TraceableAgency.provedPureTraceSufficiency
   , ``TraceableAgency.provedPureTraceCharacterization
-  , ``TraceableAgency.Theorem1.trace_tempered_choice_v3_theorem1
+  , ``TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1
   ]
 
 run_cmd do

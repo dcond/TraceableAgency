@@ -1,10 +1,84 @@
 \section{Pure trace on the constant-payoff domain}
 \label{pt:sec:environment}\label{lf:app:pure-trace}
 
-Fix an outcome $o_0\in O$.  Every channel between nonempty finite sets
+The relevance axioms in the main text are stated inside fixed channels.  The
+proofs below use their equivalent comparison-environment forms.
+
+For $o\in O$, write $K_o:\{\ast\}\to\D(O\times\{\ast\})$ for the channel that
+delivers $o$ for sure.  On a finite action set $A$, write
+$K^{\mathrm{id}}_o:A\to\D(O\times A)$ for the channel that delivers $o$ and
+reports the action, and $K^0_o:A\to\D(O\times\{\ast\})$ for the channel that
+delivers $o$ and no record.
+
+\begin{lemma}[Fixed-channel and environment relevance]\label{lem:relevance-bridge}
+Given Axioms~\textup{(A1)}, \textup{(A5)}, \textup{(A6)},
+\textup{(A7)}, and \textup{(A8)}, the following equivalences hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item Axiom~\textup{(A3)} is equivalent to the existence of
+  $o^+,o^-\in O$ such that
+  \[
+    (\delta_\ast,K_{o^+})\succ(\delta_\ast,K_{o^-}).
+  \]
+\item Axiom~\textup{(A4)} is equivalent to the following condition: there is
+  an outcome $o_\ast\in O$ such that, for every finite $A$ with $|A|\ge2$
+  and every full-support $q\in\D(A)$,
+  \[
+    (q,K^{\mathrm{id}}_{o_\ast})\succ(q,K^0_{o_\ast}).
+  \]
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+For part \textup{(a)}, apply action processing to either pure lottery in the
+two-action channel of Axiom~\textup{(A3)}.  Collapsing its support to
+a singleton gives $K_{o^+}$ or $K_{o^-}$.  Conversely, the singleton can be
+processed back to the corresponding action; the unrestricted row at the
+unreached action completes the pushforward to the original channel.  Thus
+each pure lottery is indifferent to the corresponding singleton experiment.
+Weak order and block coherence transport the strict comparison in either
+direction.
+
+For part \textup{(b)}, let $o_\ast$ witness Axiom~\textup{(A4)} and first
+restrict its two lotteries to their supports.  Action processing in both
+directions identifies the first with fair binary full revelation and the
+second with a fair binary channel whose two rows are the same.  Record
+processing in both directions identifies the latter channel with silence.
+Hence the fixed-channel axiom is equivalent to
+\begin{equation}
+  ((\tfrac12,\tfrac12),K^{\mathrm{id}}_{o_\ast})
+  \succ
+  ((\tfrac12,\tfrac12),K^0_{o_\ast})
+  \label{eq:bridge-fair-binary}
+\end{equation}
+on a binary action set.
+
+Now let $p$ have full support on a binary set.  Choose
+$0<\varepsilon\le 2\min_i p_i$ and an interim record $y$ with
+$P(y\mid i)=\varepsilon/(2p_i)$.  The branch has probability $\varepsilon$
+and posterior $(\tfrac12,\tfrac12)$.  Compare two continuation plans: after that branch the
+first reveals the action and the second is silent; after every other branch
+both are silent.  Equation~\eqref{eq:bridge-fair-binary} and branchwise
+continuation give a strict comparison of the two compounds.  Full revelation
+can be garbled into the first compound, and the second compound can be
+garbled into silence.  Record processing and transitivity therefore give
+$(p,K^{\mathrm{id}}_{o_\ast})\succ(p,K^0_{o_\ast})$.
+
+Finally, let $q$ have full support on any finite $A$ with $|A|\ge2$, and
+partition $A$ into two nonempty cells.  The channel that reports only the cell
+is, by action processing in both directions, indifferent to binary full
+revelation under the induced binary prior; silence on $A$ is similarly
+indifferent to binary silence.  The cell-reporting channel is therefore
+strictly preferred to silence, and full revelation is weakly preferred to
+the cell report by record processing.  This proves the displayed
+comparison for every $q$ and $A$ at $o_\ast$.  The converse follows by taking
+a fair binary prior and reversing the support identifications used above.
+\end{proof}
+
+Whenever Axiom~\textup{(A4)} is imposed below, fix one of its witnessing
+outcomes and denote it by $o_\ast$.  Every channel between nonempty finite sets
 $P:A\to\D(X)$ has the constant-payoff lift
 \begin{equation}
-K_P(o,x\mid a):=\1_{\{o=o_0\}}P(x\mid a).
+K_P(o,x\mid a):=\1_{\{o=o_\ast\}}P(x\mid a).
 \label{pt:eq:constant-payoff-lift}
 \end{equation}
 Throughout this appendix, comparisons of pure record channels mean comparisons
@@ -19,11 +93,11 @@ processing, and a compound $P_1\triangleright\{Q^x\}$ are shorthand for the
 corresponding main-text constructions after applying
 \eqref{pt:eq:constant-payoff-lift}.  The lift commutes with each construction
 up to canonical tagged or singleton-record bijections; those bijections are
-neutral by Axiom~\textup{(A4)} applied in both directions.  No new primitive
+neutral by Axiom~\textup{(A6)} applied in both directions.  No new primitive
 relation or behavioural condition is introduced here.
 
 Two pieces of notation will be used repeatedly.  If
-$S:A\to\Delta(B)$ is an action report, let $S^qP:B\to\Delta(X)$ denote any
+$S:A\to\Delta(B)$ is an action processor, let $S^qP:B\to\Delta(X)$ denote any
 Bayesian pushforward satisfying
 \[
  (qS)(b)(S^qP)(x\mid b)
@@ -58,7 +132,7 @@ I_{qP}(A;X)
 
 \begin{proposition}[Pure-trace lemma]\label{pt:prop:main}
 Suppose the preference family satisfies main-text Axioms
-\textup{(A1)--(A6)} and \textup{(A8)}.  Then, for every record channel between
+\textup{(A1)}, \textup{(A2)}, and \textup{(A4)--(A8)}.  Then, for every record channel between
 nonempty finite sets
 $P:A\to\D(X)$ and every $q,q'\in\D(A)$,
 \[
@@ -82,8 +156,8 @@ I_{q_iP_i}(A_i;X_i)\ge I_{q_jP_j}(A_j;X_j).
 Assume the hypotheses of Proposition~\ref{pt:prop:main}.  Every appeal below
 to weak order, continuity, block coherence, record processing, action
 processing, branchwise continuation, or positive trace orientation is an
-appeal to Axiom \textup{(A1)}, \textup{(A2)}, \textup{(A3)}, \textup{(A4)},
-\textup{(A5)}, \textup{(A6)}, or \textup{(A8)}, respectively, on the
+appeal to Axiom \textup{(A1)}, \textup{(A2)}, \textup{(A5)}, \textup{(A6)},
+\textup{(A7)}, \textup{(A8)}, or \textup{(A4)}, respectively, on the
 constant-payoff lifts.  Thus the proof has no auxiliary axiom system.
 
 \paragraph{How to read the proof.}
@@ -142,9 +216,9 @@ Completeness is Axiom~\textup{(A1)} in the two-block environment.  To prove
 transitivity, suppose
 $(q_1,P_1)\succeq(q_2,P_2)$ and
 $(q_2,P_2)\succeq(q_3,P_3)$.  Put the three pairs in the common environment
-$P_1\sqcup P_2\sqcup P_3$.  Axiom~\textup{(A3)} transports the two
+$P_1\sqcup P_2\sqcup P_3$.  Axiom~\textup{(A5)} transports the two
 hypotheses to that environment, Axiom~\textup{(A1)} composes them there, and
-Axiom~\textup{(A3)} deletes the middle block.  Applying Axiom~\textup{(A3)}
+Axiom~\textup{(A5)} deletes the middle block.  Applying Axiom~\textup{(A5)}
 with the ordered pair of block labels reversed gives
 \[
  (q_2,P_2)\succeq(q_1,P_1)
@@ -152,7 +226,7 @@ with the ordered pair of block labels reversed gives
  q_2^1\succeq_{P_1\sqcup P_2}q_1^0,
 \]
 so reversal is also canonical.  The displayed within-channel equivalence is
-the duplication clause of Axiom~\textup{(A3)}.  Finally, a block channel is a
+the duplication clause of Axiom~\textup{(A5)}.  Finally, a block channel is a
 continuous affine function of its component channels.  Closedness on fixed
 alphabets is therefore exactly Axiom~\textup{(A2)} applied to the common block
 environment.
@@ -219,7 +293,7 @@ It follows that
 Both sides vanish when $m_Q(y)=0$, again by full support.  Thus $PT=Q$.
 Interchanging $P$ and $Q$ constructs $T'$ with $QT'=P$.
 
-Axiom~\textup{(A4)} applied to $T$ and $T'$ yields the two weak comparisons;
+Axiom~\textup{(A6)} applied to $T$ and $T'$ yields the two weak comparisons;
 Lemma~\ref{pt:lem:blockcoh} puts the reverse comparison into the same block
 order and gives indifference.  If $P,P'$ have the same posterior law, place
 $(q,P),(q,P')$ and the two objects being compared in one finite block
@@ -282,13 +356,13 @@ is $q$.  The compounds
 \]
 have the posterior laws on the right-hand side of
 \eqref{pt:eq:public-posterior-mixture}; they differ from the displayed public
-mixtures only by record labels.  If $(q,P)\succeq(q,Q)$, Axiom~\textup{(A6)}
+mixtures only by record labels.  If $(q,P)\succeq(q,Q)$, Axiom~\textup{(A8)}
 applied to branch $0$, together with reflexivity on the common branch $1$,
 gives the aggregate comparison.
 
 Conversely, suppose the aggregate comparison holds but
 $(q,P)\not\succeq(q,Q)$.  Completeness gives $(q,Q)\succ(q,P)$.  Apply the
-strict clause of Axiom~\textup{(A6)} with the two continuation profiles
+strict clause of Axiom~\textup{(A8)} with the two continuation profiles
 reversed.  Branch $0$ is reached with probability $t>0$, so it yields the
 strict reverse aggregate comparison, contradicting the assumed weak one.
 Posterior-law substitution transfers both conclusions between the compounds
@@ -343,7 +417,7 @@ closed.  By \eqref{pt:eq:public-posterior-mixture}, these are exactly
 \]
 Thus the Herstein--Milnor mixture-space theorem
 \cite{HersteinMilnor1953} applies and supplies an affine representation
-$F_q$.  When $|A|\ge2$, Axiom~\textup{(A8)} makes the order nonconstant, so
+$F_q$.  When $|A|\ge2$, Axiom~\textup{(A4)} makes the order nonconstant, so
 the usual positive-affine uniqueness conclusion applies.  For a singleton
 action set, Bayes plausibility forces every posterior law to equal
 $\delta_q$.
@@ -385,7 +459,7 @@ $F_q\equiv0$.
 
 \begin{proof}
 Every channel $P$ can be record-postprocessed to the uninformative channel by
-deleting its record.  Axiom~\textup{(A4)} and
+deleting its record.  Axiom~\textup{(A6)} and
 \eqref{pt:eq:fibre-representation} therefore imply
 \[
  F_q(\mu_{qP})\ge F_q(\delta_q).
@@ -395,7 +469,7 @@ Every law in $\mathcal M_q$ is implemented by
 on the whole fibre.  Subtract $F_q(\delta_q)$ to obtain
 \eqref{pt:eq:zero-minimum}.
 
-If $|A|\ge2$, Axiom~\textup{(A8)} says that full revelation is strictly
+If $|A|\ge2$, Axiom~\textup{(A4)} says that full revelation is strictly
 preferred to no information at every full-support prior.  Hence
 $F_q(\chi_q)>0$.  Dividing by this positive number gives
 \eqref{pt:eq:full-revelation-anchor} without changing any comparison.  If two
@@ -467,7 +541,7 @@ represents all continuation comparisons at the boundary prior $q$.
 
 \begin{proof}
 \emph{Part (a).}
-Regard $\pi$ as a deterministic action-report kernel.  Axiom~\textup{(A5)}
+Regard $\pi$ as a deterministic action processor.  Axiom~\textup{(A7)}
 gives
 \[
  (q,P)\succeq(q\pi,P\pi^{-1}),
@@ -491,7 +565,7 @@ $G=F_q^A$.  If $A$ is a singleton, both sides vanish.
 
 \emph{Part (b).}
 Since $q$ has full support and $S$ is onto, $qS$ has full support.  One
-direction of \eqref{pt:eq:undetectable} is Axiom~\textup{(A5)}.  For the
+direction of \eqref{pt:eq:undetectable} is Axiom~\textup{(A7)}.  For the
 reverse direction, define the Bayesian refinement kernel
 \[
  R(a\mid b):=
@@ -502,7 +576,7 @@ reverse direction, define the Bayesian refinement kernel
 \]
 Then $(qS)R=q$.  Since $P$ is constant on each fibre of $S$, the pushforward
 $S^qP$ has at $b$ precisely the common row of $P$ on $S^{-1}(b)$, and pushing
-it back through $R$ recovers $P$.  Axiom~\textup{(A5)} applied to
+it back through $R$ recovers $P$.  Axiom~\textup{(A7)} applied to
 $(qS,S^qP)$ and $R$ therefore gives the reverse weak comparison.  For the
 last assertion, $G_S$ is $S$-measurable and its pushforward is $\Id_B$.
 
@@ -514,11 +588,11 @@ $a\notin B$ to $b_0$.  Since $q$ assigns zero mass outside $B$,
  \qquad
  S^qP=P_B.
 \]
-Axiom~\textup{(A5)} gives $(q,P)\succeq(q_B,P_B)$.  Conversely, let
+Axiom~\textup{(A7)} gives $(q,P)\succeq(q_B,P_B)$.  Conversely, let
 $\iota:B\hookrightarrow A$ be the inclusion.  Then $q_B\iota=q$.  The exact
-Bayesian completion equation pins down the reported channel on $B$ and leaves
+Bayesian completion equation pins down the processed channel on $B$ and leaves
 all zero-mass rows in $A\setminus B$ arbitrary.  The all-completions clause of
-Axiom~\textup{(A5)} therefore permits us to choose the completion to be the
+Axiom~\textup{(A7)} therefore permits us to choose the completion to be the
 original $P$, yielding $(q_B,P_B)\succeq(q,P)$.  This proves
 \eqref{pt:eq:support-indifference}; applying it to $P$ and $Q$ in a common
 block environment proves \eqref{pt:eq:support-comparison}.  It also shows
@@ -545,7 +619,7 @@ needed.  From now on ambient action-set superscripts are suppressed unless
 two action sets occur in the same formula; a boundary-prior subscript always
 means the representative transported from its positive support.  The next two
 stages derive product and branch scale coherence, with
-Axiom~\textup{(A6)} providing the essential cardinal alignment across reached
+Axiom~\textup{(A8)} providing the essential cardinal alignment across reached
 branches.
 
 \subsubsection{Stage 3: products and a common comparison scale}
@@ -600,13 +674,13 @@ support-transport clauses of Lemmas~\ref{pt:lem:neutrality} and
 \tag{BI$'$}\label{pt:eq:bg-branch-transport}
 \]
 Thus every reached branch has the same weak comparison as $P$ versus $Q$ at
-$p$.  If $P\succeq_pQ$, the weak clause of Axiom~\textup{(A6)} applied to
+$p$.  If $P\succeq_pQ$, the weak clause of Axiom~\textup{(A8)} applied to
 these branches proves the forward implication in~\eqref{pt:eq:backgroundinert}.
 
 For the converse, suppose that $P\not\succeq_pQ$.  Completeness gives
 $Q\succ_pP$.  By~\eqref{pt:eq:bg-branch-transport}, the reversed comparison is
 strict on every reached branch; at least one such branch has positive mass.
-The strict clause of Axiom~\textup{(A6)} therefore gives
+The strict clause of Axiom~\textup{(A8)} therefore gives
 $Q\otimes R\succ_{p\otimes r}P\otimes R$, contradicting
 $P\otimes R\succeq_{p\otimes r}Q\otimes R$.  This proves the converse and
 also records why weak branch monotonicity alone would not suffice.  Interchange
@@ -768,7 +842,7 @@ $P,Q$ on the respective action sets,
 \begin{equation}
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- G_q(\mu_{qP})\ge G_r(\mu_{rQ}).
+ G_q(\mu_{qP})\ge G_r(\mu_{r,Q}).
 \tag{BC}\label{pt:eq:blockcomp}
 \end{equation}
 \end{lemma}
@@ -779,21 +853,21 @@ $G_q(\delta_q)=G_r(\delta_r)=0$,
 \[
  G_{q\otimes r}(\mu_{qP}\otimes\delta_r)=G_q(\mu_{qP}),
  \qquad
- G_{q\otimes r}(\delta_q\otimes\mu_{rQ})=G_r(\mu_{rQ}).
+ G_{q\otimes r}(\delta_q\otimes\mu_{r,Q})=G_r(\mu_{r,Q}).
 \]
 The two laws on the left lie in the same fibre and are implemented by
 $P\otimes U_B$ and $U_A\otimes Q$, so the affine fibre representation
 compares them by the displayed numbers.
 
 It remains only to remove the uninformative product coordinates.  Projection
-$A\times B\to A$ and Axiom~\textup{(A5)} give
+$A\times B\to A$ and Axiom~\textup{(A7)} give
 $(q\otimes r,P\otimes U_B)\succeq(q,P)$.  Conversely the stochastic
 embedding
 \[
  T((a,b)\mid a')=\mathbf 1_{\{a=a'\}}r(b)
 \]
 sends $q$ to $q\otimes r$ and its Bayesian pushforward sends $P$ to
-$P\otimes U_B$; Axiom~\textup{(A5)} gives the reverse comparison.  Thus the
+$P\otimes U_B$; Axiom~\textup{(A7)} gives the reverse comparison.  Thus the
 two pairs are indifferent.  The same argument identifies
 $(q\otimes r,U_A\otimes Q)$ with $(r,Q)$.  Block coherence and transitivity
 now prove~\eqref{pt:eq:blockcomp}.  Arbitrary priors follow by restricting
@@ -880,7 +954,7 @@ Implement $\nu,\nu'\in\mathcal M_{r_B}$ by channels on $B$, extend their
 off-support rows arbitrarily to $A$, and pad their record alphabets if
 necessary.  Vary only the continuation on the branch reaching $r$ from
 $\nu$ to $\nu'$.  The aggregate posterior law changes by
-$\varepsilon i_B(\nu-\nu')$.  Axiom~\textup{(A6)}, support transport, and the
+$\varepsilon i_B(\nu-\nu')$.  Axiom~\textup{(A8)}, support transport, and the
 strict clause give all three signs:
 \begin{align*}
  L_{r_B}^B(\nu-\nu')>0&\Longrightarrow
@@ -892,7 +966,7 @@ strict clause give all three signs:
 \end{align*}
 The second line is the first applied after swapping the continuations.  For
 the third, indifference supplies both weak branch comparisons, and the weak
-part of Axiom~\textup{(A6)} supplies both aggregate inequalities.  By
+part of Axiom~\textup{(A8)} supplies both aggregate inequalities.  By
 \eqref{pt:eq:tangent-space}, the sign agreement extends by positive scaling
 to all of $W_B$.  Positive trace orientation makes
 \[
@@ -971,7 +1045,7 @@ are
  =\beta_\iota(q,r)\beta_\jmath(r,s)L_s^C.
 \]
 The direct coefficient from $q$ to $s$ is unique because $L_s^C\ne0$ by
-Axiom~\textup{(A8)}.  Therefore
+Axiom~\textup{(A4)}.  Therefore
 \begin{equation}
  \beta_{\iota\circ\jmath}(q,s)
  =\beta_\iota(q,r)\beta_\jmath(r,s).
@@ -1057,7 +1131,7 @@ In this proof only, put
 \[
  H_G(q):=G_q(\chi_q),\qquad Z(q):=1+\kappa H_G(q).
 \]
-For nondegenerate $q$, Axiom~\textup{(A8)} and zero normalisation give
+For nondegenerate $q$, Axiom~\textup{(A4)} and zero normalisation give
 $H_G(q)>0$, while the strict slice-slope
 \eqref{pt:eq:QAslope} gives
 \begin{equation}
@@ -1187,7 +1261,7 @@ Thus $w$ is constant on all finite probability vectors.  Its singleton value
 is one, so $w\equiv1$.
 
 It follows that $Z\equiv1$, hence $\kappa H_G(q)=0$ for every $q$.
-Axiom~\textup{(A8)} supplies a nondegenerate $q$ with $H_G(q)>0$, so
+Axiom~\textup{(A4)} supplies a nondegenerate $q$ with $H_G(q)>0$, so
 $\kappa=0$, contradicting the temporary alternative.  Equation
 \eqref{pt:eq:ascaleZ} now gives $a_q=C$ universally.
 Dividing the product and branch formulas by $C$ proves
@@ -1209,7 +1283,7 @@ $P:A\to\Delta(X)$ satisfies
 \begin{equation}
  V_q(\mu_{qP})
  =\mathcal H(q)-\sum_{x:m_{qP}(x)>0}
-    m_{qP}(x)\mathcal H(r_x^{\,qP}).
+    m_{qP}(x)\mathcal H(r_x^{\,q,P}).
 \tag{ER}\label{pt:eq:entropy-reduction}
 \end{equation}
 Moreover,
@@ -1263,7 +1337,7 @@ $\mathcal H$ symmetric; support restriction makes it expansive under adding
 zero-probability states; and $\mathcal H(\delta_a)=0$.  Record processing
 makes every experiment weakly preferable to its no-information garbling, so
 $V_q(\mu)\ge0$ on every fibre and hence $\mathcal H(q)\ge0$.
-Axiom~\textup{(A8)} gives strict
+Axiom~\textup{(A4)} gives strict
 positivity at every nondegenerate full-support prior.
 Although \eqref{pt:eq:faddeev-recursion} was derived by partitioning the
 positive support, it also holds with zero outer weights: delete the null cells
@@ -1274,7 +1348,7 @@ expansibility.
 Write $h(t):=\mathcal H(t,1-t)$.  We derive, rather than assume, its
 continuity from Axiom~\textup{(A2)}.  Fix $c\ge0$.  Choose a full-support
 binary prior $\theta$ with $\mathcal H(\theta)>0$, as supplied by
-Axiom~\textup{(A8)}.  Choose $n\ge1$ and $\lambda\in[0,1]$ so that
+Axiom~\textup{(A4)}.  Choose $n\ge1$ and $\lambda\in[0,1]$ so that
 \[
  c=\lambda n\mathcal H(\theta).
 \]
@@ -1328,12 +1402,12 @@ bijections, expansibility, vanishing on point masses, and
 \[
  \mathcal H(q)=\alpha\Sh(q)
 \]
-for some $\alpha\ge0$.  Axiom~\textup{(A8)} forces $\alpha>0$.
+for some $\alpha\ge0$.  Axiom~\textup{(A4)} forces $\alpha>0$.
 Substitution in~\eqref{pt:eq:entropy-reduction} gives
 \[
  V_q(\mu_{qP})
  =\alpha\left(\Sh(q)-\sum_x m_{qP}(x)
-                    \Sh(r_x^{\,qP})\right)
+                    \Sh(r_x^{\,q,P})\right)
  =\alpha I_{qP}(A;X),
 \]
 where the sum is over positive-mass records.  This proves
@@ -1348,14 +1422,14 @@ $(r,Q)$,
 \[
  q^0\succeq_{P\sqcup Q}r^1
  \quad\Longleftrightarrow\quad
- I_{qP}\ge I_{rQ},
+ I_{qP}\ge I_{r,Q},
 \tag{BMI}\label{pt:eq:final-block-MI}
 \]
 including boundary priors by support restriction.  For one fixed channel,
-the duplication clause of Axiom~\textup{(A3)} identifies
+the duplication clause of Axiom~\textup{(A5)} identifies
 $q\succeq_Pq'$ with the left side of~\eqref{pt:eq:final-block-MI} for
 $Q=P$, proving the first assertion.  For the block clause,
-Axiom~\textup{(A3)} deletes all irrelevant blocks and
+Axiom~\textup{(A5)} deletes all irrelevant blocks and
 \eqref{pt:eq:final-block-MI} compares the two remaining pairs.  A lottery
 supported on block $i$ has a constant block tag, so
 \[

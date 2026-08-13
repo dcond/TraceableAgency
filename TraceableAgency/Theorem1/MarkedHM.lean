@@ -279,7 +279,7 @@ noncomputable def markedTerminalAbstractConvexMixtureSpace
 
 /-- Block preference descended to marked terminal laws. -/
 def markedTerminalMixtureRel
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     MarkedTerminalMixtureSpace (O := O) (A := A) q →
       MarkedTerminalMixtureSpace (O := O) (A := A) q → Prop :=
@@ -294,7 +294,7 @@ def markedTerminalMixtureRel
 
 @[simp]
 theorem markedTerminalMixtureRel_mk
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E G : MarkedTerminalExperiment O A) :
     markedTerminalMixtureRel F h q hq
@@ -303,7 +303,7 @@ theorem markedTerminalMixtureRel_mk
   rfl
 
 theorem markedTerminalMixtureRel_out
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (x y : MarkedTerminalMixtureSpace (O := O) (A := A) q) :
     markedTerminalMixtureRel F h q hq x y ↔
@@ -313,7 +313,7 @@ theorem markedTerminalMixtureRel_out
   rw [Quotient.out_eq x, Quotient.out_eq y]
 
 theorem markedTerminalMixtureRel_complete
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (x y : MarkedTerminalMixtureSpace (O := O) (A := A) q) :
     markedTerminalMixtureRel F h q hq x y ∨
@@ -333,7 +333,7 @@ theorem markedTerminalMixtureRel_complete
     exact (markedTerminalMixtureRel_out F h q hq y x).2 hGE
 
 theorem markedTerminalMixtureRel_transitive
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (x y z : MarkedTerminalMixtureSpace (O := O) (A := A) q) :
     markedTerminalMixtureRel F h q hq x y →
@@ -708,7 +708,7 @@ theorem markedChannelIntegral_commonPayoffCompound
 alphabet in the informative branch is supplied by deterministic sum padding;
 the strict direction is exactly the strict clause of A6. -/
 theorem markedPairWeak_publicMix_independence
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E G R : MarkedTerminalExperiment O A)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1) :
@@ -904,7 +904,7 @@ theorem markedPairWeak_publicMix_independence
 
 /-- Public-mixture independence descended to the marked-law quotient. -/
 theorem markedTerminalMixtureRel_independence
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (x y z : MarkedTerminalMixtureSpace (O := O) (A := A) q)
     (t : Set.Ioo (0 : ℝ) 1) :
@@ -1103,7 +1103,7 @@ theorem markedClosedSegment_quotient_eq_hmSegment
 /-- A2 closes the upper contour of a fixed target along the fixed-alphabet
 marked segment. -/
 theorem markedPairWeak_closedSegment_limit_left
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A)
     {tseq : ℕ → HMUnitInterval} {t : HMUnitInterval}
     (ht : Tendsto tseq atTop (𝓝 t))
@@ -1163,7 +1163,7 @@ theorem markedPairWeak_closedSegment_limit_left
 
 /-- A2 closes the lower contour of a fixed target along the same segment. -/
 theorem markedPairWeak_closedSegment_limit_right
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A)
     {tseq : ℕ → HMUnitInterval} {t : HMUnitInterval}
     (ht : Tendsto tseq atTop (𝓝 t))
@@ -1224,7 +1224,7 @@ theorem markedPairWeak_closedSegment_limit_right
 /-- Direct calibration on a marked-law segment.  Only A2 on the two fixed
 common-block alphabets is used for closedness. -/
 theorem markedTerminalMixtureRel_segment_calibration
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (high target low : MarkedTerminalMixtureSpace (O := O) (A := A) q)
     (hhigh : markedTerminalMixtureRel F h q hq high target)
@@ -1331,7 +1331,7 @@ theorem markedTerminalMixtureRel_segment_calibration
 /-- The fixed-prior marked-law order supplies exactly the hypotheses consumed
 by the generic Herstein--Milnor theorem. -/
 theorem markedTerminalHMCalibratableWeakOrder
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     HMCalibratableWeakOrder
       (markedTerminalAbstractConvexMixtureSpace (O := O) (A := A) q)
@@ -1345,7 +1345,7 @@ theorem markedTerminalHMCalibratableWeakOrder
 /-- The affine utility representation on the quotient of attainable marked
 terminal laws. -/
 noncomputable def markedTerminalAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     AffineUtilityRepresentation
       (markedTerminalAbstractConvexMixtureSpace (O := O) (A := A) q)
@@ -1358,7 +1358,7 @@ noncomputable def markedTerminalAffineUtilityRepresentation
 
 /-- Representation specialized to quotient constructors. -/
 theorem markedTerminalAffineUtility_represents_mk
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E G : MarkedTerminalExperiment O A) :
     MarkedPairWeak F q E q G ↔
@@ -1372,7 +1372,7 @@ theorem markedTerminalAffineUtility_represents_mk
 /-- Affinity specialized to quotient constructors and the concrete public
 mixture representative. -/
 theorem markedTerminalAffineUtility_affine_mk
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (t : Set.Ioo (0 : ℝ) 1) (E R : MarkedTerminalExperiment O A) :
     (markedTerminalAffineUtilityRepresentation F h q hq).utility
@@ -1389,7 +1389,7 @@ theorem markedTerminalAffineUtility_affine_mk
 
 /-- The same utility evaluated on a raw bundled experiment. -/
 noncomputable def markedAffineUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E : MarkedTerminalExperiment O A) : ℝ :=
   (markedTerminalAffineUtilityRepresentation F h q hq).utility
@@ -1397,7 +1397,7 @@ noncomputable def markedAffineUtility
 
 /-- The raw utility depends only on the full marked terminal law. -/
 theorem markedAffineUtility_respects_sameMarkedTerminalLaw
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E E' : MarkedTerminalExperiment O A)
     (hsame : SameMarkedTerminalLaw q E E') :
@@ -1408,7 +1408,7 @@ theorem markedAffineUtility_respects_sameMarkedTerminalLaw
 
 /-- The raw utility represents the paper's marked pair comparison. -/
 theorem markedAffineUtility_represents
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E G : MarkedTerminalExperiment O A) :
     MarkedPairWeak F q E q G ↔
@@ -1417,7 +1417,7 @@ theorem markedAffineUtility_represents
 
 /-- The raw utility is affine under the concrete public-coin experiment. -/
 theorem markedAffineUtility_publicMix
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
     (E R : MarkedTerminalExperiment O A) :
