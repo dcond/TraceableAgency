@@ -12,9 +12,6 @@
 - Extra project axioms: none; the theorem-side
   [`Axioms.lean`](../TraceableAgency/Theorem1/Axioms.lean) declares nothing.
 
-The historical v3 names remain compatibility declarations. They are not the
-certified v4 boundary.
-
 ## Domain and constructions
 
 | Paper anchor | Mathematical role | Lean declaration |
@@ -25,6 +22,7 @@ certified v4 boundary.
 | `eq:record-processing` | Payoff-preserving record rewrite | `RecordProcessor`, `recordPostprocess` |
 | `eq:action-processing` | Exact action-processor joint-law completion, including null rows | `IsActionProcessorCompletion` |
 | `eq:compound` | Branch-dependent sequential composition | `commonPayoffCompound` |
+| displayed mutual-information formula | Finite likelihood-ratio sum with zero-joint-mass summands set to zero | `mutualInfoLikelihoodRatio`, `mutualInfoLikelihoodRatio_eq_mutualInfo` |
 
 The block record tag is reassociated without moving the common payoff
 coordinate by `sumPayoffRecordEquiv` and `sigmaPayoffRecordEquiv`.

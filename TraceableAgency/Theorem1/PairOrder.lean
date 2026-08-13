@@ -97,8 +97,8 @@ theorem sameBlock_reverse_iff_pairWeak_swap
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     F.rel (commonPayoffBlockChannel K L)
@@ -177,8 +177,8 @@ theorem pairStrict_iff_pairWeak_not_swap
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
-    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
+    (h4 : A6_RecordDataProcessing F) (h5 : A7_ActionDataProcessing F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     pairStrict F q K p L ↔
@@ -235,7 +235,7 @@ theorem pairWeak_transitive_of_structural
     [Fintype S] [DecidableEq S] [Nonempty S]
     [Fintype T] [DecidableEq T] [Nonempty T]
     (F : FixedPayoffPrefFamily O)
-    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h1 : A1_WeakOrder F) (h3 : A5_BlockComparisonCoherence F)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S))
     (s : TraceableAgency.Dist C) (M : Channel C (O × T)) :

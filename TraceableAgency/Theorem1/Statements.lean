@@ -244,10 +244,6 @@ def IsActionProcessorCompletion
     (Channel.actionPushforward q S) b * Khat b z =
       ∑ a, q a * S a b * K a z
 
-/-- Historical v3 compatibility name.  The v4 public terminology is
-`IsActionProcessorCompletion`. -/
-abbrev IsActionReportCompletion := @IsActionProcessorCompletion
-
 /-- The canonical bijection that makes the first-stage branch label part of
 the record while leaving the terminal payoff coordinate first. -/
 def compoundPayoffRecordEquiv (Y O : Type u) (Rec : Y → Type u) :
@@ -569,59 +565,6 @@ def TraceTemperedBridgeAxioms.traceAnchor
     (_h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
   traceAnchor
 
-/-! ### Historical v3 compatibility surface -/
-
-/-- V3 A3. -/
-abbrev A3_BlockComparisonCoherence := @A5_BlockComparisonCoherence
-
-/-- V3 A4. -/
-abbrev A4_RecordDataProcessing := @A6_RecordDataProcessing
-
-/-- V3 A5. -/
-abbrev A5_ActionDataProcessing := @A7_ActionDataProcessing
-
-/-- V3 A6. -/
-abbrev A6_BranchwiseContinuationConsistency_Weak :=
-  @A8_BranchwiseContinuationConsistency_Weak
-
-/-- V3 A6. -/
-abbrev A6_BranchwiseContinuationConsistency_Strict :=
-  @A8_BranchwiseContinuationConsistency_Strict
-
-/-- V3 A6. -/
-abbrev A6_BranchwiseContinuationConsistency :=
-  @A8_BranchwiseContinuationConsistency
-
-/-- V3 A7 environment relevance. -/
-abbrev A7_MaterialRelevance := @MaterialRelevanceEnvironment
-
-/-- V3 A8 required positive trace orientation at every payoff. -/
-def A8_PositiveTraceOrientation
-    {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) : Prop :=
-  ∀ {A : Type u}
-    [Fintype A] [DecidableEq A] [Nontrivial A]
-    (q : TraceableAgency.Dist A), q.FullSupport →
-    ∀ o : O,
-      pairStrict F q (fullRevealAtPayoff (A := A) o)
-        q (uninformativeAtPayoff (A := A) o)
-
-/-- The historical v3 bundle. -/
-structure TraceTemperedAxiomsV3
-    {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) : Prop where
-  a1 : A1_WeakOrder F
-  a2 : A2_Continuity F
-  a3 : A3_BlockComparisonCoherence F
-  a4 : A4_RecordDataProcessing F
-  a5 : A5_ActionDataProcessing F
-  a6 : A6_BranchwiseContinuationConsistency F
-  a7 : A7_MaterialRelevance F
-  a8 : A8_PositiveTraceOrientation F
-
-/-- Historical name retained for source compatibility. -/
-abbrev TraceTemperedAxioms := @TraceTemperedAxiomsV3
-
 /-! ## Represented value and theorem conclusion -/
 
 /-- Expected utility of the payoff coordinate under the joint law `q(a)K(o,r|a)`. -/
@@ -675,33 +618,10 @@ def SameWitnessBlockRepresentation
     traceTemperedValue u lambda qi (K i) ≥
       traceTemperedValue u lambda qj (K j)
 
-/-- Exact single-proposition reading of Theorem 1.
-
-The payoff alphabet is chosen first and is required to have at least two
-elements.  The first conjunct is the displayed equivalence.  The second is the
-weakest literal reading of the "moreover" clause: under the axioms there are
-particular witnesses `u, lambda` that simultaneously represent within-channel
-and block-supported cross-channel comparisons. -/
-def Theorem1StatementV3 : Prop :=
-  ∀ (O : Type u) [Fintype O] [DecidableEq O],
-    2 ≤ Fintype.card O →
-    ∀ F : FixedPayoffPrefFamily O,
-      (TraceTemperedAxioms F ↔
-        ∃ (u : O → ℝ) (lambda : ℝ),
-          ¬ IsConstantPayoffIndex u ∧
-          0 < lambda ∧
-          WithinChannelRepresentation F u lambda) ∧
-      (TraceTemperedAxioms F →
-        ∃ (u : O → ℝ) (lambda : ℝ),
-          ¬ IsConstantPayoffIndex u ∧
-          0 < lambda ∧
-          WithinChannelRepresentation F u lambda ∧
-          SameWitnessBlockRepresentation F u lambda)
-
-/-- Exact v4 statement of Theorem 1.  Only the hypotheses differ from v3:
-material and trace relevance are the two fixed-channel axioms, and trace
-relevance is assumed at a single payoff.  The representation and same-witness
-finite-block conclusion are unchanged. -/
+/-- Exact v4 statement of Theorem 1.  Material and trace relevance are the two
+fixed-channel axioms, and trace relevance is assumed at a single payoff.  The
+same global witnesses represent both within-channel and finite block-supported
+comparisons. -/
 def Theorem1StatementV4 : Prop :=
   ∀ (O : Type u) [Fintype O] [DecidableEq O],
     2 ≤ Fintype.card O →
@@ -717,8 +637,5 @@ def Theorem1StatementV4 : Prop :=
           0 < lambda ∧
           WithinChannelRepresentation F u lambda ∧
           SameWitnessBlockRepresentation F u lambda)
-
-/-- Historical v3 statement name retained for compatibility. -/
-abbrev Theorem1Statement : Prop := Theorem1StatementV3.{u}
 
 end TraceableAgency.Theorem1

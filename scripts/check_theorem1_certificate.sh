@@ -32,7 +32,7 @@ fi
 echo "== Minimal statement boundary =="
 lake build TraceableAgency.Theorem1.Statements
 
-echo "== Public proof and compatibility surface =="
+echo "== Complete public proof surface =="
 lake build TraceableAgency
 lake build TraceableAgency.PureTrace.Compatibility
 

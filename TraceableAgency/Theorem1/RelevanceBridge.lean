@@ -1121,23 +1121,4 @@ theorem traceTemperedAxiomsV4_of_bridge
     a7 := h.a5
     a8 := h.a6 }
 
-/-- Historical v3 assumptions also package into the proof-facing bundle;
-this retains the prior public theorem as a compatibility corollary. -/
-theorem traceTemperedBridgeAxioms_of_v3
-    {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxiomsV3 F) :
-    ∃ traceAnchor : O, TraceTemperedBridgeAxioms F traceAnchor := by
-  obtain ⟨ostar, _ominus, _hmaterial⟩ := h.a7
-  exact ⟨ostar,
-    { a1 := h.a1
-      a2 := h.a2
-      a3 := h.a3
-      a4 := h.a4
-      a5 := h.a5
-      a6 := h.a6
-      a7 := h.a7
-      a8 := by
-        intro A _ _ _ q hq
-        exact h.a8 q hq ostar }⟩
-
 end TraceableAgency.Theorem1

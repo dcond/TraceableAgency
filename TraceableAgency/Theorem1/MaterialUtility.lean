@@ -173,7 +173,7 @@ theorem recordPostprocess_markedPayoffMix_insert
     TraceableAgency.Dist.pure_apply]
 
 theorem payoffCompoundMix_mutualPairWeak_marked
-    (F : FixedPayoffPrefFamily O) (h4 : A4_RecordDataProcessing F)
+    (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell n : TraceableAgency.Dist O) :
     pairWeak F singletonActionPrior
