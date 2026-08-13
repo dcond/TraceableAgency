@@ -33,6 +33,13 @@ jobs:
           FORCE_SOURCE_DATE: 1
           TZ: UTC
 
+      - name: Upload rebuilt v4 PDF
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: trace-tempered-choice-v4-pdf
+          path: Paper/trace_tempered_choice_v4.pdf
+          retention-days: 1
+
       - name: Check reproducible PDF
         run: git diff --exit-code -- Paper/trace_tempered_choice_v4.pdf
 
