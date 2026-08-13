@@ -139,7 +139,7 @@ private theorem sameMarkedTerminalLaw_branchInsertionCommon_rawChannel
 /-- Insertion from the support face is an exact order embedding even when the
 reached posterior is on the boundary of the ambient action simplex. -/
 theorem markedPairWeak_supportBranchInsertion_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O)
@@ -267,7 +267,7 @@ theorem markedPairWeak_supportBranchInsertion_iff
 
 /-- Exact order embedding on the two marked-terminal-law quotients. -/
 theorem supportBranchInsertionMixtureMap_rel_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O)
@@ -293,7 +293,7 @@ theorem supportBranchInsertionMixtureMap_rel_iff
 /-- Pull back the normalized outer-fibre utility along support extension and
 branch insertion. -/
 noncomputable def supportBranchInsertionPullbackAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O) :
@@ -326,7 +326,7 @@ noncomputable def supportBranchInsertionPullbackAffineUtilityRepresentation
 constant on the reached posterior's support fibre.  No numerical
 identification of that coefficient is asserted here. -/
 theorem supportBranchInsertionPullback_positiveAffine_exists
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O) :
@@ -369,7 +369,7 @@ theorem supportBranchInsertionPullback_positiveAffine_exists
 
 /-- The positive affine coefficient selected from uniqueness. -/
 noncomputable def supportBranchInsertionScale
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O) : ℝ :=
@@ -380,7 +380,7 @@ noncomputable def supportBranchInsertionScale
 /-- The additive constant selected together with the support-insertion
 coefficient. -/
 noncomputable def supportBranchInsertionOffset
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O) : ℝ :=
@@ -389,7 +389,7 @@ noncomputable def supportBranchInsertionOffset
       F h q hq P target htarget o0))
 
 theorem supportBranchInsertionScale_pos
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O) :
@@ -399,7 +399,7 @@ theorem supportBranchInsertionScale_pos
       F h q hq P target htarget o0))).1
 
 theorem supportBranchInsertionPullback_eq_scale_add_offset
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O)
@@ -421,7 +421,7 @@ theorem supportBranchInsertionPullback_eq_scale_add_offset
 /-- The positive-affine formula specialized to a raw support-face marked
 experiment. -/
 theorem normalizedMarkedUtility_supportBranchInsertion
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target) (o0 : O)

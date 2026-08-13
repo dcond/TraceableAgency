@@ -90,7 +90,7 @@ theorem rightIndependentDummy_pairWeak_neutrality
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (L : Channel B (O × R))
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
     pairWeak F p L (prodDist q p)
@@ -125,7 +125,7 @@ theorem pairWeak_iff_commonProductLifts
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S)) :
     pairWeak F q K p L ↔

@@ -125,7 +125,7 @@ theorem sameMarkedTerminalLaw_crossedPayoffBackgrounds
 /-- Changing the payoff at one branch has a normalized-value effect that is
 independent of the payoff profile in every other branch. -/
 theorem normalizedMarkedUtility_branchPayoff_difference_background_independent
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y) (o o0 : O)
     (payoff payoff' : Y → O) :

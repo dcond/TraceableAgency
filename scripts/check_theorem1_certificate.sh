@@ -36,6 +36,9 @@ echo "== Public proof and compatibility surface =="
 lake build TraceableAgency
 lake build TraceableAgency.PureTrace.Compatibility
 
+echo "== Exact v4 declaration surface =="
+lake build TraceableAgency.Audit.V4Certificate
+
 echo "== Recursive kernel and dependency audits =="
 lake build TraceableAgency.Audit
 
@@ -50,7 +53,7 @@ echo "== Fresh kernel replay =="
 if [[ "${TRACEABLE_SKIP_FRESH_CHECKER:-0}" == "1" ]]; then
   echo "fresh replay is reserved for the full local certificate"
 else
-  lake env leanchecker --fresh TraceableAgency.Theorem1.Proof
+  lake env leanchecker --fresh TraceableAgency.Audit.V4Certificate
 fi
 
 echo "Theorem 1 certificate passed."

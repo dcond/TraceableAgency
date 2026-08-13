@@ -5,17 +5,17 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import TraceableAgency.Theorem1.FullSupportValueAssembly
 import TraceableAgency.Theorem1.RepresentationAssembly
+import TraceableAgency.Theorem1.PositiveBranchIncrement
 import TraceableAgency.Theorem1.Benchmark
+import TraceableAgency.Theorem1.RelevanceBridge
 
 /-!
 # Final closure of Trace-Tempered Choice, Theorem 1
 
-This module packages the last logical step of the proof.  Once the reached-
-branch payoff increment formula is available, the full-support value assembly
-gives the canonical numerical formula.  The representation assembly then gives
-both the within-channel representation and the finite-block moreover clause
-with exactly the same material utility and trace coefficient.  The converse
-direction is the already kernel-checked benchmark implication.
+The fixed-channel relevance bridge chooses the single trace anchor from v4
+inside the proposition being proved.  The anchor-indexed proof bundle then
+feeds the branch increment, full-support value assembly, and representation
+assembly.  The converse returns to the exact fixed A3/A4 benchmark channels.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -24,26 +24,19 @@ open TraceableAgency
 
 universe u
 
-/-- The one remaining premise, quantified at exactly the scope needed to close
-`Theorem1Statement`. -/
-def Theorem1PositiveBranchPayoffIncrementPremise : Prop :=
-  ∀ (O : Type u) [Fintype O] [DecidableEq O],
-    2 ≤ Fintype.card O →
-    ∀ (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F),
-      PositiveBranchPayoffIncrementFormula F h
-
-/-- For a fixed preference family satisfying the axioms, the positive reached-
-branch payoff increment formula supplies the complete representation witnesses,
-including the same-witness block comparison clause. -/
-theorem traceTemperedAxioms_imply_representation_and_block_of_positiveBranchPayoffIncrement
+/-- An anchor-indexed semantic axiom bundle yields one set of representation
+witnesses, including the same-witness finite-block clause. -/
+theorem traceTemperedBridgeAxioms_imply_representation_and_block
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (hpositive : PositiveBranchPayoffIncrementFormula F h) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O}
+    (h : TraceTemperedBridgeAxioms F traceAnchor) :
     ∃ (u : O → ℝ) (lambda : ℝ),
       ¬ IsConstantPayoffIndex u ∧
       0 < lambda ∧
       WithinChannelRepresentation F u lambda ∧
       SameWitnessBlockRepresentation F u lambda := by
+  have hpositive : PositiveBranchPayoffIncrementFormula F h :=
+    positiveBranchPayoffIncrementFormula F h
   have hvalue : FullSupportNormalizedValueFormula F h :=
     fullSupportNormalizedValueFormula_of_positiveBranchPayoffIncrement
       F h hpositive
@@ -53,21 +46,16 @@ theorem traceTemperedAxioms_imply_representation_and_block_of_positiveBranchPayo
     materialPayoffUtility_nonconstant F h, globalTraceLambda_pos F h,
     hwithin, hblock⟩
 
-/-- Fixed-family closure: a branch-increment proof for every axioms witness
-gives both clauses appearing under the payoff-alphabet quantifier in
-`Theorem1Statement`.  The reverse implication uses the benchmark construction
-for all eight axioms. -/
-theorem theorem1Clauses_of_positiveBranchPayoffIncrement
+/-- Fixed-family closure for the exact v4 axioms. -/
+theorem theorem1V4Clauses
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O)
-    (hpositive : ∀ h : TraceTemperedAxioms F,
-      PositiveBranchPayoffIncrementFormula F h) :
-    (TraceTemperedAxioms F ↔
+    (F : FixedPayoffPrefFamily O) :
+    (TraceTemperedAxiomsV4 F ↔
       ∃ (u : O → ℝ) (lambda : ℝ),
         ¬ IsConstantPayoffIndex u ∧
         0 < lambda ∧
         WithinChannelRepresentation F u lambda) ∧
-    (TraceTemperedAxioms F →
+    (TraceTemperedAxiomsV4 F →
       ∃ (u : O → ℝ) (lambda : ℝ),
         ¬ IsConstantPayoffIndex u ∧
         0 < lambda ∧
@@ -75,27 +63,59 @@ theorem theorem1Clauses_of_positiveBranchPayoffIncrement
         SameWitnessBlockRepresentation F u lambda) := by
   constructor
   · constructor
-    · intro h
+    · intro hv4
+      obtain ⟨_traceAnchor, hbridge⟩ :=
+        traceTemperedBridgeAxioms_of_v4 F hv4
       obtain ⟨u, lambda, hnonconstant, hlambda, hwithin, _hblock⟩ :=
-        traceTemperedAxioms_imply_representation_and_block_of_positiveBranchPayoffIncrement
-          F h (hpositive h)
+        traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
+      exact ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
+    · rintro ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
+      exact traceTemperedAxiomsV4_of_representation
+        hnonconstant hlambda hwithin
+  · intro hv4
+    obtain ⟨_traceAnchor, hbridge⟩ :=
+      traceTemperedBridgeAxioms_of_v4 F hv4
+    exact traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
+
+/-- Complete exact v4 statement, including the same-witness clause. -/
+theorem theorem1StatementV4 : Theorem1StatementV4.{u} := by
+  intro O _instFintype _instDecidableEq _hcard F
+  exact theorem1V4Clauses F
+
+/-- Compatibility closure for the historical v3 bundle. -/
+theorem theorem1V3Clauses
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) :
+    (TraceTemperedAxiomsV3 F ↔
+      ∃ (u : O → ℝ) (lambda : ℝ),
+        ¬ IsConstantPayoffIndex u ∧
+        0 < lambda ∧
+        WithinChannelRepresentation F u lambda) ∧
+    (TraceTemperedAxiomsV3 F →
+      ∃ (u : O → ℝ) (lambda : ℝ),
+        ¬ IsConstantPayoffIndex u ∧
+        0 < lambda ∧
+        WithinChannelRepresentation F u lambda ∧
+        SameWitnessBlockRepresentation F u lambda) := by
+  constructor
+  · constructor
+    · intro hv3
+      obtain ⟨_traceAnchor, hbridge⟩ :=
+        traceTemperedBridgeAxioms_of_v3 F hv3
+      obtain ⟨u, lambda, hnonconstant, hlambda, hwithin, _hblock⟩ :=
+        traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
       exact ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
     · rintro ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
       exact traceTemperedAxioms_of_representation
         hnonconstant hlambda hwithin
-  · intro h
-    exact
-      traceTemperedAxioms_imply_representation_and_block_of_positiveBranchPayoffIncrement
-        F h (hpositive h)
+  · intro hv3
+    obtain ⟨_traceAnchor, hbridge⟩ :=
+      traceTemperedBridgeAxioms_of_v3 F hv3
+    exact traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
 
-/-- The complete formal theorem follows from a proof of the single remaining
-positive-branch increment premise for every payoff alphabet and preference
-family in its stated scope. -/
-theorem theorem1Statement_of_positiveBranchPayoffIncrement
-    (hpositive : Theorem1PositiveBranchPayoffIncrementPremise.{u}) :
-    Theorem1Statement.{u} := by
+/-- Historical statement retained as a proved compatibility theorem. -/
+theorem theorem1StatementV3 : Theorem1StatementV3.{u} := by
   intro O _instFintype _instDecidableEq _hcard F
-  exact theorem1Clauses_of_positiveBranchPayoffIncrement F
-    (fun h ↦ hpositive O _hcard F h)
+  exact theorem1V3Clauses F
 
 end TraceableAgency.Theorem1

@@ -524,7 +524,7 @@ forward direction is A6-weak, while the reverse direction follows from local
 completeness and A6-strict at the reached branch. -/
 theorem pairWeak_branchInsertionCommon_iff
     {R : Type u} [Fintype R] [DecidableEq R] [Nonempty R]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (P : Channel A Y)
     (target : Y) (htarget : BranchPositive P q target) (o0 : O)
     (K L : Channel A (O × R)) :
@@ -602,7 +602,7 @@ theorem pairWeak_branchInsertionCommon_iff
 image under insertion.  Sum padding gives A6 one common target record type;
 the reverse implication uses completeness locally and A6's strict clause. -/
 theorem markedPairWeak_branchInsertion_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -791,7 +791,7 @@ theorem markedPairWeak_branchInsertion_iff
 
 /-- Exact order embedding on the marked-terminal-law quotients. -/
 theorem branchInsertionMixtureMap_rel_iff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -817,7 +817,7 @@ theorem branchInsertionMixtureMap_rel_iff
 insertion.  Exact order reflection and public-mixture preservation make this
 an affine representation of the local marked order. -/
 noncomputable def branchInsertionPullbackAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -844,7 +844,7 @@ noncomputable def branchInsertionPullbackAffineUtilityRepresentation
 /-- The local normalized marked representative is nonconstant, witnessed by
 the material high and low anchors. -/
 theorem normalizedMarkedAffineUtility_nonconstant
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (r : TraceableAgency.Dist A) (hr : r.FullSupport) :
     ∃ x y : MarkedTerminalMixtureSpace (O := O) (A := A) r,
       (normalizedMarkedAffineUtilityRepresentation F h r hr).utility x ≠
@@ -860,7 +860,7 @@ theorem normalizedMarkedAffineUtility_nonconstant
 /-- Positive-affine uniqueness supplies a slope and intercept relating the
 outer pullback to the locally normalized marked representative. -/
 theorem branchInsertionPullback_positiveAffine_exists
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -887,7 +887,7 @@ theorem branchInsertionPullback_positiveAffine_exists
 
 /-- The selected positive slope of the branch-insertion affine pullback. -/
 noncomputable def branchInsertionAffineSlope
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -899,7 +899,7 @@ noncomputable def branchInsertionAffineSlope
 
 /-- The selected intercept paired with `branchInsertionAffineSlope`. -/
 noncomputable def branchInsertionAffineIntercept
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -910,7 +910,7 @@ noncomputable def branchInsertionAffineIntercept
       F h q hq P target htarget hr o0))
 
 theorem branchInsertionAffineSlope_pos
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -924,7 +924,7 @@ theorem branchInsertionAffineSlope_pos
 
 /-- Pointwise positive-affine formula on the local marked-law quotient. -/
 theorem branchInsertionAffineFormula
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)
@@ -948,7 +948,7 @@ theorem branchInsertionAffineFormula
 
 /-- The same affine formula specialized to a raw marked experiment. -/
 theorem normalizedMarkedUtility_branchInsertion
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y)
     (htarget : BranchPositive P q target)

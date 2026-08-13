@@ -11,10 +11,11 @@ import TraceableAgency.Theorem1.PureMarkedEmbedding
 # A single trace scale on all nontrivial full-support fibres
 
 The normalized marked-terminal representative is pulled back through the
-constant-low-payoff embedding.  Affine uniqueness identifies that pullback
-with a positive multiple of mutual information, with zero intercept.  Exact
-normalization under independent dummy actions then identifies the multiplier
-across all nontrivial full-support finite action alphabets.
+constant-payoff embedding at the separate v4 trace anchor.  Affine uniqueness
+identifies the intercept as the normalized material value of that anchor and
+the slope as a positive multiple of mutual information.  Exact normalization
+under independent dummy actions then identifies the multiplier across all
+nontrivial full-support finite action alphabets.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -31,9 +32,9 @@ variable [Fintype B] [DecidableEq B] [Nonempty B]
 /-! ## The normalized fixed-payoff pullback -/
 
 /-- Pull the normalized marked representative back to the pure posterior-law
-space at the chosen low material payoff. -/
-noncomputable def normalizedConstantLowPullbackAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+space at the v4 trace anchor. -/
+noncomputable def normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     AffineUtilityRepresentation
       (posteriorLawAbstractConvexMixtureSpace q) (pureMIRel q) :=
@@ -42,113 +43,125 @@ noncomputable def normalizedConstantLowPullbackAffineUtilityRepresentation
     (markedTerminalAbstractConvexMixtureSpace q)
     (pureMIRel q) (markedTerminalMixtureRel F h q hq)
     (normalizedMarkedAffineUtilityRepresentation F h q hq)
-    (constantPayoffMarkedEmbedding q (materialLowOutcome F h))
-    (constantPayoffMarkedEmbedding_order_iff F h q hq
-      (materialLowOutcome F h))
-    (constantPayoffMarkedEmbedding_mix q (materialLowOutcome F h))
+    (constantPayoffMarkedEmbedding q h.traceAnchor)
+    (constantPayoffMarkedEmbedding_order_iff F h q hq)
+    (constantPayoffMarkedEmbedding_mix q h.traceAnchor)
 
-/-- The constant-low lift of the uninformative experiment has the same marked
-terminal law as the degenerate low-payoff lottery. -/
-theorem sameMarkedTerminalLaw_constantLow_uninformative
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+/-- The trace-anchor lift of the uninformative experiment has the same marked
+terminal law as the degenerate trace-anchor payoff lottery. -/
+theorem sameMarkedTerminalLaw_constantTraceAnchor_uninformative
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) :
     SameMarkedTerminalLaw q
-      (constantPayoffMarkedExperiment (materialLowOutcome F h)
+      (constantPayoffMarkedExperiment (h.traceAnchor)
         (uninformativeExperiment A))
-      (markedMaterialLowExperiment (A := A) F h) := by
+      (markedPayoffLotteryExperiment (A := A)
+        (TraceableAgency.Dist.pure h.traceAnchor)) := by
   intro phi
   rw [markedTerminalIntegral_constantPayoffMarkedExperiment]
   change posteriorLawIntegralExp q
       (experimentOfChannel (Channel.uninformativeChannelU A))
-        (fun p => phi (materialLowOutcome F h, p)) = _
+        (fun p => phi (h.traceAnchor, p)) = _
   rw [posteriorLawIntegralExp_uninformativeChannelU_eq_prior,
     markedTerminalIntegral_markedPayoffLottery]
   unfold payoffLotteryExpected
   simp [TraceableAgency.Dist.pure_apply]
 
-/-- Zero information and the low-payoff normalization identify the additive
-constant in affine uniqueness as zero. -/
-theorem normalizedConstantLow_uninformative_eq_zero
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+/-- Zero information identifies the affine intercept as the normalized
+material utility of the trace anchor. -/
+theorem normalizedConstantTraceAnchor_uninformative_eq_materialUtility
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     normalizedMarkedUtility F h q hq
-      (constantPayoffMarkedExperiment (materialLowOutcome F h)
-        (uninformativeExperiment A)) = 0 := by
+      (constantPayoffMarkedExperiment (h.traceAnchor)
+        (uninformativeExperiment A)) =
+      materialPayoffUtility F h h.traceAnchor := by
   calc
     normalizedMarkedUtility F h q hq
-        (constantPayoffMarkedExperiment (materialLowOutcome F h)
+        (constantPayoffMarkedExperiment (h.traceAnchor)
           (uninformativeExperiment A)) =
         normalizedMarkedUtility F h q hq
-          (markedMaterialLowExperiment (A := A) F h) :=
+          (markedPayoffLotteryExperiment (A := A)
+            (TraceableAgency.Dist.pure h.traceAnchor)) :=
       normalizedMarkedUtility_respects_sameMarkedTerminalLaw F h q hq _ _
-        (sameMarkedTerminalLaw_constantLow_uninformative F h q)
-    _ = 0 := normalizedMarkedUtility_low F h q hq
+        (sameMarkedTerminalLaw_constantTraceAnchor_uninformative F h q)
+    _ = materialPayoffUtility F h h.traceAnchor := by
+      have hv := normalizedMarkedUtility_payoffLottery
+        (A := A) F h q hq (TraceableAgency.Dist.pure h.traceAnchor)
+      rw [expectedPayoffUtility_payoffLotteryChannel] at hv
+      simpa [payoffLotteryExpected, TraceableAgency.Dist.pure_apply] using hv
 
 /-- On a nontrivial full-support fibre, normalized marked utility at the
-chosen constant low payoff is a positive multiple of mutual information. -/
-theorem normalizedConstantLow_positiveMultiple_exists
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+trace anchor is its material intercept plus a positive multiple of mutual
+information. -/
+theorem normalizedConstantTraceAnchor_positiveMultiple_exists
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A] :
     ∃ a : ℝ, 0 < a ∧
       ∀ x : PosteriorLawMixtureSpace q,
-        (normalizedConstantLowPullbackAffineUtilityRepresentation
-          F h q hq).utility x = a * pureMIUtility q x := by
+        (normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation
+          F h q hq).utility x =
+            materialPayoffUtility F h h.traceAnchor +
+              a * pureMIUtility q x := by
   obtain ⟨a, b, ha, hab⟩ :=
     affineUtilityRepresentation_positiveAffine_unique
       (posteriorLawAbstractConvexMixtureSpace q) (pureMIRel q)
       (pureMIAffineUtilityRepresentation q)
-      (normalizedConstantLowPullbackAffineUtilityRepresentation F h q hq)
+      (normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation F h q hq)
       (pureMIAffineUtility_nonconstant q hq)
   let x0 : PosteriorLawMixtureSpace q := ⟦uninformativeExperiment A⟧
   have hzero := hab x0
-  have hb : b = 0 := by
+  have hb : b = materialPayoffUtility F h h.traceAnchor := by
     change
       normalizedMarkedUtility F h q hq
-          (constantPayoffMarkedExperiment (materialLowOutcome F h)
+          (constantPayoffMarkedExperiment (h.traceAnchor)
             (uninformativeExperiment A)) =
         a * mutualInfo q (Channel.uninformativeChannelU A) + b at hzero
-    rw [normalizedConstantLow_uninformative_eq_zero,
+    rw [normalizedConstantTraceAnchor_uninformative_eq_materialUtility,
       mutualInfo_uninformativeChannelU] at hzero
     linarith
   refine ⟨a, ha, ?_⟩
   intro x
   rw [hab x, hb]
   simp [pureMIAffineUtilityRepresentation]
+  ring
 
 /-- The positive mutual-information coefficient on one full-support fibre. -/
 noncomputable def traceLambdaAtPrior
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A] : ℝ :=
-  Classical.choose (normalizedConstantLow_positiveMultiple_exists F h q hq)
+  Classical.choose (normalizedConstantTraceAnchor_positiveMultiple_exists F h q hq)
 
 theorem traceLambdaAtPrior_pos
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A] :
     0 < traceLambdaAtPrior F h q hq :=
   (Classical.choose_spec
-    (normalizedConstantLow_positiveMultiple_exists F h q hq)).1
+    (normalizedConstantTraceAnchor_positiveMultiple_exists F h q hq)).1
 
-theorem normalizedConstantLow_eq_traceLambdaAtPrior_mul_pureMI
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+theorem normalizedConstantTraceAnchor_eq_traceLambdaAtPrior_mul_pureMI
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
     (x : PosteriorLawMixtureSpace q) :
-    (normalizedConstantLowPullbackAffineUtilityRepresentation
+    (normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation
       F h q hq).utility x =
-      traceLambdaAtPrior F h q hq * pureMIUtility q x :=
+      materialPayoffUtility F h h.traceAnchor +
+        traceLambdaAtPrior F h q hq * pureMIUtility q x :=
   (Classical.choose_spec
-    (normalizedConstantLow_positiveMultiple_exists F h q hq)).2 x
+    (normalizedConstantTraceAnchor_positiveMultiple_exists F h q hq)).2 x
 
-theorem normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+theorem normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
     (E : FiniteExperimentOn A) :
     normalizedMarkedUtility F h q hq
-        (constantPayoffMarkedExperiment (materialLowOutcome F h) E) =
-      traceLambdaAtPrior F h q hq *
+        (constantPayoffMarkedExperiment (h.traceAnchor) E) =
+      materialPayoffUtility F h h.traceAnchor +
+        traceLambdaAtPrior F h q hq *
         @mutualInfo A E.OutcomeType _ E.outFintype q E.P := by
-  simpa [normalizedConstantLowPullbackAffineUtilityRepresentation,
+  simpa [normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation,
     pullbackAffineUtility, normalizedMarkedUtility] using
-      normalizedConstantLow_eq_traceLambdaAtPrior_mul_pureMI
+      normalizedConstantTraceAnchor_eq_traceLambdaAtPrior_mul_pureMI
         F h q hq (⟦E⟧ : PosteriorLawMixtureSpace q)
 
 /-! ## Pure dummy lifts and mutual information -/
@@ -280,7 +293,7 @@ theorem rightIndependentDummyMarkedExperiment_constantPayoff
 /-- Passing from a nontrivial fibre to a product fibre by adjoining a right
 dummy preserves its positive mutual-information coefficient. -/
 theorem traceLambdaAtPrior_prod_left
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport) [Nontrivial A] :
     traceLambdaAtPrior F h (prodDist q r)
@@ -288,18 +301,19 @@ theorem traceLambdaAtPrior_prod_left
       traceLambdaAtPrior F h q hq := by
   let E : FiniteExperimentOn A :=
     FiniteExperimentOn.ofChannel (Channel.idChannel : Channel A A)
+  letI : Fintype E.OutcomeType := E.outFintype
   let ED : FiniteExperimentOn (A × B) :=
     pureIndependentDummyExperiment (B := B) E
   have hsource :=
-    normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo
+    normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo
       F h q hq E
   have htarget :=
-    normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo
+    normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo
       F h (prodDist q r)
         (markedDummy_prodDist_fullSupport q r hq hr) ED
   have hpreserve := normalizedMarkedUtility_independentDummy
     F h q r hq hr
-      (constantPayoffMarkedExperiment (materialLowOutcome F h) E)
+      (constantPayoffMarkedExperiment (h.traceAnchor) E)
   rw [independentDummyMarkedExperiment_constantPayoff] at hpreserve
   rw [htarget, hsource] at hpreserve
   have hmi :
@@ -308,12 +322,10 @@ theorem traceLambdaAtPrior_prod_left
     dsimp only [ED]
     exact mutualInfo_pureIndependentDummyExperiment (B := B) q r E
   rw [hmi] at hpreserve
-  change traceLambdaAtPrior F h (prodDist q r)
-      (markedDummy_prodDist_fullSupport q r hq hr) *
-        mutualInfo q (Channel.idChannel : Channel A A) =
-    traceLambdaAtPrior F h q hq *
-      mutualInfo q (Channel.idChannel : Channel A A) at hpreserve
-  rw [mutualInfo_idChannel'] at hpreserve
+  have hmiId : mutualInfo q E.P = entropy q := by
+    dsimp only [E, FiniteExperimentOn.ofChannel]
+    exact mutualInfo_idChannel' q
+  rw [hmiId] at hpreserve
   have hentropy : 0 < entropy q :=
     entropy_pos_of_fullSupport_nontrivial q hq
   nlinarith
@@ -321,7 +333,7 @@ theorem traceLambdaAtPrior_prod_left
 /-- Passing from a nontrivial right-coordinate fibre to the same product
 fibre preserves its coefficient. -/
 theorem traceLambdaAtPrior_prod_right
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (r : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hr : r.FullSupport) [Nontrivial B] :
     traceLambdaAtPrior F h (prodDist q r)
@@ -329,18 +341,19 @@ theorem traceLambdaAtPrior_prod_right
       traceLambdaAtPrior F h r hr := by
   let E : FiniteExperimentOn B :=
     FiniteExperimentOn.ofChannel (Channel.idChannel : Channel B B)
+  letI : Fintype E.OutcomeType := E.outFintype
   let ED : FiniteExperimentOn (A × B) :=
     pureRightIndependentDummyExperiment (A := A) E
   have hsource :=
-    normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo
+    normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo
       F h r hr E
   have htarget :=
-    normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo
+    normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo
       F h (prodDist q r)
         (markedDummy_prodDist_fullSupport q r hq hr) ED
   have hpreserve := normalizedMarkedUtility_rightIndependentDummy
     F h q r hq hr
-      (constantPayoffMarkedExperiment (materialLowOutcome F h) E)
+      (constantPayoffMarkedExperiment (h.traceAnchor) E)
   rw [rightIndependentDummyMarkedExperiment_constantPayoff] at hpreserve
   rw [htarget, hsource] at hpreserve
   have hmi :
@@ -349,12 +362,10 @@ theorem traceLambdaAtPrior_prod_right
     dsimp only [ED]
     exact mutualInfo_pureRightIndependentDummyExperiment (A := A) q r E
   rw [hmi] at hpreserve
-  change traceLambdaAtPrior F h (prodDist q r)
-      (markedDummy_prodDist_fullSupport q r hq hr) *
-        mutualInfo r (Channel.idChannel : Channel B B) =
-    traceLambdaAtPrior F h r hr *
-      mutualInfo r (Channel.idChannel : Channel B B) at hpreserve
-  rw [mutualInfo_idChannel'] at hpreserve
+  have hmiId : mutualInfo r E.P = entropy r := by
+    dsimp only [E, FiniteExperimentOn.ofChannel]
+    exact mutualInfo_idChannel' r
+  rw [hmiId] at hpreserve
   have hentropy : 0 < entropy r :=
     entropy_pos_of_fullSupport_nontrivial r hr
   nlinarith
@@ -375,19 +386,19 @@ theorem traceReferencePrior_fullSupport :
 
 /-- The single trace multiplier, fixed on the uniform lifted-Bool fibre. -/
 noncomputable def globalTraceLambda
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) : ℝ :=
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : ℝ :=
   traceLambdaAtPrior F h traceReferencePrior.{u}
     traceReferencePrior_fullSupport.{u}
 
 theorem globalTraceLambda_pos
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     0 < globalTraceLambda F h :=
   traceLambdaAtPrior_pos F h traceReferencePrior.{u}
     traceReferencePrior_fullSupport.{u}
 
 /-- Every nontrivial full-support finite fibre has the reference coefficient. -/
 theorem traceLambdaAtPrior_eq_globalTraceLambda
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A] :
     traceLambdaAtPrior F h q hq = globalTraceLambda F h := by
   let r : TraceableAgency.Dist TraceReferenceAction.{u} :=
@@ -397,27 +408,29 @@ theorem traceLambdaAtPrior_eq_globalTraceLambda
     (traceLambdaAtPrior_prod_left F h q r hq hr).symm.trans
       (traceLambdaAtPrior_prod_right F h q r hq hr)
 
-/-- Quotient-level global trace formula at the chosen low material payoff. -/
-theorem normalizedConstantLow_eq_globalTraceLambda_mul_pureMI
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+/-- Quotient-level global trace formula at the separate v4 trace anchor. -/
+theorem normalizedConstantTraceAnchor_eq_globalTraceLambda_mul_pureMI
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
     (x : PosteriorLawMixtureSpace q) :
-    (normalizedConstantLowPullbackAffineUtilityRepresentation
+    (normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation
       F h q hq).utility x =
-      globalTraceLambda F h * pureMIUtility q x := by
-  rw [normalizedConstantLow_eq_traceLambdaAtPrior_mul_pureMI,
+      materialPayoffUtility F h h.traceAnchor +
+        globalTraceLambda F h * pureMIUtility q x := by
+  rw [normalizedConstantTraceAnchor_eq_traceLambdaAtPrior_mul_pureMI,
     traceLambdaAtPrior_eq_globalTraceLambda]
 
-/-- Raw-experiment global trace formula at the chosen low material payoff. -/
-theorem normalizedMarkedUtility_constantLow_eq_globalTraceLambda_mul_mutualInfo
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+/-- Raw-experiment global trace formula at the separate v4 trace anchor. -/
+theorem normalizedMarkedUtility_constantTraceAnchor_eq_globalTraceLambda_mul_mutualInfo
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
     (E : FiniteExperimentOn A) :
     normalizedMarkedUtility F h q hq
-        (constantPayoffMarkedExperiment (materialLowOutcome F h) E) =
-      globalTraceLambda F h *
+        (constantPayoffMarkedExperiment (h.traceAnchor) E) =
+      materialPayoffUtility F h h.traceAnchor +
+        globalTraceLambda F h *
         @mutualInfo A E.OutcomeType _ E.outFintype q E.P := by
-  rw [normalizedMarkedUtility_constantLow_eq_traceLambdaAtPrior_mul_mutualInfo,
+  rw [normalizedMarkedUtility_constantTraceAnchor_eq_traceLambdaAtPrior_mul_mutualInfo,
     traceLambdaAtPrior_eq_globalTraceLambda]
 
 end TraceableAgency.Theorem1

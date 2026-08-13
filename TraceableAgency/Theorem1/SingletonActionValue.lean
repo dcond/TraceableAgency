@@ -103,7 +103,7 @@ theorem expectedPayoffUtility_inducedPayoffLottery
 /-- The target normalized trace-tempered formula in the degenerate action
 case. -/
 theorem normalizedMarkedUtility_eq_traceTemperedValue_of_subsingleton
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (K : Channel A (O × R)) :
     normalizedMarkedUtility F h q hq (markedExperimentOfChannel K) =

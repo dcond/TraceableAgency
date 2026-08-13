@@ -6,13 +6,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import TraceableAgency.Theorem1.GlobalTraceScale
 
 /-!
-# Constant-low marked experiments
+# Constant-trace-anchor marked experiments
 
-Any marked experiment whose payoff coordinate is surely the chosen material
-low outcome is exactly the constant-payoff lift of the pure experiment carried
-by its record coordinate.  Consequently its normalized marked utility is the
-global trace coefficient times the mutual information of its original joint
-channel.
+Any marked experiment whose payoff coordinate is surely the separate v4 trace
+anchor is exactly the constant-payoff lift of the pure experiment carried by
+its record coordinate.  Consequently its normalized marked utility is the
+material value of the anchor plus the global trace coefficient times mutual
+information.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -180,48 +180,45 @@ theorem sameMarkedTerminalLaw_surePayoffRecordExperiment
               EP.P) q z)
   rw [hK]
 
-/-! ## Global constant-low formula -/
+/-! ## Global constant-trace-anchor formula -/
 
-/-- A pointwise sure-low marked experiment has normalized value equal to the
-single global trace coefficient times the mutual information of its original
-joint payoff-record channel. -/
-theorem normalizedMarkedUtility_eq_globalTraceLambda_mul_mutualInfo_of_sureLow
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+/-- A pointwise sure-trace-anchor marked experiment has normalized value equal
+to the anchor's material utility plus the single global trace coefficient
+times mutual information. -/
+theorem normalizedMarkedUtility_eq_materialUtility_add_globalTraceLambda_mul_mutualInfo_of_sureTraceAnchor
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
     (E : MarkedTerminalExperiment O A)
     (hLow : ∀ (a : A) (o : O) (r : E.RecordType),
-      o ≠ materialLowOutcome F h → E.K a (o, r) = 0) :
+      o ≠ h.traceAnchor → E.K a (o, r) = 0) :
     normalizedMarkedUtility F h q hq E =
-      globalTraceLambda F h *
+      materialPayoffUtility F h h.traceAnchor +
+        globalTraceLambda F h *
         @mutualInfo A (O × E.RecordType) inferInstance
           (@instFintypeProd O E.RecordType inferInstance E.recordFintype)
           q E.K := by
   letI : Fintype E.RecordType := E.recordFintype
   letI : DecidableEq E.RecordType := E.recordDecEq
   letI : Nonempty E.RecordType := E.recordNonempty
-  let EP := surePayoffRecordExperiment (materialLowOutcome F h) E hLow
+  let EP := surePayoffRecordExperiment (h.traceAnchor) E hLow
   letI : Fintype EP.OutcomeType := EP.outFintype
   letI : DecidableEq EP.OutcomeType := EP.outDecEq
   have hsame := sameMarkedTerminalLaw_surePayoffRecordExperiment q
-    (materialLowOutcome F h) E hLow
+    (h.traceAnchor) E hLow
   calc
     normalizedMarkedUtility F h q hq E =
         normalizedMarkedUtility F h q hq
-          (constantPayoffMarkedExperiment (materialLowOutcome F h) EP) :=
+          (constantPayoffMarkedExperiment (h.traceAnchor) EP) :=
       normalizedMarkedUtility_respects_sameMarkedTerminalLaw
         F h q hq _ _ hsame
-    _ = globalTraceLambda F h * mutualInfo q EP.P := by
-      exact normalizedMarkedUtility_constantLow_eq_globalTraceLambda_mul_mutualInfo
+    _ = materialPayoffUtility F h h.traceAnchor +
+        globalTraceLambda F h * mutualInfo q EP.P := by
+      exact normalizedMarkedUtility_constantTraceAnchor_eq_globalTraceLambda_mul_mutualInfo
         F h q hq EP
-    _ = globalTraceLambda F h * mutualInfo q E.K := by
-      congr 1
-      calc
-        mutualInfo q EP.P =
-            mutualInfo q (constantPayoffLift (materialLowOutcome F h) EP.P) :=
-          (mutualInfo_constantPayoffLift
-            (materialLowOutcome F h) q EP.P).symm
-        _ = mutualInfo q E.K := by
-          rw [constantPayoffLift_surePayoffRecordExperiment
-            (materialLowOutcome F h) E hLow]
+    _ = materialPayoffUtility F h h.traceAnchor +
+        globalTraceLambda F h * mutualInfo q E.K := by
+      rw [← mutualInfo_constantPayoffLift h.traceAnchor q EP.P,
+        constantPayoffLift_surePayoffRecordExperiment
+          h.traceAnchor E hLow]
 
 end TraceableAgency.Theorem1

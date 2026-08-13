@@ -84,7 +84,7 @@ theorem sameMarkedTerminalLaw_branchInsertion_purePayoff
 /-- Consequently the two concrete experiments receive the same normalized
 marked utility on every full-support outer fibre. -/
 theorem normalizedMarkedUtility_branchInsertion_purePayoff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y) (o0 o : O) :
     normalizedMarkedUtility F h q hq

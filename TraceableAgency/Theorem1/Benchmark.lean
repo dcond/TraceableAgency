@@ -8,6 +8,7 @@ import TraceableAgency.Info.Identities
 import TraceableAgency.PureTrace.Behaviour.Representation
 import TraceableAgency.PureTrace.Support.GenericFaddeev
 import TraceableAgency.Theorem1.Statements
+import TraceableAgency.Theorem1.RelevanceBridge
 
 /-!
 # Benchmark direction for trace-tempered choice
@@ -485,7 +486,7 @@ theorem a3_blockCoherence_of_representation
     rw [traceTemperedValue_commonBlockFamily_embed,
       traceTemperedValue_commonBlockFamily_embed]
 
-/-! ## Payoff-preserving and action-report data processing -/
+/-! ## Payoff-preserving and action-processor data processing -/
 
 theorem expectedUtilityAlong_postprocess
     {O A X Y : Type u}
@@ -563,7 +564,7 @@ theorem a4_recordDataProcessing_of_representation
   simpa [add_comm, recordPostprocess] using
     (add_le_add_left hscaled (expectedPayoffUtility u q K))
 
-theorem bayesCompletion_of_actionReportCompletion
+theorem bayesCompletion_of_actionProcessorCompletion
     {O A B R : Type u}
     [Fintype O]
     [Fintype A]
@@ -571,13 +572,13 @@ theorem bayesCompletion_of_actionReportCompletion
     [Fintype R]
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A)
     (S : Channel.ActionKernel A B) (Khat : Channel B (O × R))
-    (hcompletion : IsActionReportCompletion K q S Khat) :
+    (hcompletion : IsActionProcessorCompletion K q S Khat) :
     Channel.IsBayesPushforwardCompletion K q S Khat := by
   intro b hb z
   apply (eq_div_iff (ne_of_gt hb)).2
   simpa [mul_comm] using hcompletion b z
 
-theorem expectedPayoffUtility_actionReport
+theorem expectedPayoffUtility_actionProcessor
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -586,13 +587,13 @@ theorem expectedPayoffUtility_actionReport
     (u : O → ℝ)
     (K : Channel A (O × R)) (q : TraceableAgency.Dist A)
     (S : Channel.ActionKernel A B) (Khat : Channel B (O × R))
-    (hcompletion : IsActionReportCompletion K q S Khat) :
+    (hcompletion : IsActionProcessorCompletion K q S Khat) :
     expectedPayoffUtility u (Channel.actionPushforward q S) Khat =
       expectedPayoffUtility u q K := by
   rw [expectedPayoffUtility_eq_marginal,
     expectedPayoffUtility_eq_marginal]
   rw [outcomeMarginal_bayesPushforwardCompletion K q S Khat
-    (bayesCompletion_of_actionReportCompletion K q S Khat hcompletion)]
+    (bayesCompletion_of_actionProcessorCompletion K q S Khat hcompletion)]
 
 theorem a5_actionDataProcessing_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -603,9 +604,9 @@ theorem a5_actionDataProcessing_of_representation
   intro A B R _ _ _ _ _ _ _ _ _ K q S Khat hcompletion
   rw [pairWeak_iff_value_ge hrep]
   unfold traceTemperedValue
-  rw [expectedPayoffUtility_actionReport u K q S Khat hcompletion]
+  rw [expectedPayoffUtility_actionProcessor u K q S Khat hcompletion]
   have hbayes :=
-    bayesCompletion_of_actionReportCompletion K q S Khat hcompletion
+    bayesCompletion_of_actionProcessorCompletion K q S Khat hcompletion
   have hmi := mutualInfo_action_bayes_pushforward_le K q S Khat hbayes
   have hscaled := mul_le_mul_of_nonneg_left hmi hlambda.le
   simpa [add_comm] using
@@ -951,6 +952,22 @@ theorem traceTemperedAxioms_of_representation
   a6 := a6_branchwiseConsistency_of_representation hrep
   a7 := a7_materialRelevance_of_representation hnonconstant hrep
   a8 := a8_positiveTraceOrientation_of_representation hlambda hrep
+
+/-- The represented value satisfies the exact fixed-channel v4 axioms.  The
+historical benchmark calculation supplies structural processing and positive
+entropy; the relevance bridge converts those facts back to the fixed A3/A4
+channels. -/
+theorem traceTemperedAxiomsV4_of_representation
+    {O : Type u} [Fintype O] [DecidableEq O]
+    {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
+    (hnonconstant : ¬ IsConstantPayoffIndex u)
+    (hlambda : 0 < lambda)
+    (hrep : WithinChannelRepresentation F u lambda) :
+    TraceTemperedAxiomsV4 F := by
+  have hv3 := traceTemperedAxioms_of_representation
+    hnonconstant hlambda hrep
+  obtain ⟨_traceAnchor, hbridge⟩ := traceTemperedBridgeAxioms_of_v3 F hv3
+  exact traceTemperedAxiomsV4_of_bridge F hbridge
 
 theorem representation_implies_axioms_and_sameWitnessBlockRepresentation
     {O : Type u} [Fintype O] [DecidableEq O]

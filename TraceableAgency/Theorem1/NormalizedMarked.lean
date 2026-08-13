@@ -104,7 +104,7 @@ noncomputable def markedPayoffLotteryEmbedding
 /-- The embedding identifies the singleton payoff-lottery order with the
 fixed-prior marked pair order. -/
 theorem markedPayoffLotteryEmbedding_order
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (ell m : TraceableAgency.Dist O) :
     payoffLotteryRel F ell m ↔
@@ -159,22 +159,22 @@ theorem markedPayoffLotteryEmbedding_mix
 
 /-- The chosen high material outcome, bundled on the fixed action alphabet. -/
 noncomputable abbrev markedMaterialHighExperiment
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     MarkedTerminalExperiment O A :=
   markedPayoffLotteryExperiment
     (TraceableAgency.Dist.pure (materialHighOutcome F h))
 
 /-- The chosen low material outcome, bundled on the fixed action alphabet. -/
 noncomputable abbrev markedMaterialLowExperiment
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     MarkedTerminalExperiment O A :=
   markedPayoffLotteryExperiment
     (TraceableAgency.Dist.pure (materialLowOutcome F h))
 
-/-- The A7 anchors remain strictly ordered in every full-support marked-law
+/-- The material anchors remain strictly ordered in every full-support marked-law
 fibre. -/
 theorem markedMaterialAnchors_HMStrict
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     HMStrict (markedTerminalMixtureRel F h q hq)
       (markedPayoffLotteryEmbedding q
@@ -203,7 +203,7 @@ theorem markedMaterialAnchors_HMStrict
 /-- The marked-terminal affine representation normalized at the same A7
 anchors used for the common material payoff index. -/
 noncomputable def normalizedMarkedAffineUtilityRepresentation
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     AffineUtilityRepresentation
       (markedTerminalAbstractConvexMixtureSpace (O := O) (A := A) q)
@@ -218,7 +218,7 @@ noncomputable def normalizedMarkedAffineUtilityRepresentation
 
 @[simp]
 theorem normalizedMarkedAffineUtility_high
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     (normalizedMarkedAffineUtilityRepresentation F h q hq).utility
       (markedPayoffLotteryEmbedding q
@@ -233,7 +233,7 @@ theorem normalizedMarkedAffineUtility_high
 
 @[simp]
 theorem normalizedMarkedAffineUtility_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     (normalizedMarkedAffineUtilityRepresentation F h q hq).utility
       (markedPayoffLotteryEmbedding q
@@ -248,7 +248,7 @@ theorem normalizedMarkedAffineUtility_low
 
 /-- The normalized quotient utility evaluated on a raw marked experiment. -/
 noncomputable def normalizedMarkedUtility
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E : MarkedTerminalExperiment O A) : ℝ :=
   (normalizedMarkedAffineUtilityRepresentation F h q hq).utility
@@ -256,7 +256,7 @@ noncomputable def normalizedMarkedUtility
 
 /-- The normalized marked utility still represents the marked pair order. -/
 theorem normalizedMarkedUtility_represents
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E G : MarkedTerminalExperiment O A) :
     MarkedPairWeak F q E q G ↔
@@ -267,7 +267,7 @@ theorem normalizedMarkedUtility_represents
 
 /-- Normalization preserves public-mixture affinity. -/
 theorem normalizedMarkedUtility_publicMix
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
     (E R : MarkedTerminalExperiment O A) :
@@ -284,7 +284,7 @@ theorem normalizedMarkedUtility_publicMix
 /-- The normalized marked utility is literally a function of the full marked
 terminal law. -/
 theorem normalizedMarkedUtility_respects_sameMarkedTerminalLaw
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (E E' : MarkedTerminalExperiment O A)
     (hsame : SameMarkedTerminalLaw q E E') :
@@ -296,7 +296,7 @@ theorem normalizedMarkedUtility_respects_sameMarkedTerminalLaw
 
 @[simp]
 theorem normalizedMarkedUtility_high
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     normalizedMarkedUtility F h q hq
       (markedMaterialHighExperiment F h) = 1 :=
@@ -304,7 +304,7 @@ theorem normalizedMarkedUtility_high
 
 @[simp]
 theorem normalizedMarkedUtility_low
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
     normalizedMarkedUtility F h q hq
       (markedMaterialLowExperiment F h) = 0 :=
@@ -316,7 +316,7 @@ theorem normalizedMarkedUtility_low
 material expected utility.  This is affine-representation uniqueness along
 the payoff-lottery embedding, not an additional normalization convention. -/
 theorem normalizedMarkedUtility_payoffLottery
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (ell : TraceableAgency.Dist O) :
     normalizedMarkedUtility F h q hq
