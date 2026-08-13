@@ -25,7 +25,7 @@ jobs:
       - name: Rebuild the paper with pinned TeX Live
         uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
         with:
-          root_file: trace_tempered_choice_v3.tex
+          root_file: trace_tempered_choice_v4.tex
           working_directory: Paper
           texlive_version: 2026
         env:
@@ -34,7 +34,7 @@ jobs:
           TZ: UTC
 
       - name: Check reproducible PDF
-        run: git diff --exit-code -- Paper/trace_tempered_choice_v3.pdf
+        run: git diff --exit-code -- Paper/trace_tempered_choice_v4.pdf
 
   kernel:
     runs-on: ubuntu-24.04

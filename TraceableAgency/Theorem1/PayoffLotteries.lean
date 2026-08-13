@@ -11,7 +11,7 @@ import TraceableAgency.Theorem1.PairOrder
 This file isolates the material-payoff slice used in the converse direction.
 It defines action-independent payoff lotteries, their singleton versions, and
 binary public mixtures.  It proves their finite marginal and expectation
-identities, their exact action-report equivalence across action alphabets, and
+identities, their exact action-processor equivalence across action alphabets, and
 the payoff-preserving record equivalence between marked and ordinary mixtures.
 -/
 
@@ -269,23 +269,23 @@ theorem expectedPayoffUtility_mixedPayoffLotteryChannel
   rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
   congr 1 <;> apply Finset.sum_congr rfl <;> intro o _ <;> ring
 
-/-! ## Exact action-report equivalence -/
+/-! ## Exact action-processor equivalence -/
 
-/-- Ignore the reported action and draw the target action from `p`. -/
-noncomputable def payoffLotteryActionReport
+/-- Ignore the processed action and draw the target action from `p`. -/
+noncomputable def payoffLotteryActionProcessor
     {A B : Type u} [Fintype B]
     (p : TraceableAgency.Dist B) : Channel.ActionKernel A B :=
   fun _ => p
 
-theorem actionPushforward_payoffLotteryActionReport
+theorem actionPushforward_payoffLotteryActionProcessor
     {A B : Type u} [Fintype A] [Fintype B]
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
-    Channel.actionPushforward q (payoffLotteryActionReport p) = p := by
+    Channel.actionPushforward q (payoffLotteryActionProcessor p) = p := by
   ext b
   change (∑ a, q a * p b) = p b
   rw [← Finset.sum_mul, q.sum_eq_one, one_mul]
 
-theorem payoffLotteryActionReport_isBayesCompletion
+theorem payoffLotteryActionProcessor_isBayesCompletion
     {O A B : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
@@ -294,31 +294,31 @@ theorem payoffLotteryActionReport_isBayesCompletion
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
     Channel.IsBayesPushforwardCompletion
       (payoffLotteryChannel (A := A) ell) q
-      (payoffLotteryActionReport p)
+      (payoffLotteryActionProcessor p)
       (payoffLotteryChannel (A := B) ell) := by
   intro b hb z
-  rw [actionPushforward_payoffLotteryActionReport] at hb ⊢
+  rw [actionPushforward_payoffLotteryActionProcessor] at hb ⊢
   change ell z.1 = (∑ a, q a * p b * ell z.1) / p b
   simp_rw [mul_assoc]
   rw [← Finset.sum_mul, q.sum_eq_one, one_mul]
   field_simp [ne_of_gt hb]
 
-theorem payoffLotteryActionReport_isExact
+theorem payoffLotteryActionProcessor_isExact
     {O A B : Type u}
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B]
     (ell : TraceableAgency.Dist O)
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
-    IsActionReportCompletion
+    IsActionProcessorCompletion
       (payoffLotteryChannel (A := A) ell) q
-      (payoffLotteryActionReport p)
+      (payoffLotteryActionProcessor p)
       (payoffLotteryChannel (A := B) ell) :=
   actionCompletion_isExact
     (payoffLotteryChannel (A := A) ell) q
-    (payoffLotteryActionReport p)
+    (payoffLotteryActionProcessor p)
     (payoffLotteryChannel (A := B) ell)
-    (payoffLotteryActionReport_isBayesCompletion ell q p)
+    (payoffLotteryActionProcessor_isBayesCompletion ell q p)
 
 /-- Any two uses of the same payoff lottery are weakly equivalent, regardless
 of their action alphabets or priors. -/
@@ -333,10 +333,10 @@ theorem payoffLottery_pairWeak
     pairWeak F q (payoffLotteryChannel ell)
       p (payoffLotteryChannel ell) := by
   have hh := h5 (payoffLotteryChannel (A := A) ell) q
-    (payoffLotteryActionReport p)
+    (payoffLotteryActionProcessor p)
     (payoffLotteryChannel (A := B) ell)
-    (payoffLotteryActionReport_isExact ell q p)
-  simpa [actionPushforward_payoffLotteryActionReport] using hh
+    (payoffLotteryActionProcessor_isExact ell q p)
+  simpa [actionPushforward_payoffLotteryActionProcessor] using hh
 
 theorem payoffLottery_mutualPairWeak
     {O A B : Type u}
@@ -370,7 +370,7 @@ theorem payoffLottery_pairIndiff
     [Fintype O] [DecidableEq O]
     [Fintype A] [DecidableEq A] [Nonempty A]
     [Fintype B] [DecidableEq B] [Nonempty B]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (ell : TraceableAgency.Dist O)
     (q : TraceableAgency.Dist A) (p : TraceableAgency.Dist B) :
     pairIndiff F q (payoffLotteryChannel ell)
@@ -512,6 +512,41 @@ theorem rel_markedPayoffMix_iff_mixedPayoffLottery
 a weakly better equivalent and its dispreferred endpoint by a weakly worse
 equivalent.  Cross-environment transitivity and reverse orientation are the
 derived results in `PairOrder.lean`. -/
+theorem pairStrict_transport_of_structural
+    {O A B C D R S T U : Type u}
+    [Fintype O] [DecidableEq O]
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype B] [DecidableEq B] [Nonempty B]
+    [Fintype C] [DecidableEq C] [Nonempty C]
+    [Fintype D] [DecidableEq D] [Nonempty D]
+    [Fintype R] [DecidableEq R] [Nonempty R]
+    [Fintype S] [DecidableEq S] [Nonempty S]
+    [Fintype T] [DecidableEq T] [Nonempty T]
+    [Fintype U] [DecidableEq U] [Nonempty U]
+    (F : FixedPayoffPrefFamily O)
+    (h1 : A1_WeakOrder F) (h3 : A3_BlockComparisonCoherence F)
+    (h4 : A4_RecordDataProcessing F) (h5 : A5_ActionDataProcessing F)
+    (q : TraceableAgency.Dist A) (K : Channel A (O × R))
+    (p : TraceableAgency.Dist B) (L : Channel B (O × S))
+    (q' : TraceableAgency.Dist C) (K' : Channel C (O × T))
+    (p' : TraceableAgency.Dist D) (L' : Channel D (O × U))
+    (hstrict : pairStrict F q K p L)
+    (hq'_to_q : pairWeak F q' K' q K)
+    (hp_to_p' : pairWeak F p L p' L') :
+    pairStrict F q' K' p' L' := by
+  rw [pairStrict_iff_pairWeak_not_swap F h1 h3 h4 h5] at hstrict ⊢
+  rcases hstrict with ⟨hqp, hnotpq⟩
+  constructor
+  · have hq'p := pairWeak_transitive_of_structural F h1 h3 q' K' q K p L
+      hq'_to_q hqp
+    exact pairWeak_transitive_of_structural F h1 h3 q' K' p L p' L' hq'p hp_to_p'
+  · intro hp'q'
+    apply hnotpq
+    have hpq' := pairWeak_transitive_of_structural F h1 h3 p L p' L' q' K'
+      hp_to_p' hp'q'
+    exact pairWeak_transitive_of_structural F h1 h3 p L q' K' q K hpq' hq'_to_q
+
+/-- Strict-transport wrapper for the proof-facing axiom bundle. -/
 theorem pairStrict_transport
     {O A B C D R S T U : Type u}
     [Fintype O] [DecidableEq O]
@@ -523,7 +558,7 @@ theorem pairStrict_transport
     [Fintype S] [DecidableEq S] [Nonempty S]
     [Fintype T] [DecidableEq T] [Nonempty T]
     [Fintype U] [DecidableEq U] [Nonempty U]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (K : Channel A (O × R))
     (p : TraceableAgency.Dist B) (L : Channel B (O × S))
     (q' : TraceableAgency.Dist C) (K' : Channel C (O × T))
@@ -531,18 +566,9 @@ theorem pairStrict_transport
     (hstrict : pairStrict F q K p L)
     (hq'_to_q : pairWeak F q' K' q K)
     (hp_to_p' : pairWeak F p L p' L') :
-    pairStrict F q' K' p' L' := by
-  rw [pairStrict_iff_pairWeak_not_swap F h.a1 h.a3 h.a4 h.a5] at hstrict ⊢
-  rcases hstrict with ⟨hqp, hnotpq⟩
-  constructor
-  · have hq'p := pairWeak_transitive F h q' K' q K p L
-      hq'_to_q hqp
-    exact pairWeak_transitive F h q' K' p L p' L' hq'p hp_to_p'
-  · intro hp'q'
-    apply hnotpq
-    have hpq' := pairWeak_transitive F h p L p' L' q' K'
-      hp_to_p' hp'q'
-    exact pairWeak_transitive F h p L q' K' q K hpq' hq'_to_q
+    pairStrict F q' K' p' L' :=
+  pairStrict_transport_of_structural F h.a1 h.a3 h.a4 h.a5
+    q K p L q' K' p' L' hstrict hq'_to_q hp_to_p'
 
 theorem singletonPayoffLottery_pure_eq_deterministic
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -557,12 +583,12 @@ theorem singletonPayoffLottery_pure_eq_deterministic
     payoffLotteryRecordDist, deterministicPayoffChannel,
     TraceableAgency.Dist.pure_apply]
 
-/-- The two A7 anchors strictly rank the corresponding action-independent
+/-- The two material anchors strictly rank the corresponding action-independent
 payoff lotteries for every pair of finite action alphabets and every pair of
 priors. -/
 theorem materialAnchors_strict_everyPrior
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F) :
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     ∃ oplus ominus : O,
       ∀ {A B : Type u}
         [Fintype A] [DecidableEq A] [Nonempty A]

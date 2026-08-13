@@ -1,36 +1,24 @@
-# Theorem 1 certificate
+# Theorem 1 v4 certificate
 
-This directory documents the correspondence between Theorem 1 of
-[`trace_tempered_choice_v3.tex`](../Paper/trace_tempered_choice_v3.tex) and its
-Lean proof.
+This directory documents the correspondence between
+[`trace_tempered_choice_v4.tex`](../Paper/trace_tempered_choice_v4.tex) and the
+Lean theorem
+`TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1`.
 
-## Reader entry points
-
-- [`FORMALIZATION_CERTIFICATE.md`](FORMALIZATION_CERTIFICATE.md): mathematical
-  statement, exact Axiom (A1)--(A8) translations, conclusion, and trust
+- [`FORMALIZATION_CERTIFICATE.md`](FORMALIZATION_CERTIFICATE.md): exact
+  mathematical boundary, v4 axiom translation, relevance bridge, and trust
   boundary.
-- [`CLAIM_MAP.md`](CLAIM_MAP.md): stable LaTeX labels mapped to Lean
+- [`CLAIM_MAP.md`](CLAIM_MAP.md): stable paper anchors mapped to Lean
   declarations.
-- [`PAPER_PROOF_ROADMAP.md`](PAPER_PROOF_ROADMAP.md): detailed paper-proof route
-  following the checked Lean dependencies.
-- [`SHA256SUMS`](SHA256SUMS): SHA-256 digest of every repository file other than
-  the manifest itself.
+- [`PAPER_PROOF_ROADMAP.md`](PAPER_PROOF_ROADMAP.md): paper-to-code proof route.
+- [`SHA256SUMS`](SHA256SUMS): SHA-256 digest of every repository file other
+  than the manifest itself.
 
-## Formal boundary
+The exact proposition is `TraceableAgency.Theorem1.Theorem1StatementV4`.
+The public proof has that proposition as its type. Appendix C is paper-only and
+is outside this certified endpoint.
 
-- [`Statements.lean`](../TraceableAgency/Theorem1/Statements.lean) states the
-  domain, Axioms (A1)--(A8), representation, and exact proposition
-  `TraceableAgency.Theorem1.Theorem1Statement`.
-- [`Proof.lean`](../TraceableAgency/Theorem1/Proof.lean) proves
-  `trace_tempered_choice_v3_theorem1 : Theorem1Statement`.
-- [`Axioms.lean`](../TraceableAgency/Theorem1/Axioms.lean) declares no extra
-  axiom.
-- [`Axioms.lean`](../TraceableAgency/Audit/Axioms.lean) rejects unexpected
-  kernel axioms.
-- [`Dependencies.lean`](../TraceableAgency/Audit/Dependencies.lean) rejects
-  superseded stronger or unproved dependency routes.
-
-## Reproduce
+Reproduce with:
 
 ```bash
 ./scripts/check_theorem1_certificate.sh
@@ -43,6 +31,3 @@ propext
 Classical.choice
 Quot.sound
 ```
-
-These are Lean/Mathlib foundations, not behavioral, information-theoretic,
-topological, or representation-theorem assumptions.

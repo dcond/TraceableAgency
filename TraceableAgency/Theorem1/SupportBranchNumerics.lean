@@ -5,7 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 import TraceableAgency.Theorem1.SupportBranchInsertion
 import TraceableAgency.Theorem1.BranchInformation
-import TraceableAgency.Theorem1.ConstantLowGeneral
+import TraceableAgency.Theorem1.ConstantTraceAnchorGeneral
 import TraceableAgency.Theorem1.BranchPayoffLaw
 
 /-!
@@ -84,33 +84,33 @@ theorem supportExtendMarkedExperiment_surePayoff
 
 /-- If the support-face continuation is surely the normalized material-low
 payoff, then inserting it with the same low baseline is pointwise surely low.
-This is exactly the premise used by the general constant-low value theorem. -/
-theorem supportBranchInsertionExperiment_sureLow
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+This is exactly the premise used by the general constant-trace-anchor value theorem. -/
+theorem supportBranchInsertionExperiment_sureTraceAnchor
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (P : Channel A Y)
     (target : Y)
     (E : MarkedTerminalExperiment O
       (supportSubtype (branchPosterior P q target)))
     (hE : ∀ (a : supportSubtype (branchPosterior P q target))
       (o : O) (s : E.RecordType),
-      o ≠ materialLowOutcome F h → E.K a (o, s) = 0) :
+      o ≠ h.traceAnchor → E.K a (o, s) = 0) :
     ∀ (a : A) (o : O)
       (s : (supportBranchInsertionExperiment q P target
-        (materialLowOutcome F h) E).RecordType),
-      o ≠ materialLowOutcome F h →
+        (h.traceAnchor) E).RecordType),
+      o ≠ h.traceAnchor →
         (supportBranchInsertionExperiment q P target
-          (materialLowOutcome F h) E).K a (o, s) = 0 := by
+          (h.traceAnchor) E).K a (o, s) = 0 := by
   classical
   let r := branchPosterior P q target
   let SE := supportExtendMarkedExperiment r E
   have hSE : ∀ (a : A) (o : O) (s : SE.RecordType),
-      o ≠ materialLowOutcome F h → SE.K a (o, s) = 0 := by
+      o ≠ h.traceAnchor → SE.K a (o, s) = 0 := by
     exact supportExtendMarkedExperiment_surePayoff
-      r (materialLowOutcome F h) E hE
+      r (h.traceAnchor) E hE
   intro a o s ho
   rcases s with ⟨y, sy⟩
   change P a y *
-      (branchInsertionContinuation target (materialLowOutcome F h) SE y)
+      (branchInsertionContinuation target (h.traceAnchor) SE y)
         a (o, sy) = 0
   by_cases hy : y = target
   · subst y
@@ -121,7 +121,7 @@ theorem supportBranchInsertionExperiment_sureLow
   · unfold branchInsertionContinuation
     simp only [dif_neg hy, Relabeling.relabelChannel_apply]
     change P a y *
-      (uninformativeAtPayoff (A := A) (materialLowOutcome F h)) a
+      (uninformativeAtPayoff (A := A) (h.traceAnchor)) a
         (o, (Equiv.cast _).symm sy) = 0
     simp [uninformativeAtPayoff, ho]
 
@@ -197,7 +197,7 @@ theorem sameMarkedTerminalLaw_supportBranchInsertion_purePayoff
 /-- The corresponding normalized marked values are equal on every
 full-support outer fibre. -/
 theorem normalizedMarkedUtility_supportBranchInsertion_purePayoff
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)
     (P : Channel A Y) (target : Y) (o0 o : O) :
     normalizedMarkedUtility F h q hq

@@ -27,8 +27,8 @@ inductive TracePairIndex : Type u
 
 open TracePairIndex
 
-/-- At one constant payoff, the pure-trace proposition ranks every cross-channel,
-cross-prior comparison by the same mutual-information scale. -/
+/-- At the v4 trace anchor, the pure-trace proposition ranks every
+cross-channel, cross-prior comparison by the same mutual-information scale. -/
 theorem constantPayoff_pairWeak_iff_mutualInfo
     {O A B R S : Type u}
     [Fintype O] [DecidableEq O]
@@ -36,12 +36,11 @@ theorem constantPayoff_pairWeak_iff_mutualInfo
     [Fintype B] [DecidableEq B] [Nonempty B]
     [Fintype R] [DecidableEq R] [Nonempty R]
     [Fintype S] [DecidableEq S] [Nonempty S]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
-    (o : O)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (P : Channel A R)
     (p : TraceableAgency.Dist B) (Q : Channel B S) :
-    pairWeak F q (constantPayoffLift o P)
-        p (constantPayoffLift o Q) ↔
+    pairWeak F q (constantPayoffLift h.traceAnchor P)
+        p (constantPayoffLift h.traceAnchor Q) ↔
       mutualInfo q P ≥ mutualInfo p Q := by
   classical
   let Act : TracePairIndex → Type u
@@ -79,9 +78,9 @@ theorem constantPayoff_pairWeak_iff_mutualInfo
     | right => Q
   have hlr : (left : TracePairIndex.{u}) ≠ right := by decide
   have hblock := constantPayoff_blockRepresentation
-    F h o Act Rec C left right hlr q p
+    F h Act Rec C left right hlr q p
   have hcoherence := h.a3.irrelevant_blocks Act Rec
-    (fun k ↦ constantPayoffLift o (C k))
+    (fun k ↦ constantPayoffLift h.traceAnchor (C k))
     left right hlr q p
   exact hcoherence.symm.trans hblock
 

@@ -58,7 +58,7 @@ theorem supportSubtype_prodDist_nontrivial_right
 /-- A deterministic-payoff compound has exactly the same normalized marked
 utility after an independent dummy action is adjoined to its first stage. -/
 theorem normalizedMarkedUtility_payoffBranch_independentDummy
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxioms F)
+    (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (s : TraceableAgency.Dist B)
     (hq : q.FullSupport) (hs : s.FullSupport)
     (P : Channel A Y) (payoff : Y → O) :

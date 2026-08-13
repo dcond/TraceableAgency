@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 paper_dir="$repo_root/Paper"
-paper_name="trace_tempered_choice_v3"
+paper_name="trace_tempered_choice_v4"
 mode="${1:---check}"
 
 case "$mode" in
