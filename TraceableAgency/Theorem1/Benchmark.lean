@@ -707,11 +707,11 @@ theorem traceTemperedValue_commonCompound
   rw [Finset.sum_add_distrib, Finset.mul_sum]
   ring_nf
 
-theorem a8_branchwiseConsistency_of_representation
+theorem finiteBranchContinuationConsistency_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hrep : WithinChannelRepresentation F u lambda) :
-    A8_BranchwiseContinuationConsistency F := by
+    FiniteBranchContinuationConsistency F := by
   constructor
   · intro A Y _ _ _ _ _ _ Rec _ _ _ P K L q hbranch
     rw [pairWeak_iff_value_ge hrep]
@@ -939,15 +939,15 @@ theorem positiveTraceOrientationAt_of_representation
 /-! ## Complete benchmark package -/
 
 /-- The represented value constructs the proof-facing bridge directly and
-then recovers the exact fixed-channel v4 axioms.  Its chosen trace anchor is
+then recovers the exact fixed-channel v5 axioms.  Its chosen trace anchor is
 kept fixed throughout the bridge. -/
-theorem traceTemperedAxiomsV4_of_representation
+theorem traceTemperedAxiomsV5_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hnonconstant : ¬ IsConstantPayoffIndex u)
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
-    TraceTemperedAxiomsV4 F := by
+    TraceTemperedAxiomsV5 F := by
   have hmaterial : MaterialRelevanceEnvironment F :=
     materialRelevanceEnvironment_of_representation hnonconstant hrep
   obtain ⟨ostar, ominus, hstrict⟩ := hmaterial
@@ -957,9 +957,9 @@ theorem traceTemperedAxiomsV4_of_representation
       a3 := a5_blockCoherence_of_representation hrep
       a4 := a6_recordDataProcessing_of_representation hlambda hrep
       a5 := a7_actionDataProcessing_of_representation hlambda hrep
-      a6 := a8_branchwiseConsistency_of_representation hrep
+      a6 := finiteBranchContinuationConsistency_of_representation hrep
       a7 := ⟨ostar, ominus, hstrict⟩
       a8 := positiveTraceOrientationAt_of_representation ostar hlambda hrep }
-  exact traceTemperedAxiomsV4_of_bridge F hbridge
+  exact traceTemperedAxiomsV5_of_bridge F hbridge
 
 end TraceableAgency.Theorem1

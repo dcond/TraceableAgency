@@ -8,21 +8,21 @@ import TraceableAgency.Theorem1.PositiveBranchIncrement
 import TraceableAgency.Theorem1.TheoremClosure
 
 /-!
-# Kernel proof of Trace-Tempered Choice v4, Theorem 1
+# Kernel proof of Trace-Tempered Choice v5, Theorem 1
 
-All mathematical assumptions are the eight v4 behavioral hypotheses;
+All mathematical assumptions are the eight v5 behavioral hypotheses;
 `Axioms.lean` declares no extra axiom.
 -/
 
-/-! The stable public v4 verification namespace used by the certificate. -/
+/-! The stable public v5 verification namespace used by the certificate. -/
 namespace TraceTemperedChoiceVerification
 
 universe u
 
-/-- Theorem 1 of `trace_tempered_choice_v4`, including its same-witness
+/-- Theorem 1 of `trace_tempered_choice_v5`, including its same-witness
 finite-block moreover clause. -/
-theorem trace_tempered_choice_v4_theorem1 :
-    TraceableAgency.Theorem1.Theorem1StatementV4.{u} := by
-  exact TraceableAgency.Theorem1.theorem1StatementV4
+theorem trace_tempered_choice_v5_theorem1 :
+    TraceableAgency.Theorem1.Theorem1StatementV5.{u} := by
+  exact TraceableAgency.Theorem1.theorem1StatementV5
 
 end TraceTemperedChoiceVerification

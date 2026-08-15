@@ -3,20 +3,27 @@
 [![Theorem 1 certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml)
 
 Lean 4 verification of Theorem 1 in *A Preference for Traceable Agency: An
-Axiomatization of Expected Utility plus Mutual Information* (version 4).
+Axiomatization of Expected Utility plus Mutual Information* (version 5).
 
 ## Verified theorem
 
 ```lean
-TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV4
+TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV5
 ```
 
 For every finite payoff alphabet with at least two elements, the theorem proves
-that v4 Axioms (A1)--(A8) are equivalent to representation by expected payoff
+that v5 Axioms (A1)--(A8) are equivalent to representation by expected payoff
 utility plus a strictly positive global multiple of mutual information.  The
 same witnesses represent every finite block-supported cross-channel
 comparison.
+
+(A2) is formalized as sequential closedness, equivalent to the closed graph in this finite-dimensional setting.
+
+V5 Axiom 8 is the binary recordwise sure-thing biconditional. Lean proves the
+paper's finite-branch extension from binary A8 together with A1 and A5--A7 in
+`recordwiseSureThing_iff_finiteBranchContinuationConsistency`; the long proof
+uses only that derived finite form, not a stronger public premise.
 
 The formalization keeps the two material anchors `o+`, `o-` separate from the
 single trace anchor `o*`.  The fixed-channel relevance bridge transports trace
@@ -33,12 +40,12 @@ recursively collected kernel foundations are exactly `propext`,
 
 | Path | Role |
 |---|---|
-| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v4 statement, relevance bridge, and proof |
+| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v5 statement, relevance bridge, and proof |
 | [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
 | [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, and public-declaration audits |
 | [`Certificate/`](Certificate/) | Claim map, formalization certificate, proof roadmap, and byte manifest |
-| [`Paper/`](Paper/) | Authoritative v4 TeX sources and reproducible PDF |
+| [`Paper/`](Paper/) | Authoritative v5 TeX sources and reproducible PDF |
 
 ## Reproduce
 
@@ -51,14 +58,14 @@ lake build TraceableAgency.Audit
 ```
 
 The certificate rejects proof holes and project axioms, checks the complete
-repository manifest, rebuilds the v4 paper, audits the final declaration's
-transitive dependencies, and replays the v4 certificate module with
+repository manifest, rebuilds the v5 paper, audits the final declaration's
+transitive dependencies, and replays the v5 certificate module with
 `leanchecker --fresh`.
 
 ## Paper and correspondence
 
-- [Paper source](Paper/trace_tempered_choice_v4.tex)
-- [Compiled paper](Paper/trace_tempered_choice_v4.pdf)
+- [Paper source](Paper/trace_tempered_choice_v5.tex)
+- [Compiled paper](Paper/trace_tempered_choice_v5.pdf)
 - [Formalization certificate](Certificate/FORMALIZATION_CERTIFICATE.md)
 - [Claim map](Certificate/CLAIM_MAP.md)
 - [Proof roadmap](Certificate/PAPER_PROOF_ROADMAP.md)

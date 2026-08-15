@@ -41,13 +41,15 @@ of the two $W$-values.  A strict inequality between $V$-values similarly gives a
 $W$-values.  Thus $\varphi$ is strictly increasing and $W=\varphi\circ V$.  The converse is immediate from
 Theorem~\ref{thm:main}.
 
-For part \textup{(ii)}, the expected-utility and mutual-information chain rules give, for any two continuation
-profiles,
+For part \textup{(ii)}, the expected-utility and mutual-information chain rules give, for every
+$P:A\to\D(\{1,\ldots,k\})$ and every
+$K_1,\ldots,K_k,L_1,\ldots,L_k:A\to\D(O\times R)$, writing
+$m(i):=\sum_aq(a)P(i\mid a)$,
 \[
- V\bigl(q,P\triangleright\{K^y\}\bigr)
- -V\bigl(q,P\triangleright\{L^y\}\bigr)
- =\sum_{y:m(y)>0}m(y)
- \bigl[V(q_y,K^y)-V(q_y,L^y)\bigr].
+ V\bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ -V\bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr)
+ =\sum_{i:m(i)>0}m(i)
+ \bigl[V(q_i,K_i)-V(q_i,L_i)\bigr].
 \]
 Hence every $\alpha V+\beta$, with $\alpha>0$, is common-scale and branch-additive.
 
@@ -57,9 +59,9 @@ Conversely, let the branch-additive common-scale representation be $W=\varphi\ci
  \qquad x\ge0.
 \]
 Fix $n\ge2$ and let $q$ be uniform on $n$ actions.  For $x\in[0,\lambda\log n]$, choose a constant-$o_*$ erasure
-channel whose value is $\underline u+x$.  In the first continuation profile, use this channel after the first branch
+channel whose value is $\underline u+x$.  In the first compound, use this channel after the first branch
 of a public coin with probabilities $\theta$ and $1-\theta$, and use the uninformative constant-$o_*$ channel after
-the second.  Let the comparison profile use the uninformative channel after both branches.  The two compound values
+the second.  In the comparison compound, use the uninformative channel after both branches.  The two compound values
 are $\underline u+\theta x$ and $\underline u$, so \eqref{eq:branch-additive-index} gives
 \[
  \psi(\theta x)=\theta\psi(x)
@@ -69,8 +71,9 @@ Taking $x=\lambda\log n$ shows that $\psi$ is linear on $[0,\lambda\log n]$.  Th
 unbounded, so $\psi(x)=\alpha x$ on $[0,\infty)$ for one $\alpha>0$.  Therefore
 $\varphi(v)=\alpha v+\beta$ on the range of $V$.
 
-Finally, any second trace-tempered index $\widetilde V$ is itself branch-additive.  Applying part \textup{(ii)} and
-then restricting to deterministic payoff outcomes and to constant-payoff record channels gives
+Finally, any second trace-tempered index $\widetilde V$ is common-scale, because expected utility and mutual
+information are invariant under block embedding, and is branch-additive by the same two chain rules.  Applying
+part \textup{(ii)} and then restricting to deterministic payoff outcomes and to constant-payoff record channels gives
 $\widetilde u=\alpha u+\beta$ and $\widetilde\lambda=\alpha\lambda$.
 \end{proof}
 
@@ -119,8 +122,9 @@ Use the Pareto relation on the two coordinates $(U,I)$:
  U(q,K)\ge U(p,L)\ \text{and}\ I(q,K)\ge I(p,L).
 \]
 It is transitive but incomplete whenever one alternative has more payoff and the other more information.  Its graph is
-closed.  Both data-processing axioms are coordinatewise monotonic, and both chain rules make branchwise weak and strict
-improvements aggregate.  Block coherence holds.  For Axiom~\textup{(A3)}, choose the two outcomes so that
+closed.  Both data-processing axioms are coordinatewise monotonic.  Under a common-branch replacement, both the
+payoff and information differences are multiplied by the same positive branch probability, so Axiom~\textup{(A8)}
+holds in both directions.  Block coherence holds.  For Axiom~\textup{(A3)}, choose the two outcomes so that
 $u(o^+)>u(o^-)$; for Axiom~\textup{(A4)}, the two test lotteries have equal payoff value and information values
 $\log2$ and zero.  Thus both relevance axioms hold.
 
@@ -148,22 +152,19 @@ chosen to have different utility, but the two lotteries in Axiom~\textup{(A4)}
 always have the same payoff and hence are indifferent.
 
 \emph{Failure of Axiom \textup{(A5)}.}
-Treat block labels as syntactic tags, with the outermost tag taking precedence.  Put $w(a^0)=1$, $w(a^i)=0$ for
-$i\ne0$, and $w(a)=0$ on untagged actions.  For $\varepsilon>0$, use
+Treat outer block labels as syntactic action tags.  For an action alphabet presented with at least three outer
+blocks, put $w(a^0)=1$ and $w(a^i)=0$ for $i\ne0$; put $w(a)=0$ on every action alphabet with fewer than three
+outer blocks.  For $\varepsilon>0$, use within each environment
 \[
  V_\varepsilon(q,K):=U(q,K)+I(q,K)+\varepsilon\sum_aq(a)w(a).
 \]
-Every record- or action-processing comparison places the original alternative in block $0$, so the data-processing
-inequality receives the additional $\varepsilon$.  If $\Delta_y$ is the base-score difference in continuation branch
-$y$, its block comparison is weak exactly when $\Delta_y+\varepsilon\ge0$, while the aggregate block difference is
-\[
- \sum_y m(y)\Delta_y+\varepsilon
- =\sum_y m(y)(\Delta_y+\varepsilon).
-\]
-Thus Axiom~\textup{(A8)}, including strictness, holds; the remaining axioms are immediate.  Duplication coherence fails.
-The two fixed relevance tests are untagged, so their scores reduce to $U+I$ and both strict comparisons hold.
-Take constant payoff, $K$ revealing a binary action, a degenerate $q$, and a nearby nondegenerate $p$ with
-$0<\Sh(p)<\varepsilon$.  Then $p\succ_Kq$, but $q^0\succ_{K\sqcup K}p^1$.
+This defines a continuous weak order in every fixed environment.  Every comparison in Axioms~\textup{(A6)},
+\textup{(A7)}, and \textup{(A8)} is made in a two-block environment, where $w=0$; those axioms therefore reduce
+to their valid $U+I$ comparisons.  The fixed relevance tests can be chosen on untagged action sets and also reduce
+to $U+I$.  But irrelevant-block coherence fails.  Take three identical one-action, constant-payoff, silent
+channels.  Their first two block-supported lotteries are indifferent in the canonical two-block comparison, while
+in the three-block environment the lottery supported on block $0$ is strictly preferred to the lottery supported
+on block $1$ by $\varepsilon$.
 
 \emph{Failure of Axiom \textup{(A6)}.}
 For $\varepsilon>0$, use
@@ -205,16 +206,18 @@ $J_G=3/104$ afterwards.  Hence Axiom~\textup{(A7)} fails.
 Use $V:=U+\min\{I,1\}$, with information measured in bits.  It is continuous, respects both data-processing axioms,
 and satisfies block coherence.  Axiom~\textup{(A3)} holds through $U$, while the test in Axiom~\textup{(A4)}
 has information values one and zero.  Let $q$ be uniform on four actions.  A first-stage record reveals which of two pairs
-contains the action.  In every branch, revealing the action within the pair strictly improves the continuation from
-zero to one bit.  The two compounds have respectively one and two bits before capping and are therefore indifferent.
-The strict clause of Axiom~\textup{(A8)} fails.
+contains the action.  Hold the continuation following one record fixed and silent.  Following the other record,
+keep payoffs constant and compare a silent continuation with one that reveals the action within its pair.  The latter continuation is strictly
+preferred at the branch posterior, but the two compounds have respectively one and three-halves bits before capping
+and are therefore indifferent.  The forward implication in Axiom~\textup{(A8)} fails.
 \end{proof}
 
 \subsection{Proofs of the choice implications}\label{app:choice-proofs}
 
-Results stated in the text only in summary form (Propositions~\ref{prop:binary}, \ref{prop:wtp},
-and~\ref{prop:trace-demand}, Corollary~\ref{cor:lambda-limits}, and Remark~\ref{rem:elicitation}) are restated here
-in full.  Proofs appear in an order that front-loads shared machinery.
+Several results stated only in summary form in the text are given here in full.  Proofs appear in an order that
+front-loads shared machinery.  Throughout this subsection, write
+$Z:=O\times R$ and $K_a:=K(\cdot\mid a)\in\D(Z)$ for the row of action $a$; the distribution induced by $q$ is
+$p_{qK}$, as in Section~\ref{sec:theorem}.
 
 \begin{proof}[Proof of Proposition~\ref{prop:signature}]
 (i) Under either lottery, each visible pair $(o_0,r_j)$, $j=1,2$, has probability $\tfrac12$: under $q'$ because
@@ -231,60 +234,100 @@ the representation gives indifference.
 Expected utility is linear in $q$, while mutual information is concave in the input distribution of a fixed channel
 \cite{CoverThomas2006}.  Continuity on the compact simplex gives existence.  Using
 \[
- I_{qK}(A;Z)=\sum_aq(a)\KL\!\left(K_Z(\cdot\mid a)\,\middle\|\,m_{qK}\right),
+ I_{qK}(A;Z)=\sum_aq(a)\KL\!\left(K_a\,\middle\|\,p_{qK}\right),
 \]
 its directional derivative in the mass on action $a$ equals the displayed divergence up to a term common to every
 action.  The result is the Kuhn--Tucker condition for a concave programme.  At constant $u$ it reduces to the classical
 capacity condition.
 \end{proof}
 
+\begin{proposition}[Optimal marginal and multiplicity]\label{prop:optimal-marginal}
+Let $\lambda>0$ and write $C^*(K):=\max_{q\in\D(A)}V(q,K)$.  There is a unique $p^*\in\D(Z)$ such that
+$p_{q^*K}=p^*$ for every optimal lottery $q^*$.  With
+\[
+ \mathcal A^*
+ :=\bigl\{a\in A:
+ \bar u(a)+\lambda
+ \KL\!\left(K_a\,\middle\|\,p^*\right)=C^*(K)
+ \bigr\},
+\]
+the set of optimal lotteries is exactly
+\[
+ \bigl\{q\in\D(A):
+ p_{qK}=p^*,\ \supp(q)\subseteq\mathcal A^*
+ \bigr\}.
+\]
+The optimum is unique whenever the rows $\{K_a:a\in\mathcal A^*\}$ are affinely independent.  If actions are
+partitioned into classes with identical rows, $V(q,K)$ depends on $q$ within each class only through the class's
+total mass.  The optimal lotteries are exactly the lifts of the optimal lotteries of the collapsed channel, and
+each class's mass may be distributed arbitrarily among its members.
+\end{proposition}
+
 \begin{proof}[Proof of Proposition~\ref{prop:optimal-marginal}]
 The entropy identity gives
 \[
  V(q,K)
- =\lambda\Sh(m_{qK})
+ =\lambda\Sh(p_{qK})
   +\sum_aq(a)\bigl[\bar u(a)-\lambda\Sh(K_a)\bigr].
 \]
-If $q_0$ and $q_1$ are optimal with $m_{q_0K}\ne m_{q_1K}$, strict concavity of Shannon entropy and linearity of
-$q\mapsto m_{qK}$ and of the remaining sum give $V(tq_0+(1-t)q_1,K)>C^*(K)$ for $t\in(0,1)$, a contradiction.
-Hence every optimum induces the same $m^*$.  By Proposition~\ref{prop:optimal-choice}, an optimum $q^*$ satisfies
+If $q_0$ and $q_1$ are optimal with $p_{q_0K}\ne p_{q_1K}$, strict concavity of Shannon entropy and linearity of
+$q\mapsto p_{qK}$ and of the remaining sum give $V(tq_0+(1-t)q_1,K)>C^*(K)$ for $t\in(0,1)$, a contradiction.
+Hence every optimum induces the same $p^*$.  By Proposition~\ref{prop:optimal-choice}, an optimum $q^*$ satisfies
 the displayed equalities at some constant $c$; averaging them under $q^*$ gives $c=V(q^*,K)=C^*(K)$, so
-$\supp(q^*)\subseteq\mathcal A^*$.  Conversely, if $m_{qK}=m^*$ and $\supp(q)\subseteq\mathcal A^*$, then
+$\supp(q^*)\subseteq\mathcal A^*$.  Conversely, if $p_{qK}=p^*$ and $\supp(q)\subseteq\mathcal A^*$, then
 \[
  V(q,K)
- =\sum_aq(a)\bigl[\bar u(a)+\lambda\KL(K_a\|m^*)\bigr]
+ =\sum_aq(a)\bigl[\bar u(a)+\lambda\KL(K_a\|p^*)\bigr]
  =C^*(K).
 \]
-Affine independence makes the representation $m^*=\sum_aq(a)K_a$ with $\supp(q)\subseteq\mathcal A^*$ unique.
-Identical rows share $\bar u(a)$ and $\Sh(K_a)$, so both $m_{qK}$ and the displayed expression for $V$ are
+Affine independence makes the representation $p^*=\sum_aq(a)K_a$ with $\supp(q)\subseteq\mathcal A^*$ unique.
+Identical rows share $\bar u(a)$ and $\Sh(K_a)$, so both $p_{qK}$ and the displayed expression for $V$ are
 unchanged by redistribution within a class; collapsing the classes and lifting aggregate masses proves the last
 claim.
 \end{proof}
 
-\begin{proof}[Proof of Proposition~\ref{cor:support-pure}]
-Throughout, $m^*$ denotes the common optimal marginal of Proposition~\ref{prop:optimal-marginal}.
-(i) Suppose $m^*(z)=0$ for some $z\in Z_K$ and choose $a$ with $K_Z(z\mid a)>0$.  Then
-$\KL(K_Z(\cdot\mid a)\|m^*)=+\infty$, which is incompatible with the finite on-support equality if some optimum
-uses $a$ and with the off-support inequality of Proposition~\ref{prop:optimal-choice} if none does.  Under the
-private-consequence condition, an optimum with $q^*(a)=0$ would force $m^*(z_a)=0$.
+\begin{proposition}[Support and pure choice]\label{cor:support-pure}
+Let $\lambda>0$ and let $Z_K:=\{z\in Z:K_a(z)>0\text{ for some }a\in A\}$.
+\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
+\item Every optimal lottery $q^*$ satisfies $p_{q^*K}(z)>0$ for every $z\in Z_K$.  Consequently, if every action
+$a$ has a private consequence---some $z_a$ with $K_a(z_a)>0$ and $K_b(z_a)=0$ for all $b\ne a$---then every
+optimal lottery has full support.
+\item The pure lottery $\delta_a$ is optimal if and only if
+\[
+ \bar u(b)+\lambda\KL\!\left(K_b\,\middle\|\,K_a\right)
+ \le \bar u(a)
+ \qquad\text{for every }b\in A,
+\]
+and uniquely optimal if these inequalities are strict for $b\ne a$.  In particular, if some rival reaches a
+consequence outside the support of $K_a$, then $\delta_a$ is not optimal, however large its payoff advantage.
+\end{enumerate}
+\end{proposition}
 
-(ii) For $q=\delta_a$ the induced marginal is $K_Z(\cdot\mid a)$ and the on-support constant is $\bar u(a)$; the
-displayed system is the off-support condition of Proposition~\ref{prop:optimal-choice}, necessary and sufficient by
+\begin{proof}[Proof of Proposition~\ref{cor:support-pure}]
+Throughout, $p^*$ denotes the common optimal marginal of Proposition~\ref{prop:optimal-marginal}.
+(i) Suppose $p^*(z)=0$ for some $z\in Z_K$ and choose $a$ with $K_a(z)>0$.  Then
+$\KL(K_a\|p^*)=+\infty$, which is incompatible with the finite on-support equality if some optimum uses $a$ and
+with the off-support inequality of Proposition~\ref{prop:optimal-choice} if none does.  Under the
+private-consequence condition, an optimum with $q^*(a)=0$ would force $p^*(z_a)=0$.
+
+(ii) For $q=\delta_a$ the induced marginal is $K_a$ and the on-support constant is $\bar u(a)$; the displayed
+system is the off-support condition of Proposition~\ref{prop:optimal-choice}, necessary and sufficient by
 concavity.  Under strict inequalities, $\mathcal A^*=\{a\}$ in Proposition~\ref{prop:optimal-marginal}, so every
 optimum is $\delta_a$.
 \end{proof}
 
 \begin{proposition}[Optimal mixing]\label{prop:binary}
-Let $A=\{a,b\}$ with $K_a:=K_Z(\cdot\mid a)\ne K_b:=K_Z(\cdot\mid b)$ and
+Let $\lambda>0$ and $A=\{a,b\}$ with $K_a\ne K_b$ and
 $\Delta:=\bar u(a)-\bar u(b)\ge0$.  For $x\in[0,1]$ let $q_x$ put mass $x$ on $b$, so that
-$m_{q_xK}=(1-x)K_a+xK_b=:m_x$, and for $x\in(0,1)$ define
+$p_{q_xK}=(1-x)K_a+xK_b=:p_x$, and for $x\in(0,1)$ define
 \[
- g(x):=\KL\!\left(K_b\,\middle\|\,m_x\right)-\KL\!\left(K_a\,\middle\|\,m_x\right).
+ g(x):=\KL\!\left(K_b\,\middle\|\,p_x\right)-\KL\!\left(K_a\,\middle\|\,p_x\right).
 \]
 \begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
 \item $g$ is continuous and strictly decreasing, with $g(0^+)=\KL(K_b\,\|\,K_a)$ and
-$g(1^-)=-\KL(K_a\,\|\,K_b)$ as extended-real limits.  If $\Delta<\lambda\,\KL(K_b\,\|\,K_a)$, the optimum is
-unique and interior, $q^*=q_{x^*}$ with $x^*$ the unique solution of $\Delta=\lambda g(x)$.
+$g(1^-)=-\KL(K_a\,\|\,K_b)$ as extended-real limits.  The pure lottery $\delta_a$ is optimal if and only if
+$\Delta\ge\lambda\,\KL(K_b\,\|\,K_a)$.  Below this threshold the optimum is unique and interior,
+$q^*=q_{x^*}$ with $x^*$ the unique solution of $\Delta=\lambda g(x)$.
 \item The optimal mass $x^*(\Delta,\lambda)$ on the inferior action is nonincreasing in $\Delta$ and
 nondecreasing in $\lambda$, strictly so on the mixing region; at $\Delta=0$ it is the capacity-achieving input
 of the two-row channel, independently of $\lambda$.
@@ -293,15 +336,15 @@ of the two-row channel, independently of $\lambda$.
 
 \begin{proof}
 Write $f(x):=V(q_x,K)=\bar u(a)-x\Delta+\lambda I(x)$ with
-$I(x)=\Sh(m_x)-(1-x)\Sh(K_a)-x\Sh(K_b)$.  Since $K_a\ne K_b$,
-$x\mapsto m_x$ is affine and injective, so strict concavity of $\Sh$ \cite{CoverThomas2006} makes $f$ strictly
-concave on $[0,1]$, and a unique maximiser exists.  On $(0,1)$ every $z\in\supp K_a\cup\supp K_b$ has $m_x(z)>0$
+$I(x)=\Sh(p_x)-(1-x)\Sh(K_a)-x\Sh(K_b)$.  Since $K_a\ne K_b$,
+$x\mapsto p_x$ is affine and injective, so strict concavity of $\Sh$ \cite{CoverThomas2006} makes $f$ strictly
+concave on $[0,1]$, and a unique maximiser exists.  On $(0,1)$ every $z\in\supp K_a\cup\supp K_b$ has $p_x(z)>0$
 and, using $\sum_z(K_b(z)-K_a(z))=0$,
 \[
- I'(x)=\Sh(K_a)-\Sh(K_b)-\sum_z\bigl(K_b(z)-K_a(z)\bigr)\log m_x(z)=g(x),
+ I'(x)=\Sh(K_a)-\Sh(K_b)-\sum_z\bigl(K_b(z)-K_a(z)\bigr)\log p_x(z)=g(x),
 \]
 so $f'(x)=-\Delta+\lambda g(x)$, with $g$ continuous and strictly decreasing as the derivative of a strictly
-concave function.  As $x\downarrow0$, $m_x(z)\to K_a(z)$; if $\supp K_b\subseteq\supp K_a$ every summand converges
+concave function.  As $x\downarrow0$, $p_x(z)\to K_a(z)$; if $\supp K_b\subseteq\supp K_a$ every summand converges
 and $g(0^+)=\KL(K_b\|K_a)$, while if some $\bar z$ has $K_b(\bar z)>0=K_a(\bar z)$ the summand
 $-K_b(\bar z)\log\bigl(xK_b(\bar z)\bigr)$ diverges to $+\infty$, matching the extended-sense divergence.
 Exchanging the roles of $a$ and $b$ gives the limit at $1$.  By concavity and the mean value theorem,
@@ -315,6 +358,21 @@ strictly decreasing $g$ at $\Delta/\lambda$: raising $\Delta$ raises the target,
 $\Delta=0$ the condition $g(x)=0$ is the capacity condition of Proposition~\ref{prop:optimal-choice} at constant
 payoff.
 \end{proof}
+
+\begin{remark}[Overlapping traces and IIA]\label{rem:overlap-iia-example}
+Let three actions have equal expected utility and rows
+\[
+ K_1=(1,0,0),\qquad K_2=(0,1,0),\qquad K_3=(1/2,0,1/2).
+\]
+With only the first two actions, the optimal lottery is $(1/2,1/2)$.  Adding the third gives
+\[
+ q^*=(1/3,4/9,2/9),\qquad p_{q^*K}=(4/9,4/9,1/9).
+\]
+Each active row has divergence $\log(9/4)$ from $p_{q^*K}$, so
+Proposition~\ref{prop:optimal-choice} verifies optimality.  The ratio of the first two choice probabilities falls
+from $1$ to $3/4$.  Thus overlapping rows can generate the red-bus/blue-bus pattern even when expected utilities
+are equal.
+\end{remark}
 
 \begin{proposition}[Trace demand]\label{prop:trace-demand}
 Fix $K$ and write $e(q):=\E_{qK}[u(O)]$, $i(q):=\I_{qK}(A;O,R)$,
@@ -402,13 +460,25 @@ a Markov chain, so expanding $\I(A;Z,Z')$ in both orders gives
  \I(A;Z)-\I(A;Z')=\I(A;Z\mid Z')=\I(A;R\mid O,R'),
 \]
 the last equality because $O$ is part of $Z'$.  Conditional mutual information is nonnegative and vanishes exactly
-under the conditional independence in \textup{(b)} \cite{CoverThomas2006}, proving the identity and
-\textup{(a)}$\Leftrightarrow$\textup{(b)}.  For \textup{(b)}$\Rightarrow$\textup{(c)}: the Markov property gives
-$\Pr(A=\cdot\mid Z,Z')=\pi^{qK}_{Z}$ almost surely, while \textup{(b)} gives
-$\Pr(A=\cdot\mid Z,Z')=\pi^{qL}_{Z'}$; the two random posteriors coincide almost surely, so their laws are equal.
-For \textup{(c)}$\Rightarrow$\textup{(a)}: by the identity in the proof of Corollary~\ref{cor:matching}, the
-information term depends on $(q,K)$ only through $\mu_{qK}$, and the payoff terms already agree.
+when $A$ and $(O,R)$ are conditionally independent given $(O,R')$ \cite{CoverThomas2006}.  This is the zero-price
+condition stated in the proposition.  Under a garbling, it is also equivalent to equality of the posterior laws,
+$\mu_{qK}=\mu_{qL}$.  Indeed, the Markov property gives
+$\Pr(A=\cdot\mid Z,Z')=\pi^{qK}_{Z}$ almost surely, while conditional independence gives
+$\Pr(A=\cdot\mid Z,Z')=\pi^{qL}_{Z'}$; the two random posteriors then coincide almost surely.  Conversely, by the
+identity in the proof of Corollary~\ref{cor:matching}, equality of the posterior laws gives equality of the
+information terms, and the payoff terms already agree.
 \end{proof}
+
+\begin{corollary}[The recorded coin]\label{cor:recorded-coin}
+Let $K,L:A\to\D(O\times R)$ and $t\in(0,1)$.  Let $tK\oplus(1-t)L$ be the public mixture that draws an
+action-independent coin $Y$ with $\Pr(Y=0)=t$, applies $K$ if $Y=0$ and $L$ otherwise, and includes the coin in
+the record; let $M_t:=tK+(1-t)L$ be the rowwise mixture, which hides it.  Then, for every $q\in\D(A)$,
+\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
+\item $V\bigl(q,\,tK\oplus(1-t)L\bigr)=t\,V(q,K)+(1-t)\,V(q,L)$;
+\item $V\bigl(q,\,tK\oplus(1-t)L\bigr)-V(q,M_t)=\lambda\,\I(A;Y\mid O,R)\ge0$, with equality if and only if $A$
+and $Y$ are conditionally independent given $(O,R)$.
+\end{enumerate}
+\end{corollary}
 
 \begin{proof}[Proof of Corollary~\ref{cor:recorded-coin}]
 Part \textup{(i)} is the chain rule with an action-independent first stage:
@@ -419,12 +489,30 @@ deterministic payoff-preserving record processor carrying the public mixture
 to $M_t$.
 \end{proof}
 
-\begin{proof}[Proof of Proposition~\ref{prop:blackwell}]
-(i) If $L=KT$, Proposition~\ref{prop:garbling-price} gives $\I_{qK}\ge\I_{qL}$ at every $q$.  Because the payoff
-kernels coincide, $V(q,K)-V(q,L)=\lambda[\I_{qK}-\I_{qL}]$ with $\lambda>0$, so uniform value dominance and
-$K\succeq_cL$ are the same statement.
+\begin{definition}[Garbling and more-capable orders]\label{def:channel-orders}
+Let $K:A\to\D(O\times R)$ and $L:A\to\D(O\times R')$ have the same payoff kernels.  Write $K\succeq_gL$ if
+$L=KT$ for some record processor $T$, and write $K\succeq_cL$ if
+$\I_{qK}(A;O,R)\ge\I_{qL}(A;O,R')$ for every $q\in\D(A)$; the latter is the \emph{more-capable} order on the
+visible-consequence channels \cite{KornerMarton1977}.
+\end{definition}
 
-(ii) Let $A=\{0,1\}$, fix $o^\ast\in O$, and let both channels pay $o^\ast$ surely.  Let $K$ carry the binary
+\begin{proposition}[Uniform dominance is more-capable, not garbling]\label{prop:blackwell}
+Let $K$ and $L$ have identical payoff kernels.
+\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
+\item $K\succeq_cL$ if and only if $V(q,K)\ge V(q,L)$ for every $q\in\D(A)$.
+\item $K\succeq_gL\Rightarrow K\succeq_cL$, but the converse fails.  There are channels for which
+$K\succeq_cL$ although $L\ne KT$ for every record processor $T$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}[Proof of Proposition~\ref{prop:blackwell}]
+(i) Because the payoff kernels coincide,
+$V(q,K)-V(q,L)=\lambda[\I_{qK}-\I_{qL}]$ with $\lambda>0$.  Uniform value dominance and
+$K\succeq_cL$ are therefore the same statement.
+
+(ii) If $L=KT$, Proposition~\ref{prop:garbling-price} gives $\I_{qK}\ge\I_{qL}$ at every $q$, and hence
+$K\succeq_gL\Rightarrow K\succeq_cL$.  For failure of the converse, let $A=\{0,1\}$, fix $o^\ast\in O$, and let
+both channels pay $o^\ast$ surely.  Let $K$ carry the binary
 erasure record with erasure probability $\varepsilon=\tfrac12$ and $L$ the binary symmetric record with crossover
 $p=\tfrac15$:
 \[
@@ -465,13 +553,14 @@ and $o^-$ attain the maximum and minimum of $u$, write $\Delta u:=u(o^+)-u(o^-)>
 $w(\beta):=\beta u(o^+)+(1-\beta)u(o^-)$.
 
 \begin{definition}[Side bet]\label{def:dilution}
-For $K:A\to\D(O\times R)$, $\varepsilon\in[0,1)$, and $\beta\in[0,1]$, let $P_\varepsilon:A\to\D(\{0,1\})$ be the
-public coin $P_\varepsilon(1\mid a)=\varepsilon$, and let $B_\beta:A\to\D(O\times\{\ast\})$ have the constant rows
+For $K:A\to\D(O\times R)$, put $R^\ast:=R\sqcup\{\ast\}$ and regard $K$ as a channel on $R^\ast$ by zero
+padding.  For $\varepsilon\in[0,1)$ and $\beta\in[0,1]$, let $P_\varepsilon:A\to\D(\{1,2\})$ be the public coin
+$P_\varepsilon(2\mid a)=\varepsilon$, and let $B_\beta:A\to\D(O\times R^\ast)$ have the constant rows
 $B_\beta(o^+,\ast\mid a)=\beta$ and $B_\beta(o^-,\ast\mid a)=1-\beta$.  Write
 \[
- D_{\varepsilon,\beta}K:=P_\varepsilon\triangleright\{K,\,B_\beta\},
+ D_{\varepsilon,\beta}K:=P_\varepsilon\triangleright(K,B_\beta),
 \]
-as in \eqref{eq:compound}, listing the branch-$0$ and branch-$1$ continuations in order.
+as in \eqref{eq:compound}.
 \end{definition}
 
 \begin{proposition}[Willingness to pay for trace]\label{prop:wtp}
@@ -529,11 +618,25 @@ Lemma~\ref{lem:info-payoff-plane} to realise pairs with $\phi$-coordinates $(t,\
 $(0,\overline u)$; they are indifferent, while $E+\lambda'\I$ differs across them by $(\lambda-\lambda')t\ne0$.
 \end{proof}
 
-We restate Proposition~\ref{prop:comparative} with its standing hypotheses.  Both families are defined over the
-same outcome set $O$, on the common domain of all finite pairs, with mutual information in one fixed base.  A
+To compare agents, let both families be defined over the same outcome set $O$, on the common domain of all finite
+pairs, with mutual information in one fixed base.  A
 channel $B$ is \emph{silent} if all its rows are equal; then the joint law under any $p$ is a product, so
 $\I_{pB}=0$ and $V^i(p,B)$ is the expectation of $u_i$ under the $O$-marginal of the common row.  Since
 one-action channels realise every payoff lottery in $\D(O)$, silent pairs realise exactly the payoff lotteries.
+
+\begin{definition}[More trace-seeking]
+Family 2 is \emph{more trace-seeking than} family 1 if
+\[
+ (q,K)\succeq^1(p,B)\quad\Longrightarrow\quad(q,K)\succeq^2(p,B)
+\]
+for all lotteries $q,p$, all channels $K$, and all silent channels $B$.
+\end{definition}
+
+\begin{proposition}[More trace-seeking]\label{prop:comparative}
+Let $\{\succeq^1_K\}$ and $\{\succeq^2_K\}$ satisfy Axioms~\textup{(A1)--(A8)}.  Then family 2 is more
+trace-seeking than family 1 if and only if the representations can be chosen with a common utility and
+$\lambda_2\ge\lambda_1$.
+\end{proposition}
 
 \begin{proof}[Proof of Proposition~\ref{prop:comparative}]
 Throughout, block comparisons are read through the moreover clause of Theorem~\ref{thm:main}.
@@ -607,6 +710,6 @@ $(q,K^{\mathrm{id}}_o)\succ(q,K^{0}_o)$ at every payoff, although Axiom~\textup{
 under the total record garbling of $K^{\mathrm{id}}_o$, both blocks carry zero information and indifference must
 obtain; a surviving strict preference indicates that an uncontrolled feature of the display still traces the
 action.  Transport: repeating Step 2 at another $n$, prior, or payoff level must return the same $\lambda$, by
-Proposition~\ref{prop:single-price}\textup{(ii)}; an estimate that declines in $\log n$ is the signature of the
+Proposition~\ref{prop:single-price}; an estimate that declines in $\log n$ is the signature of the
 capped-information criterion.
 \end{remark}

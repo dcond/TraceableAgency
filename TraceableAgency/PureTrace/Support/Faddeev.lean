@@ -48,7 +48,7 @@ The Faddeev entropy theorem derives:
 
 ## References
 
-* Paper/appendix_a_pure_trace_v4.tex, Lemma faddeevsketch
+* Paper/appendix_a_pure_trace_v5.tex, Lemma faddeevsketch
 * Faddeev (1956), "On the concept of entropy of a finite probabilistic scheme"
 * Baez-Fritz-Leinster (2011), Theorem 6
 

@@ -9,7 +9,7 @@ import TraceableAgency.Theorem1.SupportBranchNumerics
 # Identifying the probability scale of branch insertion
 
 On a nontrivial reached support face, compare full revelation with silence at
-the separate v4 trace anchor.  The local value
+the separate v5 trace anchor.  The local value
 difference is the global trace coefficient times the support entropy, while
 the value difference after insertion is additionally multiplied by the
 probability of reaching the branch.  Positive-affine uniqueness therefore
@@ -29,7 +29,7 @@ variable [Fintype Y] [DecidableEq Y] [Nonempty Y]
 
 /-! ## Constant-trace-anchor calibration pair on a support face -/
 
-/-- Full revelation on a support face, with the v4 trace-anchor payoff
+/-- Full revelation on a support face, with the v5 trace-anchor payoff
 attached deterministically. -/
 noncomputable def supportTraceAnchorFullRevealExperiment
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)

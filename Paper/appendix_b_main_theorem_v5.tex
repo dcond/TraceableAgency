@@ -155,11 +155,9 @@ E\succeq_q L
 tE\oplus(1-t)G\succeq_q tL\oplus(1-t)G.
 \label{lf:eq:mixture-independence}
 \end{equation}
-For the reverse implication, if $E\not\succeq_q L$, completeness gives
-$L\succ_q E$; the strict part of Axiom~\textup{(A8)} makes the reverse public
-mixture strict.  If record
-alphabets differ, put them in a common disjoint union before invoking the
-axiom; part \textup{(a)} identifies the result with
+This is the action-independent special case of the axiom: the public coin is the binary first-stage record and
+$G$ is the common continuation.  If record alphabets differ, put them in a common disjoint union before invoking
+the axiom; part \textup{(a)} identifies the result with
 \eqref{lf:eq:public-mixture}.
 
 It remains only to check the Archimedean step.  A closed segment between two
@@ -242,8 +240,8 @@ limits on each finite simplex, and compounding.  Thus Axiom~\textup{(A1)} gives
 the pure weak order, while Lemma~\ref{lem:relevance-bridge} turns
 Axiom~\textup{(A4)} into its positive orientation; Axiom \textup{(A2)} gives continuity; Axiom \textup{(A5)} gives
 block coherence; Axioms \textup{(A6)} and \textup{(A7)} give the two data
-processing conditions, including every null-row completion; and Axiom
-\textup{(A8)} gives branchwise continuation.  These are precisely the
+processing conditions, including every null-row completion; and
+Lemma~\ref{pt:lem:finite-branch-extension} gives finite-branch continuation.  These are precisely the
 hypotheses of Proposition~\ref{pt:prop:main}.  Its conclusion is that every
 within-channel and block-supported comparison between such lifts is ordered by
 $I_{qP}(A;R)$.
@@ -331,16 +329,13 @@ $r_y$ gives $P(y\mid a)=0$.  Hence the continuation rows chosen outside $S_y$
 are never used on branch $y$.  Support restriction identifies their local
 versions as well, so the extension is independent of the chosen projection.
 
-Support restriction and Axiom~\textup{(A8)}, including its strict part, give
+Support restriction and Corollary~\ref{pt:cor:one-branch-a8} give
 \[
 E\succeq_{\bar r_y}G
 \quad\Longleftrightarrow\quad
 J_y(E)\succeq_q J_y(G).
 \]
-For the reverse implication, failure of the local weak comparison gives a
-strict reverse comparison by completeness, and strict branchwise consistency
-gives a strict reverse compound comparison.  Different continuation record
-alphabets are first put in a common disjoint union.  Moreover, $J_y$ commutes
+Different continuation record alphabets are first put in a common disjoint union.  Moreover, $J_y$ commutes
 with public mixtures at the level of marked terminal laws.  Thus affine
 uniqueness gives constants $c_y>0,d_y$ such that
 \begin{equation}
@@ -508,21 +503,15 @@ Thus $I(B;O,R)\le I(A;O,R)$, proving Axiom~\textup{(A7)}.  This argument uses
 the undivided joint-law equation and so also covers every completion on a null
 processed action.
 
-For a compound channel, the two finite chain rules are
+For the binary compounds in Axiom~\textup{(A8)}, the expected-utility and mutual-information chain rules give
 \begin{align*}
-\E[u(O)]
-  &=\sum_{y:m(y)>0} m(y)\E_{q_yK^y}[u(O)],\\
-I(A;Y,O,R)
-  &=I(A;Y)+\sum_{y:m(y)>0} m(y)I_{q_yK^y}(A;O,R).
+&V\bigl(q,P\triangleright(K,M)\bigr)-V\bigl(q,P\triangleright(L,M)\bigr)\\
+&\qquad =\left(\sum_a q(a)P(1\mid a)\right)
+ \bigl[V(q_1,K)-V(q_1,L)\bigr].
 \end{align*}
-The first-stage term is common to two continuation profiles.  Their aggregate
-value difference is therefore
-\[
-\sum_{y:m(y)>0} m(y)\bigl[V(q_y,K^y)-V(q_y,L^y)\bigr].
-\]
-Branchwise weak improvement makes this sum nonnegative, and a strict
-improvement on a reached branch makes it positive.  This is precisely
-Axiom~\textup{(A8)}.
+The first-stage information term and the continuation following record $2$ cancel.  Because record $1$ has
+positive probability under $q$, the coefficient is positive, so the two differences have the same sign.  This
+proves the weak biconditional in Axiom~\textup{(A8)} and its strict form.
 
 Because $u$ is nonconstant, choose $o^+,o^-$ with $u(o^+)>u(o^-)$.  In the
 two-action channel of Axiom~\textup{(A3)}, its two pure lotteries have these
