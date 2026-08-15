@@ -264,7 +264,7 @@ noncomputable def commonPayoffCompound
     (compoundPayoffRecordEquiv Y O Rec)
     (seqComposeDep P (fun y => O × Rec y) K)
 
-/-! ## V4 axioms A1--A8 -/
+/-! ## V5 axioms A1--A8 -/
 
 /-- A1: every fixed joint channel carries a complete and transitive order. -/
 def A1_WeakOrder
@@ -345,10 +345,10 @@ def A7_ActionDataProcessing
     IsActionProcessorCompletion K q S Khat →
     pairWeak F q K (Channel.actionPushforward q S) Khat
 
-/-- Paper-faithful weak part of A8.  Both
-continuation profiles share the same branch-dependent record family `Rec`;
-allowing two unrelated families would be a stronger premise. -/
-def A8_BranchwiseContinuationConsistency_Weak
+/-- Weak part of the finite-branch extension of A8.  Both continuation
+profiles share the same branch-dependent record family `Rec`; allowing two
+unrelated families would be a stronger premise. -/
+def FiniteBranchContinuationConsistency_Weak
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A Y : Type u}
@@ -365,10 +365,10 @@ def A8_BranchwiseContinuationConsistency_Weak
     pairWeak F q (commonPayoffCompound Rec P K)
       q (commonPayoffCompound Rec P L)
 
-/-- Strict part of A8: a strict comparison in at least one reached branch,
-in addition to weak improvement in every reached branch, makes the compound
-comparison strict. -/
-def A8_BranchwiseContinuationConsistency_Strict
+/-- Strict part of the finite-branch extension: a strict comparison in at
+least one reached branch, in addition to weak improvement in every reached
+branch, makes the compound comparison strict. -/
+def FiniteBranchContinuationConsistency_Strict
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
   ∀ {A Y : Type u}
@@ -388,12 +388,51 @@ def A8_BranchwiseContinuationConsistency_Strict
     pairStrict F q (commonPayoffCompound Rec P K)
       q (commonPayoffCompound Rec P L)
 
-/-- A8 with its weak and strict clauses. -/
-def A8_BranchwiseContinuationConsistency
+/-- The proof-facing finite-branch property derived from binary A8. -/
+def FiniteBranchContinuationConsistency
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop :=
-  A8_BranchwiseContinuationConsistency_Weak F ∧
-    A8_BranchwiseContinuationConsistency_Strict F
+  FiniteBranchContinuationConsistency_Weak F ∧
+    FiniteBranchContinuationConsistency_Strict F
+
+/-! Canonical binary labels are lifted so that they inhabit the same universe
+as the fixed payoff alphabet. -/
+
+abbrev RelevanceBit : Type u := ULift.{u, 0} Bool
+
+/-- Select a continuation after binary record `1` (`true`) and the common
+continuation after record `2` (`false`). -/
+def binaryContinuationProfile
+    {O A R : Type u}
+    [Fintype O] [Fintype A] [Fintype R]
+    (K M : Channel A (O × R)) (b : RelevanceBit) : Channel A (O × R) :=
+  if b.down then K else M
+
+/-- The binary compound displayed in v5 A8. -/
+noncomputable def binaryPayoffCompound
+    {O A R : Type u}
+    [Fintype O] [DecidableEq O]
+    [Fintype A]
+    [Fintype R] [DecidableEq R]
+    (P : Channel A RelevanceBit) (K M : Channel A (O × R)) :=
+  commonPayoffCompound (fun _ : RelevanceBit => R) P
+    (binaryContinuationProfile K M)
+
+/-- V5 A8: recordwise sure-thing for a reached first binary record.  The two
+compounds share the same continuation `M` after the other record. -/
+def A8_RecordwiseSureThing
+    {O : Type u} [Fintype O] [DecidableEq O]
+    (F : FixedPayoffPrefFamily O) : Prop :=
+  ∀ {A R : Type u}
+    [Fintype A] [DecidableEq A] [Nonempty A]
+    [Fintype R] [DecidableEq R] [Nonempty R]
+    (q : TraceableAgency.Dist A) (P : Channel A RelevanceBit)
+    (K L M : Channel A (O × R)),
+    BranchPositive P q (ULift.up true) →
+      (pairWeak F (branchPosterior P q (ULift.up true)) K
+          (branchPosterior P q (ULift.up true)) L ↔
+        pairWeak F q (binaryPayoffCompound P K M)
+          q (binaryPayoffCompound P L M))
 
 /-- One-action, uninformative-record channel delivering payoff `o` surely. -/
 noncomputable def deterministicPayoffChannel
@@ -420,12 +459,7 @@ noncomputable def uninformativeAtPayoff
 def IsConstantPayoffIndex {O : Type u} (u : O → ℝ) : Prop :=
   ∃ c : ℝ, ∀ o : O, u o = c
 
-/-! Canonical benchmark alphabets are lifted so that they inhabit the same
-universe as the fixed payoff alphabet. -/
-
-abbrev RelevanceBit : Type u := ULift.{u, 0} Bool
-
-/-- The fixed two-action material benchmark from v4 A3.  The lifted action
+/-- The fixed two-action material benchmark from v5 A3.  The lifted action
 `true` delivers `oplus`; lifted `false` delivers `ominus`; neither leaves a
 record. -/
 noncomputable def materialRelevanceBenchmarkChannel
@@ -444,7 +478,7 @@ noncomputable def materialRelevanceWorsePrior :
     TraceableAgency.Dist RelevanceBit :=
   TraceableAgency.Dist.pure (ULift.up false)
 
-/-- A3 (v4): two distinct sure outcomes are strictly ranked inside the one
+/-- A3 (v5): two distinct sure outcomes are strictly ranked inside the one
 fixed two-action, no-record benchmark channel. -/
 def A3_MaterialRelevance
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -453,12 +487,12 @@ def A3_MaterialRelevance
     F.strictRel (materialRelevanceBenchmarkChannel oplus ominus)
       materialRelevanceBetterPrior materialRelevanceWorsePrior
 
-/-- The fair distribution on the two records/actions used in v4 A4. -/
+/-- The fair distribution on the two records/actions used in v5 A4. -/
 noncomputable def traceRelevanceFairPrior :
     TraceableAgency.Dist RelevanceBit :=
   TraceableAgency.Dist.uniform
 
-/-- The fixed four-action trace benchmark from v4 A4, encoded by
+/-- The fixed four-action trace benchmark from v5 A4, encoded by
 `RelevanceBit ⊕ RelevanceBit`.  The left two actions reveal their Boolean
 label; both right actions emit an independent fair record.  Every row pays
 `ostar`. -/
@@ -482,17 +516,17 @@ noncomputable def traceRelevanceBenchmarkChannel
               simp [ho]
             · simp }
 
-/-- The fair lottery over the two revealing actions in the v4 A4 channel. -/
+/-- The fair lottery over the two revealing actions in the v5 A4 channel. -/
 noncomputable def traceRelevanceRevealingPrior :
     TraceableAgency.Dist (RelevanceBit ⊕ RelevanceBit) :=
   inlDist traceRelevanceFairPrior
 
-/-- The fair lottery over the two uninformative actions in the v4 A4 channel. -/
+/-- The fair lottery over the two uninformative actions in the v5 A4 channel. -/
 noncomputable def traceRelevanceUnrevealingPrior :
     TraceableAgency.Dist (RelevanceBit ⊕ RelevanceBit) :=
   inrDist traceRelevanceFairPrior
 
-/-- A4 (v4): inside one fixed four-action constant-payoff channel, the fair
+/-- A4 (v5): inside one fixed four-action constant-payoff channel, the fair
 lottery whose record identifies the action is strictly preferred to the fair
 lottery whose record is independent of the action. -/
 def A4_TraceRelevance
@@ -502,7 +536,7 @@ def A4_TraceRelevance
     F.strictRel (traceRelevanceBenchmarkChannel ostar)
       traceRelevanceRevealingPrior traceRelevanceUnrevealingPrior
 
-/-- Environment form of material relevance used after the v4 relevance
+/-- Environment form of material relevance used after the v5 relevance
 bridge. -/
 def MaterialRelevanceEnvironment
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -514,7 +548,7 @@ def MaterialRelevanceEnvironment
       (deterministicPayoffChannel ominus)
 
 /-- Environment form of trace relevance at one fixed payoff.  The bridge
-transports the v4 A4 benchmark across full-support priors and nontrivial finite
+transports the v5 A4 benchmark across full-support priors and nontrivial finite
 action alphabets without changing `ostar`. -/
 def PositiveTraceOrientationAt
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -525,8 +559,8 @@ def PositiveTraceOrientationAt
       pairStrict F q (fullRevealAtPayoff (A := A) ostar)
         q (uninformativeAtPayoff (A := A) ostar)
 
-/-- The exact v4 axiom bundle, in the paper's v4 numbering. -/
-structure TraceTemperedAxiomsV4
+/-- The exact v5 axiom bundle, in the paper's v5 numbering. -/
+structure TraceTemperedAxiomsV5
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) : Prop where
   a1 : A1_WeakOrder F
@@ -536,12 +570,12 @@ structure TraceTemperedAxiomsV4
   a5 : A5_BlockComparisonCoherence F
   a6 : A6_RecordDataProcessing F
   a7 : A7_ActionDataProcessing F
-  a8 : A8_BranchwiseContinuationConsistency F
+  a8 : A8_RecordwiseSureThing F
 
 /-! ### Proof-facing bridge bundle
 
 The long representation proof is written in semantic dependency order.  The
-relevance bridge supplies this bundle from v4: material relevance is in its
+relevance bridge supplies this bundle from v5: material relevance is in its
 environment form, while trace relevance carries one explicit, separate
 anchor.  No mathematical hypothesis is added here. -/
 
@@ -553,7 +587,7 @@ structure TraceTemperedBridgeAxioms
   a3 : A5_BlockComparisonCoherence F
   a4 : A6_RecordDataProcessing F
   a5 : A7_ActionDataProcessing F
-  a6 : A8_BranchwiseContinuationConsistency F
+  a6 : FiniteBranchContinuationConsistency F
   a7 : MaterialRelevanceEnvironment F
   a8 : PositiveTraceOrientationAt F traceAnchor
 
@@ -618,20 +652,20 @@ def SameWitnessBlockRepresentation
     traceTemperedValue u lambda qi (K i) ≥
       traceTemperedValue u lambda qj (K j)
 
-/-- Exact v4 statement of Theorem 1.  Material and trace relevance are the two
+/-- Exact v5 statement of Theorem 1.  Material and trace relevance are the two
 fixed-channel axioms, and trace relevance is assumed at a single payoff.  The
 same global witnesses represent both within-channel and finite block-supported
 comparisons. -/
-def Theorem1StatementV4 : Prop :=
+def Theorem1StatementV5 : Prop :=
   ∀ (O : Type u) [Fintype O] [DecidableEq O],
     2 ≤ Fintype.card O →
     ∀ F : FixedPayoffPrefFamily O,
-      (TraceTemperedAxiomsV4 F ↔
+      (TraceTemperedAxiomsV5 F ↔
         ∃ (u : O → ℝ) (lambda : ℝ),
           ¬ IsConstantPayoffIndex u ∧
           0 < lambda ∧
           WithinChannelRepresentation F u lambda) ∧
-      (TraceTemperedAxiomsV4 F →
+      (TraceTemperedAxiomsV5 F →
         ∃ (u : O → ℝ) (lambda : ℝ),
           ¬ IsConstantPayoffIndex u ∧
           0 < lambda ∧

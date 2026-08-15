@@ -1,15 +1,15 @@
-# Formalization certificate: `trace_tempered_choice_v4`, Theorem 1
+# Formalization certificate: `trace_tempered_choice_v5`, Theorem 1
 
 ## Certified result
 
 The authoritative informal result is Theorem 1 (`thm:main`) in
-`Paper/trace_tempered_choice_v4.tex`. Its formal statement and public proof are:
+`Paper/trace_tempered_choice_v5.tex`. Its formal statement and public proof are:
 
 ```lean
-TraceableAgency.Theorem1.Theorem1StatementV4
+TraceableAgency.Theorem1.Theorem1StatementV5
 
-TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV4
+TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV5
 ```
 
 The proof declaration has exactly the displayed proposition as its type. This
@@ -36,7 +36,7 @@ V_{u,\lambda}(q,K)
 +\lambda I_{qK}(A;O,R).
 \]
 
-Lean proves that the exact v4 Axioms A1--A8 are equivalent to the existence of
+Lean proves that the exact v5 Axioms A1--A8 are equivalent to the existence of
 one nonconstant (u), one (lambda>0), and simultaneous representation of
 every within-channel comparison by (V_{u,lambda}). It also proves that some
 same witnesses represent all comparisons between alternatives supported on
@@ -47,7 +47,7 @@ likelihood-ratio sum, setting every zero-joint-mass summand to zero.
 `mutualInfoLikelihoodRatio_eq_mutualInfo` proves that formula equal to Lean's
 entropy-difference definition of `mutualInfo`, without an additional axiom.
 
-These are the two conjuncts of `Theorem1StatementV4`, respectively expressed
+These are the two conjuncts of `Theorem1StatementV5`, respectively expressed
 through `WithinChannelRepresentation` and `SameWitnessBlockRepresentation`.
 
 ## Domain and comparison environments
@@ -61,7 +61,7 @@ compares the supported copies of (q) and (p) inside one explicit block
 channel. Only record tags are added; `sumPayoffRecordEquiv` and
 `sigmaPayoffRecordEquiv` retain the same payoff coordinate.
 
-## Exact v4 axioms
+## Exact v5 axioms
 
 ### A1 — weak order
 
@@ -74,6 +74,8 @@ relation on its action lotteries.
 channel and both lotteries preserves a weak comparison. On finite Euclidean
 simplexes this is the paper's closed-graph formulation.
 
+(A2) is formalized as sequential closedness, equivalent to the closed graph in this finite-dimensional setting.
+
 ### A3 — fixed-channel material relevance
 
 `A3_MaterialRelevance`: there are distinct (o^+,o^-) such that, inside the
@@ -81,7 +83,7 @@ canonical two-action no-record channel delivering those outcomes surely, the
 pure (o^+) lottery is strictly preferred to the pure (o^-) lottery.
 
 This is a single within-channel comparison. The older cross-environment
-material condition is not assumed by v4.
+material condition is not assumed by v5.
 
 ### A4 — fixed-channel trace relevance at one payoff
 
@@ -90,7 +92,7 @@ channel. Its left pair reveals the selected Boolean action, while its right
 pair emits an independent fair Boolean record. The fair revealing lottery is
 strictly preferred to the fair nonrevealing lottery in that same channel.
 
-The existential payoff is deliberately singular. v4 does not assume positive
+The existential payoff is deliberately singular. v5 does not assume positive
 trace orientation at every payoff.
 
 ### A5 — block-comparison coherence
@@ -119,16 +121,23 @@ cannot improve an alternative for every completion satisfying
 processed action, nonnegativity makes the right side zero and leaves the
 completion row unrestricted. Lean quantifies over every such completion.
 
-### A8 — branchwise continuation consistency
+### A8 — binary recordwise sure-thing principle
 
-`A8_BranchwiseContinuationConsistency` combines weak and strict clauses. The
-two continuation profiles share one branch-dependent record family. Unreached
-branches are ignored; weak improvement is required at every reached branch,
-and one reached strict improvement yields a strict compound comparison.
+`A8_RecordwiseSureThing` is the paper's binary weak biconditional. The first
+binary record must be reached; the two compounds differ only in its
+continuation and share the same continuation after the other record.
+
+`recordwiseSureThing_iff_finiteBranchContinuationConsistency` proves, from A1
+and A5--A7, that this binary premise is equivalent to the weak-and-strict
+finite-branch property used by the representation proof. The construction
+collapses one finite record against its complement, pads continuations onto a
+common tagged record alphabet, handles null rows through exact A7 completions,
+and telescopes branch replacements using A1 and A5. The derived property is
+`FiniteBranchContinuationConsistency`; it is not an extra axiom field.
 
 ### Bundle boundary
 
-`TraceTemperedAxiomsV4` contains exactly these eight predicates, in this
+`TraceTemperedAxiomsV5` contains exactly these eight predicates, in this
 numbering. It has no representation, posterior-continuity, Faddeev,
 Herstein--Milnor, normalization, reachability, scale, or selection field.
 
@@ -158,7 +167,7 @@ The forward construction proceeds as follows.
    comparison to the embedded fair prior.
 3. From an arbitrary full-support prior, `binaryReachChannel` creates a
    positive branch whose posterior is that embedded fair prior.
-4. A8 makes the compound comparison strict; A6 garbles full revelation to the
+4. The derived finite-branch lemma makes the compound comparison strict; A6 garbles full revelation to the
    revealing compound and the nonrevealing compound to silence.
 
 All channels, processors, branch masses, posteriors, and null completions are
@@ -168,7 +177,7 @@ independent fair record from silence, and reinserts the two supports into the
 fixed four-action channel.
 
 `TraceTemperedBridgeAxioms F ostar` is a proof-facing `Prop` indexed by the
-chosen trace anchor. `traceTemperedBridgeAxioms_of_v4` returns an existentially
+chosen trace anchor. `traceTemperedBridgeAxioms_of_v5` returns an existentially
 indexed bundle, so extraction never moves data from a proposition into a
 computational type and introduces no choice principle beyond the final proof's
 audited foundations.
@@ -210,14 +219,15 @@ priors. Support restriction handles boundary priors without assigning them a
 new normalized representative.
 
 `representationClauses_of_fullSupportNormalizedValueFormula` produces the
-within-channel and same-witness block conclusions. `theorem1V4Clauses` combines
+within-channel and same-witness block conclusions. `theorem1V5Clauses` combines
 this with the relevance bridge.
 
 For the converse, the benchmark module proves weak order, continuity, block
-coherence, both data-processing axioms, branch consistency, material
+coherence, both data-processing axioms, finite branch consistency, material
 nonconstancy, and positive entropy of full revelation. It constructs the
-proof-facing v4 bridge directly at one fixed trace anchor, then the reverse
-relevance bridge gives the exact fixed A3/A4 channels. In particular, the A4
+proof-facing v5 bridge directly at one fixed trace anchor. The reverse half of
+the finite-branch lemma supplies public binary A8, and the reverse relevance
+bridge gives the exact fixed A3/A4 channels. In particular, the A4
 benchmark has mutual-information values (log 2) and (0), so
 (lambda>0) supplies strictness.
 
@@ -233,7 +243,7 @@ Quot.sound
 ```
 
 The dependency audit rejects superseded stronger proof routes.
-`TraceableAgency/Audit/V4Certificate.lean` checks and prints the exact public
+`TraceableAgency/Audit/V5Certificate.lean` checks and prints the exact public
 declaration and its axioms. `scripts/check_theorem1_certificate.sh` checks the
-byte manifest, source hygiene, complete Lean build, audits, reproducible v4
+byte manifest, source hygiene, complete Lean build, audits, reproducible v5
 PDF, and a fresh `leanchecker` replay.

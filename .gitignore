@@ -13,3 +13,4 @@ lake-packages/
 *.out
 *.synctex.gz
 Paper/.build/
+Paper/*.extraction_cache.json

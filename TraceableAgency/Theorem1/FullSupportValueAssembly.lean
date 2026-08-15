@@ -14,7 +14,7 @@ import TraceableAgency.Theorem1.RepresentationAssembly
 
 This file isolates the last numerical calculation.  Its only non-structural
 input is the payoff increment from changing one reached deterministic-payoff
-branch away from the separate v4 trace anchor.  Zero-mass branches are handled
+branch away from the separate v5 trace anchor.  Zero-mass branches are handled
 directly at the level of marked terminal laws; finite telescoping then gives
 the value of every deterministic-payoff profile, and A6 sequentialization
 reduces an arbitrary payoff-record channel to such a profile.

@@ -1,6 +1,139 @@
 \section{Pure trace on the constant-payoff domain}
 \label{pt:sec:environment}\label{lf:app:pure-trace}
 
+\subsection{Binary and finite branching}
+
+We first record the finite-branch form of Axiom~\textup{(A8)} used throughout the proofs.  The result also makes
+explicit where the other structural axioms enter the equivalence.
+
+\begin{lemma}[Finite-branch extension]\label{pt:lem:finite-branch-extension}
+Suppose Axioms~\textup{(A1)} and \textup{(A5)--(A7)} hold.  Then Axiom~\textup{(A8)} is equivalent to the
+following property: for every $k\ge1$, every first-stage record channel
+$P:A\to\D(\{1,\ldots,k\})$, every $q\in\D(A)$, and every
+two ordered lists of continuation channels $(K_1,\ldots,K_k)$ and $(L_1,\ldots,L_k)$, with
+$K_i,L_i:A\to\D(O\times R)$, if
+\[
+ (q_i,K_i)\succeq(q_i,L_i)
+ \quad\text{for every reached }i,
+\]
+then
+\begin{equation}
+ \bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ \succeq
+ \bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr),
+ \label{pt:eq:finite-branch-extension}
+\end{equation}
+strictly if one reached branch comparison is strict.
+\end{lemma}
+
+\begin{proof}
+Assume first Axiom~\textup{(A8)}.  Put
+\[
+ m(i):=\sum_aq(a)P(i\mid a),
+ \qquad
+ I^+:=\{i\in\{1,\ldots,k\}:m(i)>0\}.
+\]
+If $m(i)=0$, then $P(i\mid a)=0$ for every $a\in\supp q$.  Consequently, changing the continuation after such a
+record changes the compound channel only on action rows outside $\supp q$.  Apply Axiom~\textup{(A7)} in both
+directions using the identity action processor: its Bayesian pushforwards agree on supported rows and allow
+arbitrary completions elsewhere.  Continuations following unreached records are therefore immaterial.  We may
+hold them fixed and enumerate the reached records as $I^+=\{i_1,\ldots,i_n\}$.
+
+If $n=1$, the first-stage record is constant on $\supp q$.  Deleting or restoring that constant record is an
+invertible record relabelling, up to rows outside $\supp q$; Axioms~\textup{(A6)} and \textup{(A7)} therefore
+identify the compound comparison with the sole branch comparison.  Suppose henceforth that $n\ge2$.
+
+For $j=0,\ldots,n$, define hybrid continuation channels by
+\[
+ H_i^j:=
+ \begin{cases}
+ K_i,&i\in\{i_1,\ldots,i_j\},\\
+ L_i,&i\in I^+\setminus\{i_1,\ldots,i_j\},
+ \end{cases}
+\]
+and use a common arbitrary continuation on $\{1,\ldots,k\}\setminus I^+$.  Write
+$E_j:=P\triangleright(H_1^j,\ldots,H_k^j)$.  Fix $j\ge1$ and collapse the first-stage record to the binary channel
+\[
+ B_j(1\mid a):=P(i_j\mid a),
+ \qquad
+ B_j(2\mid a):=\sum_{i\ne i_j}P(i\mid a).
+\]
+Both binary records are reached.  Put all binary continuations on the common record set
+$\{1,\ldots,k\}\times R$.  Pad the
+two continuations that may differ by
+\[
+ \widetilde K_j(o,(i,r)\mid a):=\1_{\{i=i_j\}}K_{i_j}(o,r\mid a),
+ \qquad
+ \widetilde L_j(o,(i,r)\mid a):=\1_{\{i=i_j\}}L_{i_j}(o,r\mid a).
+\]
+On record $2$, collect all unchanged branches in the continuation channel
+\begin{equation}
+ M_j(o,(i,r)\mid a)
+ :=\frac{P(i\mid a)}{B_j(2\mid a)}H_i^j(o,r\mid a),
+ \qquad i\ne i_j,
+ \label{pt:eq:complement-continuation}
+\end{equation}
+with zero probability on records $(i_j,r)$, whenever $B_j(2\mid a)>0$, and complete the other rows arbitrarily.
+Since $H_i^j=H_i^{j-1}$ for $i\ne i_j$, this continuation is common to the two comparisons.
+Binary record $1$ has probability
+$m(i_j)$ and carries the conditional action lottery $q_{i_j}$; record $2$ carries the complementary conditional
+lottery, and their mixture is $q$.  Appending or deleting the constant label $i_j$ is an invertible record
+relabeling, so Axiom~\textup{(A6)} identifies the comparison of $\widetilde K_j$ and $\widetilde L_j$ with that of
+$K_{i_j}$ and $L_{i_j}$.  Hence Axiom~\textup{(A8)} gives
+\[
+ \bigl(q,B_j\triangleright(\widetilde K_j,M_j)\bigr)
+ \succeq
+ \bigl(q,B_j\triangleright(\widetilde L_j,M_j)\bigr),
+\]
+strictly whenever the comparison at $q_{i_j}$ is strict.
+
+The nested records $(1,(i_j,r))$ and $(2,(i,r))$ correspond bijectively to the flat records $(i,r)$ through
+\[
+ (1,(i_j,r))\longmapsto(i_j,r),
+ \qquad
+ (2,(i,r))\longmapsto(i,r)\quad(i\ne i_j).
+\]
+This relabelling is a payoff-preserving record processing in both directions.  Axiom~\textup{(A6)} therefore
+makes the two binary compounds indifferent to $E_j$ and $E_{j-1}$, respectively.  Thus
+$(q,E_j)\succeq(q,E_{j-1})$, strictly at any strict replacement.  Place the finite collection
+$E_0,\ldots,E_n$ in one block environment.  Axiom~\textup{(A5)} transports each pairwise comparison to that
+environment, and transitivity in Axiom~\textup{(A1)} yields $(q,E_n)\succeq(q,E_0)$, strictly if at least one
+step is strict.  Restoring the immaterial null branches proves \eqref{pt:eq:finite-branch-extension}.
+
+Conversely, assume the displayed finite-branch property, including its strict clause.  In the binary environment
+of Axiom~\textup{(A8)}, reflexivity and duplication coherence make the common continuation weakly comparable to
+itself, so the finite-branch property gives the forward implication in
+\eqref{eq:recordwise-sure-thing}.  If the aggregate comparison in that equation held while
+$(q_1,K)\not\succeq(q_1,L)$, completeness would give $(q_1,L)\succ(q_1,K)$.  Applying the strict
+finite-branch property to the reversed lists would give the strict reverse aggregate comparison, a contradiction.  This
+proves the converse implication and hence Axiom~\textup{(A8)}.
+\end{proof}
+
+\begin{corollary}[One-branch insertion]\label{pt:cor:one-branch-a8}
+Under the hypotheses of Lemma~\ref{pt:lem:finite-branch-extension}, fix $q\in\D(A)$, a first-stage record channel
+$P:A\to\D(\{1,\ldots,k\})$, a reached record $i^*$, and continuation channels
+$K_1,\ldots,K_k,L_1,\ldots,L_k:A\to\D(O\times R)$ such that $K_i=L_i$ for every $i\ne i^*$.  Then
+\[
+ (q_{i^*},K_{i^*})\succeq(q_{i^*},L_{i^*})
+ \quad\Longleftrightarrow\quad
+ \bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ \succeq
+ \bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr),
+\]
+and the same equivalence holds for strict preference.
+\end{corollary}
+
+\begin{proof}
+The forward implication follows from Lemma~\ref{pt:lem:finite-branch-extension}, using duplication coherence on
+the common branches.  If the aggregate comparison held but the branch comparison failed, completeness would make
+the reversed branch comparison strict; the strict part of the finite-branch extension would then give a strict
+reverse aggregate comparison.  The strict equivalence follows by applying the weak equivalence in both directions.
+\end{proof}
+
+In the appendices, references to Axiom~\textup{(A8)} with more than two first-stage records mean its
+finite-branch extension in Lemma~\ref{pt:lem:finite-branch-extension}; when only one branch changes, we cite
+Corollary~\ref{pt:cor:one-branch-a8}.
+
 The relevance axioms in the main text are stated inside fixed channels.  The
 proofs below use their equivalent comparison-environment forms.
 
@@ -57,8 +190,8 @@ $0<\varepsilon\le 2\min_i p_i$ and an interim record $y$ with
 $P(y\mid i)=\varepsilon/(2p_i)$.  The branch has probability $\varepsilon$
 and posterior $(\tfrac12,\tfrac12)$.  Compare two continuation plans: after that branch the
 first reveals the action and the second is silent; after every other branch
-both are silent.  Equation~\eqref{eq:bridge-fair-binary} and branchwise
-continuation give a strict comparison of the two compounds.  Full revelation
+both are silent.  Equation~\eqref{eq:bridge-fair-binary} and
+Corollary~\ref{pt:cor:one-branch-a8} give a strict comparison of the two compounds.  Full revelation
 can be garbled into the first compound, and the second compound can be
 garbled into silence.  Record processing and transitivity therefore give
 $(p,K^{\mathrm{id}}_{o_\ast})\succ(p,K^0_{o_\ast})$.
@@ -89,7 +222,8 @@ q\succeq_Pq'\quad:\Longleftrightarrow\quad q\succeq_{K_P}q'.
 We similarly write $(q,P)\succeq(r,Q)$ for the main-text two-block
 comparison of $(q,K_P)$ and $(r,K_Q)$.
 Likewise, $P\sqcup Q$, block-supported lotteries, action and record
-processing, and a compound $P_1\triangleright\{Q^x\}$ are shorthand for the
+processing, ordered lists of continuation channels, and compounds
+$P_1\triangleright(Q_1,\ldots,Q_k)$ are shorthand for the
 corresponding main-text constructions after applying
 \eqref{pt:eq:constant-payoff-lift}.  The lift commutes with each construction
 up to canonical tagged or singleton-record bijections; those bijections are
@@ -155,7 +289,7 @@ I_{q_iP_i}(A_i;X_i)\ge I_{q_jP_j}(A_j;X_j).
 
 Assume the hypotheses of Proposition~\ref{pt:prop:main}.  Every appeal below
 to weak order, continuity, block coherence, record processing, action
-processing, branchwise continuation, or positive trace orientation is an
+processing, the finite-branch extension of the recordwise sure-thing principle, or positive trace orientation is an
 appeal to Axiom \textup{(A1)}, \textup{(A2)}, \textup{(A5)}, \textup{(A6)},
 \textup{(A7)}, \textup{(A8)}, or \textup{(A4)}, respectively, on the
 constant-payoff lifts.  Thus the proof has no auxiliary axiom system.
@@ -346,27 +480,19 @@ If necessary, embed the record alphabets of $P,Q,R$ into one tagged disjoint
 union and fill the unused coordinates with zeros.  This does not change any
 posterior law, so Lemma~\ref{pt:lem:plsuff} makes the padding neutral.
 
-Let $C:A\to\Delta(\{0,1\})$ be the uninformative first-stage channel with
-$C(0\mid a)=t$ for every $a$.  Both branches are reached, and their posterior
-is $q$.  The compounds
+Let $B:A\to\Delta(\{1,2\})$ be the uninformative first-stage channel with
+$B(1\mid a)=t$ for every $a$.
+Both branches are reached, and their posterior is $q$.  The compounds
 \[
- C\triangleright\{P,R\},
+ B\triangleright(P,R),
  \qquad
- C\triangleright\{Q,R\}
+ B\triangleright(Q,R)
 \]
 have the posterior laws on the right-hand side of
 \eqref{pt:eq:public-posterior-mixture}; they differ from the displayed public
-mixtures only by record labels.  If $(q,P)\succeq(q,Q)$, Axiom~\textup{(A8)}
-applied to branch $0$, together with reflexivity on the common branch $1$,
-gives the aggregate comparison.
-
-Conversely, suppose the aggregate comparison holds but
-$(q,P)\not\succeq(q,Q)$.  Completeness gives $(q,Q)\succ(q,P)$.  Apply the
-strict clause of Axiom~\textup{(A8)} with the two continuation profiles
-reversed.  Branch $0$ is reached with probability $t>0$, so it yields the
-strict reverse aggregate comparison, contradicting the assumed weak one.
-Posterior-law substitution transfers both conclusions between the compounds
-and the tagged mixtures.
+mixtures only by record labels.  Axiom~\textup{(A8)} gives the desired
+biconditional directly.  Posterior-law substitution transfers it between the
+compounds and the tagged mixtures.
 \end{proof}
 
 \begin{lemma}[Affine posterior-law representation]\label{pt:lem:postsep}
@@ -618,8 +744,8 @@ posterior-law continuity statement and no posterior-separable integrand are
 needed.  From now on ambient action-set superscripts are suppressed unless
 two action sets occur in the same formula; a boundary-prior subscript always
 means the representative transported from its positive support.  The next two
-stages derive product and branch scale coherence, with
-Axiom~\textup{(A8)} providing the essential cardinal alignment across reached
+stages derive product and branch scale coherence, with Axiom~\textup{(A8)} and its finite-branch extension providing
+the essential cardinal alignment across reached
 branches.
 
 \subsubsection{Stage 3: products and a common comparison scale}
@@ -674,13 +800,13 @@ support-transport clauses of Lemmas~\ref{pt:lem:neutrality} and
 \tag{BI$'$}\label{pt:eq:bg-branch-transport}
 \]
 Thus every reached branch has the same weak comparison as $P$ versus $Q$ at
-$p$.  If $P\succeq_pQ$, the weak clause of Axiom~\textup{(A8)} applied to
+$p$.  If $P\succeq_pQ$, Lemma~\ref{pt:lem:finite-branch-extension} applied to
 these branches proves the forward implication in~\eqref{pt:eq:backgroundinert}.
 
 For the converse, suppose that $P\not\succeq_pQ$.  Completeness gives
 $Q\succ_pP$.  By~\eqref{pt:eq:bg-branch-transport}, the reversed comparison is
 strict on every reached branch; at least one such branch has positive mass.
-The strict clause of Axiom~\textup{(A8)} therefore gives
+The strict part of Lemma~\ref{pt:lem:finite-branch-extension} therefore gives
 $Q\otimes R\succ_{p\otimes r}P\otimes R$, contradicting
 $P\otimes R\succeq_{p\otimes r}Q\otimes R$.  This proves the converse and
 also records why weak branch monotonicity alone would not suffice.  Interchange
@@ -907,16 +1033,16 @@ $\beta_A(q,r)>0$ satisfying
 \label{pt:eq:branch-linear}
 \end{equation}
 It depends only on $q,r$ and the face inclusion, not on the experiment that
-reaches $r$.  If a first-stage channel $P_1$ has reached branches of masses
-$m_x$ and posteriors $r_x$, then every continuation profile satisfies
+reaches $r$.  If a first-stage channel $P_1:A\to\Delta(\{1,\ldots,k\})$ has branch masses
+$m_i$ and posteriors $r_i$, then every list of continuation channels $Q_1,\ldots,Q_k$ satisfies
 \begin{equation}
- G_q(\mu_{q,P_1\triangleright\{Q^x\}})
+ G_q\bigl(\mu_{q,P_1\triangleright(Q_1,\ldots,Q_k)}\bigr)
  =G_q(\mu_{qP_1})+
- \sum_{x:m_x>0}m_x\beta_A(q,r_x)
- G_{r_x}(\mu_{r_x,Q^x}).
+ \sum_{i:m_i>0}m_i\beta_A(q,r_i)
+ G_{r_i}(\mu_{r_i,Q_i}).
 \tag{BA}\label{pt:eq:branchaggregation}
 \end{equation}
-For singleton $r_x$, the continuation value is zero and the corresponding
+For singleton $r_i$, the continuation value is zero and the corresponding
 coefficient may be fixed by any positive convention.
 \end{lemma}
 
@@ -954,8 +1080,8 @@ Implement $\nu,\nu'\in\mathcal M_{r_B}$ by channels on $B$, extend their
 off-support rows arbitrarily to $A$, and pad their record alphabets if
 necessary.  Vary only the continuation on the branch reaching $r$ from
 $\nu$ to $\nu'$.  The aggregate posterior law changes by
-$\varepsilon i_B(\nu-\nu')$.  Axiom~\textup{(A8)}, support transport, and the
-strict clause give all three signs:
+$\varepsilon i_B(\nu-\nu')$.  Corollary~\ref{pt:cor:one-branch-a8}, support transport, and strictness give all
+three signs:
 \begin{align*}
  L_{r_B}^B(\nu-\nu')>0&\Longrightarrow
      L_q^A i_B(\nu-\nu')>0,\\
@@ -965,8 +1091,8 @@ strict clause give all three signs:
      L_q^A i_B(\nu-\nu')=0.
 \end{align*}
 The second line is the first applied after swapping the continuations.  For
-the third, indifference supplies both weak branch comparisons, and the weak
-part of Axiom~\textup{(A8)} supplies both aggregate inequalities.  By
+the third, indifference supplies both weak branch comparisons, and
+Corollary~\ref{pt:cor:one-branch-a8} supplies both aggregate inequalities.  By
 \eqref{pt:eq:tangent-space}, the sign agreement extends by positive scaling
 to all of $W_B$.  Positive trace orientation makes
 \[
@@ -979,18 +1105,18 @@ the unique coefficient in~\eqref{pt:eq:branch-linear}.  Since both linear
 functionals in that equation are fixed before a reaching experiment is
 chosen, the coefficient is path-independent.
 
-For the aggregation formula, put $B_x:=\operatorname{supp}(r_x)$ and
+For the aggregation formula, put $B_i:=\operatorname{supp}(r_i)$ and
 \[
- \nu_x:=\pi_{B_x}\mu_{r_x,Q^x}\in\mathcal M_{(r_x)_{B_x}}.
+ \nu_i:=\pi_{B_i}\mu_{r_i,Q_i}\in\mathcal M_{(r_i)_{B_i}}.
 \]
 The compound law differs from the first-stage law by
 \[
- \mu_{q,P_1\triangleright\{Q^x\}}-\mu_{qP_1}
- =\sum_{x:m_x>0}m_x\,i_{B_x}
-   (\nu_x-\delta_{(r_x)_{B_x}}).
+ \mu_{q,P_1\triangleright(Q_1,\ldots,Q_k)}-\mu_{qP_1}
+ =\sum_{i:m_i>0}m_i\,i_{B_i}
+   (\nu_i-\delta_{(r_i)_{B_i}}).
 \]
 Apply $L_q^A$, use~\eqref{pt:eq:branch-linear}, and use
-$G_{r_x}(\delta_{r_x})=0$.  Singleton summands vanish.  This is
+$G_{r_i}(\delta_{r_i})=0$.  Singleton summands vanish.  This is
 \eqref{pt:eq:branchaggregation}.
 \end{proof}
 
@@ -1020,11 +1146,12 @@ coefficient for reaching the face $\iota(B)$.  Hence the representatives
 \[
  V_q:=\frac{G_q}{a_q}
 \]
-satisfy the exact chain rule
+satisfy, for every $P_1:A\to\Delta(\{1,\ldots,k\})$ with branch masses $m_i$ and posteriors $r_i$, and every
+list of continuation channels $Q_1,\ldots,Q_k$, the exact chain rule
 \begin{equation}
- V_q(\mu_{q,P_1\triangleright\{Q^x\}})
+ V_q\bigl(\mu_{q,P_1\triangleright(Q_1,\ldots,Q_k)}\bigr)
  =V_q(\mu_{qP_1})
-  +\sum_{x:m_x>0}m_xV_{r_x}(\mu_{r_x,Q^x}).
+  +\sum_{i:m_i>0}m_iV_{r_i}(\mu_{r_i,Q_i}).
 \tag{CR}\label{pt:eq:chainrule}
 \end{equation}
 Singleton continuation terms are zero.
@@ -1096,8 +1223,8 @@ reaching that support as a face.  Divide~\eqref{pt:eq:branchaggregation} by
 $a_q$ and use~\eqref{pt:eq:facescale}.  Every nondegenerate branch coefficient
 becomes
 \[
- \frac1{a_q}\,\beta_A(q,r_x)G_{r_x}
- =\frac1{a_{r_x}}G_{r_x}=V_{r_x}.
+ \frac1{a_q}\,\beta_A(q,r_i)G_{r_i}
+ =\frac1{a_{r_i}}G_{r_i}=V_{r_i}.
 \]
 Singleton values vanish, so their scales and coefficients may be fixed
 arbitrarily.  This proves~\eqref{pt:eq:chainrule}.
@@ -1118,10 +1245,12 @@ Consequently the final representatives $V_q=G_q/C$ satisfy both
 \begin{align}
  V_{p\otimes r}(\mu\otimes\nu)
    &=V_p(\mu)+V_r(\nu),\tag{PA}\label{pt:eq:PArecovered}\\
- V_q(\mu_{q,P_1\triangleright\{Q^x\}})
-   &=V_q(\mu_{qP_1})+\sum_{x:m_x>0}m_x
-     V_{r_x}(\mu_{r_x,Q^x}).\tag{CR$'$}\label{pt:eq:final-chain}
+ V_q\bigl(\mu_{q,P_1\triangleright(Q_1,\ldots,Q_k)}\bigr)
+   &=V_q(\mu_{qP_1})+\sum_{i:m_i>0}m_i
+     V_{r_i}(\mu_{r_i,Q_i}).\tag{CR$'$}\label{pt:eq:final-chain}
 \end{align}
+for every $P_1:A\to\Delta(\{1,\ldots,k\})$ with branch masses $m_i$ and posteriors $r_i$, and every list of
+continuation channels $Q_1,\ldots,Q_k$.
 The cross-prior bridge of Lemma~\ref{pt:lem:blockbridge} is valid with $V$
 in place of $G$.
 \end{lemma}
