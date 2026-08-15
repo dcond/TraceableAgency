@@ -1,6 +1,6 @@
 import TraceableAgency.Audit.Axioms
 import TraceableAgency.Audit.Dependencies
-import TraceableAgency.Audit.V4Certificate
+import TraceableAgency.Audit.V5Certificate
 
 /-!
 # Theorem 1 certificate audits

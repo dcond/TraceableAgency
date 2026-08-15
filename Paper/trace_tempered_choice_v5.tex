@@ -1,8 +1,5 @@
 \documentclass[11pt,a4paper]{article}
 
-% Keep the checked-in PDF byte-for-byte reproducible across temporary build paths.
-\pdftrailerid{545241434541424C454147454E43595634}
-
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[british]{babel}
@@ -51,8 +48,8 @@
 \href{mailto:d.condorelli@gmail.com}{d.condorelli@gmail.com}.  All parts of this manuscript have been written with assistance
 from a multi-model LLM workflow; the author personally contributed very little to the writing of the proofs
 beyond encouragement.  A Lean~4 verification of the main theorem is available at
-\url{https://github.com/dcond/TraceableAgency}.  All claims, errors, and omissions remain the sole responsibility
-of the author.}}
+\url{https://github.com/dcond/TraceableAgency}; it uses the equivalent finite-branch form of the recordwise
+sure-thing principle.  All claims, errors, and omissions remain the sole responsibility of the author.}}
 \author{Daniele Condorelli\\University of Warwick}
 \date{ \today}
 
@@ -63,7 +60,7 @@ of the author.}}
 \noindent
 An action can matter twice: through the payoff it produces and the visible trace it leaves.  A channel maps
 actions into consequences; preferences rank action lotteries in each channel.  Data-processing conditions and a
-branchwise sure-thing principle, with standard axioms, characterize expected utility plus $\lambda$ times the
+recordwise sure-thing principle, with standard axioms, characterize expected utility plus $\lambda$ times the
 mutual information between action and consequence.  The theorem identifies $\lambda$, the price of trace in
 payoff units; expected utility is the case $\lambda=0$.  The criterion reads the coupling of act and
 consequence, not consequences alone; randomisation can be strictly optimal.  When each action leaves a distinct
@@ -113,7 +110,7 @@ $\{\succeq_K\}_K$, with one binary relation $\succeq_K$ on $\Delta(A)$ for each 
 The statement $q\succeq_Kp$ means that $q$ is weakly preferred to $p$ in environment $K$.  Eight axioms are
 imposed on this family.  To compare lotteries governed
 by different channels, the channels are placed side by side as blocks of one larger environment; duplicating a
-channel or adding an unused block does not alter the comparison at issue.  Two processing axioms say that the agent never gains when her record is garbled or her action variable is processed noisily, and a benchmark comparison rules out indifference to trace. A sure-thing principle for records that arrive in stages supplies
+channel or adding an unused block does not alter the comparison at issue.  Two processing axioms say that the agent never gains when her record is garbled or her action variable is processed noisily, and a benchmark comparison rules out indifference to trace. A recordwise sure-thing principle for records that arrive in stages supplies
 the cardinal structure.  No audience appears in the model, and the
 taste is content-neutral: it prices how much the consequence reveals, not what it reveals.
 
@@ -132,8 +129,7 @@ families \emph{trace-tempered}.  The utility $u$ is unique up to positive affine
 measured in payoff units per unit of information, and the same pair prices comparisons across channels, embedded
 as blocks of one larger environment.  A sign trichotomy completes the picture: reversing the axioms that carry the
 taste for trace characterizes $\lambda<0$---a preference for deniability---while weakening them to indifference
-yields expected utility, $\lambda=0$. Equivalently, the information term prices control: how strongly the distribution of visible consequences depends on the realised act. Trace and control are not separate components of preference but two descriptions of the same act–consequence dependence. No choice among lotteries separates~them.
-
+yields expected utility, $\lambda=0$. 
 
 
 
@@ -164,9 +160,9 @@ the choice in a channel that writes a fair record independently of the realised 
 then assigns both flips the same value, whatever $u$ and $\lambda$, so a strict preference there rejects the
 model.  Section~\ref{sec:implications} develops the test and what it excludes.}  The comparison identifies a
 value of act--consequence dependence; by itself it does not distinguish trace from control or identify the
-psychological source of that value.
+psychological source of that value.\footnote{The information term admits a control interpretation. Read backward: it measures trace. Read forward, it measures how strongly the action controls the distribution of visible consequences. We return to this in Section~\ref{sec:interpretation}.}
 
-%This comparison has not been run.  The nearest evidence comes from two experiments.  Bartling, Fehr, and Herz elicit each principal's point of indifference between retaining and delegating the right to choose a project and the effort devoted to it.  At that point, the lottery produced by delegation has a certainty equivalent 16.7 \%  higher on average than the lottery produced by the principal's own choices, when both are subsequently valued outside the delegation setting \cite{BartlingFehrHerz2014}.  This is consistent with a preference for trace, since retaining control makes the principal's actions determine the payoff lottery, but it may instead reflect autonomy or some other value of deciding for oneself.  Norton and Liljeholm ask subjects to select a pair of slot machines and then choose between those two for several gambles.  Subjects are more likely to select a pair whose machines produce distinct token distributions when they choose the machines themselves than when a computer chooses for them, holding current monetary payoffs and outcome entropies fixed \cite{NortonLiljeholm2020}.  With the machines weighted equally, the divergence between their token distributions is mutual information.  This result also admits a trace interpretation, since the token records the subject's choice only when the subject chooses.  But subjects knew that token values could change after the pair was selected; choosing the machines themselves then allowed them to respond to the new values. Thus trace is confounded with the value of deciding in the first experiment and with the value of adapting in the second.  The test proposed above removes both confounds.
+
 
 This comparison has not been run.  The nearest evidence comes from two experiments.  Bartling, Fehr, and Herz elicit each principal's point of indifference between retaining and delegating the right to choose a project and the effort devoted to it.  At that point, the delegation lottery has a certainty equivalent 16.7\% higher on average than the lottery produced by the principal's own choices, when both are valued outside the delegation setting \cite{BartlingFehrHerz2014}.  This is consistent with a preference for trace, since retaining control makes the principal's choices determine the payoff lottery, but it may instead reflect autonomy or some other value of deciding for oneself.  Mistry and Liljeholm, and later Norton and Liljeholm, ask subjects to select a room containing two slot machines and then gamble in that room.  Subjects are more likely to choose a high-divergence room over a zero-divergence room when they choose between its machines themselves than when a computer chooses for them, holding current expected payoffs and outcome entropies fixed \cite{MistryLiljeholm2016,NortonLiljeholm2020}.  With equal weight on the two machines, the divergence between their token distributions is the mutual information between the machine and the token.  This also admits a trace interpretation: in self-play, the token is evidence about a voluntarily selected machine.  But token values could change after the room was selected, allowing subjects in self-play to adapt their machine choices.  Thus trace is confounded with the value of deciding in the first design and with that of adapting in the second.  The test proposed above removes both confounds.
 
@@ -224,12 +220,12 @@ is closed.
 
 
 \item[(A3) Material relevance.]
-There are distinct outcomes $o^+,o^-\in O$ and a two-action channel $K$ with no record in which $a^+$ delivers
+There are distinct outcomes $o^+,o^-\in O$ and a two-action channel $K$ with a one-point record set in which $a^+$ delivers
 $o^+$ for sure and $a^-$ delivers $o^-$ for sure.  For this channel,
 \[
  \delta_{a^+}\succ_K\delta_{a^-}.
 \]
-The agent strictly ranks at least two outcomes when each is delivered for sure and leaves no record.
+The agent strictly ranks at least two outcomes when each is delivered for sure and the two actions leave the same record.
 
 \item[(A4) Trace relevance.]
 There is an outcome $o^\ast\in O$ and a four-action channel $K$ in which every action delivers $o^\ast$ for
@@ -248,8 +244,7 @@ preference for the first, whose record identifies the realised action, over the 
 \paragraph{Comparison environments.}
 Some axioms compare lotteries carried by different channels.  Each relation $\succeq_K$ ranks lotteries within
 one channel, so such comparisons need a domain in which two channels appear in a single preference statement.  A
-larger channel that contains both as labelled blocks provides it, much as objective lotteries enrich Savage's
-domain in Anscombe and Aumann \cite{AnscombeAumann1963}.
+larger channel that contains both as labelled blocks provides it.
 
 For
 $K:A\to\D(O\times R)$ and $L:B\to\D(O\times R_L)$, let $K\sqcup L$ be the block-diagonal joint channel---the
@@ -266,9 +261,10 @@ block-supported copies, defined on the tagged action set by
 \end{aligned}
 \qquad(a\in A,\ b\in B).
 \]
-Under $q^0$ the visible consequence is generated by $K$, and under $p^1$ by $L$, so a choice between them is
-also a choice between the two channels, made inside a single environment.  When the blocks have the same action
-alphabet, $q^0$ and $q^1$ are the two tagged copies of the same lottery.  Write
+
+Under \(q^0\), the visible consequence is generated by \(K\) after the action is drawn according to \(q\); under \(p^1\), it is generated by \(L\) after the action is drawn according to \(p\). So a choice between them is
+also a choice between the two channels, made inside a single environment.  %When the blocks have the same action alphabet, $q^0$ and $q^1$ are the two tagged copies of the same lottery.  
+Write
 \[
  (q,K)\succeq(p,L)
  \quad\Longleftrightarrow\quad
@@ -357,46 +353,46 @@ Nor does she gain when the action variable is processed, holding the distributio
 \end{description}
 
 \paragraph{Compounding.}
-A first-stage record channel $P:A\to\D(Y)$ and a \emph{profile of continuation channels}
-$K^y:A\to\D(O\times R_y)$ compose into the \emph{compound environment}
+For $k\ge1$, let $P:A\to\D(\{1,\ldots,k\})$ be a first-stage record channel and let
+$(K_1,\ldots,K_k)$ be an ordered list of continuation channels $K_i:A\to\D(O\times R)$.  Their
+\emph{compound environment} is
 \begin{equation}
- (P\triangleright\{K^y\})(o,(y,r)\mid a)
- :=P(y\mid a)K^y(o,r\mid a).
+ \bigl(P\triangleright(K_1,\ldots,K_k)\bigr)(o,(i,r)\mid a)
+ :=P(i\mid a)K_i(o,r\mid a),
+ \qquad i=1,\ldots,k.
  \label{eq:compound}
 \end{equation}
 In words, one action is realised and the environment responds in two stages.  First, the action $a$ generates only
-an interim record $y$ through $P$; no payoff is delivered at this stage.  Then the same action generates the payoff
-$o$ and a further record $r$ through $K^y$.  The agent does not act again.  The interim record remains visible, so
-the final record is $(y,r)$.  Given
-an action lottery $q$, let $q_y$ denote the posterior distribution of the action after an interim record $y$ that
-occurs with positive probability.\footnote{Thus
-$ q_y(a):=\frac{q(a)P(y\mid a)}{\sum_{a'}q(a')P(y\mid a')}$
-whenever $\sum_{a'}q(a')P(y\mid a')>0$.}
+an interim record $i$ through $P$; no payoff is delivered at this stage.  Record $i$ selects the continuation
+channel $K_i$, through which the same action generates the payoff $o$ and a further record $r$.  The agent does not
+act again.  The interim record remains visible, so the final record is $(i,r)$.  Under $q$ and $P$, record $i$ is
+\emph{reached} if $\sum_aq(a)P(i\mid a)>0$.  For every reached record, let $q_i$ denote the posterior distribution
+of the action.\footnote{Thus $q_i(a):=q(a)P(i\mid a)/\sum_{a'}q(a')P(i\mid a')$.}
 
 \begin{description}[leftmargin=*,style=sameline]
 
-\item[(A8) Branchwise continuation consistency.]
-For every finite family of record alphabets $(R_y)_{y\in Y}$, every first-stage record channel
-$P:A\to\D(Y)$, every pair of continuation profiles $K^y,L^y:A\to\D(O\times R_y)$, and every $q\in\D(A)$: if
- \[
- (q_y,K^y)\succeq(q_y,L^y)
- \quad\text{for every $y$ that occurs with positive probability under $q$ and $P$},
- \]
-\begin{samepage}then
-\[
- \bigl(q,\,P\triangleright\{K^y\}\bigr)\succeq\bigl(q,\,P\triangleright\{L^y\}\bigr),
-\]
-strictly if one such branch comparison is strict.\end{samepage}
+\item[(A8) Recordwise sure-thing principle.]
+For every $q\in\D(A)$, every binary first-stage record channel $P:A\to\D(\{1,2\})$ for which record $1$ is
+reached, and every three continuation channels $K,L,M:A\to\D(O\times R)$,
+\begin{equation}
+ (q_1,K)\succeq(q_1,L)
+ \quad\Longleftrightarrow\quad
+ \bigl(q,P\triangleright(K,M)\bigr)
+ \succeq
+ \bigl(q,P\triangleright(L,M)\bigr).
+ \label{eq:recordwise-sure-thing}
+\end{equation}
 
-The axiom holds the action lottery $q$ and the first-stage record channel $P$ fixed.  The interim record may change
-the posterior over actions and hence the conditional ranking of the branches.  But if, conditional on every interim
-record $y$ that can occur, the branch governed by $K^y$ is weakly preferred to the branch governed by $L^y$, then
-their common first stage cannot reverse that ranking: the compound using $\{K^y\}$ is weakly preferred to the
-compound using $\{L^y\}$.  The preference is strict if one such conditional preference is strict.  Zero-probability
-branches are unrestricted, exactly as Savage's null events are.  The branching event is always a record, never a
-payoff.
-
-When $P$ is an action-independent public coin, Axiom~\textup{(A8)} reduces to ordinary mixture independence.
+Fix $q$ and a binary first-stage record channel $P$, and suppose record $1$ is reached, inducing posterior $q_1$.
+The two compound environments share the continuation $M$ after record $2$ and differ only after record $1$, where
+one continues with $K$ and the other with $L$.  The axiom says that the compounds are ranked exactly as the lottery
+$q_1$ in channel $K$ and the same lottery in channel $L$ are ranked in their block environment.  The common
+continuation on the other branch cannot affect the comparison.  This is a version of Savage's sure-thing principle
+with the event given by an interim record \cite{Savage1954}.  Unlike the exogenous event in Savage's formulation,
+reaching the record can be informative here: $P(1\mid a)$ may vary with the action.  This is why the conditional
+comparison is evaluated at $q_1$.  If record $1$ is never reached, the axiom is silent, as on Savage's null
+events.  When $P$ is an action-independent public coin, $q_1=q$, and
+Axiom~\textup{(A8)} reduces to ordinary mixture independence with the coin retained in the record.
 
 \end{description}
 
@@ -444,62 +440,61 @@ $q_i\in\D(A_i)$ and $q_j\in\D(A_j)$,
 \end{theorem}
 
 We call a family satisfying \textup{(A1)--(A8)} \emph{trace-tempered}, and likewise the criterion that
-represents it: the taste for trace is tempered by ordinary payoff utility, at the identified rate $\lambda$.  The criterion is
-a single expectation.  Under the joint law of act and visible consequence, the agent collects
-$u(O)$ plus $\lambda$ times the log-likelihood ratio of the realised consequence under her act against its
-average under the lottery.  Payoff and trace enter additively, and the additivity is a claim about behaviour:
-the agent values what she obtains and what the visible consequence reveals about what she did, not the
-coincidence of the two.  If two channels give the agent the same expected payoff and the same distribution of
-the posterior about her act, she is indifferent, however each pairs the good payoffs with the revealing records
-(Corollary~\ref{cor:matching}, Appendix~\ref{app:auxiliary-results}): there is no premium for the good outcome
-arriving through the revealing record rather than alongside it.  No axiom asserts this separability; it is
-derived.  Compound environments branch formally on interim records.  The derivation also uses the richness of
-the domain: a realised payoff can be disclosed in an interim record and delivered later without changing its
-value.
+represents it.  Its central restriction is that payoff and trace enter separately.  The agent may value good
+outcomes and may value evidence about her action, but she cannot place an extra value on a good payoff being the
+revealing consequence.  Thus, if under the same lottery two channels give the same expected utility from payoffs
+and induce the same distribution of posteriors over actions, the agent is indifferent between them, regardless of
+how payoffs and records are paired (Corollary~\ref{cor:matching}, Appendix~\ref{app:auxiliary-results}).  This
+separation is derived, not assumed.
 
 \subsection{Proof sketch}
-That the representation satisfies the axioms is a direct verification.  The converse has four steps; the
-complete proof is in Appendix~\ref{app:main-proof}, resting on a lemma proved in
-Appendix~\ref{pt:sec:environment}.
+That the representation satisfies the axioms is a direct verification.  The converse has four steps.
+Appendix~\ref{app:main-proof} gives the complete proof; Appendix~\ref{pt:sec:environment} supplies the pure-trace
+result used in Step~3.
 
-\emph{Step 1: reduction to terminal laws.}  Fix a full-support $q$.  Two channels that induce the same joint law
-of realised payoff and posterior about the action are record processings of one another, so Axioms~\textup{(A1)},
-\textup{(A5)}, and \textup{(A6)} rank them as indifferent (Lemma~\ref{lf:lem:terminal-affine}).
-Axiom~\textup{(A7)}, applied to bijective processors in both directions, makes relabellings neutral; applied to
-general $q$, it deletes null actions and extends the identification beyond full support.  Each pair $(q,K)$ is
-thereby identified with its \emph{terminal law}, the joint distribution of realised payoff and posterior.
+\emph{Step 1: reduction to terminal laws.}  Fix a full-support $q$.  If two channels induce the same joint
+distribution of the realised payoff and the posterior over actions, each is a record processing of the other.
+Block coherence and record processing therefore make them indifferent.  Action processing makes action
+relabellings immaterial and, for an arbitrary $q$, permits null actions to be deleted.  Thus $(q,K)$ is identified
+by its \emph{terminal law}, the joint distribution of the realised payoff and posterior
+(Lemma~\ref{lf:lem:terminal-affine}\textup{(a)} and
+Lemma~\ref{lf:lem:bookkeeping}\textup{(a)--(b)}).
 
-\emph{Step 2: cardinalisation.}  A public coin is a first stage that reveals nothing, so every branch posterior
-equals $q$.  A coin between two environments therefore realises the mixture of their terminal laws, and
-Axiom~\textup{(A8)} applied to such stages makes preference respect that mixing: independence holds over
-terminal laws (Lemma~\ref{lf:lem:terminal-affine}).  With continuity, Axiom~\textup{(A2)}, the mixture-space
-theorem then gives an affine representation on each fixed-$q$ fibre, the family of pairs sharing one lottery.
-All cardinal content enters here; every other axiom is an ordinal condition, imposed environment by environment.
+\emph{Step 2: cardinalisation.}  Let a public coin select between two channels.  Because the coin is independent
+of the action, the posterior in either branch remains $q$.  The recordwise sure-thing principle therefore gives
+mixture independence over terminal laws.  With continuity, the mixture-space theorem gives an affine
+representation for each $q$.  All cardinal content enters here; every other axiom is an ordinal condition,
+imposed environment by environment (Lemma~\ref{lf:lem:terminal-affine}\textup{(b)}).
 
-\emph{Step 3: two scales.}  Two special families of environments deliver the two scales.  On singleton action
-sets there is no trace, and the affine representation is expected utility, nonconstant by
-Axiom~\textup{(A3)}; action processors transport this payoff scale across lotteries and alphabets, and block
-coherence makes it one scale for all environments (Lemma~\ref{lf:lem:material-scale}).  At the constant payoff
-that witnesses Axiom~\textup{(A4)}, there is no payoff motive, and what preference still ranks is the trace:
-Appendix~\ref{pt:sec:environment} identifies this order with mutual information, Axiom~\textup{(A4)} fixes its
-positive sign, and Lemma~\ref{lf:lem:trace-scale} puts these comparisons on the same scale as the payoffs.
-Here Axioms~\textup{(A7)} and~\textup{(A8)} do different work.  Branchwise continuation gives the chain rule,
-while action processing identifies revelation of an action group with revelation of the corresponding reduced
-action.  Once Axiom~\textup{(A5)} has aligned scales across priors, these implications yield Faddeev's
-recursion, which characterises Shannon entropy \cite{Faddeev1956}.
+\emph{Step 3: payoff and trace.}  On singleton action sets there is no trace, so the affine representation reduces
+to expected utility.  Material relevance makes its index $u$ nonconstant, while action processing and block
+coherence make the same payoff scale apply throughout.  At the payoff $o_\ast$ that witnesses trace relevance,
+the payoff term is constant.  Appendix~\ref{pt:sec:environment} shows that the remaining order is represented by
+mutual information.  The finite-branch extension of Axiom~\textup{(A8)} (Lemma~\ref{pt:lem:finite-branch-extension}) supplies the chain rule; action processing supplies the corresponding
+grouping property; and block coherence aligns comparisons across priors.  Together these
+properties give Faddeev's recursion and hence Shannon entropy \cite{Faddeev1956}.  Trace relevance fixes the
+positive sign, and the common block scale determines a single coefficient $\lambda$ relative to $u$
+(Lemmas~\ref{lf:lem:material-scale} and~\ref{lf:lem:trace-scale}).
 
-\emph{Step 4: assembly.}  By Axiom~\textup{(A8)}, differences in continuation value aggregate across reached
-branches.  The level of a compound also includes the trace carried by its first-stage record; comparisons with
-terminal payoffs identify the reached-probability weights (Lemmas~\ref{lf:lem:branch-increment}
-and~\ref{lf:lem:deterministic-assembly}).  Now sequentialise an arbitrary channel: announce $(o,r)$ as a
-first-stage record, then deliver $o$ terminally.  The result is a record processing of the original, so
-Axiom~\textup{(A6)} makes the two indifferent, and stagewise assembly gives
-$\E_{qK}[u(O)]+\lambda\I_{qK}(A;O,R)$.
+\emph{Step 4: assembly.}  The finite-branch extension of Axiom~\textup{(A8)} also determines how payoff and trace combine.
+Continue to use the payoff $o_\ast$ that witnesses trace relevance.  Begin with a compound that pays $o_\ast$
+after every first-stage record.  If record $y$ occurs with probability $m(y)$, changing only the payoff after $y$
+from $o_\ast$ to $o$ changes value by
+$
+ m(y)\bigl[u(o)-u(o_\ast)\bigr].
+$
+This baseline compound has value
+\[
+ u(o_\ast)+\lambda\I(A;Y).
+\]
+Summing across branches gives the representation when the payoff is determined by the first-stage record.  For
+an arbitrary channel, announce $(o,r)$ as an interim record and then deliver $o$.  This sequential channel and
+the original channel are record processings of one another and hence are indifferent.  The representation
+follows (Lemmas~\ref{lf:lem:branch-increment} and~\ref{lf:lem:deterministic-assembly}).
 
 \subsection{Uniqueness}
 
-To state uniqueness, fix one representation $V$ supplied by Theorem~\ref{thm:main}.  A real-valued index $W$ on all
-finite lottery--channel pairs is a \emph{common-scale representation} if, for every channel
+A real-valued index $W$ on all finite lottery--channel pairs is a \emph{common-scale representation} if, for every channel
 $K:A\to\D(O\times R)$ and every $q,p\in\D(A)$,
 \[
  q\succeq_Kp
@@ -514,21 +509,27 @@ $q_i\in\D(A_i)$ and $q_j\in\D(A_j)$,
  W(q_i,K_i)\ge W(q_j,K_j).
 \]
 
-Call a common-scale representation $W$ \emph{branch-additive} if, for every first-stage record channel $P$, every
-$q\in\D(A)$, and every two continuation profiles $\{K^y\}$ and $\{L^y\}$ admitted in Axiom~\textup{(A8)},
+Axiom~\textup{(A8)} is ordinal: it says that a common continuation on the other branch cannot affect a conditional
+comparison.  By Lemma~\ref{pt:lem:finite-branch-extension}, this is equivalent---given the other structural
+axioms---to the requirement that branchwise improvements cannot be reversed by finite compounding.  Branch
+additivity is the corresponding requirement on numerical differences.  A common-scale representation $W$
+is \emph{branch-additive} if, for every $q\in\D(A)$, every $P:A\to\D(\{1,\ldots,k\})$, and every
+two ordered lists of continuation channels $(K_1,\ldots,K_k)$ and $(L_1,\ldots,L_k)$, with
+$K_i,L_i:A\to\D(O\times R)$, writing
+$m(i):=\sum_aq(a)P(i\mid a)$,
 \begin{equation}
- W\bigl(q,P\triangleright\{K^y\}\bigr)
- -W\bigl(q,P\triangleright\{L^y\}\bigr)
- =\sum_{y:m(y)>0}m(y)
- \bigl[W(q_y,K^y)-W(q_y,L^y)\bigr].
+ W\bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ -W\bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr)
+ =\sum_{i:m(i)>0}m(i)
+ \bigl[W(q_i,K_i)-W(q_i,L_i)\bigr].
  \label{eq:branch-additive-index}
 \end{equation}
-Thus continuation-value differences aggregate by their reached-branch probabilities; stating the requirement in
-differences avoids fixing an arbitrary zero for material utility.
+A continuation change worth $x$ after record $i$ therefore changes ex-ante value by $m(i)x$, and changes on
+different branches add. 
 
 \begin{proposition}[Uniqueness]\label{prop:uniqueness}
-Suppose the equivalent conditions of Theorem~\ref{thm:main} hold.  For any real-valued index $W$ on all finite
-lottery--channel pairs:
+Suppose \textup{(A1)--(A8)} hold, and fix a representation $V$, with parameters $(u,\lambda)$, as in
+Theorem~\ref{thm:main}.  For any real-valued index $W$ on all finite lottery--channel~pairs:
 \begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
 \item $W$ is a common-scale representation if and only if $W=\varphi\circ V$ for a single strictly increasing
 $\varphi:[\underline u,\infty)\to\mathbb R$, where $\underline u:=\min_{o\in O}u(o)$.
@@ -539,18 +540,18 @@ $W=\alpha V+\beta$ for some $\alpha>0$ and $\beta\in\mathbb R$.
 
 The proof is in Appendix~\ref{app:auxiliary-results}.
 
-The primitive remains ordinal: part \textup{(i)} permits any common increasing transformation.  Branch additivity is
-an accounting requirement on an index, not another behavioural axiom; part \textup{(ii)} selects the affine gauge.
-Consequently, if $(u,\lambda)$ and $(\widetilde u,\widetilde\lambda)$ are two trace-tempered representations, then
+Every trace-tempered representation is a common-scale representation and, by the expected-utility and
+mutual-information chain rules, branch-additive.  Part~\textup{(ii)} therefore implies that if $(u,\lambda)$ and
+$(\widetilde u,\widetilde\lambda)$ are two such representations, then
 \[
  \widetilde u=\alpha u+\beta,
  \qquad
  \widetilde\lambda=\alpha\lambda
 \]
-for some $\alpha>0$ and $\beta\in\mathbb R$.  Once two non-indifferent payoff outcomes are assigned numerical utilities, $\lambda$ is
-therefore uniquely measured in those payoff units per unit of information.  Unlike in the pure-trace model of
-Appendix~\ref{pt:sec:environment}, its magnitude is not merely a choice of information unit once payoff utility
-has been calibrated: it is the identified payoff--trace trade-off.
+for some $\alpha>0$ and $\beta\in\mathbb R$.  Once two non-indifferent payoff outcomes are assigned numerical
+utilities, $\lambda$ is unique for the chosen logarithm base.  In the pure-trace model of
+Appendix~\ref{pt:sec:environment}, multiplying the index by a positive constant has no behavioural content.  Here
+the payoff normalisation fixes that scale, and $\lambda$ measures the trade-off between payoff and trace.
 
 \subsection{Sign of the trace weight}
 
@@ -575,18 +576,17 @@ Thus the trace component has exactly the positive, negative, and neutral orienta
 
 The proof is in Appendix~\ref{app:auxiliary-results}.
 
-Weakened to indifference, the three orientation clauses yield expected utility.  Reversed, they yield the same
-representation with $\lambda<0$: an agent who prefers her records garbled and her actions coarsened satisfies
-the other five axioms just as the trace-seeker does.  The clauses cannot point in opposite directions:
-under the other structural axioms, \textup{(A4)} is inconsistent with $(\mathrm{A}6^-)$.  Support transport
-identifies the uninformative test lottery with a total garbling of the revealing one, so $(\mathrm{A}6^-)$ ranks
-the former weakly above the latter while \textup{(A4)} ranks it strictly below.
+The directions of the three orientation clauses cannot be chosen independently.  For example, under the
+corollary's background axioms and any orientation of Axiom~\textup{(A7)}, Axiom~\textup{(A4)} is inconsistent
+with $(\mathrm{A}6^-)$.  Restrict the two lotteries in Axiom~\textup{(A4)} to their supports and relabel the
+actions.  The second channel is then a total garbling of the first.  Axiom~$(\mathrm{A}6^-)$ weakly prefers the
+second, whereas Axiom~\textup{(A4)} strictly prefers the first.
 
-The negative case is quiet in unconstrained choice over lotteries.  If $\lambda<0$, a payoff-maximising pure
-action is always optimal; more generally, the optimal lotteries are those supported on payoff-maximising
-actions for which $\I_{qK}(A;O,R)=0$.  Deniability is therefore revealed through constrained lotteries or
-cross-channel comparisons.  If the agent must use a fair lottery over two actions in a fully revealing channel,
-she will surrender up to $|\lambda|\log2$ in expected-utility units to replace it with a silent channel.
+The negative case is quiet in unconstrained choice over lotteries.  With $\lambda<0$, every payoff-maximising
+pure action is optimal.  More generally, $q$ is optimal in a fixed channel if and only if it is supported on
+payoff-maximising actions and $\I_{qK}(A;O,R)=0$.  To reveal deniability in optimal choice, one must therefore
+constrain the lottery or compare channels.  Under an imposed fair lottery over two actions, the agent is willing
+to give up as much as $|\lambda|\log2$ of expected utility from payoffs to replace full revelation with silence.
 
 \subsection{Independence of the axioms}
 
@@ -598,8 +598,8 @@ Axiom~\textup{(A$i$)}.
 The eight families are constructed in Appendix~\ref{app:auxiliary-results}.  Three mark the substantive frontier of the
 system.  A conditional-entropy penalty satisfies every axiom except record data processing and values the removal of
 extraneous record noise.  A Gini posterior-reduction criterion satisfies every axiom except action data processing.
-The satiation criterion $\E[u(O)]+\min\{I(A;O,R),c\}$, for $c>0$, satisfies every axiom except branchwise
-continuation consistency and ceases to value trace once $c$ units of information are secured.
+The satiation criterion $\E[u(O)]+\min\{I(A;O,R),c\}$, for $c>0$, satisfies every axiom except the recordwise
+sure-thing principle and ceases to value trace once $c$ units of information are secured.
 
 % ===============================================================
 \section{Choice implications}\label{sec:implications}
@@ -607,24 +607,16 @@ continuation consistency and ceases to value trace once $c$ units of information
 
 This section works out what an agent with the representation of Theorem~\ref{thm:main} does: which finite designs
 falsify the model directly (\S\ref{sec:tracetest}), when she deliberately randomises (\S\ref{sec:randomisation}),
-what she will pay for changes to the record technology (\S\ref{sec:record-price}), how that price can be
-measured and compared across agents (\S\ref{sec:measurement}), and how her rankings compare record
-technologies---and how they do not (\S\ref{sec:cannot-reveal}).
+what she will pay for changes to the record technology (\S\ref{sec:record-price}), and how that price can be
+measured and compared across agents (\S\ref{sec:measurement}).
 Throughout, $\lambda$ is measured in payoff units per unit of information in the fixed base.  Proofs for this
 section, together with full statements of the supporting results that the text presents in summary form, are
 collected in Appendix~\ref{app:choice-proofs}; only one-line verifications are kept here.
 
 \subsection{The trace test}\label{sec:tracetest}
 
-The functional $V$ reads the joint distribution of the action and its visible consequence.  Existing theories of
-choice read less: the distribution of consequences, the lottery, or both.  The following experiment separates
-them.
-
-In the first treatment the agent chooses between two fair coins over actions.  One flips between two actions
-that leave distinct marks; the other flips between two actions that produce noise.  Both coins yield the same
-payoff for certain and the same fifty--fifty distribution over records; only the first coin's record identifies
-the realised action.  In the second treatment the record technology is disabled: the same choice is offered in a
-channel where every action produces noise.
+The criterion $V$ reads the joint distribution of action and visible consequence, rather than the consequence
+distribution or action lottery alone.  The following two-treatment design separates these objects. In both treatments, the lottery must be knowingly chosen and implemented by the subject, since the primitive ranks her own randomisations.\footnote{A direct value for information about which action was realised is observationally equivalent on this domain. It can be separated by assigning the same lottery externally: the information structure remains, but the subject no longer chooses the lottery.}
 
 \begin{proposition}[The trace test]\label{prop:signature}
 Four actions pay the same outcome $o_0$.  Two of them leave distinct marks: $a_1$ always produces record $r_1$,
@@ -632,7 +624,7 @@ and $a_2$ always produces the distinct record $r_2$.  The other two are indistin
 produce $r_1$ or $r_2$ with equal probability.  Call this channel $K$, and let $q'$ be the fair coin over
 $\{a_1,a_2\}$ and $q''$ the fair coin over $\{a_3,a_4\}$.
 \begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
-\item The two coins induce the same joint distribution of visible consequences, $p_{q'K}=p_{q''K}$; yet
+\item The two coins induce the same distribution of visible consequences, $p_{q'K}=p_{q''K}$; yet
 \[
  V(q',K)-V(q'',K)=\lambda\log2>0,
  \qquad\text{so}\qquad
@@ -644,379 +636,216 @@ probability.  Then $q'\sim_{K^\circ}q''$.
 \end{proposition}
 
 The prediction is strict preference for the revealing coin in the first treatment and exact indifference in the
-second.  Part \textup{(i)} alone rules out every consequentialist theory.  The two coins induce the same
-distribution over payoff--record pairs, so any criterion that evaluates only that distribution is indifferent
-between them: expected utility over payoffs, expected utility that values records directly as consequences
-through some $v(o,r)$, and every non-linear functional of $p_{q'K}$.  What separates the coins is the joint
-distribution of the action with its visible consequence, and that is precisely what consequentialist theories do
-not read.
+second.  Part \textup{(i)} rules out any criterion that depends only on the distribution of visible consequences.
+The two coins induce the same distribution over payoff--record pairs, so any such criterion is indifferent between them.
 
-Part \textup{(i)} restricts only how a theory reads consequences.  A theory that also reads the lottery can
-match part \textup{(i)}.  Existing theories of deliberate randomisation are of this kind: in the hedging model
+Part \textup{(i)} restricts only how a theory reads consequences; a theory that also reads the lottery can
+match it.  Existing theories of deliberate randomisation are of this kind: in the hedging model
 of Cerreia-Vioglio, Dillenberger, Ortoleva, and Riella \cite{CerreiaVioglioDillenbergerOrtolevaRiella2019}, and
 in the preference for randomisation documented by Agranov and Ortoleva \cite{AgranovOrtoleva2017}, the value of
 mixing depends only on the induced distribution and the lottery.  Call an index $W$ \emph{channel-blind} if it
-reads only these two objects: there are functions $F$ and $h:\D(A)\to\Rnum$, fixed across channels, such that
+reads only these two objects: there is a function $F$, fixed across channels, such that
 \[
- W(q,K)=F\bigl(p_{qK},h(q)\bigr).
+ W(q,K)=F\bigl(p_{qK},q\bigr).
 \]
 
-The second treatment rules these out.  Nothing a channel-blind index reads changes between the treatments: in
+Part \textup{(ii)}  rules these out.  Nothing a channel-blind index reads changes between the treatments: in
 all four lottery--channel combinations the distribution of visible consequences is uniform on
 $\{(o_0,r_1),(o_0,r_2)\}$, and the lotteries are the same two lotteries.  A channel-blind index therefore
 separates the coins in both treatments or in neither, so none reproduces the pattern of
 Proposition~\ref{prop:signature}: strict preference under $K$ and indifference under
-$K^\circ$.\footnote{If $h$ does not depend on how the actions are labelled---an entropy bonus, say---the first
+$K^\circ$.\footnote{If $W$ does not depend on how the actions are labelled---an entropy bonus, say---the first
 treatment is enough: the permutation that swaps $a_1$ with $a_3$ and $a_2$ with $a_4$ turns $q'$ into $q''$ and
-leaves $p_{qK}$ unchanged, so $W(q',K)=W(q'',K)$.  The second treatment is needed for arbitrary $h$.}
+leaves $p_{qK}$ unchanged, so $W(q',K)=W(q'',K)$.  The second treatment is needed for label-sensitive indices.}
 
-The test also rejects.  The first treatment separates the three cases of Corollary~\ref{cor:signduality}: the
-revealing coin if $\lambda>0$, the other coin if $\lambda<0$, indifference if $\lambda=0$.  In the second
-treatment every representation assigns both coins the same value, whatever $u$ and $\lambda$, so a strict
-preference there rejects the model.  The lottery should be knowingly chosen and implemented by the subject.
-Repeating the same statistical lottery under external assignment provides a control for whether the provenance
-of randomisation matters.
+The first treatment also identifies the orientation of taste: it selects the revealing coin when $\lambda>0$,
+the noisy coin when $\lambda<0$, and indifference when $\lambda=0$.  A strict preference between the coins in
+the second treatment rejects all three cases of Corollary~\ref{cor:signduality}.
+
 
 \subsection{Deliberate randomisation}\label{sec:randomisation}
 
-A degenerate lottery leaves no trace, so an agent with $\lambda>0$ may deliberately randomise: she gives up
-expected payoff to make her act genuinely uncertain, because only then can its consequence reveal it.  In a
-payoff-based theory a sufficiently large payoff advantage makes a single action optimal.  Here it need not: an
-action that leaves a mark no other action can leave is never wholly abandoned, however poorly it pays, because
-the first grain of mass on it is infinitely informative per unit, and no finite payoff difference outweighs
-that.  The next proposition states this, and gives the exact terms on which a pure action survives: its payoff
-advantage must cover, for every rival, the price of the rival's distinctiveness from it.
+Randomisation gives the record something to reveal.  A pure action leaves no
+trace: if only one action can be realised, its consequence cannot reduce uncertainty about it.  The
+agent may therefore give up expected utility to make her action uncertain, so that its consequence can reveal
+it.  Whether she does so depends on how different the actions' visible consequences are.  Write
+$K_a:=K(\cdot\mid a)$ for the distribution of visible consequences under action $a$ and
+$\bar u(a):=\E_{K_a}[u(O)]$ for its expected utility.  The Kullback--Leibler divergence
+$\KL(P\,\|\,Q)$ measures how far $P$ departs from $Q$.\footnote{For distributions $P$ and $Q$,
+$\KL(P\,\|\,Q):=\sum_{o,r}P(o,r)\log\bigl(P(o,r)/Q(o,r)\bigr)$, with zero-mass summands set to zero.  The
+divergence is $+\infty$ if $P$ assigns positive probability to a consequence and $Q$ assigns zero.}
 
-Some notation.  Let $Z:=O\times R$ and write $K_Z(z\mid a):=K(o,r\mid a)$ for $z=(o,r)$; let
+Consider two actions $a$ and $b$, with $K_a\ne K_b$, and suppose that $a$ has expected-utility advantage
+$\Delta:=\bar u(a)-\bar u(b)\ge0$.  Proposition~\ref{prop:binary} in
+Appendix~\ref{app:choice-proofs} gives the exact rule:
 \[
- \bar u(a):=\sum_{o,r}K(o,r\mid a)u(o),
- \qquad
- m_{qK}(z):=\sum_aq(a)K_Z(z\mid a)
+ \delta_a\text{ is optimal}
+ \quad\Longleftrightarrow\quad
+ \Delta\ge\lambda\,\KL(K_b\,\|\,K_a).
 \]
-be the expected payoff of an action and the distribution of visible consequences induced by a lottery; $m_{qK}$
-is the distribution $p_{qK}$ of Section~\ref{sec:theorem}, re-indexed by $z$.  The
-Kullback--Leibler divergence $\KL(P\,\|\,Q):=\sum_zP(z)\log\bigl(P(z)/Q(z)\bigr)$ between distributions on $Z$
-measures how sharply consequences drawn from $P$ stand out against a background of $Q$; it equals $+\infty$ when
-$P$ puts mass where $Q$ does not.
+A small shift of probability from $a$ to $b$ costs $\Delta$ per unit.  At the pure choice, its marginal trace
+value is $\lambda\KL(K_b\,\|\,K_a)$.  The order in the divergence matters because the question is whether to
+introduce $b$ into a lottery concentrated on $a$.  If $b$ can produce a consequence that $a$ cannot, the
+divergence is infinite---the first unit of probability on $b$ is unboundedly informative---and $b$ receives
+positive probability whatever its finite payoff disadvantage.
 
-\begin{proposition}[Exercised distinctiveness]\label{cor:support-pure}
-Let $Z_K:=\{z\in Z:K_Z(z\mid a)>0\text{ for some }a\in A\}$.
-\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
-\item Every optimal lottery $q^*$ satisfies $m_{q^*K}(z)>0$ for every $z\in Z_K$.  Consequently, if every action $a$ has
-a private consequence---some $z_a$ with $K_Z(z_a\mid a)>0$ and $K_Z(z_a\mid b)=0$ for all $b\ne a$---then every
-optimal lottery has full support.
-\item The pure lottery $\delta_a$ is optimal if and only if
-\[
- \bar u(b)+\lambda
- \KL\!\left(K_Z(\cdot\mid b)\,\middle\|\,K_Z(\cdot\mid a)\right)
- \le \bar u(a)
- \qquad\text{for every }b\in A,
-\]
-and uniquely optimal if these inequalities are strict for $b\ne a$.  In particular, if some rival reaches a
-consequence outside the support of $K_Z(\cdot\mid a)$, then $\delta_a$ is not optimal, however large its payoff
-advantage.
-\end{enumerate}
-\end{proposition}
+Below the threshold the optimal lottery is unique and mixes the two actions.  The inferior action receives more
+probability as $\lambda$ rises and less as $\Delta$ rises.  At equal payoffs the chosen mixture maximises the
+information carried by the channel; in information-theoretic terms, it is the capacity-achieving input. % Thus randomisation is instrumental to trace.  An uninformative channel supplies no reason to mix, and a taste for mixing as such is channel-blind.
 
-With two actions, the threshold below which the agent mixes is a case of
-Proposition~\ref{cor:support-pure}\textup{(ii)}.  Let $A=\{a,b\}$, write $K_a:=K_Z(\cdot\mid a)$ and
-$K_b:=K_Z(\cdot\mid b)$, and let $\Delta:=\bar u(a)-\bar u(b)\ge0$ be the payoff advantage of $a$.  Then
-$\delta_a$ is optimal if and only if $\Delta\ge\lambda\,\KL(K_b\,\|\,K_a)$.  The threshold is directional: what
-protects the pure action is the detectability of the rival against the background of the pure action's signature.  It is
-infinite when $K_b$ puts mass where $K_a$ does not---the two-action face of
-Proposition~\ref{cor:support-pure}\textup{(i)}.
+With more than two actions, each action is compared with the distribution of visible consequences generated by
+the lottery as a whole.
 
-Below the threshold the agent mixes (Proposition~\ref{prop:binary}, Appendix~\ref{app:choice-proofs}).  The
-optimal mix is unique, and it puts more mass on the inferior action the larger is $\lambda$ and less the larger
-is $\Delta$.  Mixing therefore stops exactly at $\Delta=\lambda\,\KL(K_b\,\|\,K_a)$.  Once $\Delta$ has been
-calibrated on the normalized expected-utility scale, the known divergence makes the switching threshold
-identify $\lambda$.  At equal payoffs the
-mix is the capacity-achieving input of the channel, whatever $\lambda$: an agent who values trace at all,
-however little, randomises at zero stakes so as to maximise the information the visible consequence carries
-about her act.  The comparative statics restate the wedge of the trace test (\S\ref{sec:tracetest}):
-randomisation here is instrumental to trace.  An uninformative channel supplies no incentive to mix, and, in
-the binary case, garbling weakly lowers the payoff threshold below which the superior action ceases to be
-optimal.  A taste for mixing as such is channel-blind.
-
-With more than two actions, the same logic is captured by a first-order condition.  The objective
-$q\mapsto V(q,K)$ is concave in $q$, so an optimum exists and Kuhn--Tucker conditions characterise it: at an
-optimum, every action in use offers the same total of expected payoff and priced distinctiveness.
-
-\begin{proposition}[Distinctiveness condition]\label{prop:optimal-choice}
+\begin{proposition}[Optimality condition]\label{prop:optimal-choice}
 Let $\lambda>0$.  A lottery $q^*$ is optimal if and only if there is a constant $c$ such that
 \[
- \bar u(a)+\lambda\KL\!\left(K_Z(\cdot\mid a)\,\middle\|\,m_{q^*K}\right)=c
+ \bar u(a)+\lambda\KL\!\left(K_a\,\middle\|\,p_{q^*K}\right)=c
  \quad\text{for }a\in\supp(q^*),
  \qquad
  \le c\quad\text{for }a\notin\supp(q^*).
 \]
 \end{proposition}
 
-The proposition gives a \emph{distinctiveness premium}.  Each action is credited, on top of its expected payoff,
-with $\lambda$ times how far its visible consequences depart from the average visible behaviour that the lottery
-itself generates; at an optimum this total is equalised across the actions in use.  An action can therefore receive
-more probability because it pays more or because its consequences are more distinctive.  The
-condition mirrors rational-inattention first-order conditions with the channel direction and sign reversed
-\cite{Sims2003,MatejkaMcKay2015}.
+An action is credited with its expected utility and with how far its visible consequences depart from those
+generated on average.  At an optimum this total is the same for every action in use; an unused action cannot
+offer more.
 
-Which lotteries are optimal depends on the coupling of actions to consequences, not on consequences alone; and
-optimal lotteries need not be unique.  Yet every optimal lottery induces the same distribution of visible
-consequences.  The model therefore predicts the record an observer sees, not the mix that generated it.
+The condition has a sharp support implication.  Every visible consequence that can arise under some action
+occurs with positive probability under any optimal lottery.  Hence, if each action can produce some consequence
+that no other action can produce, every optimal lottery uses every action.  No finite payoff disadvantage can
+eliminate an action with such a private consequence (Proposition~\ref{cor:support-pure},
+Appendix~\ref{app:choice-proofs}).
 
-\begin{proposition}[Optimal marginal and multiplicity]\label{prop:optimal-marginal}
-Write $K_a:=K_Z(\cdot\mid a)$ and $C^*(K):=\max_{q\in\D(A)}V(q,K)$.  There is a unique $m^*\in\D(Z)$ such that
-$m_{q^*K}=m^*$ for every optimal lottery $q^*$.  With
-\[
- \mathcal A^*
- :=\bigl\{a\in A:
- \bar u(a)+\lambda
- \KL\!\left(K_a\,\middle\|\,m^*\right)=C^*(K)
- \bigr\},
-\]
-the set of optimal lotteries is exactly
-\[
- \bigl\{q\in\D(A):
- m_{qK}=m^*,\ \supp(q)\subseteq\mathcal A^*
- \bigr\},
-\]
-and the optimum is unique whenever the rows $\{K_a:a\in\mathcal A^*\}$ are affinely independent.  If actions are
-partitioned into classes with identical rows, $V(q,K)$ depends on $q$ within each class only through the class's
-total mass: every redistribution of an optimal lottery within such a class is optimal, and the optimal lotteries
-are exactly the lifts of the optimal lotteries of the collapsed channel, whose actions are the classes, each
-carrying the common row; a lift distributes each class's mass arbitrarily within the class.
-\end{proposition}
+The optimal lottery need not be unique, but every optimal lottery induces the same distribution of 
+consequences.  If two actions have identical rows, only their combined probability matters: reallocating a fixed
+total between them changes nothing.  Splitting an action into duplicate copies therefore leaves the set of
+optimal aggregate choices unchanged and permits any division of the original mass among the copies.  A model
+that gives each action its own weight, as multinomial logit does, instead raises the copies' combined share
+(Proposition~\ref{prop:optimal-marginal}, Appendix~\ref{app:choice-proofs}).
 
-The proposition's final claim---that moving mass between actions with identical rows changes nothing---is a
-test.  Split an action into two copies with the same row.  The record cannot tell the copies apart, so the
-value, the induced marginal $m^*$, and the pair's total probability do not depend on how the mass is divided
-between them.  Any model that gives each action its own weight, as multinomial logit does, predicts instead that
-duplication raises the pair's combined share.  Trace-tempered choice predicts exact invariance.
-
-\begin{remark}[Logit boundary]\label{rem:logit}
-Suppose every action leaves its own mark: the supports of the rows are pairwise disjoint, so the visible
-consequence identifies the action and $\I_{qK}(A;O,R)=\Sh(q)$, the Shannon entropy of the lottery.  The unique
-optimum is then multinomial logit,
+\begin{remark}[Separated and overlapping traces]\label{rem:logit}
+If every action leaves its own mark, the row supports are pairwise disjoint, the visible consequence identifies
+the action, and $\I_{qK}(A;O,R)=\Sh(q)$.  The unique optimum is then multinomial logit,
 \[
  q^*(a)
  =\frac{\exp\bigl(\bar u(a)/\lambda\bigr)}
  {\sum_{a'}\exp\bigl(\bar u(a')/\lambda\bigr)},
 \]
-with $1/\lambda$ as the payoff sensitivity (information in natural logarithms; a change to another base greater than one rescales
-$\lambda$).  If instead no action leaves any mark---identical rows---every lottery is optimal.  Between these
-extremes there is no closed form, and the ratio of two actions' probabilities depends on the rest of the menu:
-by Proposition~\ref{prop:optimal-choice}, each action is credited for standing out against the average
-consequence of the mix, and adding an action changes that average.  Thus pairwise-disjoint row supports are
-sufficient for independence of irrelevant alternatives, while overlap permits, but does not imply, its failure.
-A three-action example shows the mechanism.  Let the rows be
-\[
- K_1=(1,0,0),\qquad K_2=(0,1,0),\qquad K_3=(1/2,0,1/2),
-\]
-and let expected payoffs be equal.  With only the first two actions, the optimal lottery is $(1/2,1/2)$.
-Adding the third gives
-\[
- q^*=(1/3,4/9,2/9),\qquad m^*=(4/9,4/9,1/9).
-\]
-Each active row then has divergence $\log(9/4)$ from $m^*$, while the ratio of the first two choice
-probabilities falls from $1$ to $3/4$---the red-bus/blue-bus pattern.
-Failures of independence in choice data are commonly attributed to correlated tastes or to costly attention.  A
-taste for trace produces them as well.
-In rational inattention the same logit formula arises for the opposite reason, as the optimal tilting of a chosen
-channel at a fixed prior over states \cite{MatejkaMcKay2015}; here the channel is fixed and the source is chosen.
+with $1/\lambda$ as the payoff sensitivity when information is measured in natural logarithms.  Changing the
+logarithm base rescales $\lambda$.  At the other extreme, suppose every action produces the same distribution of payoffs and records. The consequence then reveals nothing about the action, and all actions have the same expected utility. Hence the agent is indifferent among all lotteries.  With partial overlap, the ratio
+of two actions' probabilities can depend on the rest of the menu because adding an action changes the average
+consequence distribution.  Pairwise-disjoint row supports therefore imply independence of irrelevant
+alternatives, while overlap permits, but does not require, its failure.  Remark~\ref{rem:overlap-iia-example} in
+Appendix~\ref{app:choice-proofs} gives a three-action example in which the ratio falls from $1$ to $3/4$.
+The same logit formula appears in rational inattention for the opposite reason: there the prior is fixed and the
+channel is chosen; here the channel is fixed and the distribution of actions is chosen
+\cite{MatejkaMcKay2015}.
 \end{remark}
 
 \subsection{The price of being on the record}\label{sec:record-price}
 
-Theorem~\ref{thm:main} represents comparisons across environments on one scale, so the model prices changes to
-the record technology itself: what is it worth to the agent that her record is coarsened, that a further signal
-about her is disclosed, that her mixing device is observed?  Each answer is an exact amount of information times
-$\lambda$.
-
-The first result answers the first question.  Axiom~\textup{(A6)} asserts only a weak preference against
-garbling; the representation upgrades the axiom to an exact price and characterises when the price is zero.
+The representation puts different record technologies on a common scale.  Processing a record leaves payoffs
+unchanged, so its price depends only on the information about the action that it removes.
 
 \begin{proposition}[Price of a record garbling]\label{prop:garbling-price}
 Let $K:A\to\D(O\times R)$, let $T$ be a record processor, and write
-$L:=KT$.  Fix $q\in\D(A)$ and let $(A,O,R,R')$ carry the joint law $q(a)K(o,r\mid a)T(r'\mid o,r)$.  Then
+$L:=KT$.  Fix $q\in\D(A)$ and let $(A,O,R,R')$ carry the joint law $q(a)K(o,r\mid a)T(o,r'\mid o,r)$.  Then
 \[
  V(q,K)-V(q,L)=\lambda\,\I\!\left(A;R\mid O,R'\right)\ge0,
 \]
-and the following are equivalent:
-\textup{(a)} $V(q,L)=V(q,K)$;
-\textup{(b)} $A$ and $(O,R)$ are conditionally independent given $(O,R')$;
-\textup{(c)} the two channels induce the same distribution of the posterior about the act,
-$\mu_{qL}=\mu_{qK}$ in the notation of Corollary~\ref{cor:matching}.
+with equality if and only if, after $(O,R')$ has been observed, the original record $R$ contains no further
+information about the action.
 \end{proposition}
 
 Rewriting the record costs $\lambda$ times the information about the action that the original record carried
-beyond the rewritten one.  A garbling is free exactly when it pools only records that already said the same
-thing about the action: the agent does not pay for gratuitous detail, only for detail that discriminates among
-her own actions.
+beyond the rewritten one.  A garbling is free exactly when it combines only records that support the same
+posterior about the action.  The agent does not pay for detail as such, only for detail that distinguishes among
+her actions.\footnote{The same calculation applies to added information.  If $K^{+S}$ appends a signal $S$
+drawn conditional on $(a,o,r)$, then
+$
+ V(q,K^{+S})-V(q,K)=\lambda\,\I(A;S\mid O,R).
+$
+Under the deniability case of Corollary~\ref{cor:signduality}, the sign is reversed.}
 
-The same accounting runs in reverse.  Appending any further signal $S$ drawn given $(a,o,r)$ to the record
-raises $V(q,\cdot)$ by exactly $\lambda\,\I(A;S\mid O,R)\ge0$: more evidence about oneself never hurts.  Under
-the deniability dual of Corollary~\ref{cor:signduality} the sign reverses, and every additional signal about
-oneself is a cost.  Since the visible pair includes the payoff, the total value of trace in any environment is
-at most $\lambda\min\{\Sh(q),\log(|O|\,|R|)\}$.
+One application concerns the mixing device itself.  Suppose an action-independent coin $Y$ selects $K$ with
+probability $t$ and $L$ otherwise.  If the coin is recorded, the resulting environment is worth
+$tV(q,K)+(1-t)V(q,L)$: the agent has no taste for the draw itself.  If the coin is hidden, the resulting channel
+is the rowwise mixture $M_t:=tK+(1-t)L$, and
+\[
+ tV(q,K)+(1-t)V(q,L)-V(q,M_t)
+ =\lambda\,\I(A;Y\mid O,R)\ge0.
+\]
+The coin says nothing about the action by itself.  Hiding it is costly only when knowing which channel operated
+would sharpen the inference about the action after the other visible consequences have been observed.  The
+premium is for recording which channel operated, not for drawing the coin.  A theory that values mixing as such
+has no reason to distinguish a recorded draw from an unrecorded one.  Corollary~\ref{cor:recorded-coin} in
+Appendix~\ref{app:choice-proofs} gives the full statement.
 
-One garbling deserves its own statement.  Suppose the environment itself is drawn by a coin that is independent
-of the action.  The agent has no taste for or against the draw itself; what she cares about is whether the
-coin's outcome goes on the record.
-
-\begin{corollary}[The recorded coin]\label{cor:recorded-coin}
-Let $K,L:A\to\D(O\times R)$ and $t\in(0,1)$.  Let $tK\oplus(1-t)L$ be the public mixture that draws an
-action-independent coin $Y$ with $\Pr(Y=0)=t$, applies $K$ if $Y=0$ and $L$ otherwise, and includes the coin in
-the record; let $M_t:=tK+(1-t)L$ be the rowwise mixture, which hides it.  Then, for every $q\in\D(A)$,
-\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
-\item $V\bigl(q,\,tK\oplus(1-t)L\bigr)=t\,V(q,K)+(1-t)\,V(q,L)$;
-\item $V\bigl(q,\,tK\oplus(1-t)L\bigr)-V(q,M_t)=\lambda\,\I(A;Y\mid O,R)\ge0$, with equality if and only if $A$
-and $Y$ are conditionally independent given $(O,R)$.
-\end{enumerate}
-\end{corollary}
-
-The proof is in Appendix~\ref{app:choice-proofs}; part \textup{(ii)} is
-Proposition~\ref{prop:garbling-price} applied to the processor that deletes the coin from the record.
-
-Part \textup{(i)} says the agent has no taste for or against randomising over environments: with the coin on the
-record, a mixture of environments is worth the mixture of their values (the preference-level counterpart is
-Lemma~\ref{lf:lem:terminal-affine}).  Part \textup{(ii)} prices the coin's visibility.  Hiding it costs
-$\lambda\,\I(A;Y\mid O,R)$.  The coin says nothing about the action by itself; the cost is positive whenever
-knowing which environment operated would sharpen what the visible consequences reveal about the action.  So the
-agent prefers her mixing device observed.  Theories that value randomisation as such are silent on this margin.
+Uniform rankings do not identify garbling.  Suppose two channels $K$ and $L$ generate the same payoff distribution after every action, so they
+differ only in their records, and every action lottery is worth at least as much under $K$ as under $L$.  This says
+exactly that $K$ carries at least as much mutual information at every lottery---that $K$ is more capable
+\cite{KornerMarton1977}---but not that $L$ is a garbling of $K$: two constant-payoff binary channels can be ordered
+by information at every prior although no record processor maps one into the other
+(Proposition~\ref{prop:blackwell}, Appendix~\ref{app:choice-proofs}).  Uniform preference reveals capability, not
+censorship.
 
 \subsection{Measuring the trace weight}\label{sec:measurement}
 
-The weight $\lambda$ is a number: payoff units per unit of information (Proposition~\ref{prop:uniqueness}).
-This subsection shows how choices reveal it.  The idea is compensation.  An agent will accept a channel that
-reveals less about her if she is paid enough, and the payment that leaves her exactly indifferent is the price
-of the lost information.  The domain has no money, but it has two outcomes that Axiom~\textup{(A3)} strictly
-ranks, and a lottery between them can serve as payment: attach to each environment a side branch, reached by a
-public coin, that pays the better outcome with some probability and the worse one otherwise---probability
-$\beta$ for the first environment, $\beta'$ for the second.  Holding $\beta'$ fixed, the experimenter moves
-$\beta$ until the agent is indifferent between the two environments.  Because the public side branch carries no
-information about the action, changing $\beta$ or $\beta'$ changes only its payoff.  Each compound's
-information term is its probability of remaining in the original environment times that environment's trace,
-and the gap $\beta-\beta'$ at indifference converts into payoff units at odds fixed by the design.  When the two environments carry the same expected
-payoff, the converted gap is $\lambda$ times their information gap---a gap the experimenter fixed in designing
-the channels, so no information quantity need be estimated.  A corner response---the agent cannot be made
-indifferent with $\beta\in[0,1]$---brackets the price instead of measuring it.  The construction and its
-exact accounting are Proposition~\ref{prop:wtp} in Appendix~\ref{app:choice-proofs}; a complete two-treatment
-protocol, with the garbling control built in, is Remark~\ref{rem:elicitation} there.
-
-Two priors turn the design into a test of the functional form itself.  For a fully revealing channel, the
-premium for revelation over silence is $\lambda\Sh(q)$.  Eliciting that premium at $q=(1/2,1/2)$ and at
-$q=(1/4,3/4)$ therefore predicts the ratio
-\[
- \frac{\log 2}{\frac14\log4+\frac34\log\frac43}
- \approx1.23.
-\]
-A quadratic posterior-reduction criterion predicts $4/3$.  The second prior thus overidentifies $\lambda$ and
-separates the Shannon form from nearby dependence indices.
-
-Suppose the agent is indifferent between two environments, one carrying more information about her act and the
-other paying more.  The indifference is a trade: so much payoff given up per unit of information gained.
-Nothing in the primitive suggests the terms of this trade should travel---they could depend on the prior, on the
-payoff level, on how much information is already at stake.  The next result says they do not: every such trade,
-anywhere in the domain, occurs at the single rate $\lambda$.  Write $E_{qK}:=\E_{qK}[u(O)]$.
+The coefficient $\lambda$ is the price of one unit of information in expected-utility units.  Any indifference
+between two environments with different amounts of trace reveals it.  Write $E_{qK}:=\E_{qK}[u(O)]$.
 
 \begin{proposition}[Single information price]\label{prop:single-price}
 If $(q,K)\sim(p,L)$ and $\I_{qK}\ne\I_{pL}$, then
 \[
  \frac{E_{pL}-E_{qK}}{\I_{qK}-\I_{pL}}=\lambda,
 \]
-and $\lambda$ is the unique number with this property: for every $\lambda'\ne\lambda$ there are finite pairs
-$(q,K)\sim(p,L)$ with $E_{qK}+\lambda'\I_{qK}\ne E_{pL}+\lambda'\I_{pL}$.
+and $\lambda$ is the only number for which this identity holds at every such indifference.
 \end{proposition}
 
-In the information--payoff plane, indifference is a family of
-parallel straight lines of slope $-\lambda$.  This constancy is the testable fingerprint of
-Axiom~\textup{(A8)}.  An agent whose taste for trace satiates---the independence example for that axiom in
-Proposition~\ref{prop:independence}---has kinked indifference curves, whose measured slope falls to zero beyond
-the cap.  Finding the same slope across designs with different priors or alphabets therefore over-identifies the
-model; so does agreement between this elicitation and the switching experiment of \S\ref{sec:randomisation},
-which measures the same $\lambda$ from optimal behaviour in a single channel.
+In the information--payoff plane, indifference curves are parallel lines of slope $-\lambda$.  The slope does
+not depend on the prior, the payoff level, the action alphabet, or the amount of information already present.
+This constancy is the observable restriction that Axiom~\textup{(A8)} adds to the rest of the system.  A taste
+for trace that satiates instead has a measured slope that falls to zero beyond the satiation point.
 
-Indifference is a knife edge: a subject may never report it, and a corner response only brackets the price.
-Plain choices still bound the weight.  Compare two agents facing the same channel, with weights
-$\lambda_1<\lambda_2$.  The agent who cares more about trace chooses at least as much information and at most as
-much payoff, and the rate at which the two chosen bundles trade payoff for information lies between the two
-weights.
-
-\begin{remark}[Trace demand]\label{rem:trace-demand}
-Fix $K$, write $e(q):=\E_{qK}[u(O)]$ and $i(q):=\I_{qK}(A;O,R)$, and let $q_j$ maximise $e+\lambda_ji$ for
-$0<\lambda_1<\lambda_2$.  Comparing each optimum at the other weight gives $i_1\le i_2$, $e_1\ge e_2$, and,
-whenever $i_2>i_1$,
+Consider a lottery $q$ with $\Sh(q)>0$ and two channels with the same constant payoff, one that reveals the
+realised action and one that is silent.  Revelation is worth $\lambda\Sh(q)$.  Thus compensating the silent
+channel until the agent is indifferent measures her willingness to pay for trace.  One implementation dilutes
+both channels by the same public side branch, reached with probability $\varepsilon$.  Normalise the two
+outcomes in Axiom~\textup{(A3)} so that $u(o^+)=1$ and $u(o^-)=0$.  On the revealing side the branch pays $o^-$
+for sure; on the silent side it pays $o^+$ with probability $\beta$ and $o^-$ otherwise.  If $\beta$ produces
+indifference, then
 \[
- \lambda_1\le\frac{e_1-e_2}{i_2-i_1}\le\lambda_2:
+ \lambda=\frac{\varepsilon}{1-\varepsilon}\frac{\beta}{\Sh(q)}.
 \]
-the payoff surrendered per additional unit of information brackets the trace weight, whatever selection among
-optima the data reflect.  The indirect value is convex in $\lambda$, with the chosen information as its derivative
-wherever it is differentiable, and its extreme regimes are expected utility ($\lambda\downarrow0$, with information
-breaking material ties) and maximal distinctiveness ($\lambda\uparrow\infty$, with payoff breaking information
-ties).  Exact statements are Proposition~\ref{prop:trace-demand} and Corollary~\ref{cor:lambda-limits} in
-Appendix~\ref{app:choice-proofs}.
-\end{remark}
+The common baseline payoff's utility cancels, so it need not be known.  Proposition~\ref{prop:wtp} and
+Remark~\ref{rem:elicitation} in Appendix~\ref{app:choice-proofs} give the construction, boundary cases, and
+controls.
 
-The comparison of two agents just made presupposed their weights: it ranked $\lambda_1$ against $\lambda_2$
-inside the representation.  Choices also settle when that ranking is legitimate---what it means, in behaviour,
-that one agent is more trace-seeking than another.  Call a channel \emph{silent} if every action produces the
-same distribution of visible consequences; a silent environment offers payoff and nothing else.  Say
-$\{\succeq^2_K\}$ is \emph{more trace-seeking than} $\{\succeq^1_K\}$ if $(q,K)\succeq^1(p,B)$ implies
-$(q,K)\succeq^2(p,B)$ for all lotteries $q$ and $p$ and all channels $K$ and silent $B$: whenever agent 1
-weakly prefers an environment to a silent one, so does agent 2.
+Varying the prior tests the model rather than merely estimating $\lambda$: the premia at $q=(1/2,1/2)$ and
+$q=(1/4,3/4)$ must stand in the ratio
+\[
+ \frac{\log 2}{\frac14\log4+\frac34\log\frac43}
+ \approx1.23.
+\]
+A quadratic posterior-reduction criterion gives $4/3$.  Agreement across the two designs overidentifies
+$\lambda$; disagreement rejects the Shannon specification even if each design separately admits an information
+price.  The switching threshold in \S\ref{sec:randomisation} supplies a third estimate of $\lambda$, from
+optimal choices rather than stated indifferences: the payoff advantage at which the agent abandons mixing equals
+$\lambda$ times a known divergence.  It must return the same number.
 
-\begin{proposition}[More trace-seeking]\label{prop:comparative}
-Let $\{\succeq^1_K\}$ and $\{\succeq^2_K\}$ satisfy Axioms~\textup{(A1)--(A8)}.  Then $\{\succeq^2_K\}$ is more
-trace-seeking than $\{\succeq^1_K\}$ if and only if the representations can be chosen with a common utility and
-$\lambda_2\ge\lambda_1$.
-\end{proposition}
+Within a fixed channel, $\lambda$ governs the demand for trace.  Holding payoff utility fixed, raising $\lambda$
+leads the agent to choose a lottery that carries weakly more information about her action and yields weakly less
+expected utility from payoffs.  As $\lambda$ approaches zero, payoff is maximised first and trace breaks ties; as
+$\lambda$ becomes large, trace is maximised first and payoff breaks ties
+(Proposition~\ref{prop:trace-demand} and Corollary~\ref{cor:lambda-limits},
+Appendix~\ref{app:choice-proofs}).
 
-The proof is in Appendix~\ref{app:choice-proofs}.  One condition delivers both conclusions.  Agreement is
-forced on the silent environments first---two agents comparable in this sense must share their taste for
-payoff---and the ordering of the trace weights follows.  The comparative is a partial order: agents with
-genuinely different payoff tastes are incomparable, as in the comparatives of preference for commitment and of
-ambiguity aversion \cite{GulPesendorfer2001,GhirardatoMarinacci2002}.
-
-\subsection{Comparing record technologies}\label{sec:cannot-reveal}
-
-A last question inverts the direction of measurement: not what choices reveal about the agent, but what they
-reveal about the record technology.  Suppose an agent ranks environment $K$ above environment $L$ at \emph{every} lottery.  Has she thereby revealed
-that $L$ is a coarsening of $K$---that some garbling maps the one record technology into the other?  For a
-Blackwell decision-maker the answer would be yes: dominance in every decision problem is equivalent to garbling
-\cite{Blackwell1953}.  Here the answer is no, and the gap can be stated exactly.
-
-\begin{definition}\label{def:channel-orders}
-Let $K:A\to\D(O\times R)$ and $L:A\to\D(O\times R')$ have identical payoff kernels,
-$\sum_rK(o,r\mid a)=\sum_{r'}L(o,r'\mid a)$ for every $(a,o)$.  Write $K\succeq_gL$ if $L=KT$ for some record
-processor $T$, and $K\succeq_cL$ if
-$\I_{qK}(A;O,R)\ge\I_{qL}(A;O,R')$ for every $q\in\D(A)$; the latter is the \emph{more-capable} order on the
-visible-consequence channels \cite{KornerMarton1977}.
-\end{definition}
-
-\begin{proposition}[Uniform dominance is more-capable, not garbling]\label{prop:blackwell}
-Let $K$ and $L$ have identical payoff kernels.
-\begin{enumerate}[label=\textup{(\roman*)},leftmargin=*]
-\item $K\succeq_gL\Rightarrow K\succeq_cL$, and $K\succeq_cL$ holds if and only if $V(q,K)\ge V(q,L)$ for every
-$q\in\D(A)$.
-\item The converse of the first implication fails: there are channels with identical payoff kernels such that
-$V(q,K)\ge V(q,L)$ for every $q$ and every representation $(u,\lambda)$, yet $L\ne KT$ for every record processor
-$T$.
-\end{enumerate}
-\end{proposition}
-
-The reason Blackwell's equivalence fails here is that his test family is rich---all state-dependent
-utilities---while the axioms pin the attitude to records down to the single functional $\E[u]+\lambda\I$, so environments are
-assessed only through mutual information at priors.  The revealed informativeness order is then exactly the
-information theorists' more-capable order, strictly coarser than garbling.  And the counterexample is
-utility-robust---the payoff terms cancel identically---so observing that an agent always ranks one environment
-above another licenses no inference that the second is a censored version of the first.
-
-The comparison also says where the value of information comes from.  For Blackwell's decision-maker information
-is an input: she can use a finer signal or ignore it, so more is never worse, and monotonicity is a theorem.
-Here information is an output: the record is about her, and she has no way to discard the evidence her actions
-generate, because the channel is not hers to process.  Whether a finer record is good is therefore not settled
-by rationality.  The axioms settle it by taste: positive for the trace-seeker, negative under the deniability
-dual of Corollary~\ref{cor:signduality}, zero for expected utility.  Being better informed is a theorem; being
-better known is a preference.
+The coefficient also permits comparisons across agents.  Say agent 2 is more trace-seeking than agent 1 if she
+weakly prefers an environment to a silent benchmark whenever agent 1 does.  This ordering holds exactly when
+their representations can use the same payoff utility, after a common normalisation, with
+$\lambda_2\ge\lambda_1$.  Agents with different payoff tastes are not ordered
+(Proposition~\ref{prop:comparative}, Appendix~\ref{app:choice-proofs}; compare
+\cite{GhirardatoMarinacci2002}).
 
 
 % ===============================================================
@@ -1087,10 +916,13 @@ Blackwell \cite{Blackwell1953} compares experiments by their value in all downst
 and Lehrer \cite{GilboaLehrer1991} characterise which functions on partitions can arise as values of information
 in Bayesian decision problems, and Azrieli and Lehrer \cite{AzrieliLehrer2008} extend the analysis to stochastic
 information structures.  Cabrales, Gossner, and Serrano \cite{CabralesGossnerSerrano2013} obtain entropy
-reduction from the decisions of ruin-averse investors.  In each case, the signal is valuable because it can
-affect a later decision; here no decision follows the record.  Proposition~\ref{prop:blackwell} shows that
-uniform preference between two record technologies identifies the more-capable order, not Blackwell garbling.
-Being better informed is a theorem; being better known requires an orientation of taste.
+reduction from the decisions of ruin-averse investors.  For Blackwell's decision-maker, information is an input:
+she can use a finer signal or ignore it, so more information cannot hurt.  Here information is an output: the
+record is evidence about the agent, and no decision follows it.  Uniform preference between two record
+technologies identifies the more-capable order, not Blackwell garbling (Proposition~\ref{prop:blackwell},
+Appendix~\ref{app:choice-proofs}).  Whether a finer record is desirable is therefore a matter of taste---positive
+for the trace-seeker, negative under the deniability dual of Corollary~\ref{cor:signduality}, and zero under
+expected utility.  Being better informed is a theorem; being better known is a preference.
 
 The closest formal comparison is with rational inattention and information costs.  Sims \cite{Sims2003} imposes
 a finite Shannon-capacity constraint on information flow, while Mat\v{e}jka and McKay
@@ -1152,43 +984,69 @@ learning about the world; the present paper prices being learned about.
 \section{Interpretation and scope}\label{sec:interpretation}
 % ===============================================================
 
-\paragraph{What the axioms preclude.}Mutual information measures how much a record reveals about the act; it assigns no value to which act is revealed. An agent who wants her generous acts recognized and her mean acts hidden may therefore prefer an informative record in one channel and a garbling in another. Such preferences violate the global data-processing requirement in Axiom~\textup{(A6)} and fall outside all three cases of the sign trichotomy. They are not irrational; they are simply not represented here. A model of selective legibility would have to make the value of evidence depend on its content, not only on the amount of uncertainty it removes.
+\paragraph{Control and empowerment.}
+The information term reads in two directions.  Backward, it measures trace: how much the visible consequence
+reveals about the realised action.  Forward, it measures control: how strongly the action shapes the
+distribution of visible consequences.  Mutual information is symmetric, but the channel is
+directional---$K$ maps actions into distributions over consequences---so the two readings describe the same
+dependence.  No choice among lotteries separates them.  The control in question is informational: how
+distinguishable actions are in their consequences, not the agent's power to obtain the consequences she
+prefers.
 
-
-\paragraph{Relation to empowerment.}
-Suppose $\E[u(O)\mid a]=\bar u$ for every action.  Maximising $V$ over $q$ then gives
+The forward reading has an exact counterpart.  Suppose $\E[u(O)\mid a]=\bar u$ for every action.  Since
+$\lambda>0$, maximising $V$ over $q$ gives
 \[
- \max_q V(q,K)=\bar u+\lambda C(K),
+ \max_{q\in\Delta(A)}V(q,K)=\bar u+\lambda C(K),
+ \qquad
+ C(K):=\max_{q\in\Delta(A)}I_{qK}(A;O,R),
 \]
-where $C(K)=\max_q I_{qK}(A;O,R)$ is the Shannon capacity of the channel.  This is the one-step
-empowerment index when the visible consequence is interpreted as the agent's sensor state
-\cite{KlyubinPolaniNehaniv2005,SalgeGlackinPolani2014}.  Empowerment evaluates a channel at its
-capacity.  The representation instead ranks every action lottery $q$, including those that do not
-achieve capacity and those for which material utilities differ across actions.  At a given $q$, an
-action assigned zero probability contributes nothing, even though its availability may raise
-$C(K)$.  Valuing such unused options would require preferences over menus and lies outside the
-present domain \cite{Kreps1979}.
+the Shannon capacity of the channel.  When the visible consequence is read as the agent's sensor state, $C(K)$
+is the one-step empowerment index of Klyubin, Polani, and Nehaniv \cite{KlyubinPolaniNehaniv2005}; see also
+\cite{SalgeGlackinPolani2014}.  Under this supposition, the trace-tempered agent solves exactly the problem
+that defines one-step empowerment: her optimal lotteries are the capacity-achieving action distributions, and
+the size of $\lambda$ plays no role in the ranking---the price is visible only against payoffs.  Empowerment
+summarises the channel by the optimised value $C(K)$; the representation recovers the ranking beneath it,
+$q\mapsto I_{qK}(A;O,R)$, from preferences and prices it against material utility.  Empowerment is thus the
+trace part of indirect utility when expected payoffs are equal; once they differ across actions, the ranking
+also reflects their material value, which the empowerment index does not encode.
 
-\paragraph{A belief-based utility, derived.}
-Fix the prior.  The trace term becomes a utility over beliefs: visible consequences are valued by the expected
-reduction in the entropy of the posterior about the agent's act.  This is utility from beliefs in the manner of
-Caplin and Leahy \cite{CaplinLeahy2001}: the posterior enters the objective directly, not as an input to a later
-decision.  Two things distinguish it.  The belief here concerns the agent's own conduct, whereas their
-applications concern external states, such as health.  And there beliefs are primitive carriers of utility, free
-in form; here the belief-based form is derived, and the derivation pins its shape: mutual information priced at
-one constant rate.  Even a taste that satiates after $c$ units of information violates branchwise continuation
-consistency.
+\paragraph{Evidence, not authorship.}
+The trace term prices evidence of agency, not authorship as such.  A pure action has zero trace value even when
+its consequence names it perfectly: an act settled in advance leaves no uncertainty for the consequence to
+resolve.  A coin the agent flips herself can do better.  The model does not say that surrendering a choice to
+chance creates more agency; it says that an unsettled act can leave more evidence than a predetermined one.  The
+lottery must be hers---knowingly chosen and implemented, as in the test of \S\ref{sec:tracetest}.  This is the
+Underground Man's problem: the proof he wants cannot come from an act fixed in advance.
 
-\paragraph{One-shot, with no audience in the model.}
-The model is a single episode: no observer holds the posterior beliefs, no response follows from them, and the
-staged records in Axiom~\textup{(A8)} belong to one interaction, not to a reputational relationship.  The theorem
-accordingly prices the act--consequence relation itself; it does not identify the psychological source of that
-value.  An experiment could vary whether an audience observes the record, holding the channel fixed: that tests
-the external-response mechanism---praise, sanction, reputation---but cannot exclude an internal one, such as
-self-image.
+\paragraph{What the axioms preclude.}
+A principal substantive exclusion is selective legibility.  Mutual information responds to an act's
+probability and to the distinctiveness of its consequences, not to what the act is.  An agent who wants her generous
+acts recognised and her mean acts hidden may therefore prefer an informative record in one channel and a garbling
+in another.  Such preferences violate the global data-processing requirement in Axiom~\textup{(A6)} and fall
+outside all three cases of the sign trichotomy.  They are not irrational; they are simply not represented here.
+A model of selective legibility would have to make the value of evidence depend on its content, not only on the
+amount of uncertainty it removes.
 
+\paragraph{The payoff--record distinction.}
+Although the information term treats $O$ and $R$ jointly, the axioms cannot.  Axiom~\textup{(A6)} permits the
+record to be garbled while the payoff is held fixed; this separates a change in evidence from a change in material
+consequences.  Axiom~\textup{(A8)} permits records to arrive in stages while the payoff is delivered once.  Its
+recordwise sure-thing restriction makes branchwise comparisons commensurable and supplies the cardinal structure used to
+place payoff utility and information on a common scale.  Thus either $O$ or $R$ may reveal the action, but only
+$O$ enters material utility.  The record is also assumed to have no utility beyond what it reveals: a record
+that is itself pleasant or shameful belongs in $O$, or the domain must be enlarged.  Once $u$ is normalised,
+willingness to sacrifice payoff utility for additional mutual information identifies $\lambda$.
 
-\paragraph{Role of the payoff--record distinction.}The payoff--record distinction is needed to identify the representation. First, Axiom~\textup{(A6)} permits the record to be garbled while holding the payoff fixed, thereby restricting the information component without changing payoff utility. Second, Axiom~\textup{(A8)} permits records, but not payoffs, to resolve in stages; this provides the cardinal discipline needed to separate the two components on a common scale. The information term itself treats $O$ and $R$ jointly: either may reveal the act, while only $O$ enters material utility. Once $u$ is normalized, willingness to sacrifice payoff utility for additional mutual information identifies $\lambda$.
+\paragraph{One shot, with no audience.}
+The model describes one episode.  It specifies neither an audience nor any response to the beliefs induced by
+the record; the posterior is a statistic of the implemented lottery and the channel, not anyone's belief.  The stages in
+Axiom~\textup{(A8)} divide a single interaction: they create neither a reputational relationship nor a feedback
+policy, so dynamic empowerment and the value of keeping future options open lie outside the model.  An
+experiment could vary whether an audience observes the record while holding the agent's payoffs and information
+fixed.  A response to that treatment would reveal an external component at work---praise, sanction, reputation;
+where such responses change material consequences, they belong in $O$ and the channel.  Persistence in private
+would be consistent with an internal mechanism, such as self-image, but would not identify it.  Distinguishing
+these sources requires additional primitives.
 
 \clearpage
 \appendix
@@ -1196,11 +1054,11 @@ self-image.
 \part*{Proofs}
 \addcontentsline{toc}{part}{Proofs}
 
-\input{appendix_a_pure_trace_v4}
+\input{appendix_a_pure_trace_v5}
 \clearpage
-\input{appendix_b_main_theorem_v4}
+\input{appendix_b_main_theorem_v5}
 \clearpage
-\input{appendix_c_auxiliary_results_v4}
+\input{appendix_c_auxiliary_results_v5}
 
 \clearpage
 \begin{thebibliography}{99}
@@ -1220,11 +1078,6 @@ Marina Agranov and Pietro Ortoleva.
 James Andreoni and B. Douglas Bernheim.
 \newblock Social image and the 50--50 norm: A theoretical and experimental analysis of audience effects.
 \newblock {\em Econometrica}, 77(5):1607--1636, 2009.
-
-\bibitem{AnscombeAumann1963}
-Francis J. Anscombe and Robert J. Aumann.
-\newblock A definition of subjective probability.
-\newblock {\em Annals of Mathematical Statistics}, 34(1):199--205, 1963.
 
 \bibitem{AzrieliLehrer2008}
 Yaron Azrieli and Ehud Lehrer.
@@ -1444,6 +1297,11 @@ Christoph Salge, Cornelius Glackin, and Daniel Polani.
 \newblock Empowerment---an introduction.
 \newblock In Mikhail Prokopenko, editor, {\em Guided Self-Organization: Inception}, pages 67--114. Springer, Berlin,
   2014.
+
+\bibitem{Savage1954}
+Leonard J. Savage.
+\newblock {\em The Foundations of Statistics}.
+\newblock Wiley, New York, 1954.
 
 \bibitem{Shannon1948}
 Claude E. Shannon.

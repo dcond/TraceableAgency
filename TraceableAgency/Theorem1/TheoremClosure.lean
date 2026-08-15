@@ -12,7 +12,7 @@ import TraceableAgency.Theorem1.RelevanceBridge
 /-!
 # Final closure of Trace-Tempered Choice, Theorem 1
 
-The fixed-channel relevance bridge chooses the single trace anchor from v4
+The fixed-channel relevance bridge chooses the single trace anchor from v5
 inside the proposition being proved.  The anchor-indexed proof bundle then
 feeds the branch increment, full-support value assembly, and representation
 assembly.  The converse returns to the exact fixed A3/A4 benchmark channels.
@@ -46,16 +46,16 @@ theorem traceTemperedBridgeAxioms_imply_representation_and_block
     materialPayoffUtility_nonconstant F h, globalTraceLambda_pos F h,
     hwithin, hblock⟩
 
-/-- Fixed-family closure for the exact v4 axioms. -/
-theorem theorem1V4Clauses
+/-- Fixed-family closure for the exact v5 axioms. -/
+theorem theorem1V5Clauses
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) :
-    (TraceTemperedAxiomsV4 F ↔
+    (TraceTemperedAxiomsV5 F ↔
       ∃ (u : O → ℝ) (lambda : ℝ),
         ¬ IsConstantPayoffIndex u ∧
         0 < lambda ∧
         WithinChannelRepresentation F u lambda) ∧
-    (TraceTemperedAxiomsV4 F →
+    (TraceTemperedAxiomsV5 F →
       ∃ (u : O → ℝ) (lambda : ℝ),
         ¬ IsConstantPayoffIndex u ∧
         0 < lambda ∧
@@ -63,23 +63,23 @@ theorem theorem1V4Clauses
         SameWitnessBlockRepresentation F u lambda) := by
   constructor
   · constructor
-    · intro hv4
+    · intro hv5
       obtain ⟨_traceAnchor, hbridge⟩ :=
-        traceTemperedBridgeAxioms_of_v4 F hv4
+        traceTemperedBridgeAxioms_of_v5 F hv5
       obtain ⟨u, lambda, hnonconstant, hlambda, hwithin, _hblock⟩ :=
         traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
       exact ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
     · rintro ⟨u, lambda, hnonconstant, hlambda, hwithin⟩
-      exact traceTemperedAxiomsV4_of_representation
+      exact traceTemperedAxiomsV5_of_representation
         hnonconstant hlambda hwithin
-  · intro hv4
+  · intro hv5
     obtain ⟨_traceAnchor, hbridge⟩ :=
-      traceTemperedBridgeAxioms_of_v4 F hv4
+      traceTemperedBridgeAxioms_of_v5 F hv5
     exact traceTemperedBridgeAxioms_imply_representation_and_block F hbridge
 
-/-- Complete exact v4 statement, including the same-witness clause. -/
-theorem theorem1StatementV4 : Theorem1StatementV4.{u} := by
+/-- Complete exact v5 statement, including the same-witness clause. -/
+theorem theorem1StatementV5 : Theorem1StatementV5.{u} := by
   intro O _instFintype _instDecidableEq _hcard F
-  exact theorem1V4Clauses F
+  exact theorem1V5Clauses F
 
 end TraceableAgency.Theorem1

@@ -1,5 +1,5 @@
 name = "TraceableAgency"
-version = "4.0.0"
+version = "5.0.0"
 keywords = ["math", "decision-theory", "information-theory", "formal-verification"]
 defaultTargets = ["TraceableAgency"]
 
