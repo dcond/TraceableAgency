@@ -27,7 +27,7 @@ inductive TracePairIndex : Type u
 
 open TracePairIndex
 
-/-- At the v4 trace anchor, the pure-trace proposition ranks every
+/-- At the v5 trace anchor, the pure-trace proposition ranks every
 cross-channel, cross-prior comparison by the same mutual-information scale. -/
 theorem constantPayoff_pairWeak_iff_mutualInfo
     {O A B R S : Type u}

@@ -4,12 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 
 import TraceableAgency.Theorem1.PayoffLotteries
+import TraceableAgency.Theorem1.FiniteBranchExtension
 import TraceableAgency.PureTrace.Support.BranchAggregation.Reachability
 
 /-!
 # Fixed-channel relevance bridge
 
-This file proves the v4 Appendix A bridge.  Only A1 and A5--A8 are used:
+This file proves the v5 Appendix A bridge.  Only A1 and A5--A8 are used:
 the two fixed within-channel relevance comparisons are equivalent to the
 environment forms consumed by the representation proof.  In the trace part
 the payoff `ostar` is never changed; branch continuation transports the fair
@@ -825,7 +826,7 @@ theorem fairBinaryTrace_implies_positiveOrientationAt
     (F : FixedPayoffPrefFamily O)
     (h1 : A1_WeakOrder F) (h5 : A5_BlockComparisonCoherence F)
     (h6 : A6_RecordDataProcessing F) (h7 : A7_ActionDataProcessing F)
-    (h8 : A8_BranchwiseContinuationConsistency F)
+    (h8 : FiniteBranchContinuationConsistency F)
     (ostar : O)
     (hfair : pairStrict F traceRelevanceFairPrior
       (fullRevealAtPayoff ostar) traceRelevanceFairPrior
@@ -1074,7 +1075,7 @@ theorem traceRelevance_bridge
     (F : FixedPayoffPrefFamily O)
     (h1 : A1_WeakOrder F) (h5 : A5_BlockComparisonCoherence F)
     (h6 : A6_RecordDataProcessing F) (h7 : A7_ActionDataProcessing F)
-    (h8 : A8_BranchwiseContinuationConsistency F) :
+    (h8 : FiniteBranchContinuationConsistency F) :
     A4_TraceRelevance F ↔ ∃ ostar : O, PositiveTraceOrientationAt F ostar := by
   constructor
   · intro h4
@@ -1087,30 +1088,33 @@ theorem traceRelevance_bridge
     exact positiveOrientationAt_implies_traceRelevance_fixed
       F h1 h5 h6 h7 ostar hpos
 
-/-- The exact v4 bundle supplies precisely the semantic bridge bundle used by
+/-- The exact v5 bundle supplies precisely the semantic bridge bundle used by
 the long representation proof. -/
-theorem traceTemperedBridgeAxioms_of_v4
+theorem traceTemperedBridgeAxioms_of_v5
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxiomsV4 F) :
+    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxiomsV5 F) :
     ∃ traceAnchor : O, TraceTemperedBridgeAxioms F traceAnchor := by
+  have hfinite : FiniteBranchContinuationConsistency F :=
+    finiteBranchContinuationConsistency_of_recordwiseSureThing
+      F h.a1 h.a5 h.a6 h.a7 h.a8
   obtain ⟨ostar, hpos⟩ :=
-    (traceRelevance_bridge F h.a1 h.a5 h.a6 h.a7 h.a8).mp h.a4
+    (traceRelevance_bridge F h.a1 h.a5 h.a6 h.a7 hfinite).mp h.a4
   exact ⟨ostar,
     { a1 := h.a1
       a2 := h.a2
       a3 := h.a5
       a4 := h.a6
       a5 := h.a7
-      a6 := h.a8
+      a6 := hfinite
       a7 := (materialRelevance_bridge F h.a1 h.a5 h.a6 h.a7).mp h.a3
       a8 := hpos }⟩
 
 /-- Conversely, the proof-facing relevance environments imply the two fixed
-v4 benchmarks under the same structural axioms. -/
-theorem traceTemperedAxiomsV4_of_bridge
+v5 benchmarks under the same structural axioms. -/
+theorem traceTemperedAxiomsV5_of_bridge
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
-    TraceTemperedAxiomsV4 F :=
+    TraceTemperedAxiomsV5 F :=
   { a1 := h.a1
     a2 := h.a2
     a3 := (materialRelevance_bridge F h.a1 h.a3 h.a4 h.a5).mpr h.a7
@@ -1119,6 +1123,7 @@ theorem traceTemperedAxiomsV4_of_bridge
     a5 := h.a3
     a6 := h.a4
     a7 := h.a5
-    a8 := h.a6 }
+    a8 := recordwiseSureThing_of_finiteBranchContinuationConsistency
+      F h.a1 h.a3 h.a4 h.a5 h.a6 }
 
 end TraceableAgency.Theorem1

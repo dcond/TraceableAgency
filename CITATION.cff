@@ -8,8 +8,8 @@ authors:
 repository-code: "https://github.com/dcond/TraceableAgency"
 url: "https://github.com/dcond/TraceableAgency"
 license: Apache-2.0
-version: 4.0.0
-date-released: 2026-08-13
+version: 5.0.0
+date-released: 2026-08-15
 preferred-citation:
   type: article
   authors:
@@ -17,4 +17,4 @@ preferred-citation:
       given-names: Daniele
   title: "A Preference for Traceable Agency: An Axiomatization of Expected Utility plus Mutual Information"
   year: 2026
-  url: "https://github.com/dcond/TraceableAgency/blob/main/Paper/trace_tempered_choice_v4.pdf"
+  url: "https://github.com/dcond/TraceableAgency/blob/main/Paper/trace_tempered_choice_v5.pdf"

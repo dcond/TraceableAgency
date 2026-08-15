@@ -967,7 +967,7 @@ theorem inducedPureActionProcessing
 theorem inducedPureBranchContinuation
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) (o : O)
-    (h6 : A8_BranchwiseContinuationConsistency F) :
+    (h6 : FiniteBranchContinuationConsistency F) :
     TraceableAgency.PureTraceBranchContinuationMonotonicity
       (inducedPureTraceFamily F o) := by
   constructor
@@ -1028,7 +1028,7 @@ theorem inducedPureConditions_of_components
     (h3 : A5_BlockComparisonCoherence F)
     (h4 : A6_RecordDataProcessing F)
     (h5 : A7_ActionDataProcessing F)
-    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h6 : FiniteBranchContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceConditions (inducedPureTraceFamily F o) where
   weakOrder := ⟨inducedPureWeakOrder F o h1,
@@ -1059,7 +1059,7 @@ theorem inducedPureRepresentation_of_components
     (h3 : A5_BlockComparisonCoherence F)
     (h4 : A6_RecordDataProcessing F)
     (h5 : A7_ActionDataProcessing F)
-    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h6 : FiniteBranchContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceMIRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).1.1
@@ -1083,7 +1083,7 @@ theorem inducedPureBlocks_of_components
     (h3 : A5_BlockComparisonCoherence F)
     (h4 : A6_RecordDataProcessing F)
     (h5 : A7_ActionDataProcessing F)
-    (h6 : A8_BranchwiseContinuationConsistency F)
+    (h6 : FiniteBranchContinuationConsistency F)
     (h8 : PositiveTraceOrientationAt F o) :
     PureTraceBlockRepresentation (inducedPureTraceFamily F o) :=
   (provedPureTraceCharacterization (inducedPureTraceFamily F o)).2

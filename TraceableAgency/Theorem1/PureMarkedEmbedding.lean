@@ -183,7 +183,7 @@ theorem constantPayoffMarkedEmbedding_mix
       exact sameMarkedTerminalLaw_constantPayoff_publicMix
         q o t.1 t.2.1 t.2.2 E G
 
-/-- At the v4 trace anchor, the constant-payoff affine map is an order
+/-- At the v5 trace anchor, the constant-payoff affine map is an order
 embedding of the mutual-information order into the marked-terminal order. -/
 theorem constantPayoffMarkedEmbedding_order_iff
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)

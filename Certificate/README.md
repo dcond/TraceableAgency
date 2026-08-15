@@ -1,12 +1,12 @@
-# Theorem 1 v4 certificate
+# Theorem 1 v5 certificate
 
 This directory documents the correspondence between
-[`trace_tempered_choice_v4.tex`](../Paper/trace_tempered_choice_v4.tex) and the
+[`trace_tempered_choice_v5.tex`](../Paper/trace_tempered_choice_v5.tex) and the
 Lean theorem
-`TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1`.
+`TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1`.
 
 - [`FORMALIZATION_CERTIFICATE.md`](FORMALIZATION_CERTIFICATE.md): exact
-  mathematical boundary, v4 axiom translation, relevance bridge, and trust
+  mathematical boundary, v5 axiom translation, relevance bridge, and trust
   boundary.
 - [`CLAIM_MAP.md`](CLAIM_MAP.md): stable paper anchors mapped to Lean
   declarations.
@@ -14,7 +14,7 @@ Lean theorem
 - [`SHA256SUMS`](SHA256SUMS): SHA-256 digest of every repository file other
   than the manifest itself.
 
-The exact proposition is `TraceableAgency.Theorem1.Theorem1StatementV4`.
+The exact proposition is `TraceableAgency.Theorem1.Theorem1StatementV5`.
 The public proof has that proposition as its type. Appendix C is paper-only and
 is outside this certified endpoint.
 

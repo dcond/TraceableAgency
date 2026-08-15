@@ -1,6 +1,6 @@
-# Paper-to-Lean proof roadmap: version 4
+# Paper-to-Lean proof roadmap: version 5
 
-This roadmap follows the proof of Theorem 1 from the v4 paper to the checked
+This roadmap follows the proof of Theorem 1 from the v5 paper to the checked
 Lean dependency graph. Declaration names are the stable points of
 correspondence; helper lemmas remain implementation details.
 
@@ -10,7 +10,7 @@ correspondence; helper lemmas remain implementation details.
 only within a fixed joint channel. It then defines explicit common-payoff block
 environments, record processors, action processors, and compounds.
 
-The v4 bundle is `TraceTemperedAxiomsV4`:
+The v5 bundle is `TraceTemperedAxiomsV5`:
 
 1. `A1_WeakOrder`
 2. `A2_Continuity`
@@ -19,13 +19,33 @@ The v4 bundle is `TraceTemperedAxiomsV4`:
 5. `A5_BlockComparisonCoherence`
 6. `A6_RecordDataProcessing`
 7. `A7_ActionDataProcessing`
-8. `A8_BranchwiseContinuationConsistency`
+8. `A8_RecordwiseSureThing`
 
-`Theorem1StatementV4` states the equivalence with a nonconstant payoff index
+`Theorem1StatementV5` states the equivalence with a nonconstant payoff index
 and a positive mutual-information coefficient, plus the same-witness
 finite-block clause.
 
-## 2. Appendix A: relevance bridge
+(A2) is formalized as sequential closedness, equivalent to the closed graph in this finite-dimensional setting.
+
+## 2. Binary-to-finite A8 bridge
+
+Paper anchor: `pt:lem:finite-branch-extension`.
+
+Lean module: `FiniteBranchExtension.lean`.
+
+`recordwiseSureThing_iff_finiteBranchContinuationConsistency` proves the
+paper's equivalence using only A1 and A5--A7. The forward proof collapses one
+record against its complement, uses payoff-preserving record tags in both
+directions, removes null rows with exact identity-action completions, and
+telescopes finite hybrid profiles. The reverse proof obtains the binary
+biconditional from the weak and strict finite clauses plus completeness.
+
+The proof-facing bridge stores `FiniteBranchContinuationConsistency`, but
+`traceTemperedBridgeAxioms_of_v5` constructs that field from public binary A8.
+Conversely, `traceTemperedAxiomsV5_of_bridge` proves public binary A8 from the
+derived finite property. No stronger public relevance assumption is present.
+
+## 3. Appendix A: relevance bridge
 
 Paper anchor: `lem:relevance-bridge`.
 
@@ -92,7 +112,7 @@ Public equivalence: `traceRelevance_bridge`.
 
 Neither bridge uses A2. The trace bridge never changes `ostar`.
 
-## 3. Pure trace at the one trace anchor
+## 4. Pure trace at the one trace anchor
 
 `traceTemperedBridgeAxioms F traceAnchor` indexes the proof-facing bundle by
 the witness chosen in Appendix A. The pure-trace wrappers in `PureTrace.lean`
@@ -109,7 +129,7 @@ The current pure-trace route proves the auxiliary characterization through:
 The public dependency is `provedPureTraceCharacterization`; compatibility
 routes are not imported by the final theorem.
 
-## 4. Material normalization
+## 5. Material normalization
 
 `PayoffLotteries.lean` derives exact action-processor neutrality for
 action-independent payoff lotteries. `MaterialUtility.lean` uses the material
@@ -124,7 +144,7 @@ nonconstant affine payoff index:
 These anchors are used only for material scale normalization. No declaration
 sets the trace anchor equal to either material anchor.
 
-## 5. Global trace scale at `o*`
+## 6. Global trace scale at `o*`
 
 `PureMarkedEmbedding.lean` embeds pure-record experiments as marked
 constant-payoff experiments at `h.traceAnchor`.
@@ -144,7 +164,7 @@ constant-(o_*) marked experiments.
 The intercept is `materialPayoffUtility F h h.traceAnchor`; it is not assumed
 to be zero.
 
-## 6. Branch-scale identification
+## 7. Branch-scale identification
 
 `BranchScaleIdentification.lean` calibrates a positive reached branch against
 full revelation and silence at `o*`. The constant-(o_*) intercept appears on
@@ -159,7 +179,7 @@ by adjoining a fixed full-support two-action dummy and transporting the result
 back with exact action processors. Its endpoint is
 `positiveBranchPayoffIncrementFormula`.
 
-## 7. Deterministic profiles and arbitrary channels
+## 8. Deterministic profiles and arbitrary channels
 
 `PayoffBranchTelescope.lean` changes finitely many payoff branches one at a
 time. `FullSupportValueAssembly.lean` uses the branch increment and
@@ -175,7 +195,7 @@ A6 proves the original and sequential channels equivalent. This yields
 supports. Expected utility and mutual information are unchanged, so no
 boundary representative is chosen.
 
-## 8. Representation and same-witness block comparisons
+## 9. Representation and same-witness block comparisons
 
 `RepresentationAssembly.lean` converts the normalized numerical formula to
 cross-channel order representation, then uses A5 duplication for
@@ -186,16 +206,16 @@ finite block comparisons. The witnesses are exactly
 `TheoremClosure.lean` performs the final logic:
 
 - `traceTemperedBridgeAxioms_imply_representation_and_block`
-- `theorem1V4Clauses`
-- `theorem1StatementV4`
+- `theorem1V5Clauses`
+- `theorem1StatementV5`
 
-## 9. Converse
+## 10. Converse
 
 `Benchmark.lean` evaluates the represented value under blocks, record
 processing, exact action processing, and compounds. From nonconstant `u` and
 `lambda > 0`, it proves the structural axioms and constructs
 `TraceTemperedBridgeAxioms F ostar` directly at one selected material outcome.
-`traceTemperedAxiomsV4_of_bridge` then returns to the exact fixed A3/A4
+`traceTemperedAxiomsV5_of_bridge` then returns to the exact fixed A3/A4
 channels without passing through another axiom bundle.
 
 At A3 the two fixed pure lotteries have distinct utility values and zero
@@ -203,20 +223,20 @@ mutual information. At A4 the fair revealing and nonrevealing lotteries both
 pay `o*`, while their mutual-information values are `log 2` and `0`. Thus
 positive `lambda` gives the required strict comparisons.
 
-Endpoint: `traceTemperedAxiomsV4_of_representation`.
+Endpoint: `traceTemperedAxiomsV5_of_representation`.
 
-## 10. Public theorem and audit
+## 11. Public theorem and audit
 
 `Proof.lean` exposes:
 
 ```lean
-TraceTemperedChoiceVerification.trace_tempered_choice_v4_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV4
+TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV5
 ```
 
 `Audit/Axioms.lean` recursively whitelists only `propext`,
 `Classical.choice`, and `Quot.sound`. `Audit/Dependencies.lean` rejects
-superseded stronger routes. `Audit/V4Certificate.lean` checks and prints the
+superseded stronger routes. `Audit/V5Certificate.lean` checks and prints the
 exact public declaration and both relevance bridges. The certificate script
-also rejects proof holes and project axioms, rebuilds the v4 PDF, and performs
+also rejects proof holes and project axioms, rebuilds the v5 PDF, and performs
 a fresh `leanchecker` replay.
