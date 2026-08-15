@@ -14,25 +14,11 @@ TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1 :
 
 For every finite payoff alphabet with at least two elements, the theorem proves
 that v5 Axioms (A1)--(A8) are equivalent to representation by expected payoff
-utility plus a strictly positive global multiple of mutual information.  The
+utility plus a strictly positive global multiple of mutual information. The
 same witnesses represent every finite block-supported cross-channel
 comparison.
 
-(A2) is formalized as sequential closedness, equivalent to the closed graph in this finite-dimensional setting.
-
-V5 Axiom 8 is the binary recordwise sure-thing biconditional. Lean proves the
-paper's finite-branch extension from binary A8 together with A1 and A5--A7 in
-`recordwiseSureThing_iff_finiteBranchContinuationConsistency`; the long proof
-uses only that derived finite form, not a stronger public premise.
-
-The formalization keeps the two material anchors `o+`, `o-` separate from the
-single trace anchor `o*`.  The fixed-channel relevance bridge transports trace
-relevance across full-support priors and nontrivial finite action alphabets
-without changing `o*`.  Consequently, pure trace at that anchor has baseline
-`u(o*) + lambda * I`, while a reached payoff branch contributes
-`m * (u(o) - u(o*))`.
-
-The project declares no additional mathematical axiom.  The final theorem's
+The project declares no additional mathematical axiom. The final theorem's
 recursively collected kernel foundations are exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
 
@@ -40,7 +26,7 @@ recursively collected kernel foundations are exactly `propext`,
 
 | Path | Role |
 |---|---|
-| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v5 statement, relevance bridge, and proof |
+| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v5 statement and proof |
 | [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
 | [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, and public-declaration audits |
