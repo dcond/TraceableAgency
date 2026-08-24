@@ -27,7 +27,7 @@ Lean proof in `TraceableAgency.PureTrace.Support.GenericFaddeev`.
 * `ClassicalFaddeevTheoremAssumptions` - the classical theorem, stated only for
   an abstract entropy functional.
 * `relabel_rel_of_axioms` - finite action/outcome relabeling invariance, now
-  proved from A4, A5, A3, and A1 transitivity.
+  proved from main-text A6, A7, A5, and A1 transitivity.
 
 ## Status
 
@@ -41,21 +41,21 @@ The audit schema and paper-specific derivations are:
 The Faddeev entropy theorem derives:
 0. **Entropy regularity**: H is nonnegative and zero on point masses/singletons
 1. **Faddeev recursion**: H satisfies the grouping/strong-additivity recursion
-2. **Strict positivity witness**: A1 and internally proved finite relabeling invariance
+2. **Strict positivity witness**: pure-trace nontriviality and internally proved finite relabeling invariance
    give H(q) > 0 at a fixed two-point full-support prior
 3. **Shannon form**: H(q) = α Sh(q) for some α > 0
-4. **A3 block equivalence**: proved directly from `PureTraceConditions.blockCoherence`
+4. **Block equivalence**: proved directly from `PureTraceConditions.blockCoherence`
 
 ## References
 
-* Paper/appendix_a_pure_trace_v5.tex, Lemma faddeevsketch
+* Paper/appendix_a_pure_trace_v10.tex, Lemma `pt:lem:faddeevsketch`
 * Faddeev (1956), "On the concept of entropy of a finite probabilistic scheme"
 * Baez-Fritz-Leinster (2011), Theorem 6
 
 The proof structure:
-- Derive Faddeev's grouping recursion from entropy reduction + A5 neutrality
+- Derive Faddeev's grouping recursion from entropy reduction and action-processing neutrality
 - Apply Faddeev's classical theorem
-- Local non-triviality (A1) plus reverse block orientation forces α > 0
+- Local pure-trace nontriviality plus reverse block orientation forces α > 0
 -/
 
 namespace TraceableAgency
@@ -80,18 +80,18 @@ The paper-specific work is:
 - Show that the entropy function Hfun from EntropyReductionRepresentation
   has the regularity properties needed by Faddeev, including nonnegativity and
   singleton-zero
-- The grouping recursion follows from entropy reduction + A5 (neutrality)
-- Local non-triviality (A1), via the cross-prior representation and reverse
+- The grouping recursion follows from entropy reduction and action-processing neutrality
+- Local pure-trace nontriviality, via the cross-prior representation and reverse
   block orientation, forces α > 0
 
 Stage 9D splits the paper-specific derivations from the classical theorem.
 -/
 
 /--
-**A3 Duplicate-Block Equivalence from PureTraceConditions**
+**Duplicate-Block Equivalence from PureTraceConditions**
 
 The duplicate-environment clause needed by `FaddeevEntropyForm` is exactly the
-first component of A3, so it is internal and no longer part of any Faddeev
+`blockCoherence.duplication` field (main-text A5), so it is internal and no longer part of any Faddeev
 external assumption.
 -/
 theorem a3_block_equivalence_of_traceAxioms
@@ -268,7 +268,7 @@ theorem coarseRevealChannel_apply_ne
 /--
 Deterministic action kernel that projects a sigma action to its coarse block.
 It is the same stochastic matrix as `coarseRevealChannel`, used in the action
-kernel role required by A5.
+kernel role required by main-text A7.
 -/
 noncomputable def coarseProjectKernel
     {K : Type u} [Fintype K] [DecidableEq K]
@@ -563,7 +563,7 @@ theorem sigmaDist_coarse_fullSupport
   rw [hp_zero, zero_mul] at hsig
   linarith
 
-/-- A5: coarse reveal weakly dominates the projected coarse identity. -/
+/-- Action processing: coarse reveal weakly dominates the projected coarse identity. -/
 theorem coarseReveal_rel_id_of_A5
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
@@ -581,7 +581,7 @@ theorem coarseReveal_rel_id_of_A5
       (coarseReveal_isBayesPushforwardCompletion_project Act p q)
   simpa [actionPushforward_sigmaDist_coarseProject Act p q] using h
 
-/-- A5: the coarse identity weakly dominates the refined coarse-reveal channel. -/
+/-- Action processing: the coarse identity weakly dominates the refined coarse-reveal channel. -/
 theorem id_rel_coarseReveal_of_A5
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {K : Type u} [Fintype K] [DecidableEq K] [Nonempty K]
@@ -600,7 +600,7 @@ theorem id_rel_coarseReveal_of_A5
   simpa [actionPushforward_coarseRefine Act p q] using h
 
 /--
-For full-support sigma priors, A5 in both projection/refinement directions plus
+For full-support sigma priors, action processing in both projection/refinement directions plus
 the cross-prior value representation identify coarse reveal with full
 revelation of the coarse prior.
 -/
@@ -707,7 +707,7 @@ structure FiniteCoarseRevealEntropyReductionAssumptions.{v} where
 
 /--
 For full-support priors, support restriction preserves normalized value. The
-proof uses the A5 support comparisons in both directions and the full-support
+proof uses the action-processing support comparisons in both directions and the full-support
 cross-prior block representation.
 -/
 theorem normalizedValue_support_restrict_fullSupport_of_crossPrior
@@ -953,7 +953,7 @@ hypotheses is a nonnegative multiple of Shannon entropy. The schema has a
 closed inhabitant in `TraceableAgency.PureTrace.Support.GenericFaddeev`.
 
 This bridge intentionally returns only `0 ≤ alpha`; strict positivity is split
-out because the paper obtains it from local nontriviality/A1.
+out because the paper obtains it from pure-trace nontriviality.
 -/
 structure ClassicalFaddeevTheoremAssumptions.{v} where
   of_standard_hypotheses :
@@ -1353,7 +1353,7 @@ theorem nonempty_of_dist {A : Type u} [Fintype A] (q : Dist A) : Nonempty A := b
     exact False.elim (h ⟨a⟩)
   linarith [q.sum_eq_one]
 
-/-- Outcome relabeling invariance follows from reversible deterministic postprocessing and A4. -/
+/-- Outcome relabeling invariance follows from reversible record postprocessing (main-text A6). -/
 theorem relabel_rel_outcome_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A O Y : Type u}
@@ -1384,7 +1384,7 @@ theorem relabel_rel_outcome_of_axioms
     pairwise_relabel_replacement_from_weak_equiv F hax P P' q r q r
       hq_to_new hq_to_old hr_to_new hr_to_old
 
-/-- Action relabeling invariance follows from reversible deterministic action kernels and A5. -/
+/-- Action relabeling invariance follows from reversible deterministic action kernels (main-text A7). -/
 theorem relabel_rel_action_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A B O : Type u}
@@ -1428,7 +1428,7 @@ theorem relabel_rel_action_of_axioms
       q r (relabelDist eA q) (relabelDist eA r)
       hq_to_new hq_to_old hr_to_new hr_to_old
 
-/-- Full finite action/outcome relabeling invariance from A4, A5, A3, and A1 transitivity. -/
+/-- Full finite action/outcome relabeling invariance from main-text A6, A7, A5, and A1 transitivity. -/
 theorem relabel_rel_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A B O Y : Type u}
@@ -1573,7 +1573,7 @@ theorem relabel_blockChannel_sumComm_eq
   ext x y
   cases x <;> cases y <;> rfl
 
-/-- Lift A1's ordinary no-information strictness to the value-facing one-point outcome. -/
+/-- Lift pure-trace nontriviality to the value-facing one-point outcome. -/
 theorem lifted_uninformative_strict_of_relabeling
     (hrelabel : FiniteRelabelingInvarianceAssumptions.{u})
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -2058,7 +2058,7 @@ theorem hfunSupportRestriction_of_boundaryIdentity
     exact Hfun_support_restrict_of_boundary_identity hnorm hid F hax hcross hreg q
 
 /--
-A1 local nontriviality, cross-prior representation, reverse block orientation,
+Pure-trace nontriviality, cross-prior representation, reverse block orientation,
 and entropy regularity produce the fixed positive Bool/uniform entropy witness.
 -/
 theorem uniform_ulift_bool_Hfun_pos_of_A1
@@ -2546,7 +2546,7 @@ theorem faddeevBinaryEntropy_continuous_of_axioms
       exact isClosed_univ
 
 /-- Normalized values are invariant under a bijective action relabeling.  This
-is derived from A5 in both directions and the cross-prior value bridge. -/
+is derived from action processing in both directions and the cross-prior value bridge. -/
 theorem normalizedValue_actionRelabel_of_crossPrior
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     (hcross : CrossPriorBlockRepresentation F)
@@ -2830,7 +2830,7 @@ This composes the first six sufficiency bridges:
    (via internal normalized chain rule)
 6. EntropyReductionRepresentation → CrossPriorBlockRepresentation (via blockbridge)
 7. CrossPriorBlockRepresentation → FaddeevEntropyForm (via entropy regularity,
-   Faddeev recursion, classical Faddeev, and internal relabeling/A1 positivity)
+   Faddeev recursion, classical Faddeev, and internal relabeling/nontriviality positivity)
 
 Paper: Full sufficiency proof.
 -/

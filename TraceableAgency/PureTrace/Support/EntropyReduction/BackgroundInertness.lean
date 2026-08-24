@@ -12,16 +12,16 @@ universe u
 /-!
 ## Derived background inertness
 
-Paper v7, Lemma `background`.  The old A7 independent-background axiom is
-derived here from A1, A3, A4, A5, and the weak/strict clauses of A6.  The proof
-is deliberately kept at the primitive preference level, before any product
-scale or cardinal product representation is constructed.
+Paper v10, Lemma `pt:lem:background`.  Independent-background separability is
+derived here from the pure-trace axioms.  The proof is deliberately kept at
+the primitive preference level, before any product scale or cardinal product
+representation is constructed.
 -/
 
 /-- A pairwise comparison between first-coordinate product lifts is exactly
-the original first-coordinate comparison.  This is the A5 projection/embedding
-neutrality step of the v7 background-inertness proof, with reversible outcome
-padding supplied by A4 and pairwise replacement by A1/A3.  No support
+the original first-coordinate comparison.  This is the projection/embedding
+neutrality step of the background-inertness proof, with reversible outcome
+padding and pairwise replacement.  No support
 assumption is needed. -/
 theorem product_left_lifted_rel_iff_base
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -336,7 +336,7 @@ theorem product_left_background_rel_iff_sequential
 
 Adding the same statistically independent right background to both foreground
 channels preserves and reflects their comparison.  This is the stronger
-statement from paper v7; unlike the old A7, it identifies the product
+statement used in v10; it identifies the product
 comparison with the background-free comparison itself. -/
 theorem derived_background_inertness_left
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -525,9 +525,9 @@ theorem derived_background_inertness_right
   (product_right_comparison_relabel_to_left F hax q r R P Q).trans
     (derived_background_inertness_left F hax r q P Q R)
 
-/-- The v6 A7 predicate is a theorem of the v7 axioms.  Full support is not
-used: the derivation actually establishes background inertness on boundary
-priors as well. -/
+/-- Independent-background separability is derived rather than assumed.  Full
+support is not used: the derivation also establishes background inertness on
+boundary priors. -/
 theorem independentBackgroundSeparability_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F) :
     IndependentBackgroundSeparability F := by
@@ -694,7 +694,7 @@ noncomputable def productLeftSliceValue
 
 /-- Product left-slice order with no-information background is the original
 first-coordinate order. This is the projection/embedding part of Step 1 of
-paper Lemma `coherentnorm`, proved from the A3/A4/A5 weak-equivalence
+paper Lemma `coherentnorm`, proved from the main-text A5--A7 weak-equivalence
 machinery internalized in Stage 10C. -/
 theorem product_left_noInfo_value_order_iff_base
     (F : PrefFamily.{u}) (hax : PureTraceConditions F) (hs : ScaleCoherenceStructure F)
@@ -815,7 +815,7 @@ noncomputable def productRightSliceValue
     (experimentOfChannel (prodChannel P R))
 
 /-- Product right-slice with no-information first-coordinate background recovers
-the base second-coordinate order. Proved from A3/A4/A5 projection/embedding
+the base second-coordinate order. Proved from main-text A5--A7 projection/embedding
 machinery (right-side analogue of `product_left_noInfo_value_order_iff_base`). -/
 theorem product_right_noInfo_value_order_iff_base
     (F : PrefFamily.{u}) (hax : PureTraceConditions F) (hs : ScaleCoherenceStructure F)

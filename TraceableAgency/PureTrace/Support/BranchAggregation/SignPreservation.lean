@@ -162,7 +162,7 @@ theorem branch_value_gap_of_A1
     (experimentOfChannel (Channel.uninformativeChannelU A))
     hstrict.1 hstrict.2
 
-/-- A1 supplies the nonzero branch-linear-functional witness needed by the
+/-- Pure-trace nontriviality supplies the nonzero branch-linear-functional witness needed by the
 same-sign scalar argument, once the affine linear part is available.
 
 The theorem is deliberately `PureTraceConditions`-aware.  The legacy
@@ -180,7 +180,7 @@ theorem branch_linear_part_nonzero_of_A1
     ⟨E, E', hgap⟩
   exact branch_linear_part_nonzero_of_value_gap hlin F hV r E E' hgap
 
-/-- A1 supplies a nonzero branch-linear-functional witness inside the tangent
+/-- Pure-trace nontriviality supplies a nonzero branch-linear-functional witness inside the tangent
 subspace. -/
 theorem branch_linear_part_nonzero_tangent_of_A1
     (hlin : FiniteAffineLinearPartAssumptions.{u})

@@ -702,11 +702,11 @@ theorem markedChannelIntegral_commonPayoffCompound
             phi (o, Channel.posterior (K y) (Channel.posterior P q y) (o, r))) := by
             ring
 
-/-! ## A6 implies public-mixture independence -/
+/-! ## Finite-branch A8 implies public-mixture independence -/
 
 /-- Public-coin independence of the marked pair order.  The common record
 alphabet in the informative branch is supplied by deterministic sum padding;
-the strict direction is exactly the strict clause of A6. -/
+the strict direction is exactly the strict finite-branch clause derived from A8. -/
 theorem markedPairWeak_publicMix_independence
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)

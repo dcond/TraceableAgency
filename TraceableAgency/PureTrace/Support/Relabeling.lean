@@ -201,7 +201,8 @@ theorem nonempty_of_dist {A : Type u} [Fintype A] (q : Dist A) : Nonempty A := b
     exact False.elim (h ⟨a⟩)
   linarith [q.sum_eq_one]
 
-/-- Outcome relabeling invariance follows from reversible deterministic postprocessing and A4. -/
+/-- Outcome relabeling invariance follows from reversible deterministic
+postprocessing, the pure-trace form of main-text A6. -/
 theorem relabel_rel_outcome_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A O Y : Type u}

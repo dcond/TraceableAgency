@@ -20,7 +20,7 @@ through the separate support-restriction/boundary-extension layer.
 /-- Named full-support unscaled reassembly of paper Lemma `blockbridge`.
 
 It combines coherent product quasi-additivity, zero normalization,
-same-prior value representation, and the A3/A4/A5 product-to-block transfer. -/
+same-prior value representation, and the main-text A5--A7 product-to-block transfer. -/
 theorem blockbridge_fullSupport_of_decomposed_components
     (hcross : FiniteCrossPriorBlockAssumptions.{u})
     (F : PrefFamily.{u})

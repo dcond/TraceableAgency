@@ -151,7 +151,7 @@ theorem mutualInfo_restrictToSupport [Fintype O]
 /-!
 ## Support projection and inclusion kernels
 
-These kernels are the finite stochastic maps used by A5 in the paper's support
+These kernels are the finite stochastic maps used by A7 in the paper's support
 restriction argument.  The inclusion embeds a support face back into the ambient
 action set.  The projection maps positive-support actions to themselves and
 collapses zero-probability actions to an arbitrary support element.

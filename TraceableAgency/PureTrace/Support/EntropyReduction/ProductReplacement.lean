@@ -10,7 +10,7 @@ namespace TraceableAgency
 universe u
 
 /-!
-## Product-block transfer from A3/A4/A5
+## Product-block transfer from main-text A5--A7
 -/
 
 /-- Four labels for a common finite-block replacement environment. -/
@@ -91,7 +91,7 @@ noncomputable def productBlockReplacementChannel
 
 /--
 Common-block transfer: if each side of a two-block comparison is weakly
-equivalent to a replacement side, then A3 and transitivity preserve the
+equivalent to a replacement side, then block coherence and transitivity preserve the
 pairwise comparison.
 -/
 theorem pairwise_product_block_replacement_from_weak_equiv

@@ -408,8 +408,9 @@ noncomputable def posteriorValueRep_of_axioms
 
 Paper Lemma branchagg.
 
-From branchwise monotonicity (A6), we derive that the value of a sequential
-experiment is an aggregation of branch values with positive coefficients.
+From the finite-branch continuation property derived from main-text A8, we
+derive that the value of a sequential experiment is an aggregation of branch
+values with positive coefficients.
 -/
 
 /--
@@ -611,8 +612,8 @@ structure FaddeevEntropyForm (F : PrefFamily.{u}) where
     ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
       (q : Dist A),
       cross_prior.entropy_reduction.Hfun q = alpha * H(q)
-  /-- A3 duplicate-block equivalence.
-      Paper Axiom A3 first clause:
+  /-- Duplicate-block equivalence from `PureTraceConditions.blockCoherence`.
+      This is the first clause of main-text A5:
         q ≽_P q' ↔ q^0 ≽_{P⊔P} (q')^1
       This is carried from PureTraceConditions and is needed for the global-sketch proof. -/
   a3_block_equivalence :
@@ -697,7 +698,8 @@ For boundary prior r with support B ⊂ A:
 1. The posterior law μ_{r,P} depends only on rows P(·|b) for b ∈ B
 2. Channels agreeing on B are indifferent at prior r
 3. F.rel comparison at r equals comparison at restricted prior r|_B on face B
-4. This uses A5 (neutrality under stochastic maps) for the projection/embedding
+4. This uses `PureTraceConditions.actionProcessing` (main-text A7) for the
+   projection/embedding
 
 **Proof of representation extension:**
 If q or q' is on the boundary, restrict each pair (q,P) and (q',P) to their
@@ -867,7 +869,7 @@ structure SufficiencySpineAssumptions where
   posterior_to_value_rep :
     ∀ F : PrefFamily.{u}, PosteriorLawSufficiency F → PosteriorValueRepresentation F
   /-- Stage 3: Value representation implies branch aggregation.
-      Paper Lemma branchagg. Uses A6.
+      Paper Lemma branchagg. Uses the derived finite-branch form of A8.
       Returns the same V plus branch coefficients β(q,r). -/
   value_rep_to_branch :
     ∀ F : PrefFamily.{u}, PosteriorValueRepresentation F → BranchAggregationStructure F

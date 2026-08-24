@@ -431,7 +431,7 @@ theorem actionCompletion_isExact
   exact bayesCompletion_jointEquation K q S Khat hcompl
 
 /-- A deterministic relabeling of actions preserves every within-channel
-comparison.  This is derived from exact A5 in both directions and the
+comparison.  This is derived from exact A7 in both directions and the
 four-block replacement lemma, rather than assumed as a convention. -/
 theorem fixed_rel_iff_actionEquiv
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -657,7 +657,7 @@ theorem postprocess_activeInclusion
       exact hjk (congrArg Sigma.fst heq)
     rw [TraceableAgency.Dist.pure_apply_ne _ _ hne.symm, mul_zero]
 
-/-! ## Direct transfers of A1, A2, A6, A7, A8, and A5 duplication -/
+/-! ## Direct transfers of the paper axioms and derived trace orientation -/
 
 theorem inducedPureWeakOrder
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -1018,7 +1018,7 @@ theorem inducedPureBranchContinuation
 
 /-! ## Closed pure-trace proposition -/
 
-/-- A1--A6 and A8 induce the exact pure axiom bundle consumed by the already
+/-- A1, A2, and A4--A8 induce the exact pure axiom bundle consumed by the already
 formalized pure-trace proposition in Appendix A. -/
 theorem inducedPureConditions_of_components
     {O : Type u} [Fintype O] [DecidableEq O]
@@ -1041,7 +1041,7 @@ theorem inducedPureConditions_of_components
   branchContinuation := inducedPureBranchContinuation F o h6
 
 /-- Compatibility wrapper for callers that already carry the full main-text
-axiom bundle.  Material relevance A7 is not used by the pure-trace result. -/
+axiom bundle.  Material relevance A3 is not used by the pure-trace result. -/
 theorem inducedPureConditions
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)

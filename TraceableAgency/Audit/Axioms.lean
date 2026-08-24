@@ -31,7 +31,7 @@ def auditedRoots : List Name :=
   , ``TraceableAgency.pureTraceRepresentation_of_conditions
   , ``TraceableAgency.provedPureTraceSufficiency
   , ``TraceableAgency.provedPureTraceCharacterization
-  , ``TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1
+  , ``TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1
   ]
 
 run_cmd do
@@ -51,4 +51,4 @@ end TraceableAgency.Audit.Axioms
 #print axioms TraceableAgency.pureTraceRepresentation_of_conditions
 #print axioms TraceableAgency.provedPureTraceSufficiency
 #print axioms TraceableAgency.provedPureTraceCharacterization
-#print axioms TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1
+#print axioms TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1

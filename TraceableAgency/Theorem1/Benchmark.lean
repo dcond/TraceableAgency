@@ -939,15 +939,15 @@ theorem positiveTraceOrientationAt_of_representation
 /-! ## Complete benchmark package -/
 
 /-- The represented value constructs the proof-facing bridge directly and
-then recovers the exact fixed-channel v5 axioms.  Its chosen trace anchor is
+then recovers the exact fixed-channel paper axioms.  Its chosen trace anchor is
 kept fixed throughout the bridge. -/
-theorem traceTemperedAxiomsV5_of_representation
+theorem traceTemperedAxiomsV10_of_representation
     {O : Type u} [Fintype O] [DecidableEq O]
     {F : FixedPayoffPrefFamily O} {u : O → ℝ} {lambda : ℝ}
     (hnonconstant : ¬ IsConstantPayoffIndex u)
     (hlambda : 0 < lambda)
     (hrep : WithinChannelRepresentation F u lambda) :
-    TraceTemperedAxiomsV5 F := by
+    TraceTemperedAxiomsV10 F := by
   have hmaterial : MaterialRelevanceEnvironment F :=
     materialRelevanceEnvironment_of_representation hnonconstant hrep
   obtain ⟨ostar, ominus, hstrict⟩ := hmaterial
@@ -960,6 +960,6 @@ theorem traceTemperedAxiomsV5_of_representation
       a6 := finiteBranchContinuationConsistency_of_representation hrep
       a7 := ⟨ostar, ominus, hstrict⟩
       a8 := positiveTraceOrientationAt_of_representation ostar hlambda hrep }
-  exact traceTemperedAxiomsV5_of_bridge F hbridge
+  exact traceTemperedAxiomsV10_of_bridge F hbridge
 
 end TraceableAgency.Theorem1

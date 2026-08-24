@@ -10,12 +10,12 @@ import TraceableAgency.PureTrace.Support.BranchAggregation.Reachability
 /-!
 # Fixed-channel relevance bridge
 
-This file proves the v5 Appendix A bridge.  Only A1 and A5--A8 are used:
-the two fixed within-channel relevance comparisons are equivalent to the
-environment forms consumed by the representation proof.  In the trace part
-the payoff `ostar` is never changed; branch continuation transports the fair
-binary comparison across priors, and exact action processors transport it
-across nontrivial finite action alphabets.
+This file proves the v10 Appendix A relevance bridge.  Only A1 and A5--A8 are
+used: the two fixed within-channel relevance comparisons are equivalent to
+the environment forms consumed by the representation proof.  In the trace
+part the payoff `ostar` is never changed; branch continuation transports the
+fair binary comparison across priors, and exact action processors transport
+it across nontrivial finite action alphabets.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -1088,11 +1088,11 @@ theorem traceRelevance_bridge
     exact positiveOrientationAt_implies_traceRelevance_fixed
       F h1 h5 h6 h7 ostar hpos
 
-/-- The exact v5 bundle supplies precisely the semantic bridge bundle used by
+/-- The exact paper bundle supplies precisely the semantic bridge bundle used by
 the long representation proof. -/
-theorem traceTemperedBridgeAxioms_of_v5
+theorem traceTemperedBridgeAxioms_of_v10
     {O : Type u} [Fintype O] [DecidableEq O]
-    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxiomsV5 F) :
+    (F : FixedPayoffPrefFamily O) (h : TraceTemperedAxiomsV10 F) :
     ∃ traceAnchor : O, TraceTemperedBridgeAxioms F traceAnchor := by
   have hfinite : FiniteBranchContinuationConsistency F :=
     finiteBranchContinuationConsistency_of_recordwiseSureThing
@@ -1110,11 +1110,11 @@ theorem traceTemperedBridgeAxioms_of_v5
       a8 := hpos }⟩
 
 /-- Conversely, the proof-facing relevance environments imply the two fixed
-v5 benchmarks under the same structural axioms. -/
-theorem traceTemperedAxiomsV5_of_bridge
+paper benchmarks under the same structural axioms. -/
+theorem traceTemperedAxiomsV10_of_bridge
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
-    TraceTemperedAxiomsV5 F :=
+    TraceTemperedAxiomsV10 F :=
   { a1 := h.a1
     a2 := h.a2
     a3 := (materialRelevance_bridge F h.a1 h.a3 h.a4 h.a5).mpr h.a7

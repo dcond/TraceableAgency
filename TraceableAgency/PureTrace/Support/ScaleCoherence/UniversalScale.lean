@@ -1626,7 +1626,7 @@ theorem faceScaleProductPairBilinear_normalized
   rw [hnorm.rightCoeff_normalized hax q r hq hr]
   ring
 
-/-- A1 nontriviality makes full revelation nonzero in the current face-scale
+/-- Pure-trace nontriviality makes full revelation nonzero in the current face-scale
 value representative.  This early helper is used by the normalized
 triple-product coefficient algebra below. -/
 theorem faceScale_idChannel_value_ne_zero_of_A1

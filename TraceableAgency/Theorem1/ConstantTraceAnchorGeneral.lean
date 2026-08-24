@@ -8,7 +8,7 @@ import TraceableAgency.Theorem1.GlobalTraceScale
 /-!
 # Constant-trace-anchor marked experiments
 
-Any marked experiment whose payoff coordinate is surely the separate v5 trace
+Any marked experiment whose payoff coordinate is surely the separate A4 trace
 anchor is exactly the constant-payoff lift of the pure experiment carried by
 its record coordinate.  Consequently its normalized marked utility is the
 material value of the anchor plus the global trace coefficient times mutual

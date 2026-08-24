@@ -13,7 +13,7 @@ import TraceableAgency.Theorem1.Benchmark
 
 This module isolates the final order-theoretic assembly.  Its sole numerical
 input is the full-support formula for the normalized marked utility.  Support
-restriction then removes boundary priors, while A3 turns cross-channel pair
+restriction then removes boundary priors, while A5 turns cross-channel pair
 comparisons into the within-channel and finite-block conclusions of Theorem 1.
 -/
 

@@ -219,7 +219,7 @@ structure FiniteProductInteractionAssociativityAssumptions.{v}
           hpair.interactionCoeff F hax hs r s
 
 /-- K1 from normalized triple-product expansions. Set the third coordinate to
-no information, vary the first two coordinates, and cancel the nonzero A1
+no information, vary the first two coordinates, and cancel the nonzero pure-trace
 witness values. -/
 theorem interaction_assoc_xy_from_triple_of_normalized
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
@@ -280,7 +280,7 @@ theorem interaction_assoc_xy_from_triple_of_normalized
 
 /-- K2 from normalized triple-product expansions. Set the middle coordinate to
 no information, vary the first and third coordinates, and cancel the nonzero
-A1 witness values. -/
+pure-trace witness values. -/
 theorem interaction_assoc_xz_from_triple_of_normalized
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
     (hnorm : FiniteProductGaugeNormalizationAssumptions.{u} hpair)
@@ -339,7 +339,7 @@ theorem interaction_assoc_xz_from_triple_of_normalized
     simpa [mul_assoc, mul_left_comm, mul_comm] using hval)
 
 /-- K3 from normalized triple-product expansions. Set the first coordinate to
-no information, vary the last two coordinates, and cancel the nonzero A1
+no information, vary the last two coordinates, and cancel the nonzero pure-trace
 witness values. -/
 theorem interaction_assoc_yz_from_triple_of_normalized
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
@@ -478,7 +478,7 @@ structure FiniteProductInteractionSwapAssumptions.{v}
 /-- Nondegenerate interaction coefficient symmetry from product swap after the
 Step 3 gauge normalization. Evaluate both coordinates at full revelation, use
 product-swap value equality, expand both sides with the normalized pairwise
-formula, and cancel the nonzero A1 witness values. -/
+formula, and cancel the nonzero pure-trace witness values. -/
 theorem interactionCoeff_eq_swapped_of_value_swap_nondegenerate
     (hrelV : FinitePosteriorValueRelabelingAssumptions.{u})
     (hpair : FinitePairwiseProductBilinearAssumptions.{u})
@@ -804,7 +804,7 @@ theorem productLiftValue_of_coherentProductQuasiAdditivity
 /--
 Assemble the unscaled full-support blockbridge from product-lift value
 identification, same-prior value representation, and the product-block transfer
-proved from A3/A4/A5.
+proved from main-text A5--A7.
 -/
 theorem unscaled_cross_prior_block_rep_of_product_parts
     (hvalue : FiniteProductLiftValueAssumptions.{u})
@@ -840,7 +840,7 @@ theorem unscaled_cross_prior_block_rep_of_product_parts
 **Finite Cross-Prior Block Assumptions**
 
 External assumptions for the paper's unscaled full-support cross-prior
-blockbridge, after internalizing the product-to-block transfer from A3/A4/A5
+blockbridge, after internalizing the product-to-block transfer from main-text A5--A7
 and the derived value-order coordinate-independence consequence. What remains
 external is split into the paper's cardinal coherent-product pieces and the
 remaining HM/affine/product bridges: posterior-law value affinity, first-slice
@@ -848,7 +848,7 @@ classical affine-utility uniqueness, second-coordinate intercept affine
 uniqueness, slope identification, and coherent
 gauge/κ normalization. Public-mix posterior-law mixture, product-public-mix
 posterior-law compatibility, product-slice public-mix affinity, and cardinal
-base-value nonconstancy are now derived/internal; the A1 experiment-pair
+base-value nonconstancy are now derived/internal; the pure-trace experiment-pair
 strictness bridge is now derived from structural relabeling/block-swap
 plumbing; singleton first-slice handling and product-slice intercept
 identification are also derived internally. The left-slice affine package,

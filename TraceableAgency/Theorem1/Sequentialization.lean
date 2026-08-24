@@ -73,7 +73,7 @@ theorem actionPushforward_redrawFromOneAction
   simp [Channel.actionPushforward, redrawFromOneActionKernel]
 
 /-- Collapsing the same-action terminal continuation to its literal one-action
-form satisfies A5's exact joint-law equation. -/
+form satisfies A7's exact joint-law equation. -/
 theorem collapseTerminal_isActionProcessorCompletion
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
@@ -93,7 +93,7 @@ theorem collapseTerminal_isActionProcessorCompletion
     deterministicPayoffChannel, ← Finset.sum_mul, q.sum_eq_one]
 
 /-- Redrawing `q` from the literal one-action continuation recovers the
-same-action continuation and satisfies A5's exact joint-law equation. -/
+same-action continuation and satisfies A7's exact joint-law equation. -/
 theorem redrawTerminal_isActionProcessorCompletion
     {O A R : Type u}
     [Fintype O] [DecidableEq O]
@@ -112,7 +112,7 @@ theorem redrawTerminal_isActionProcessorCompletion
     redrawFromOneActionKernel, uninformativeAtPayoff,
     deterministicPayoffChannel]
 
-/-- A5 identifies the lifted terminal continuation with its literal
+/-- A7 identifies the lifted terminal continuation with its literal
 one-action form, in both oriented pair comparisons. -/
 theorem terminalContinuation_pairWeakEquiv_oneAction
     {O A R : Type u}
@@ -234,7 +234,7 @@ theorem recordPostprocess_deleteObservedPair
 
 /-! ## Behavioral equivalence -/
 
-/-- A4 gives both oriented weak comparisons between a channel and its
+/-- A6 gives both oriented weak comparisons between a channel and its
 terminal-payoff sequentialization. -/
 theorem sequentialization_pairWeakEquiv
     {O A R : Type u}
@@ -256,8 +256,8 @@ theorem sequentialization_pairWeakEquiv
     exact hh
 
 /-- In the paper's same oriented block, sequentialization is genuine
-indifference.  A1/A5/A7 enter only to identify the reverse oriented pair
-comparison with the reverse comparison inside this block. -/
+indifference.  A6 supplies the two pairwise weak comparisons; A1, A5, and A7
+identify the reverse-oriented pair comparison inside this block. -/
 theorem sequentialization_pairIndiff
     {O A R : Type u}
     [Fintype O] [DecidableEq O]

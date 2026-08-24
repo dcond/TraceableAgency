@@ -29,10 +29,22 @@ if rg --glob '*.lean' \
   exit 1
 fi
 
-legacy_pattern='\bv''4\b|version ''4|Theorem1StatementV''4|TraceTemperedAxiomsV''4|trace_tempered_choice_v''4'
-if rg -n -i "$legacy_pattern" \
+legacy_digit='[1-9]'
+legacy_api_pattern="Theorem1StatementV$legacy_digit([^0-9]|$)|TraceTemperedAxiomsV$legacy_digit([^0-9]|$)|trace_tempered_choice_v$legacy_digit([^0-9]|$)|theorem1V$legacy_digit([^0-9]|$)|theorem1StatementV$legacy_digit([^0-9]|$)|_of_v$legacy_digit([^0-9]|$)"
+legacy_release_pattern="(^|[^[:alnum:]_])(v|version[[:space:]]+)$legacy_digit([^0-9]|$)"
+if rg -n -i "$legacy_api_pattern" \
   README.md Paper Certificate TraceableAgency scripts .github CITATION.cff; then
+  echo "ERROR: obsolete prior-version theorem or certificate API" >&2
+  exit 1
+fi
+if rg -n -i "$legacy_release_pattern" \
+  README.md Paper Certificate TraceableAgency; then
   echo "ERROR: obsolete prior-version paper or theorem surface" >&2
+  exit 1
+fi
+if rg --files README.md Paper Certificate TraceableAgency scripts |
+    rg -i "(^|/|_|-)v$legacy_digit([^0-9]|$)"; then
+  echo "ERROR: obsolete prior-version repository filename" >&2
   exit 1
 fi
 
@@ -43,8 +55,11 @@ echo "== Complete public proof surface =="
 lake build TraceableAgency
 lake build TraceableAgency.PureTrace.Compatibility
 
-echo "== Exact v5 declaration surface =="
-lake build TraceableAgency.Audit.V5Certificate
+echo "== Exact v10 declaration surface =="
+lake build TraceableAgency.Audit.V10Certificate
+
+echo "== Mechanical Theorem 1 specification =="
+./scripts/build_theorem1_spec.sh --check
 
 echo "== Recursive kernel and dependency audits =="
 lake build TraceableAgency.Audit
@@ -60,7 +75,7 @@ echo "== Fresh kernel replay =="
 if [[ "${TRACEABLE_SKIP_FRESH_CHECKER:-0}" == "1" ]]; then
   echo "fresh replay is reserved for the full local certificate"
 else
-  lake env leanchecker --fresh TraceableAgency.Audit.V5Certificate
+  lake env leanchecker --fresh TraceableAgency.Audit.V10Certificate
 fi
 
 echo "Theorem 1 certificate passed."

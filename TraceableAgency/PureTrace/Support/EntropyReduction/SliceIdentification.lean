@@ -24,7 +24,8 @@ Both are proved from the single global classical finite affine-utility
 uniqueness theorem, derived background same-order, HM public mixtures, and — crucially for the
 slope — exact posterior-value relabeling invariance under the product swap
 (`Equiv.prodComm`).  This is the Lean form of the paper's coordinate-swap
-scalar `d(p,r)` (Paper/appendix_a_pure_trace_v5.tex, Lemma coherentnorm, Step 2).
+scalar `d(p,r)` (Paper/appendix_a_pure_trace_v10.tex, Lemma
+`pt:lem:coherentnorm`, Step 2).
 
 The slope target is repaired to nondegenerate first coordinate
 (`¬ Subsingleton A`): in a singleton first coordinate the base value

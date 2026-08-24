@@ -8,9 +8,9 @@ import TraceableAgency.Theorem1.PayoffLotteries
 /-!
 # Binary A8 and its finite-branch extension
 
-This file proves the v5 finite-branch lemma.  The public A8 is the binary
-recordwise sure-thing biconditional.  The derived property is the dependent
-finite-branch form used by the representation proof.
+This file proves the v10 Appendix A finite-branch lemma.  The public A8 is the
+binary recordwise sure-thing biconditional.  The derived property is the
+dependent finite-branch form used by the representation proof.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -966,7 +966,7 @@ theorem finiteBranchConsistency_strict_of_recordwiseSureThing
     q (commonPayoffCompound Rec P K) q (commonPayoffCompound Rec P L)
       hfirst hrefl htail
 
-/-- Forward half of the v5 finite-branch extension lemma. -/
+/-- Forward half of the finite-branch extension lemma. -/
 theorem finiteBranchContinuationConsistency_of_recordwiseSureThing
     {O : Type u} [Fintype O] [DecidableEq O]
     (F : FixedPayoffPrefFamily O)
@@ -1063,7 +1063,7 @@ theorem recordwiseSureThing_of_finiteBranchContinuationConsistency
         (by simpa [Q, Q', binaryPayoffCompound] using hreverse)
     exact hparts.2 haggregate
 
-/-- V5 Lemma (finite-branch extension): under A1 and A5--A7, binary A8 is
+/-- Finite-branch extension: under A1 and A5--A7, binary A8 is
 equivalent to the weak-and-strict finite-branch property used by the proof. -/
 theorem recordwiseSureThing_iff_finiteBranchContinuationConsistency
     {O : Type u} [Fintype O] [DecidableEq O]

@@ -10,11 +10,12 @@ namespace TraceableAgency
 universe u v
 
 /-!
-## One-branch A6 plumbing
+## One-branch continuation plumbing
 
 These lemmas do not prove the branch-slice affine theorem.  They isolate the
-pure A6/A3/A1 step: if two continuation profiles differ in one branch only,
-then the branch comparison lifts to the aggregate comparison.
+finite-branch continuation, duplication, and weak-order step: if two
+continuation profiles differ in one branch only, then the branch comparison
+lifts to the aggregate comparison.
 -/
 
 /-- A1 gives reflexivity of the preference relation for a fixed channel. -/
@@ -26,7 +27,7 @@ theorem rel_refl_of_A1
   exact (hA1.1 P).1 q q |>.elim id id
 
 /-- Identical branches are weakly comparable in the duplicated block
-environment, by A3 plus A1 reflexivity. -/
+environment, by block coherence (main-text A5) plus A1 reflexivity. -/
 theorem block_duplicate_rel_refl_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A O : Type u} [Fintype A] [DecidableEq A] [Fintype O] [DecidableEq O]
@@ -34,7 +35,7 @@ theorem block_duplicate_rel_refl_of_axioms
     F.rel (blockChannel P P) (inlDist q) (inrDist q) := by
   exact (hax.blockCoherence.duplication P q q).mp (rel_refl_of_A1 F hax.weakOrder P q)
 
-/-- Weak one-branch A6 specialization.  All non-target branches are identical,
+/-- Weak one-branch continuation specialization.  All non-target branches are identical,
 so their weak comparisons are supplied by `block_duplicate_rel_refl_of_axioms`.
 -/
 theorem A6_weak_one_branch_of_rel
@@ -59,7 +60,7 @@ theorem A6_weak_one_branch_of_rel
     · rw [hsame o ho]
       exact block_duplicate_rel_refl_of_axioms F hax (R o) (branchPosterior P₁ q o))
 
-/-- Strict one-branch A6 specialization.  The target branch is strictly better,
+/-- Strict one-branch continuation specialization.  The target branch is strictly better,
 and all non-target branches are identical. -/
 theorem A6_strict_one_branch_of_strict
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)

@@ -10,7 +10,7 @@ import TraceableAgency.Theorem1.MaterialUtility
 # A common normalization for fixed-prior marked-terminal utility
 
 The arbitrary affine representative on the marked-terminal quotient is
-normalized at the material high/low outcomes selected by A7.  Payoff lotteries
+normalized at the material high/low outcomes selected by A3.  Payoff lotteries
 embed affinely and order-reflectingly into this quotient, so affine uniqueness
 identifies the restriction of the normalized marked utility with the common
 material expected-utility scale.
@@ -155,7 +155,7 @@ theorem markedPayoffLotteryEmbedding_mix
     intro o _ho <;>
     ring
 
-/-! ## A7 normalization on each full-support marked fibre -/
+/-! ## A3 normalization on each full-support marked fibre -/
 
 /-- The chosen high material outcome, bundled on the fixed action alphabet. -/
 noncomputable abbrev markedMaterialHighExperiment
@@ -200,7 +200,7 @@ theorem markedMaterialAnchors_HMStrict
       (markedMaterialHighExperiment F h)).1 hreverse
     simpa [MarkedPairWeak] using hr
 
-/-- The marked-terminal affine representation normalized at the same A7
+/-- The marked-terminal affine representation normalized at the same A3
 anchors used for the common material payoff index. -/
 noncomputable def normalizedMarkedAffineUtilityRepresentation
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
