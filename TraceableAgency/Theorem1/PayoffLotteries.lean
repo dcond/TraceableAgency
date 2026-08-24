@@ -403,7 +403,7 @@ noncomputable def erasePayoffMixTag
   fun _ => TraceableAgency.Dist.pure PUnit.unit
 
 /-- Reconstruct the public branch from its conditional distribution given the
-realized payoff.  Dependence on the payoff is permitted by A4. -/
+realized payoff.  Dependence on the payoff is permitted by A6. -/
 noncomputable def reconstructPayoffMixTag
     {O : Type u} [Fintype O]
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)

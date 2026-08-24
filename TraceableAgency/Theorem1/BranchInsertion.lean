@@ -191,7 +191,8 @@ theorem markedChannelIntegral_branchInsertionContinuation_of_ne
 
 /-! A common-record variant used to compare two inserted representatives.
 Its target alphabet is supplied independently of a bundled experiment, so
-two padded channels can literally share one dependent record family in A6. -/
+two padded channels can literally share one dependent record family in the
+finite-branch form of A8. -/
 
 private theorem markedChannelIntegral_uninformativeAtPayoff_forInsertion
     (r : TraceableAgency.Dist A) (o : O)
@@ -518,10 +519,10 @@ theorem branchInsertionMixtureMap_affine
 
 /-! ## Exact order embedding -/
 
-/-- Raw same-record core of branch insertion.  This is the direct A6
-cancellation lemma and does not require full support of either prior: the
-forward direction is A6-weak, while the reverse direction follows from local
-completeness and A6-strict at the reached branch. -/
+/-- Raw same-record core of branch insertion.  This is the direct
+finite-branch cancellation lemma and does not require full support of either
+prior: the forward direction uses the weak clause, while the reverse direction
+uses local completeness and the strict clause at the reached branch. -/
 theorem pairWeak_branchInsertionCommon_iff
     {R : Type u} [Fintype R] [DecidableEq R] [Nonempty R]
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
@@ -599,8 +600,9 @@ theorem pairWeak_branchInsertionCommon_iff
     exact hparts.2 hraw
 
 /-- A reached branch with full-support posterior is order-isomorphic to its
-image under insertion.  Sum padding gives A6 one common target record type;
-the reverse implication uses completeness locally and A6's strict clause. -/
+image under insertion.  Sum padding gives the finite-branch property one
+common target record type; the reverse implication uses completeness locally
+and its strict clause. -/
 theorem markedPairWeak_branchInsertion_iff
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport)

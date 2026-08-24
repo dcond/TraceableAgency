@@ -614,8 +614,8 @@ noncomputable def boundaryNestedOutcomeProject
   | Sum.inr (Sum.inl o) => Dist.pure (Sum.inl o)
   | Sum.inr (Sum.inr o) => Dist.pure (Sum.inr o)
 
-/-- If two finite channels are mutual outcome postprocessings, then A4 plus
-A1/A3 allows replacing one by the other in any pairwise comparison. -/
+/-- If two finite channels are mutual outcome postprocessings, then main-text
+A6 plus A1/A5 allows replacing one by the other in any pairwise comparison. -/
 theorem rel_of_mutual_postprocess_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     {A O Y : Type u}
@@ -954,7 +954,7 @@ theorem boundary_block_lift_of_axioms
 
 The forward implication is the support-restriction theorem applied to the
 ambient boundary block.  The reverse implication is `boundary_block_lift_of_axioms`.
-Both directions use only A1/A3/A4/A5 through relabeling, outcome
+Both directions use only main-text A1 and A5--A7 through relabeling, outcome
 postprocessing, and support restriction. -/
 theorem boundary_block_rel_iff_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -1431,7 +1431,8 @@ theorem branch_boundary_tangent_forward_zero_of_commonOutcome_realization
     have hqzero := hbranch_zero_to_q_zero hbzero
     nlinarith [hη_lin_q, ht, hqzero]
 
-/-- A1/A6 plus atomic tangent spanning construct the boundary support-face
+/-- Pure-trace nontriviality and finite-branch aggregation, plus atomic tangent
+spanning, construct the boundary support-face
 scalar.
 
 For a full-support ambient prior `q` and an arbitrary finite boundary posterior
@@ -1760,7 +1761,8 @@ theorem boundaryAtomicLinearTangentCoeffOfA1Spanning_relation
       hlin htangent F hax hV q r hq hnd)).2 η hηatomic hηtan
 
 /-- A boundary coefficient normalization whose positive coefficient is proved
-to exist from A1/A6 and atomic tangent spanning. -/
+to exist from pure-trace nontriviality, finite-branch aggregation, and atomic
+tangent spanning. -/
 noncomputable def boundaryCoefficientScaleNormalization_of_A1_atomicLinearTangentSpanning
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (htangent : FiniteAtomicLinearPosteriorTangentSpanningAssumptions.{u})

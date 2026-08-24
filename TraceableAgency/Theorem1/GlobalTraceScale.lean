@@ -11,7 +11,7 @@ import TraceableAgency.Theorem1.PureMarkedEmbedding
 # A single trace scale on all nontrivial full-support fibres
 
 The normalized marked-terminal representative is pulled back through the
-constant-payoff embedding at the separate v5 trace anchor.  Affine uniqueness
+constant-payoff embedding at the separate A4 trace anchor.  Affine uniqueness
 identifies the intercept as the normalized material value of that anchor and
 the slope as a positive multiple of mutual information.  Exact normalization
 under independent dummy actions then identifies the multiplier across all
@@ -32,7 +32,7 @@ variable [Fintype B] [DecidableEq B] [Nonempty B]
 /-! ## The normalized fixed-payoff pullback -/
 
 /-- Pull the normalized marked representative back to the pure posterior-law
-space at the v5 trace anchor. -/
+space at the A4 trace anchor. -/
 noncomputable def normalizedConstantTraceAnchorPullbackAffineUtilityRepresentation
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) :
@@ -408,7 +408,7 @@ theorem traceLambdaAtPrior_eq_globalTraceLambda
     (traceLambdaAtPrior_prod_left F h q r hq hr).symm.trans
       (traceLambdaAtPrior_prod_right F h q r hq hr)
 
-/-- Quotient-level global trace formula at the separate v5 trace anchor. -/
+/-- Quotient-level global trace formula at the separate A4 trace anchor. -/
 theorem normalizedConstantTraceAnchor_eq_globalTraceLambda_mul_pureMI
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]
@@ -420,7 +420,7 @@ theorem normalizedConstantTraceAnchor_eq_globalTraceLambda_mul_pureMI
   rw [normalizedConstantTraceAnchor_eq_traceLambdaAtPrior_mul_pureMI,
     traceLambdaAtPrior_eq_globalTraceLambda]
 
-/-- Raw-experiment global trace formula at the separate v5 trace anchor. -/
+/-- Raw-experiment global trace formula at the separate A4 trace anchor. -/
 theorem normalizedMarkedUtility_constantTraceAnchor_eq_globalTraceLambda_mul_mutualInfo
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (q : TraceableAgency.Dist A) (hq : q.FullSupport) [Nontrivial A]

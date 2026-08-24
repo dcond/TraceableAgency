@@ -22,14 +22,15 @@ ordinal hypotheses and constructed the posterior-law quotient as an abstract
 convex mixture space.  Its private universe marker has a canonical default and
 contributes no mathematical assumption. In particular, posterior-law continuity
 is not an input:
-`posteriorLawContinuity_of_axioms` proves it from primitive A2 and A1/A3/A4.
+`posteriorLawContinuity_of_axioms` proves it from primitive A2 and main-text
+A1, A5, and A6.
 Lean constructs the required continuous barycentric coordinates by explicit
 finite vertex insertion and derives the spread/merge sandwich.
 
 Finite Blackwell equivalence is not a field: the explicit
 `posteriorMatchingKernel` construction proves it internally.  The
 paper-specific block-comparison replacement package is then reconstructed
-from that theorem plus the A4/A3/A1 replacement plumbing. -/
+from that theorem plus the A6/A5/A1 replacement plumbing. -/
 structure FinalHMInterface.{v} where
   private marker : ULift.{v} PUnit := ⟨PUnit.unit⟩
 
@@ -39,7 +40,7 @@ def provedFinalHMInterface : FinalHMInterface.{u} := {}
 /-- Posterior-law sufficiency from the auditable final HM interface.
 
 The proved finite Blackwell equivalence theorem is upgraded to the
-block-comparison replacement package by internal A4/A3/A1 plumbing, then fed
+block-comparison replacement package by internal A6/A5/A1 plumbing, then fed
 to `from_axioms_to_posterior_of_blackwell`. -/
 theorem posteriorLawSufficiency_of_FinalHMInterface
     (_hhm : FinalHMInterface.{u})

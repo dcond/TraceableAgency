@@ -2,3 +2,4 @@
 *.md text eol=lf
 *.tex text eol=lf
 *.pdf binary
+Certificate/THEOREM1_FORMAL_SPECIFICATION.md linguist-generated=true

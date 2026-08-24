@@ -1,34 +1,46 @@
-# Formalization certificate: `trace_tempered_choice_v5`, Theorem 1
+# Formalization certificate: `trace_tempered_choice_v10`, Theorem 1
 
 ## Certified result
 
 The authoritative informal result is Theorem 1 (`thm:main`) in
-`Paper/trace_tempered_choice_v5.tex`. Its formal statement and public proof are:
+`Paper/trace_tempered_choice_v10.tex`. Its formal statement and public proof are:
 
 ```lean
-TraceableAgency.Theorem1.Theorem1StatementV5
+TraceableAgency.Theorem1.Theorem1StatementV10
 
-TraceTemperedChoiceVerification.trace_tempered_choice_v5_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV5
+TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV10
 ```
 
 The proof declaration has exactly the displayed proposition as its type. This
 certificate covers Theorem 1 and its same-witness finite-block clause. It does
 not claim formal verification of the paper-only auxiliary results in Appendix
-C.
+B.
+
+`Theorem1StatementV10` and `TraceTemperedAxiomsV10` are the canonical
+formal statement and axiom bundle. `Audit/V10Certificate.lean` checks their
+exact types and the public theorem's kernel axioms, ensuring that no premise
+has been added.
+
+[`THEOREM1_FORMAL_SPECIFICATION.md`](THEOREM1_FORMAL_SPECIFICATION.md) is a
+generated, reader-facing inventory of the theorem's recursive local semantic
+closure together with the checked identity for the paper's displayed
+mutual-information formula. It prints the authoritative elaborated Lean
+beside concise mathematical notation and treats external dependency
+declarations as terminal symbols rather than unpacking them.
 
 ## Exact mathematical statement
 
-Fix a finite payoff alphabet (O) with (|O|ge2). For every nonempty finite
-action alphabet (A), record alphabet (R), and joint channel
+Fix a finite payoff alphabet \(O\) with \(|O|\ge 2\). For every nonempty finite
+action alphabet \(A\), record alphabet \(R\), and joint channel
 
 
 \[
 K:A\to\Delta(O\times R),
 \]
 
-the primitive family (F) supplies a relation (succeq_K) on
-(Delta(A)). For (u:O\to\mathbb R) and (lambda\in\mathbb R), define
+the primitive family \(F\) supplies a relation \(\succeq_K\) on
+\(\Delta(A)\). For \(u:O\to\mathbb R\) and \(\lambda\in\mathbb R\), define
 
 \[
 V_{u,\lambda}(q,K)
@@ -36,18 +48,19 @@ V_{u,\lambda}(q,K)
 +\lambda I_{qK}(A;O,R).
 \]
 
-Lean proves that the exact v5 Axioms A1--A8 are equivalent to the existence of
-one nonconstant (u), one (lambda>0), and simultaneous representation of
-every within-channel comparison by (V_{u,lambda}). It also proves that some
-same witnesses represent all comparisons between alternatives supported on
-distinct blocks of every finite common-payoff block environment.
+Lean proves that the exact v10 Axioms A1--A8 are equivalent to the existence of
+one nonconstant \(u\), one \(\lambda>0\), and simultaneous representation of
+every within-channel comparison by \(V_{u,\lambda}\). It also proves that one
+pair of witnesses simultaneously represents all comparisons between
+alternatives supported on distinct blocks of every finite common-payoff block
+environment.
 
 `mutualInfoLikelihoodRatio` formalizes the displayed finite
 likelihood-ratio sum, setting every zero-joint-mass summand to zero.
-`mutualInfoLikelihoodRatio_eq_mutualInfo` proves that formula equal to Lean's
+`mutualInfoLikelihoodRatio_eq_mutualInfo` proves that this formula equals Lean's
 entropy-difference definition of `mutualInfo`, without an additional axiom.
 
-These are the two conjuncts of `Theorem1StatementV5`, respectively expressed
+These are the two conjuncts of `Theorem1StatementV10`, respectively expressed
 through `WithinChannelRepresentation` and `SameWitnessBlockRepresentation`.
 
 ## Domain and comparison environments
@@ -57,11 +70,11 @@ allowing arbitrary nonempty finite action and record alphabets. `DecidableEq`
 is finite computational structure, not a behavioral premise.
 
 Cross-channel notation is derived, not primitive. `pairWeak F q K p L`
-compares the supported copies of (q) and (p) inside one explicit block
+compares the supported copies of \(q\) and \(p\) inside one explicit block
 channel. Only record tags are added; `sumPayoffRecordEquiv` and
 `sigmaPayoffRecordEquiv` retain the same payoff coordinate.
 
-## Exact v5 axioms
+## Exact v10 axioms
 
 ### A1 — weak order
 
@@ -74,26 +87,24 @@ relation on its action lotteries.
 channel and both lotteries preserves a weak comparison. On finite Euclidean
 simplexes this is the paper's closed-graph formulation.
 
-(A2) is formalized as sequential closedness, equivalent to the closed graph in this finite-dimensional setting.
-
 ### A3 — fixed-channel material relevance
 
-`A3_MaterialRelevance`: there are distinct (o^+,o^-) such that, inside the
+`A3_MaterialRelevance`: there are distinct \(o^+,o^-\) such that, inside the
 canonical two-action no-record channel delivering those outcomes surely, the
-pure (o^+) lottery is strictly preferred to the pure (o^-) lottery.
+pure \(o^+\) lottery is strictly preferred to the pure \(o^-\) lottery.
 
-This is a single within-channel comparison. The older cross-environment
-material condition is not assumed by v5.
+This is a single within-channel comparison. A cross-environment material
+condition is not assumed.
 
 ### A4 — fixed-channel trace relevance at one payoff
 
-`A4_TraceRelevance`: there is one payoff (o_*) and one canonical four-action
+`A4_TraceRelevance`: there is one payoff \(o_*\) and one canonical four-action
 channel. Its left pair reveals the selected Boolean action, while its right
 pair emits an independent fair Boolean record. The fair revealing lottery is
 strictly preferred to the fair nonrevealing lottery in that same channel.
 
-The existential payoff is deliberately singular. v5 does not assume positive
-trace orientation at every payoff.
+The existential payoff is deliberately singular. The theorem does not assume
+positive trace orientation at every payoff.
 
 ### A5 — block-comparison coherence
 
@@ -137,7 +148,7 @@ and telescopes branch replacements using A1 and A5. The derived property is
 
 ### Bundle boundary
 
-`TraceTemperedAxiomsV5` contains exactly these eight predicates, in this
+`TraceTemperedAxiomsV10` contains exactly these eight predicates, in this
 numbering. It has no representation, posterior-continuity, Faddeev,
 Herstein--Milnor, normalization, reachability, scale, or selection field.
 
@@ -172,12 +183,12 @@ The forward construction proceeds as follows.
 
 All channels, processors, branch masses, posteriors, and null completions are
 defined and proved in Lean. A2 is not used. Most importantly, every step keeps
-the same payoff (o_*). The converse uses the fair binary prior, generates an
+the same payoff \(o_*\). The converse uses the fair binary prior, generates an
 independent fair record from silence, and reinserts the two supports into the
 fixed four-action channel.
 
 `TraceTemperedBridgeAxioms F ostar` is a proof-facing `Prop` indexed by the
-chosen trace anchor. `traceTemperedBridgeAxioms_of_v5` returns an existentially
+chosen trace anchor. `traceTemperedBridgeAxioms_of_v10` returns an existentially
 indexed bundle, so extraction never moves data from a proposition into a
 computational type and introduces no choice principle beyond the final proof's
 audited foundations.
@@ -189,7 +200,7 @@ Material normalization chooses `materialHighOutcome` and
 index `materialPayoffUtility`.
 
 The trace proof is indexed independently by `traceAnchor = ostar`. Pure-trace
-identification is invoked only on constant-(o_*) experiments. The global
+identification is invoked only on constant-\(o_*\) experiments. The global
 formula on that face is
 
 \[
@@ -198,17 +209,31 @@ W_q(E)=u(o_*)+\lambda I_q(E).
 
 This is formalized by the constant-trace-anchor modules, including
 `GlobalTraceScale.lean` and `ConstantTraceAnchorGeneral.lean`. A reached branch
-of mass (m) changed from (o_*) to (o) has increment
+of mass \(m\) changed from \(o_*\) to \(o\) has increment
 
 \[
 m\,[u(o)-u(o_*)],
 \]
 
-proved by `positiveBranchPayoffIncrement_of_nontrivialSupport` and closed for
-all positive branches by `positiveBranchPayoffIncrementFormula`. There is no
-identification of (o_*) with the low material anchor.
+proved by `positiveBranchPayoffIncrement_of_nontrivialSupport` when the reached
+support is nontrivial. `DummyBranchBridge.lean` extends this deterministic
+payoff increment to singleton reached supports. The packaged
+`PositiveBranchPayoffIncrementFormula` still ranges over nontrivial global
+action alphabets; the globally singleton case is handled separately by
+`normalizedMarkedUtility_eq_traceTemperedValue_of_subsingleton`. There is no
+identification of \(o_*\) with the low material anchor.
 
-Finite telescoping uses (sum_y m_y=1), so the intercept (u(o_*)) cancels
+For the paper's broader reached-branch intermediate lemma, Lean proves the
+arbitrary-continuation affine insertion formula against the all-\(o_*\)
+background when the reached support is nontrivial. It then proves
+crossed-background independence only for deterministic payoff profiles in
+`PayoffBranchBackground.lean` and telescopes those profiles in
+`PayoffBranchTelescope.lean`. Lean therefore exposes exactly the specialization
+needed for Theorem 1, not a separate full
+arbitrary-continuation/arbitrary-background lemma. This proof-route difference
+adds no hypothesis and does not weaken the final theorem.
+
+Finite telescoping uses \(\sum_y m_y=1\), so the intercept \(u(o_*)\) cancels
 correctly and yields expected utility without an artificial zero baseline.
 
 ## Forward and converse closure
@@ -219,17 +244,17 @@ priors. Support restriction handles boundary priors without assigning them a
 new normalized representative.
 
 `representationClauses_of_fullSupportNormalizedValueFormula` produces the
-within-channel and same-witness block conclusions. `theorem1V5Clauses` combines
+within-channel and same-witness block conclusions. `theorem1V10Clauses` combines
 this with the relevance bridge.
 
 For the converse, the benchmark module proves weak order, continuity, block
 coherence, both data-processing axioms, finite branch consistency, material
 nonconstancy, and positive entropy of full revelation. It constructs the
-proof-facing v5 bridge directly at one fixed trace anchor. The reverse half of
+proof-facing bridge directly at one fixed trace anchor. The reverse half of
 the finite-branch lemma supplies public binary A8, and the reverse relevance
 bridge gives the exact fixed A3/A4 channels. In particular, the A4
-benchmark has mutual-information values (log 2) and (0), so
-(lambda>0) supplies strictness.
+benchmark has mutual-information values \(\log 2\) and \(0\), so
+\(\lambda>0\) supplies strictness.
 
 ## Trust boundary and reproducibility
 
@@ -243,7 +268,7 @@ Quot.sound
 ```
 
 The dependency audit rejects superseded stronger proof routes.
-`TraceableAgency/Audit/V5Certificate.lean` checks and prints the exact public
-declaration and its axioms. `scripts/check_theorem1_certificate.sh` checks the
-byte manifest, source hygiene, complete Lean build, audits, reproducible v5
-PDF, and a fresh `leanchecker` replay.
+`TraceableAgency/Audit/V10Certificate.lean` checks and prints the exact current
+public declaration and its axioms. `scripts/check_theorem1_certificate.sh`
+checks the byte manifest, source hygiene, complete Lean build, audits,
+reproducible v10 PDF, and a fresh `leanchecker` replay.

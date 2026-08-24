@@ -1,0 +1,358 @@
+\subsection{Shared affine preliminaries}
+
+We first record the support, relabelling, and replacement facts that let us
+move between comparison environments.  They require no continuity or
+compounding axiom.
+
+Recall that $(q,K)\succeq(p,L)$ denotes the paper's canonical two-block
+comparison.  For channels $E,G$ at a common prior $q$, write
+$E\succeq_q G$ for $(q,E)\succeq(q,G)$.  A \emph{finite experiment at $q$}
+is a finite payoff--record channel paired with that prior; its marked terminal
+law is denoted by $\eta_E$.
+
+\begin{lemma}[Blocks, supports, and dummies]\label{lf:lem:bookkeeping}
+Suppose Axioms \textup{(A1)} and \textup{(A5)--(A7)} hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item After identifying alternatives related by invertible action or record
+  relabellings, the derived comparison of pairs is complete and transitive.
+  If either member of a pair comparison is replaced by an indifferent
+  alternative, the comparison is unchanged.
+\item For every finite experiment $(q,K)$, if $S=\supp q$, then $(q,K)$ is indifferent to the restriction of
+  $(q,K)$ to $S$.
+\item For every finite experiment $(q,K)$, every nonempty finite $B$, and
+  every $s\in\D(B)$, if $K^\uparrow(o,r\mid a,b):=K(o,r\mid a)$, then
+  \begin{equation}
+  (q\otimes s,K^\uparrow)\sim(q,K).
+  \label{lf:eq:dummy-ordinal}
+  \end{equation}
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Place any finite collection of alternatives in one finite block environment.
+Axiom~\textup{(A5)} removes unused blocks, and Axiom~\textup{(A1)} supplies
+completeness and transitivity there.  Invertible action and record relabellings
+are neutral by applying Axioms~\textup{(A6)} and~\textup{(A7)} in both
+directions.  In particular, swapping both tags identifies the two orientations
+of a two-block comparison.  This proves part \textup{(a)}; a three-block
+environment gives transitivity and a four-block environment gives replacement.
+
+For part \textup{(b)}, process an action in $S$ by its inclusion in $A$.  In the
+other direction, output $a\in S$ when the realised action is $a$, and choose an
+arbitrary element of $S$ off the support.  Both processors satisfy
+\eqref{eq:action-processing}; rows attached to null processed actions may be
+completed arbitrarily.  Axiom~\textup{(A7)} gives the two comparisons.
+
+For part \textup{(c)}, first project $(a,b)$ to $a$.  Conversely, given $a$,
+draw $b$ independently from $s$ and output $(a,b)$.  Again the two joint-law
+identities in \eqref{eq:action-processing} are exact, so Axiom~\textup{(A7)}
+applies in both directions.  Part \textup{(a)} completes both arguments.
+\end{proof}
+
+Fix for the moment a full-support prior $q\in\D(A)$.  For a joint channel $K$,
+write
+\[
+p_K(o,r):=\sum_a q(a)K(o,r\mid a),
+\qquad
+\pi^K_{or}(a):=\frac{q(a)K(o,r\mid a)}{p_K(o,r)}
+\]
+when $p_K(o,r)>0$, and define its \emph{marked terminal law}
+\begin{equation}
+\eta_K:=\sum_{(o,r):p_K(o,r)>0}
+p_K(o,r)\,\delta_{(o,\pi^K_{or})}.
+\label{lf:eq:marked-law}
+\end{equation}
+It records the terminal payoff and the posterior about the realised action.
+Write $I_q(E)$ for the mutual information between the action and the complete
+visible output of $E$ under $q$.  When the output is a first-stage record $Y$,
+we also write this quantity as $I_q(A;Y)$.
+
+\begin{lemma}[Terminal laws and affine fibres]\label{lf:lem:terminal-affine}
+Under Axioms \textup{(A1)}, \textup{(A2)}, and
+\textup{(A5)--(A8)}, the following statements hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item If $q$ has full support and $K,L$ are finite experiments at $q$ with
+  $\eta_K=\eta_L$, then
+  $(q,K)\sim(q,L)$.
+\item At every full-support $q$, the quotient of finite experiments by their
+  marked terminal laws has an affine representation $W_q$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We give the finite Blackwell argument behind part \textup{(a)}.  For a payoff
+$o$ and posterior $\pi$, let
+\[
+M_K(o,\pi):=
+\sum_{\substack{r:\,p_K(o,r)>0\\ \pi^K_{or}=\pi}} p_K(o,r).
+\]
+Equality of marked laws gives $M_K(o,\pi)=M_L(o,\pi)=:M(o,\pi)$.
+For $p_K(o,r)>0$, draw a record $s$ of $L$ according to
+\begin{equation}
+T(s\mid o,r):=
+\1_{\{p_L(o,s)>0,\,\pi^L_{os}=\pi^K_{or}\}}
+\frac{p_L(o,s)}{M(o,\pi^K_{or})}.
+\label{lf:eq:matching-processor}
+\end{equation}
+Choose an arbitrary probability row when $p_K(o,r)=0$.  This is a
+payoff-preserving record processor.  Bayes' formula gives
+\[
+q(a)K(o,r\mid a)=p_K(o,r)\pi^K_{or}(a).
+\]
+For a reached target record $s$, with posterior $\pi=\pi^L_{os}$, it follows
+that
+\[
+\sum_r K(o,r\mid a)T(s\mid o,r)
+=\frac{p_L(o,s)}{M(o,\pi)}
+  \frac{\pi(a)}{q(a)}M(o,\pi)
+=L(o,s\mid a).
+\]
+If $s$ is unreached, full support makes both sides zero.  Thus postprocessing
+$K$ by $T$ gives $L$.  The symmetric construction gives a
+processor from $L$ to $K$.  Axiom~\textup{(A6)} and
+Lemma~\ref{lf:lem:bookkeeping}\textup{(a)} give indifference.
+
+Boundary priors are handled later by first restricting to their positive
+support using Lemma~\ref{lf:lem:bookkeeping}\textup{(b)}.
+
+For part \textup{(b)}, take the quotient of actual finite marked experiments by
+equality of \eqref{lf:eq:marked-law}.  If $E$ and $G$ are two such experiments,
+their public mixture first draws a coin independent of the action, runs the
+selected experiment, and retains the coin in the record.  Its marked law is
+\begin{equation}
+\eta_{tE\oplus(1-t)G}=t\eta_E+(1-t)\eta_G.
+\label{lf:eq:public-mixture}
+\end{equation}
+Axiom~\textup{(A8)} gives, for $0<t<1$ and any third experiment $L$,
+\begin{equation}
+E\succeq_q L
+\quad\Longleftrightarrow\quad
+tE\oplus(1-t)G\succeq_q tL\oplus(1-t)G.
+\label{lf:eq:mixture-independence}
+\end{equation}
+This is the action-independent special case of the axiom: the public coin is the binary first-stage record and
+$G$ is the common continuation.  If record alphabets differ, put them in a common disjoint union before invoking
+the axiom; part \textup{(a)} identifies the result with
+\eqref{lf:eq:public-mixture}.
+
+It remains only to check the Archimedean step.  A closed segment between two
+experiments, and any fixed comparator, can be realised on one fixed union of
+their finite record alphabets.  Its channel entries vary continuously with
+$t\in[0,1]$.
+Axiom~\textup{(A2)} therefore makes both contour sets along the segment closed.
+Completeness says that they cover $[0,1]$; when a target lies between the two
+endpoints, the sets contain opposite endpoints and connectedness makes them
+intersect.  Thus every such target is indifferent to a point of the segment.
+The mixture-space theorem now supplies an affine representative $W_q$.  This
+quotient is closed under every mixture and embedding used below.
+\end{proof}
+
+\subsection{From the axioms to their working forms}
+
+The axioms were stated in their weakest forms: a binary sure-thing principle and fixed-channel relevance
+comparisons.  The proof uses their working forms: finite-branch continuation and environment-comparison
+relevance.  This subsection records the two equivalences and makes explicit where the other axioms enter
+them.  Only the statements are used below.
+
+\begin{lemma}[Finite-branch extension]\label{pt:lem:finite-branch-extension}
+Suppose Axioms~\textup{(A1)} and \textup{(A5)--(A7)} hold.  Then
+Axiom~\textup{(A8)} is equivalent to the following property.  Given
+$k\ge1$, a first-stage record channel
+$P:A\to\D(\{1,\ldots,k\})$, a prior $q\in\D(A)$, and two ordered lists of
+continuation channels $(K_1,\ldots,K_k)$ and $(L_1,\ldots,L_k)$, with
+$K_i,L_i:A\to\D(O\times R)$, define for every reached $i$
+\[
+ m_i:=\sum_aq(a)P(i\mid a),
+ \qquad q_i(a):=\frac{q(a)P(i\mid a)}{m_i}.
+\]
+If every reached $i$ satisfies
+\[
+ (q_i,K_i)\succeq(q_i,L_i),
+\]
+then
+\begin{equation}
+ \bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ \succeq
+ \bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr),
+ \label{pt:eq:finite-branch-extension}
+\end{equation}
+strictly if one reached branch comparison is strict.
+\end{lemma}
+
+\begin{proof}
+Assume first Axiom~\textup{(A8)}.  Put
+\[
+ m_i:=\sum_aq(a)P(i\mid a),
+ \qquad
+ I^+:=\{i\in\{1,\ldots,k\}:m_i>0\}.
+\]
+If $m_i=0$, then $P(i\mid a)=0$ for every $a\in\supp q$.  Consequently, changing the continuation after such a
+record changes the compound channel only on action rows outside $\supp q$.  Apply Axiom~\textup{(A7)} in both
+directions using the identity action processor: its Bayesian pushforwards agree on supported rows and allow
+arbitrary completions elsewhere.  Continuations following unreached records are therefore immaterial.  We may
+hold them fixed and enumerate the reached records as $I^+=\{i_1,\ldots,i_n\}$.
+
+If $n=1$, the first-stage record is constant on $\supp q$.  Deleting that
+constant label and adjoining it again are payoff-preserving record processings
+in both directions on every reached row; the off-support rows are immaterial
+by the preceding paragraph.  Axiom~\textup{(A6)} therefore identifies the
+compound comparison with the sole branch comparison.  Suppose henceforth that
+$n\ge2$.
+
+For $j=0,\ldots,n$, define hybrid continuation channels by
+\[
+ H_i^j:=
+ \begin{cases}
+ K_i,&i\in\{i_1,\ldots,i_j\},\\
+ L_i,&i\in I^+\setminus\{i_1,\ldots,i_j\},
+ \end{cases}
+\]
+and use a common arbitrary continuation on $\{1,\ldots,k\}\setminus I^+$.  Write
+$E_j:=P\triangleright(H_1^j,\ldots,H_k^j)$.  Fix $j\ge1$ and collapse the first-stage record to the binary channel
+\[
+ B_j(1\mid a):=P(i_j\mid a),
+ \qquad
+ B_j(2\mid a):=\sum_{i\ne i_j}P(i\mid a).
+\]
+Both binary records are reached.  Put all binary continuations on the common record set
+$\{1,\ldots,k\}\times R$.  Pad the
+two continuations that may differ by
+\[
+ \widetilde K_j(o,(i,r)\mid a):=\1_{\{i=i_j\}}K_{i_j}(o,r\mid a),
+ \qquad
+ \widetilde L_j(o,(i,r)\mid a):=\1_{\{i=i_j\}}L_{i_j}(o,r\mid a).
+\]
+On record $2$, collect all unchanged branches in the continuation channel
+\begin{equation}
+ M_j(o,(i,r)\mid a)
+ :=\frac{P(i\mid a)}{B_j(2\mid a)}H_i^j(o,r\mid a),
+ \qquad i\ne i_j,
+ \label{pt:eq:complement-continuation}
+\end{equation}
+with zero probability on records $(i_j,r)$, whenever $B_j(2\mid a)>0$, and complete the other rows arbitrarily.
+Since $H_i^j=H_i^{j-1}$ for $i\ne i_j$, this continuation is common to the two comparisons.
+Binary record $1$ has probability
+$m_{i_j}$ and carries the conditional action lottery $q_{i_j}$; record $2$ carries the complementary conditional
+lottery, and their mixture is $q$.  On the active record support, deleting or
+adjoining the constant label $i_j$ gives payoff-preserving record processings
+in both directions.  Axiom~\textup{(A6)} therefore identifies the comparison
+of $\widetilde K_j$ and $\widetilde L_j$ with that of $K_{i_j}$ and $L_{i_j}$.
+Hence Axiom~\textup{(A8)} gives
+\[
+ \bigl(q,B_j\triangleright(\widetilde K_j,M_j)\bigr)
+ \succeq
+ \bigl(q,B_j\triangleright(\widetilde L_j,M_j)\bigr),
+\]
+strictly whenever the comparison at $q_{i_j}$ is strict.
+
+On the active record support, the nested records are in bijection with the
+flat records through
+\[
+ (1,(i_j,r))\longmapsto(i_j,r),
+ \qquad
+ (2,(i,r))\longmapsto(i,r)\quad(i\ne i_j).
+\]
+Extend these maps arbitrarily over records of zero probability.  Together
+with the preceding removal of off-support rows, they give payoff-preserving
+record processings in both directions.  Axiom~\textup{(A6)} therefore
+makes the two binary compounds indifferent to $E_j$ and $E_{j-1}$, respectively.  Thus
+$(q,E_j)\succeq(q,E_{j-1})$, strictly at any strict replacement.  Place the finite collection
+$E_0,\ldots,E_n$ in one block environment.  Axiom~\textup{(A5)} transports each pairwise comparison to that
+environment, and transitivity in Axiom~\textup{(A1)} yields $(q,E_n)\succeq(q,E_0)$, strictly if at least one
+step is strict.  Restoring the immaterial null branches proves \eqref{pt:eq:finite-branch-extension}.
+
+Conversely, assume the displayed finite-branch property, including its strict clause.  In the binary environment
+of Axiom~\textup{(A8)}, reflexivity and duplication coherence make the common continuation weakly comparable to
+itself, so the finite-branch property gives the forward implication in
+\eqref{eq:recordwise-sure-thing}.  If the aggregate comparison in that equation held while
+$(q_1,K)\not\succeq(q_1,L)$, completeness would give $(q_1,L)\succ(q_1,K)$.  Applying the strict
+finite-branch property to the reversed lists would give the strict reverse aggregate comparison, a contradiction.  This
+proves the converse implication and hence Axiom~\textup{(A8)}.
+\end{proof}
+
+\begin{corollary}[One-branch insertion]\label{pt:cor:one-branch-a8}
+Suppose Axioms~\textup{(A1)} and \textup{(A5)--(A8)} hold.  Fix $q\in\D(A)$, a first-stage record channel
+$P:A\to\D(\{1,\ldots,k\})$, a reached record $i^*$ with posterior $q_{i^*}$, and continuation channels
+$K_1,\ldots,K_k,L_1,\ldots,L_k:A\to\D(O\times R)$ such that $K_i=L_i$ for every $i\ne i^*$.  Then
+\[
+ (q_{i^*},K_{i^*})\succeq(q_{i^*},L_{i^*})
+ \quad\Longleftrightarrow\quad
+ \bigl(q,P\triangleright(K_1,\ldots,K_k)\bigr)
+ \succeq
+ \bigl(q,P\triangleright(L_1,\ldots,L_k)\bigr),
+\]
+and the same equivalence holds for strict preference.
+\end{corollary}
+
+\begin{proof}
+The forward implication follows from Lemma~\ref{pt:lem:finite-branch-extension}, using duplication coherence on
+the common branches.  If the aggregate comparison held but the branch comparison failed, completeness would make
+the reversed branch comparison strict; the strict part of the finite-branch extension would then give a strict
+reverse aggregate comparison.  The strict equivalence follows by applying the weak equivalence in both directions.
+\end{proof}
+
+In the appendices, references to Axiom~\textup{(A8)} with more than two first-stage records mean its
+finite-branch extension in Lemma~\ref{pt:lem:finite-branch-extension}; when only one branch changes, we cite
+Corollary~\ref{pt:cor:one-branch-a8}.
+
+The relevance axioms in the main text are stated inside fixed channels.  The
+proofs below use their equivalent comparison-environment forms.
+
+For $o\in O$, write $K_o:\{\ast\}\to\D(O\times\{\ast\})$ for the channel that
+delivers $o$ for sure.  On a finite action set $A$, write
+$K^{\mathrm{id}}_o:A\to\D(O\times A)$ for the channel that delivers $o$ and
+reports the action, and $K^0_o:A\to\D(O\times\{\ast\})$ for the channel that
+delivers $o$ and no record.
+
+\begin{lemma}[Fixed-channel and environment relevance]\label{lem:relevance-bridge}
+Given Axioms~\textup{(A1)}, \textup{(A5)}, \textup{(A6)},
+\textup{(A7)}, and \textup{(A8)}, the following equivalences hold.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=*]
+\item Axiom~\textup{(A3)} is equivalent to the existence of
+  $o^+,o^-\in O$ such that
+  \[
+    (\delta_\ast,K_{o^+})\succ(\delta_\ast,K_{o^-}).
+  \]
+\item Axiom~\textup{(A4)} is equivalent to the following condition: there is
+  an outcome $o_\ast\in O$ such that, for every finite $A$ with $|A|\ge2$
+  and every full-support $q\in\D(A)$,
+  \[
+    (q,K^{\mathrm{id}}_{o_\ast})\succ(q,K^0_{o_\ast}).
+  \]
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+For part \textup{(a)}, action processing in both directions identifies each
+pure lottery in Axiom~\textup{(A3)} with the corresponding singleton
+experiment; the unrestricted row at the unreached action supplies the reverse
+pushforward.  Replacement transports the strict comparison both ways.
+
+For part \textup{(b)}, restrict the witnessing lotteries to their supports.
+Two-way action processing identifies them with fair binary full revelation
+and a channel with two identical rows; two-way record processing identifies
+the latter with silence.  Thus Axiom~\textup{(A4)} is equivalent to
+\begin{equation}
+  ((\tfrac12,\tfrac12),K^{\mathrm{id}}_{o_\ast})
+  \succ
+  ((\tfrac12,\tfrac12),K^0_{o_\ast})
+  \label{eq:bridge-fair-binary}
+\end{equation}
+on a binary action set.
+
+For any full-support binary $p$, choose
+$0<\varepsilon\le2\min_i p_i$ and a record $y$ with
+$P(y\mid i)=\varepsilon/(2p_i)$.  It has mass $\varepsilon$ and fair
+posterior.  Reveal only after $y$ in one continuation plan and remain silent
+everywhere in the other.  Equation~\eqref{eq:bridge-fair-binary} and
+Corollary~\ref{pt:cor:one-branch-a8} rank the compounds strictly.  Full
+revelation garbles to the first and the second garbles to silence, so
+$(p,K^{\mathrm{id}}_{o_\ast})\succ(p,K^0_{o_\ast})$.
+
+For general full-support $q$ on $|A|\ge2$, report a two-cell partition.
+Two-way action processing identifies this with binary full revelation and
+identifies silence with binary silence.  Hence the cell report is strictly
+better than silence; full revelation weakly dominates the cell report by
+record processing.  The converse takes the fair binary prior and reverses
+the same support identifications.
+\end{proof}

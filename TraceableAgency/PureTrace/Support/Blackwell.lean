@@ -34,11 +34,11 @@ Paper reference: Lemma blackwell and Lemma plsuff.
 
 The paper proves:
 1. Same posterior law ⟹ mutual garblings exist: Q = PT and P = QT' for some T, T'
-2. Combined with A4 (post-processing aversion): q^0 ≽_{P⊔Q} q^1 and q^0 ≽_{Q⊔P} q^1
-3. Combined with A3 (block coherence) and A1 transitivity: same-posterior-law
+2. Combined with main-text A6 (record post-processing): q^0 ≽_{P⊔Q} q^1 and q^0 ≽_{Q⊔P} q^1
+3. Combined with main-text A5 (block coherence) and A1 transitivity: same-posterior-law
    experiments may be replaced inside pairwise block comparisons.
 
-Both the finite Blackwell/garbling equivalence and the A4/A3/A1 replacement
+Both the finite Blackwell/garbling equivalence and the A6/A5/A1 replacement
 plumbing are proved below.
 -/
 
@@ -55,7 +55,7 @@ Finite Blackwell equivalence at a fixed full-support prior:
 same posterior law gives garblings in both directions.
 
 This is the exact statement of paper Lemma `blackwell`.
-It does not mention preferences, A3/A4, or block replacement.
+It does not mention preferences, A5/A6, or block replacement.
 -/
 structure FiniteSamePosteriorLawBlackwellEquivalenceAssumptions.{v} : Prop where
   same_posterior_left_garbling :
@@ -412,18 +412,18 @@ can be substituted in block comparisons without changing the preference.
 
 This packages:
 1. The finite Blackwell equivalence theorem (same posterior ⟹ mutual garblings)
-2. Application of A4 (post-processing aversion) to get indifference
-3. Use of A3 (finite-block coherence) to transfer indifference across environments
+2. Application of main-text A6 (record post-processing) to get indifference
+3. Use of main-text A5 (finite-block coherence) to transfer indifference across environments
 4. Transitivity from A1 to derive the replacement property
 
 Paper: Lemmas blackwell + plsuff + blockcoh.
 
 **Key proof structure from paper:**
 - Blackwell (lem:blackwell): Same posterior law ⟹ Q = PT, P = QT' for garblings T, T'
-- A4 gives: q^0 ≽_{P⊔Q} q^1 (using Q = PT)
-- A4 + A3 reverse-block gives: q^1 ≽_{P⊔Q} q^0 (using P = QT')
+- A6 gives: q^0 ≽_{P⊔Q} q^1 (using Q = PT)
+- A6 + A5 reverse-block gives: q^1 ≽_{P⊔Q} q^0 (using P = QT')
 - Combined: q^0 ~_{P⊔Q} q^1
-- For replacement: place E, E', G in 3-block environment, use A3 + transitivity
+- For replacement: place E, E', G in 3-block environment, use A5 + transitivity
 
 The record states the replacement property used by older internal APIs.  It
 is not a public assumption: it is reconstructed below from the proved finite
@@ -431,8 +431,8 @@ mutual-garbling theorem.
 -/
 structure FiniteBlackwellPosteriorAssumptions.{v} : Prop where
   /-- Left replacement: same posterior law allows substitution on the left.
-      Paper proof: E ~_{E⊔E'} E' by Blackwell+A4, then place in 3-block with G,
-      use A3 finite-block coherence and A1 transitivity.
+      Paper proof: E ~_{E⊔E'} E' by Blackwell+A6, then place in 3-block with G,
+      use A5 finite-block coherence and A1 transitivity.
       If E ~ E' (same posterior) then (E ≽ G ↔ E' ≽ G) in block comparisons. -/
   left_replacement :
     ∀ {F : PrefFamily.{v}} {A : Type v}
@@ -572,7 +572,7 @@ noncomputable def blackwellPairBlockReplacementChannel
 
 /--
 Common-block transfer: if each side of a two-block comparison is weakly
-equivalent to a replacement side, then A3 and A1 transitivity preserve the
+equivalent to a replacement side, then A5 and A1 transitivity preserve the
 pairwise comparison.
 -/
 theorem blackwell_pairwise_block_replacement_from_weak_equiv
@@ -672,7 +672,7 @@ theorem blackwell_pairwise_block_replacement_from_weak_equiv
   exact hcommon_02.symm.trans (hreplace.trans hcommon_13)
 
 /--
-A1/A3 common-block replacement for experiment-pair preferences: if the left
+A1/A5 common-block replacement for experiment-pair preferences: if the left
 side and right side are each weakly equivalent to replacements in both
 directions, then the whole pairwise block comparison is preserved.
 -/
@@ -706,7 +706,7 @@ theorem experimentPairPref_replacement_from_weak_equiv
 
 /--
 Reconstruct the old Blackwell/posterior replacement package from the finite
-same-posterior-law mutual-garbling theorem plus internal A4/A3/A1
+same-posterior-law mutual-garbling theorem plus internal A6/A5/A1
 replacement plumbing.
 -/
 theorem blackwellPosteriorReplacement_of_samePosteriorGarblings

@@ -1,25 +1,31 @@
 # Paper
 
 The authoritative source is
-[`trace_tempered_choice_v5.tex`](trace_tempered_choice_v5.tex); its reproducible
-build is [`trace_tempered_choice_v5.pdf`](trace_tempered_choice_v5.pdf).
+[`trace_tempered_choice_v10.tex`](trace_tempered_choice_v10.tex); its
+reproducible build is
+[`trace_tempered_choice_v10.pdf`](trace_tempered_choice_v10.pdf).
 
-The proof is organized as:
+The proof appendices are organized as one main narrative and one auxiliary
+appendix:
 
-- [`appendix_a_pure_trace_v5.tex`](appendix_a_pure_trace_v5.tex): the
-  fixed-channel relevance bridge and pure-trace characterization;
-- [`appendix_b_main_theorem_v5.tex`](appendix_b_main_theorem_v5.tex): material
-  normalization, the global trace scale at `o*`, branch increments, and
+- [`appendix_a_representation_v10.tex`](appendix_a_representation_v10.tex)
+  assembles Appendix A from shared affine preliminaries, the pure-trace core,
+  and completion of the representation theorem;
+- [`appendix_a_affine_preliminaries_v10.tex`](appendix_a_affine_preliminaries_v10.tex)
+  derives terminal affine structure, the finite-branch extension, one-branch
+  insertion, and the relevance bridge;
+- [`appendix_a_pure_trace_v10.tex`](appendix_a_pure_trace_v10.tex) proves the
+  pure-trace characterization and its scale-coherence steps;
+- [`appendix_a_completion_v10.tex`](appendix_a_completion_v10.tex) identifies
+  the common material and trace scales, exact branch weights, and completes
   Theorem 1;
-- [`appendix_c_auxiliary_results_v5.tex`](appendix_c_auxiliary_results_v5.tex):
-  auxiliary paper results not required by the formal Theorem 1 endpoint.
+- [`appendix_b_auxiliary_results_v10.tex`](appendix_b_auxiliary_results_v10.tex)
+  contains auxiliary results not required by the formal Theorem 1 endpoint.
 
-The v5 numbering is: A1 weak order, A2 continuity, A3 fixed-channel material
-relevance, A4 fixed-channel trace relevance at one payoff, A5 block coherence,
-A6 record data processing, A7 action data processing, and A8 the binary
-recordwise sure-thing principle. Appendix A proves its weak-and-strict
-finite-branch extension from A1 and A5--A7. “Action processor” is used
-throughout v5.
+Axioms A1--A8 are weak order, continuity, material relevance, trace relevance,
+block coherence, record data processing, action data processing, and the
+binary recordwise sure-thing principle. Appendix A derives the weak-and-strict
+finite-branch extension from A1 and A5--A8.
 
 From the repository root:
 

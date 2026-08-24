@@ -25,7 +25,7 @@ universe u
 
 /--
 The pre-universal block-reveal value identity follows from the unscaled
-cross-prior block bridge and A5 projection/refinement neutrality.
+cross-prior block bridge and action-processing projection/refinement neutrality.
 
 This is a face-scale version of the coarse-reveal argument in the TeX proof:
 coarse reveal and coarse identity weakly dominate each other after the

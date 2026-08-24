@@ -98,10 +98,9 @@ def ExperimentPairPref (F : PrefFamily.{u}) {A : Type u} [Fintype A] [DecidableE
 def PureTraceClosedGraph (F : PrefFamily.{u}) : Prop :=
   ClosedPreferenceGraph F
 
-/-- **Posterior-law continuity** (paper `lem:plcont`), the clause that was closed-graph condition's
-second conjunct in v5.  In v6 it is a *derived* notion, not an axiom.  It is kept
-here as a standalone predicate so downstream files that previously consumed
-`hax.closedGraph.2` can take a supplied `PosteriorLawContinuity F` instead. -/
+/-- **Posterior-law continuity** (paper `pt:lem:plcont`).  This is a derived
+notion, not an axiom, and is kept as a standalone predicate for the
+pure-trace proof. -/
 def PosteriorLawContinuity (F : PrefFamily.{u}) : Prop :=
   ∀ {A : Type u} [Fintype A] [DecidableEq A] [Nonempty A]
     (q : Dist A) (_hq : q.FullSupport)

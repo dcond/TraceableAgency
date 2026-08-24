@@ -274,8 +274,8 @@ theorem MIPrefFamily_branchContinuation : PureTraceBranchContinuationMonotonicit
 /-!
 ## Benchmark Background-Separability Consequence
 
-Mutual-information preferences satisfy the former v6 A7 predicate.  In the v7
-axiom system this is a consequence rather than a benchmark obligation.
+Mutual-information preferences satisfy the derived background-separability
+predicate used internally by the pure-trace proof.
 -/
 
 theorem MIPrefFamily_independentBackgroundSeparability :
@@ -715,8 +715,8 @@ theorem MIPrefFamily_posteriorLawContinuity :
   have h_right := @tendsto_mutualInfo_of_posteriorLaw_entropy_converges A _ _ instNA q Fₙ G hF_entropy
   exact le_of_tendsto_of_tendsto h_right h_left (Filter.Eventually.of_forall h_ineq')
 
-/-- MIPrefFamily satisfies closed-graph condition (Continuity).  In v6 closed-graph condition is exactly
-`ClosedPreferenceGraph`; posterior-law continuity is the separate
+/-- `MIPrefFamily` satisfies the closed-graph condition.  Posterior-law
+continuity is the separate derived result
 `MIPrefFamily_posteriorLawContinuity`. -/
 theorem MIPrefFamily_closedGraph : PureTraceClosedGraph MIPrefFamily :=
   MIPrefFamily_closedPreferenceGraph

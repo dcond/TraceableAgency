@@ -13,7 +13,7 @@ universe u v
 ## Branch Aggregation External Assumption
 
 The branch aggregation theorem states that given:
-1. Axiom A6 (branchwise continuation monotonicity)
+1. branchwise continuation monotonicity (derived from main-text A8)
 2. A posterior value representation V from Herstein-Milnor
 
 There exist positive branch coefficients β(q, r) such that the value of a
@@ -24,7 +24,7 @@ Paper proof sketch:
 1. Fix first-stage channel P₁ with branch structure (m(o), r_o)
 2. For a positive-probability branch o̅, define g(ν) = F_q(T_H(ν)) where T_H
    embeds branch law ν into the full posterior law
-3. A6 implies g and F_r represent the same weak order on M_r
+3. Branchwise continuation monotonicity implies g and F_r represent the same weak order on M_r
 4. Herstein-Milnor uniqueness gives g = αF_r + γ with α > 0
 5. Path-independence argument shows α/m depends only on (q, r), not on P₁
 6. Define β(q, r) := α/m to get the aggregation formula
@@ -33,14 +33,15 @@ Paper proof sketch:
 /--
 **Finite Branch Aggregation Assumptions**
 
-External assumption that Axiom A6 (branchwise continuation monotonicity)
+External assumption that branchwise continuation monotonicity
 combined with a posterior value representation yields a branch aggregation
 structure with positive coefficients.
 
 Paper: Lemma branchagg.
 
 **Key mathematical content:**
-- From A6 + posterior value representation, derive positive β(q, r)
+- From branchwise continuation monotonicity and posterior value representation,
+  derive positive β(q, r)
 - β(q, r) depends only on prior q and reached posterior r, not on the
   specific first-stage channel
 - The value decomposes as: V_q(P₁▷{Q}) = V_q(P₁) + Σ m(o) β(q,r_o) V_{r_o}(Q^o)
@@ -51,7 +52,7 @@ We state this as an external assumption because the proof involves:
 - Case analysis for boundary/degenerate posteriors
 -/
 structure FiniteBranchAggregationAssumptions where
-  /-- Given A6 and a posterior value representation, construct a branch
+  /-- Given branchwise continuation monotonicity and a posterior value representation, construct a branch
       aggregation structure. This is the main theorem of Lemma branchagg.
 
       Note: This returns a data-carrying structure (BranchAggregationStructure),
@@ -70,9 +71,9 @@ sufficiency spine.
 -/
 
 /--
-**Branch Aggregation from A6 Assumption**
+**Branch Aggregation from Continuation Monotonicity**
 
-Given the external branch aggregation assumption, A6, and a posterior value
+Given the external branch aggregation assumption, branchwise continuation monotonicity, and a posterior value
 representation, derive a branch aggregation structure.
 -/
 noncomputable def branchAggregation_of_assumption
@@ -132,7 +133,7 @@ Shows how to fill the `value_rep_to_branch` field of `SufficiencySpineAssumption
 /--
 **Value Rep to Branch Bridge**
 
-Given A6 and the branch aggregation external assumption, provides the bridge
+Given branchwise continuation monotonicity and the branch aggregation external assumption, provides the bridge
 from PosteriorValueRepresentation to BranchAggregationStructure.
 
 This can be used to fill the `value_rep_to_branch` field when constructing

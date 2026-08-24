@@ -529,7 +529,7 @@ def MarkedPairWeak
   exact pairWeak F q E.K r G.K
 
 /-- A payoff-preserving record simulation gives the corresponding weak block
-comparison by A4. -/
+comparison by A6. -/
 theorem pairWeak_of_markedRecordPostprocesses
     (F : FixedPayoffPrefFamily O) (h4 : A6_RecordDataProcessing F)
     (q : TraceableAgency.Dist A)
@@ -593,7 +593,7 @@ def markedReplacementRecord
   | oldRight => G.RecordType
   | newRight => G'.RecordType
 
-/-- A1/A3 four-block transfer: two-sided weak equivalence of each
+/-- A1/A5 four-block transfer: two-sided weak equivalence of each
 representative makes the cross-experiment pair comparison independent of the
 chosen representatives. -/
 theorem marked_pairWeak_replacement_from_weakEquiv

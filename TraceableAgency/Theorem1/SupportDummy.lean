@@ -10,7 +10,7 @@ import TraceableAgency.Basic.SupportRestriction
 # Support restriction and independent dummy actions
 
 This module derives two structural invariances from the stated behavioral
-axioms.  Both are proved through exact A5 joint-law completions and the same
+axioms.  Both are proved through exact A7 joint-law completions and the same
 common-payoff four-block replacement argument used in the pure-trace bridge.
 -/
 
@@ -318,7 +318,7 @@ theorem actionPushforward_dummyRedraw
     simp [prodDist_apply_pair,
       TraceableAgency.Dist.pure_apply_ne _ _ hne]
 
-/-- Forgetting the dummy coordinate has `K` as its exact A5 completion. -/
+/-- Forgetting the dummy coordinate has `K` as its exact A7 completion. -/
 theorem dummyProjection_isActionProcessorCompletion
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]
@@ -356,7 +356,7 @@ theorem dummyProjection_isActionProcessorCompletion
       TraceableAgency.Dist.pure_apply_ne _ _ hne]
 
 /-- Independently redrawing the dummy coordinate has the dummy lift as its
-exact A5 completion. -/
+exact A7 completion. -/
 theorem dummyRedraw_isActionProcessorCompletion
     {O A B R : Type u}
     [Fintype O] [DecidableEq O]

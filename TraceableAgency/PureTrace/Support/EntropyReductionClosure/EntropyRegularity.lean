@@ -16,7 +16,7 @@ universe u
 cross-prior block representation whose `Hfun` is the full-revelation
 normalized value (definitional for every constructor in this file).
 
-* nonnegativity at full support: A4 (outcome-postprocessing aversion) with
+* nonnegativity at full support: main-text A6 (record-postprocessing aversion) with
   `postprocess id T = T` and the cross-prior bridge give
   `V̂_q(id) ≥ V̂_q(U_A) = 0`;
 * singleton-zero: a point mass restricts to a subsingleton support face,

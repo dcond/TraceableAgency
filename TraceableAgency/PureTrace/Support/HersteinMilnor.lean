@@ -821,8 +821,8 @@ Lean constructs continuous barycentric coordinates by explicit finite
 vertex insertion. It turns them into a single fixed-alphabet spread of the
 left sequence and merge of the right sequence, proves channel
 convergence and the Blackwell order relations, and proves that the limiting
-channels have the requested posterior laws. A4 ranks the spread and merge;
-A1/A3 give transitivity; primitive A2 closes the fixed-alphabet comparison;
+channels have the requested posterior laws. Main-text A6 ranks the spread and
+merge; A1/A5 give transitivity; primitive A2 closes the fixed-alphabet comparison;
 and finite Blackwell replacement substitutes the equal-law limits.
 
 Thus posterior-law continuity is a conclusion, not a field of the final HM
@@ -881,7 +881,7 @@ theorem posteriorLawContinuity_of_axioms
       (FiniteExperimentOn.ofChannel data.lowerLimit)
       E G data.upper_limit_law data.lower_limit_law).mp hfixed
 
-/-- The A1 local nontriviality witness, transported to the HM experiment
+/-- The pure-trace nontriviality witness, transported to the HM experiment
 comparison. -/
 theorem posteriorLawHMRel_nontrivial_full_revelation_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -897,9 +897,8 @@ theorem posteriorLawHMRel_nontrivial_full_revelation_of_axioms
 proved from `PureTraceConditions` plus posterior-law sufficiency and posterior-law
 continuity.
 
-In v6, posterior-law continuity is no longer a clause of Axiom A2; it is the
-derived lemma `lem:plcont`, supplied here as the explicit hypothesis `hplc`.
-Previously this field was discharged by `hax.closedGraph.2`. -/
+Posterior-law continuity is the derived lemma `pt:lem:plcont`, supplied here
+as the explicit hypothesis `hplc`; it is not an additional behavioral axiom. -/
 theorem finitePosteriorLawHMHypotheses_of_axioms
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     (hpls : PosteriorLawSufficiency F)

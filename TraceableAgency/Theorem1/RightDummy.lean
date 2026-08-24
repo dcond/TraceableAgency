@@ -12,7 +12,7 @@ import TraceableAgency.Theorem1.SupportDummy
 The product block bridge needs both alternatives on the same ordered product
 alphabet `A × B`.  `SupportDummy` supplies the left-coordinate lift.  Here the
 right alternative ignores `A`; its neutrality is derived by an explicit action
-swap and A5 in both directions.
+swap and A7 in both directions.
 -/
 
 namespace TraceableAgency.Theorem1

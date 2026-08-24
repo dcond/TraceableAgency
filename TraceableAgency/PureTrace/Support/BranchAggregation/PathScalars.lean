@@ -86,7 +86,7 @@ structure BranchTangentSignAgreementOnTangentFor
 
 /-- The forward and zero half of tangent sign preservation.
 
-This is exactly what the one-branch A6 plumbing proves directly.  The reverse
+This is exactly what the one-branch continuation plumbing proves directly.  The reverse
 positive direction is the remaining swapped-direction realization step. -/
 structure BranchTangentForwardZeroOnTangentFor
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
@@ -220,7 +220,7 @@ structure FiniteBranchLinearPartNonzeroAssumptions
       (_hr_nondegenerate : ∃ a b : A, a ≠ b ∧ 0 < r a ∧ 0 < r b),
       ∃ η : PosteriorLawSigned A, hlin.linearPart F hV r η ≠ 0
 
-/-- A1-aware nonzero branch-linear-functional witness.
+/-- Nontriviality-aware nonzero branch-linear-functional witness.
 
 This is the faithful version of the nonzero witness proved in this stage.  The
 legacy `FiniteBranchLinearPartNonzeroAssumptions` above omits `PureTraceConditions F`;
@@ -249,7 +249,7 @@ theorem branchLinearPartNonzeroFromA1_of_linearPart
 preference family and value representative.
 
 The nonzero branch-linear witness is intentionally not bundled here; it is
-supplied from A1 by `branch_linear_part_nonzero_of_A1`. -/
+supplied by pure-trace nontriviality through `branch_linear_part_nonzero_of_A1`. -/
 structure BranchTangentSignPreservationFor
     (F : PrefFamily.{u}) (hax : PureTraceConditions F)
     (hV : PosteriorValueRepresentation F)
@@ -767,7 +767,8 @@ noncomputable def branchPathScalarStructure_of_tangentSign
 
 This is the faithful replacement for `branch_linear_scalar_exists_of_tangentSign`:
 the sign-agreement part is representation-level, and the nonzero branch
-functional comes from A1 through `branch_linear_part_nonzero_of_A1`. -/
+functional comes from pure-trace nontriviality through
+`branch_linear_part_nonzero_of_A1`. -/
 theorem branch_linear_scalar_exists_of_A1_tangentSign
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hsignscalar : FiniteLinearFunctionalSameSignScalarAssumptions.{u})
@@ -866,7 +867,7 @@ theorem branchPathScalarCoeffOfA1TangentSign_relation
       hlin hsignscalar F hax hV hsign q r hq hr hr_nondegenerate)).2 η
 
 /-- Build the representation-level scalar structure from tangent sign agreement,
-A1's nonzero branch-linear witness, and the finite same-sign scalar theorem. -/
+the nonzero pure-trace branch-linear witness and the finite same-sign scalar theorem. -/
 noncomputable def branchPathScalarStructure_of_A1_tangentSign
     (hlin : FiniteAffineLinearPartAssumptions.{u})
     (hsignscalar : FiniteLinearFunctionalSameSignScalarAssumptions.{u})
@@ -1259,7 +1260,7 @@ noncomputable def branchFullSupportPathIndependence_of_scalar
 /-- A1-aware full-support path-independence package.
 
 This is the faithful representation-level path from tangent sign agreement and
-A1 nontriviality to full-support path independence.  It bypasses the old
+Pure-trace nontriviality to full-support path independence.  It bypasses the old
 hax-free `FiniteBranchTangentSignPreservationAssumptions`. -/
 noncomputable def branchFullSupportPathIndependence_of_A1_scalar
     (hlin : FiniteAffineLinearPartAssumptions.{u})

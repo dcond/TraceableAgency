@@ -12,9 +12,10 @@ import TraceableAgency.PureTrace.Support.GenericHersteinMilnor
 
 This file cardinalizes the singleton-action order on ordinary payoff
 lotteries.  The public-mixture independence used by Herstein--Milnor is
-derived from A8; A2 supplies the closed-segment calibration.  The normalized
-affine representative is then expanded over the finite payoff simplex and
-transported to arbitrary action alphabets by the exact A5 reports.
+derived from the finite-branch form of A8; A2 supplies the closed-segment
+calibration.  The normalized affine representative is then expanded over the
+finite payoff simplex and transported to arbitrary action alphabets by exact
+A7 processors.
 -/
 
 namespace TraceableAgency.Theorem1
@@ -78,7 +79,7 @@ theorem payoffLotteryRel_transitive
     singletonActionPrior (singletonPayoffLotteryChannel m)
     singletonActionPrior (singletonPayoffLotteryChannel n)
 
-/-! ## A6 and the visible public coin -/
+/-! ## Finite-branch A8 and the visible public coin -/
 
 /-- The public coin, viewed as a first-stage singleton-action channel. -/
 noncomputable def payoffMixFirstStage
@@ -94,7 +95,7 @@ noncomputable def payoffMixContinuation
   if b.down then singletonPayoffLotteryChannel ell
   else singletonPayoffLotteryChannel n
 
-/-- The A6 compound implementing a visible mixture of payoff lotteries. -/
+/-- The compound implementing a visible mixture of payoff lotteries. -/
 noncomputable def payoffCompoundMixChannel
     (t : ℝ) (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (ell n : TraceableAgency.Dist O) :
@@ -121,7 +122,7 @@ theorem payoffCompoundMixChannel_apply
       Relabeling.relabelChannel, Relabeling.relabelDist,
       seqComposeDep, seqComposeDepProb, sigmaPayoffRecordEquiv]
 
-/-- Delete the redundant unit record retained by the A6 compound. -/
+/-- Delete the redundant unit record retained by the compound. -/
 noncomputable def erasePayoffCompoundUnit :
     RecordProcessor O ((b : PayoffMixTag) × PUnit.{u + 1}) PayoffMixTag :=
   fun z => TraceableAgency.Dist.pure z.2.1
@@ -192,7 +193,7 @@ theorem payoffCompoundMix_mutualPairWeak_marked
       h4 (markedPayoffMixChannel (A := PUnit) t ht0 ht1 ell n)
         insertPayoffCompoundUnit singletonActionPrior
 
-/-- The A6 compound and the ordinary, unmarked mixed payoff lottery are
+/-- The visible-coin compound and the ordinary, unmarked mixed payoff lottery are
 mutually weakly equivalent. -/
 theorem payoffCompoundMix_mutualPairWeak_ordinary
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
@@ -238,8 +239,8 @@ theorem payoffMixFirstStage_left_positive
     payoffMixFirstStage, singletonActionPrior]
   exact ht0
 
-/-- The weak clause of A6 lifts a payoff-lottery comparison through the
-visible public coin. -/
+/-- The weak finite-branch clause derived from A8 lifts a payoff-lottery
+comparison through the visible public coin. -/
 theorem payoffCompoundMix_pairWeak_of_base
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
@@ -268,8 +269,9 @@ theorem payoffCompoundMix_pairWeak_of_base
   | true =>
       simpa [payoffLotteryRel, payoffMixContinuation, hp] using hbase
 
-/-- The strict clause of A6 lifts a strict payoff-lottery comparison through
-the positive left branch of the visible public coin. -/
+/-- The strict finite-branch clause derived from A8 lifts a strict
+payoff-lottery comparison through the positive left branch of the visible
+public coin. -/
 theorem payoffCompoundMix_pairStrict_of_base
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
     (t : ℝ) (ht0 : 0 < t) (ht1 : t < 1)
@@ -329,7 +331,7 @@ theorem payoffCompoundMix_pairStrict_of_base
   rw [hp]
   simpa [payoffMixContinuation, payoffMixLeft] using hstrict
 
-/-- A6, including its strict clause, gives the two-way public-mixture
+/-- The weak and strict finite-branch clauses give the two-way public-mixture
 independence required by Herstein--Milnor. -/
 theorem payoffLotteryRel_independence
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)
@@ -502,7 +504,7 @@ noncomputable def payoffLotteryCalibratableWeakOrder
   independence := payoffLotteryRel_independence F h
   segment_calibration := payoffLotteryRel_segmentCalibration F h
 
-/-! ## Affine cardinalization and A7 normalization -/
+/-! ## Affine cardinalization and A3 normalization -/
 
 theorem payoffLotteryAffineUtility_exists
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
@@ -513,12 +515,12 @@ theorem payoffLotteryAffineUtility_exists
     payoffLotteryMixtureSpace (payoffLotteryRel F)
     (payoffLotteryCalibratableWeakOrder F h)
 
-/-- The high material outcome selected from the A7 witness. -/
+/-- The high material outcome selected from the A3 witness. -/
 noncomputable def materialHighOutcome
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
   Classical.choose h.a7
 
-/-- The low material outcome paired with `materialHighOutcome` by A7. -/
+/-- The low material outcome paired with `materialHighOutcome` by A3. -/
 noncomputable def materialLowOutcome
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) : O :=
   Classical.choose (Classical.choose_spec h.a7)
@@ -565,7 +567,7 @@ noncomputable def materialRawAffineUtility
   Classical.choice (payoffLotteryAffineUtility_exists F h)
 
 /-- The canonical material representative, normalized to assign the chosen
-A7 low/high outcomes values zero and one. -/
+A3 low/high outcomes values zero and one. -/
 noncomputable def materialAffineUtility
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor) :
     AffineUtilityRepresentation payoffLotteryMixtureSpace
@@ -864,7 +866,7 @@ theorem materialAffineUtility_eq_expected
 
 /-! ## Common-scale representation at arbitrary priors -/
 
-/-- Exact A5 reports identify the cross-environment payoff-lottery order with
+/-- Exact A7 processors identify the cross-environment payoff-lottery order with
 the canonical singleton order. -/
 theorem pairWeak_payoffLottery_iff_singletonRel
     (F : FixedPayoffPrefFamily O) {traceAnchor : O} (h : TraceTemperedBridgeAxioms F traceAnchor)

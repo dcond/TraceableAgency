@@ -783,8 +783,9 @@ structure FinalFaithfulBranchDataFor
 /-- Selected faithful branch data with the corrected atomic support-face
 marginal theorem.
 
-This is the branch datum that is actually constructed from A1/A6 and the HM
-interface.  It does not contain the old arbitrary-`PosteriorLawTangent`
+This is the branch datum that is actually constructed from pure-trace
+nontriviality, finite-branch continuation, and the HM interface.  It does not
+contain the old arbitrary-`PosteriorLawTangent`
 support-face transport convention. -/
 structure FinalFaithfulBranchAtomicDataFor
     (hhm : FinalHMInterface.{u})

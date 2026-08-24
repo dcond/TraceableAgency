@@ -384,11 +384,12 @@ theorem finiteAtomicPosteriorTangentSpanning :
 
 /-- Common-outcome realization of tangent directions.
 
-The paper's A6 step compares two continuation channels in the same branch
-outcome alphabet.  The older tangent spanning interface realizes a tangent
+The finite-branch continuation step derived from main-text A8 compares two
+continuation channels in the same branch outcome alphabet.  The older tangent
+spanning interface realizes a tangent
 direction by two finite experiments, whose bundled outcome types may differ.
 This interface isolates the padding/realization strengthening needed before
-A6 can be applied directly. -/
+the finite-branch property can be applied directly. -/
 structure FiniteCommonOutcomeTangentRealizationAssumptions : Prop where
   tangent_as_common_outcome_difference :
     ∀ {A : Type v} [Fintype A] [DecidableEq A] [Nonempty A]
