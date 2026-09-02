@@ -119,7 +119,7 @@ The statement $q\succeq_Kp$ means that $q$ is weakly preferred to $p$ in $K$.  E
 imposed on this family.  To compare lotteries governed
 by different channels, the channels are placed side by side as blocks of one larger environment; duplicating a
 channel or adding an unused block does not alter a comparison.  Two processing axioms say that the agent never gains when her record is garbled or her action variable is processed noisily, and a benchmark comparison rules out trace indifference. A recordwise sure-thing principle for compounded records supplies
-the cardinal structure.  The taste prices how much the consequence reveals, not \emph{what} it reveals.
+the cardinal structure.  The taste prices how much the consequence reveals, not what it reveals.
 
 A family $\{\succeq_K\}_K$ satisfies the eight axioms if and
 only if there are a nonconstant payoff utility $u:O\to\mathbb R$ and $\lambda>0$ such that, for every finite joint
@@ -567,7 +567,7 @@ the payoff normalisation fixes that scale, and $\lambda$ measures the trade-off 
 
 \subsection{Sign of the trace weight}
 
-Uniqueness concerns scale; a complementary observation concerns sign.  Axioms~\textup{(A4)},
+Axioms~\textup{(A4)},
 \textup{(A6)}, and \textup{(A7)} orient the trace component.  Write $(\mathrm{A}4^-)$,
 $(\mathrm{A}6^-)$, and $(\mathrm{A}7^-)$ for the clauses obtained by reversing their displayed comparisons,
 and write $(\mathrm{A}4^0)$, $(\mathrm{A}6^0)$, and $(\mathrm{A}7^0)$ for the corresponding indifference clauses.
@@ -600,8 +600,7 @@ For each $i\in\{1,\ldots,8\}$ there is a family satisfying the other seven axiom
 Axiom~\textup{(A$i$)}.
 \end{proposition}
 
-The eight families are constructed in Appendix~\ref{app:axiom-independence}.  Three mark the substantive frontier of the
-system.  A conditional-entropy penalty satisfies every axiom except record data processing and values the removal of
+The eight families are constructed in Appendix~\ref{app:axiom-independence}.  Three are of independent interest.  A conditional-entropy penalty satisfies every axiom except record data processing and values the removal of
 extraneous record noise.  A Gini posterior-reduction criterion satisfies every axiom except action data processing.
 The satiation criterion $\E[u(O)]+\min\{I(A;O,R),c\}$, for $c>0$, satisfies every axiom except the recordwise
 sure-thing principle and ceases to value trace once $c$ units of information are secured.
@@ -672,10 +671,10 @@ Consider a decision maker free to choose lotteries among two actions, and let $a
 trace; mixing in $b$ costs payoff but gives the record something to reveal.  Write $K_a:=K(\cdot\mid a)$ for the distribution of visible
 consequences under action $a$, $\bar u(a):=\E_{K_a}[u(O)]$ for its expected utility, and
 $\Delta:=\bar u(a)-\bar u(b)\ge0$ for the payoff gap.  Each unit of probability moved from $a$ to $b$ costs
-$\Delta$.  What it buys is evidence.  A consequence testifies about the act that produced it through a
+$\Delta$.  What it buys is evidence.  A consequence is evidence about the act that produced it through a
 likelihood ratio: how much more probable it is given the realised act than given only the mixture she plays.
 With all probability on $a$, consequences are distributed exactly as $K_a$: every draw has ratio one and
-testifies to nothing.  Now move a marginal unit of probability to $b$.  The mixture's consequences are still,
+carries no evidence.  Now move a marginal unit of probability to $b$.  The mixture's consequences are still,
 to first order, distributed as $K_a$; but when $b$ realises, its consequence is drawn from $K_b$, so the draw
 carries $\log\bigl(K_b(o,r)/K_a(o,r)\bigr)$.  Its expected value over $b$'s draws is, by definition, the
 divergence $\KL(K_b\,\|\,K_a)$.\footnote{For distributions $P$ and $Q$,
@@ -707,7 +706,7 @@ Let $\lambda>0$.  A lottery $q^*$ is optimal if and only if there is a constant 
 \end{proposition}
 
 
-The condition has a sharp implication: every visible consequence that can arise under some action
+The condition has an immediate implication: every visible consequence that can arise under some action
 occurs with positive probability under any optimal lottery (Proposition~\ref{cor:support-pure},
 Appendix~\ref{app:randomisation-proofs}).  Hence, if each action can produce some consequence that no other action can produce, every optimal lottery uses every action. At the other extreme, suppose every action produces the same distribution of payoffs and records. The consequence then reveals nothing about the action, and all actions have the same expected utility. Hence the agent is indifferent among all lotteries.\footnote{With $\lambda<0$, every payoff-maximising pure action is optimal.  More generally, $q$ is optimal in a fixed channel if and only if it is supported on payoff-maximising actions and $\I_{qK}(A;O,R)=0$.}
 
@@ -832,7 +831,7 @@ where $\bar K_a$ is the Bernoulli row with parameter $\bar g_a$.
 
 In technologies in which one member's effect vanishes as the team grows, as when success depends on the
 fraction of members working, success is almost as likely whether she works or shirks, and a draw of $X$
-testifies to almost nothing about her effort.
+says almost nothing about her effort.
 The gap $\bar g_1-\bar g_0$ then closes.  The effort share of the bonus grows as it does in the standard
 model; the divergence is second order in the gap, so the trace share vanishes: trace becomes second order
 relative to pay.  The exception is an essential task, whose effect does not shrink with the team.  
@@ -942,7 +941,7 @@ evidence than a predetermined one.  The primitive ranks lotteries she implements
 from outside is not in the domain.  This is the Underground Man's problem: the proof he wants cannot come from an act
 fixed in advance.  A reading of control or authorship survives if what is valued is its display rather than its
 possession; but the display of which act was taken is exactly what the trace term measures, so the surviving reading
-is trace under another name.
+is the trace reading.
 
 \paragraph{Relation to empowerment.}
 The channel maps actions into distributions over consequences, and the information term can be read from either
