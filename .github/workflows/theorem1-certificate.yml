@@ -29,9 +29,9 @@ jobs:
           working_directory: Paper
           texlive_version: 2026
           args: -pdf -usepretex=\pdftrailerid{} -file-line-error -halt-on-error -interaction=nonstopmode
-          pre_compile: export SOURCE_DATE_EPOCH=1787529600 FORCE_SOURCE_DATE=1 TZ=UTC
+          pre_compile: export SOURCE_DATE_EPOCH=1788307200 FORCE_SOURCE_DATE=1 TZ=UTC
         env:
-          SOURCE_DATE_EPOCH: 1787529600
+          SOURCE_DATE_EPOCH: 1788307200
           FORCE_SOURCE_DATE: 1
           TZ: UTC
 

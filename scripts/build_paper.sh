@@ -17,7 +17,7 @@ esac
 build_dir="$(mktemp -d "${TMPDIR:-/tmp}/traceable-agency-paper.XXXXXX")"
 trap 'rm -rf "$build_dir"' EXIT
 
-export SOURCE_DATE_EPOCH=1787529600
+export SOURCE_DATE_EPOCH=1788307200
 export FORCE_SOURCE_DATE=1
 export TZ=UTC
 export LC_ALL=C
