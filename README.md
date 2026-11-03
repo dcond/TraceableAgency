@@ -11,6 +11,12 @@ based on the material-first proof branch; the original proof is unchanged.
 See the [Section 3 certificate](Certificate/SECTION3_VERIFICATION.md) for the
 exact claims and commands. The new results introduce no mathematical axioms.
 
+It also verifies Section 4's trace test, optimal randomization, elicitation,
+and moral-hazard implications, including boundary priors, team limits, and
+compensation for additional signals. See the
+[Section 4 certificate](Certificate/SECTION4_VERIFICATION.md) for the claim
+map and the precise scope of supporting appendix results.
+
 ## Verified theorem
 
 ```lean
@@ -38,6 +44,7 @@ recursively collected kernel foundations are exactly `propext`,
 |---|---|
 | [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v10 statement and proof |
 | [`TraceableAgency/Section3/`](TraceableAgency/Section3/) | v11 uniqueness, signs, and axiom independence |
+| [`TraceableAgency/Section4/`](TraceableAgency/Section4/) | v11 trace tests, optimal choice, measurement, and moral hazard |
 | [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
 | [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, public-declaration, and mechanical-specification audits |
@@ -54,6 +61,7 @@ lake build TraceableAgency.Audit
 ./scripts/build_paper.sh --check
 ./scripts/check_theorem1_certificate.sh
 ./scripts/check_section3_certificate.sh
+./scripts/check_section4_certificate.sh
 ```
 
 The certificate rejects proof holes and project axioms, checks the complete
