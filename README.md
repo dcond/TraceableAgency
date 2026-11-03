@@ -22,6 +22,11 @@ remaining foundation, convention, and source/compiled-code boundary. Run
 `./scripts/check_trust_boundary.sh` for a project source rebuild, raw dependency
 inspection including private helpers, and mandatory fresh kernel replay.
 
+The [v11 correspondence audit](Certificate/V11_CORRESPONDENCE_AUDIT.md)
+compares every numbered paper result and the substantive unnumbered claims
+with actual Lean statements, including narrower hypotheses and remaining
+unformalized appendix results.
+
 ## Verified theorem
 
 ```lean
