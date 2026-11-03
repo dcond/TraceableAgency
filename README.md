@@ -1,94 +1,97 @@
 # TraceableAgency
 
-[![Theorem 1 certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml)
+[![Formalization certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml)
 
-Lean 4 verification of Theorem 1 in *A Preference for Traceable Agency: An
-Axiomatization of Expected Utility plus Mutual Information* (version 10).
+Lean 4 verification of all numbered mathematical results in *A Preference for
+Traceable Agency: An Axiomatization of Expected Utility plus Mutual Information*
+(version 11), including the appendices.
 
-This branch also completes the remaining results of Section 3 in version 11:
-uniqueness, the sign trichotomy, and independence of all eight axioms. It is
-based on the material-first proof branch; the original proof is unchanged.
-See the [Section 3 certificate](Certificate/SECTION3_VERIFICATION.md) for the
-exact claims and commands. The new results introduce no mathematical axioms.
+Start with the [formalization certificate](Certificate/FORMALIZATION_CERTIFICATE.md)
+for the precise scope, statement and hypothesis correspondence, and verification
+commands. The current paper is available as a
+[PDF](Paper/trace_tempered_choice_v11.pdf) and
+[TeX source](Paper/trace_tempered_choice_v11.tex).
 
-It also verifies Section 4's trace test, optimal randomization, elicitation,
-and moral-hazard implications, including boundary priors, team limits, and
-compensation for additional signals. See the
-[Section 4 certificate](Certificate/SECTION4_VERIFICATION.md) for the claim
-map and the precise scope of supporting appendix results.
+The verification includes the material-first representation proof, uniqueness,
+the sign trichotomy, independence of all eight axioms, choice and measurement
+results, moral-hazard implications, and the audience proposition. The
+[completed v11 correspondence map](Certificate/V11_PROVED_RESULTS.md) identifies
+the exact weaker-axiom interfaces and the final additions to the original
+[Section 3](Certificate/SECTION3_VERIFICATION.md) and
+[Section 4](Certificate/SECTION4_VERIFICATION.md) checks.
 
-The [complete trust report](Certificate/TRUST_BOUNDARY.md) records every
-remaining foundation, convention, and source/compiled-code boundary. Run
-`./scripts/check_trust_boundary.sh` for a project source rebuild, raw dependency
-inspection including private helpers, and mandatory fresh kernel replay.
+## Proof surface and trust
 
-The [v11 correspondence audit](Certificate/V11_CORRESPONDENCE_AUDIT.md)
-records the original comparison of paper claims and Lean statements.
-The [proved-result completion](Certificate/V11_PROVED_RESULTS.md) maps the
-subsequent additions, including exact weaker-axiom interfaces and the missing
-appendix propositions. They are exported through `TraceableAgency.V11`.
+Import `TraceableAgency` for the complete public proof surface. The original
+representation proof and the material-first proof prove the same theorem
+statement. Existing names containing `V10` are retained as stable APIs; they
+do not restrict the coverage of this release to version 10.
 
-## Verified theorem
+For every finite payoff alphabet with at least two elements, the representation
+theorem proves that Axioms A1--A8 are equivalent to expected payoff utility
+plus a strictly positive global multiple of mutual information. The same
+witnesses represent every finite block-supported cross-channel comparison.
+The exact axiom bundle contains only A1--A8.
 
-```lean
-TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV10
-```
+The [complete trust report](Certificate/TRUST_BOUNDARY.md) describes the source
+and dependency audits, mathematical conventions, and fresh kernel replay.
+There are no project mathematical axioms or proof holes. The audited
+mathematical dependency closure uses only the standard Lean foundations
+`propext`, `Classical.choice`, and `Quot.sound`.
 
-For every finite payoff alphabet with at least two elements, the theorem proves
-that Axioms (A1)--(A8) are equivalent to representation by expected payoff
-utility plus a strictly positive global multiple of mutual information.  The
-same witnesses represent every finite block-supported cross-channel
-comparison.
-
-The v10 statement and axiom bundle are the canonical public API.  The bundle
-contains exactly A1--A8, and the theorem adds no premise beyond those eight
-behavioral hypotheses.
-
-The project declares no additional mathematical axiom.  The final theorem's
-recursively collected kernel foundations are exactly `propext`,
-`Classical.choice`, and `Quot.sound`.
+The certificate distinguishes the paper's stated results from supplementary
+unnumbered calculations. The kernel checks the formal deductions; the claim
+maps make their correspondence with the paper reviewable.
 
 ## Repository layout
 
 | Path | Role |
 |---|---|
-| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v10 statement and proof |
-| [`TraceableAgency/Section3/`](TraceableAgency/Section3/) | v11 uniqueness, signs, and axiom independence |
-| [`TraceableAgency/Section4/`](TraceableAgency/Section4/) | v11 trace tests, optimal choice, measurement, and moral hazard |
-| [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization |
+| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact representation statement, original proof, material-first proof, and v11 appendix interfaces |
+| [`TraceableAgency/Section3/`](TraceableAgency/Section3/) | Uniqueness, signs, axiom independence, and payoff--trace separation |
+| [`TraceableAgency/Section4/`](TraceableAgency/Section4/) | Trace tests, optimal choice, measurement, moral hazard, and audience results |
+| [`TraceableAgency/V11.lean`](TraceableAgency/V11.lean) | Additional exact statements completing the v11 correspondence audit |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
-| [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, public-declaration, and mechanical-specification audits |
-| [`Certificate/`](Certificate/) | Claim map, formalization certificate, generated Theorem 1 specification, proof roadmap, and byte manifest |
-| [`Paper/`](Paper/) | Authoritative v10 TeX sources and reproducible PDF |
+| [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, public-declaration, and specification audits |
+| [`Certificate/`](Certificate/) | Current certificate, detailed claim maps, trust report, and byte manifest |
+| [`Paper/`](Paper/) | Current v11 source and reproducible PDF, with v10 preserved |
 
 ## Reproduce
+
+Use the pinned Lean toolchain and dependencies, and TeX Live 2026 for the papers:
 
 ```bash
 lake exe cache get
 lake build TraceableAgency
-lake build TraceableAgency.Audit
-./scripts/build_theorem1_spec.sh --check
-./scripts/build_paper.sh --check
+./scripts/build_paper.sh --check v10
+./scripts/build_paper.sh --check v11
 ./scripts/check_theorem1_certificate.sh
-./scripts/check_section3_certificate.sh
-./scripts/check_section4_certificate.sh
+./scripts/check_trust_boundary.sh
 ```
 
-The certificate rejects proof holes and project axioms, checks the complete
-repository manifest, rebuilds the v10 paper, audits the final declaration's
-transitive dependencies, checks the recursively generated Theorem 1
-specification, and replays the v10 certificate module with `leanchecker
---fresh`.
+The final command checks the complete repository manifest and pinned dependency
+sources, rejects proof holes and unchecked mechanisms, rebuilds every project
+Lean source, audits the raw mathematical dependency closure including private
+helpers, and performs mandatory fresh kernel replay. The GitHub workflow runs
+the complete audit and checks reproducible builds of both paper versions.
 
-## Paper and correspondence
+For focused checks, use `scripts/check_section3_certificate.sh` and
+`scripts/check_section4_certificate.sh`. See the certificate for their scope
+and the additional v11 statements included in the complete audit.
 
-- [Paper source](Paper/trace_tempered_choice_v10.tex)
-- [Compiled paper](Paper/trace_tempered_choice_v10.pdf)
-- [Formalization certificate](Certificate/FORMALIZATION_CERTIFICATE.md)
-- [Mechanical formal specification of Theorem 1](Certificate/THEOREM1_FORMAL_SPECIFICATION.md)
-- [Claim map](Certificate/CLAIM_MAP.md)
-- [Proof roadmap](Certificate/PAPER_PROOF_ROADMAP.md)
+## Preserved version 10
+
+The [v10 source](Paper/trace_tempered_choice_v10.tex),
+[v10 PDF](Paper/trace_tempered_choice_v10.pdf),
+[original Theorem 1 certificate](Certificate/FORMALIZATION_CERTIFICATE_V10.md),
+[claim map](Certificate/CLAIM_MAP.md), and
+[proof roadmap](Certificate/PAPER_PROOF_ROADMAP.md) are retained. The original
+public theorem remains:
+
+```lean
+TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1 :
+  TraceableAgency.Theorem1.Theorem1StatementV10
+```
 
 Citation metadata is in [`CITATION.cff`](CITATION.cff). Lean source is licensed
 under Apache-2.0; the paper remains © Daniele Condorelli and is not relicensed

@@ -1,8 +1,8 @@
-name: Theorem 1 certificate
+name: Formalization certificate
 
 on:
   push:
-    branches: [main]
+    branches: [main, codex/v11-verified-release]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -18,6 +18,13 @@ jobs:
   paper:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      matrix:
+        include:
+          - version: v10
+            epoch: 1788307200
+          - version: v11
+            epoch: 1793664000
     steps:
       - name: Check out repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
@@ -25,25 +32,25 @@ jobs:
       - name: Rebuild the paper with pinned TeX Live
         uses: xu-cheng/latex-action@6549dc21effb2730855a1281407ecfcececc6c1b # 4.1.0
         with:
-          root_file: trace_tempered_choice_v10.tex
+          root_file: trace_tempered_choice_${{ matrix.version }}.tex
           working_directory: Paper
           texlive_version: 2026
           args: -pdf -usepretex=\pdftrailerid{} -file-line-error -halt-on-error -interaction=nonstopmode
-          pre_compile: export SOURCE_DATE_EPOCH=1788307200 FORCE_SOURCE_DATE=1 TZ=UTC
+          pre_compile: export SOURCE_DATE_EPOCH=${{ matrix.epoch }} FORCE_SOURCE_DATE=1 TZ=UTC
         env:
-          SOURCE_DATE_EPOCH: 1788307200
+          SOURCE_DATE_EPOCH: ${{ matrix.epoch }}
           FORCE_SOURCE_DATE: 1
           TZ: UTC
 
-      - name: Upload rebuilt v10 PDF
+      - name: Upload rebuilt paper PDF
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: trace-tempered-choice-v10-pdf
-          path: Paper/trace_tempered_choice_v10.pdf
+          name: trace-tempered-choice-${{ matrix.version }}-pdf
+          path: Paper/trace_tempered_choice_${{ matrix.version }}.pdf
           retention-days: 1
 
       - name: Check reproducible PDF
-        run: git diff --exit-code -- Paper/trace_tempered_choice_v10.pdf
+        run: git diff --exit-code -- Paper/trace_tempered_choice_${{ matrix.version }}.pdf
 
   kernel:
     runs-on: ubuntu-24.04

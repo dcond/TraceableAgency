@@ -4,12 +4,17 @@ This certificate covers the mathematical choice implications in Section 4 of
 [the v11 source snapshot](../Paper/trace_tempered_choice_v11.tex): the trace
 test, optimal randomization, measurement, and moral hazard. It includes the
 supporting optimization, compensation, and record-value results used there.
-Import `TraceableAgency.Section4` for the complete formalization.
+Import `TraceableAgency` for the complete current public surface. The original
+Section 4 stage is exported by `TraceableAgency.Section4`; the later
+[proved-result completion](V11_PROVED_RESULTS.md) adds the missing appendix
+statements through `TraceableAgency.V11`.
 
-The additions continue on `codex/section3-completion`, from commit `05974fc`.
-All Section 4 proofs are new files. The original representation proof, the
-material-first proof, Section 3 proofs, and both paper versions are unchanged.
-The root import now also exposes Section 4.
+The original Section 4 stage began at commit `05974fc` on
+`codex/section3-completion`, preserving the earlier Lean proofs. The completed
+mathematical Lean sources are unchanged from `5f7e8e8`. Subsequent v11 paper
+revisions shorten proofs without changing their stated results or hypotheses.
+See the [current certificate](FORMALIZATION_CERTIFICATE.md) for the complete
+numbered-result index.
 
 ## Paper-to-Lean map
 
@@ -50,7 +55,7 @@ Modules: `TraceTest`, `TraceTestQualitative`.
 | Interior first-order equation and unique root | `binary_interior_optimal_iff_equation`, `binary_exists_unique_interior_root` |
 | Weak comparative statics and strict interior comparative statics | `binary_gap_monotone`, `binary_lambda_monotone`, `binary_gap_strict_interior`, `binary_lambda_strict_interior` |
 | Zero payoff gap makes the optimum independent of positive lambda | `binary_capacity_independent_lambda` |
-| Entropy derivatives, decreasing marginal information, supported endpoint limits | `hasDerivAt_mixEntropy`, `hasDerivAt_mixEntropySlope`, `binaryGain_strictAnti`, `binaryGain_tendsto_zero_of_support`, `binaryGain_tendsto_one_of_support` |
+| Entropy derivatives, decreasing marginal information, finite supported limits and infinite unsupported limits | `hasDerivAt_mixEntropy`, `hasDerivAt_mixEntropySlope`, `binaryGain_strictAnti`, `binaryGain_tendsto_zero_of_support`, `binaryGain_tendsto_one_of_support`, `binaryGain_tendsto_zero_of_not_support`, `binaryGain_tendsto_one_of_not_support` |
 
 Modules: `Optimization*`, `InformationZero`, `ChoiceExamples`, `Binary/*`.
 The explicit IIA example has optimum `(1/3, 4/9, 2/9)` on the three-action
@@ -65,7 +70,7 @@ unique fair lottery, with odds `1`.
 | Parallel indifference lines, an informative indifference, unique global price | `indifference_lines`, `exists_price_identifying_indifference`, `unique_information_price` |
 | Information price from actual cross-channel indifference | `behavioral_information_price` |
 | Public dilution and the exact compensation identity | `dilution_value`, `dilution_information`, `dilution_material`, `dilution_indifference_iff` |
-| General compensation feasibility and maximum-compensation bound | `dilution_compensation_feasible_iff`, `dilution_max_compensation_bound`, `maximal_compensation_information_bound` |
+| General compensation feasibility and maximum-compensation bound | `dilution_compensation_feasible_iff_all_rates`, `dilution_max_compensation_bound`, `maximal_compensation_information_bound` |
 | Proposition 8: unique compensation probability iff feasible; strict preference otherwise | `elicitation_existsUnique_iff`, `behavioral_elicitation_existsUnique_iff`, `elicitation_strict_infeasible` |
 | Exact recovered coefficient; uniform-prior special case | `behavioral_elicited_price`, `uniform_elicited_price` |
 | Sufficient dilution can always make elicitation feasible | `eventually_feasible_dilution` |
@@ -73,7 +78,7 @@ unique fair lottery, with odds `1`.
 | Shannon fair/quarter-prior ratio and rounding to 1.23 | `shannon_two_prior_prediction`, `shannon_two_prior_ratio_approx` |
 | Actual Gini rival predicts 4/3; conditional on a feasible report, the capped rival returns exactly min{1,c/[(1−eps)H(q)]} | `gini_two_prior_prediction`, `capped_recovered_coefficient` |
 
-Modules: `Measurement*`. The experiments are actual finite channels, not
+Modules: `Measurement*`, `V11Measurement`. The experiments are actual finite channels, not
 assumed value formulas. Unique global price uses nonconstant utility and a
 positive information weight, as in Section 4. The implementation admits dilution zero as well;
 the strictly positive dilution required by Proposition 8 is explicit in its
@@ -88,6 +93,7 @@ their utility.
 | Value lost by garbling records is lambda times conditional mutual information | `information_loss_eq_conditional`, `record_garbling_value_loss` |
 | Zero loss iff conditional independence, for positive lambda | `processingConditionalInfo_eq_zero_iff`, `record_garbling_value_eq_iff` |
 | Recorded public mixing is affine; cost of hiding its coin | `recorded_coin_value`, `recorded_coin_hiding_cost`, `recorded_coin_hiding_eq_iff` |
+| Uniform value dominance with identical payoff kernels is the more-capable order; garbling implies it, but its converse fails | `MoreCapable.uniform_value_dominance_iff`, `MoreCapable.garbling_implies_information_dominance`, `MoreCapable.exists_moreCapable_not_garbling_at_payoff` |
 | Bernoulli moral-hazard information and value formulas | `BT.mutualInfo_eq`, `BT.rowRewardValue_eq` |
 | Information derivatives, endpoint KL slopes, strictly negative curvature | `BT.hasDerivAt_information`, `BT.hasDerivAt_informationSlope`, `BT.informationSlope_zero`, `BT.informationSlope_one`, `BT.value_curvature_neg` |
 | Exact high- and low-effort incentive thresholds and unique optimum | `BT.interval_high_optimal_iff`, `BT.interval_low_optimal_iff`, `BT.exists_unique_intervalOptimal` |
@@ -102,7 +108,7 @@ their utility.
 | Direct compensation is zero at lambda=0 | `BT.signal_compensation_zero` |
 | Actual signal extension can change effort, with unchanged production probabilities | `BT.flat_signal_changes_effort`, `BT.flat_fullActionRecord_probability` |
 
-Modules: `RecordInformation`, `RecordedCoin`, `SignalValue`, `MoralHazard/*`.
+Modules: `RecordInformation`, `RecordedCoin`, `MoreCapable*`, `SignalValue`, `MoralHazard/*`.
 The signal example changes a unique zero-effort optimum to the unique interior
 probability `exp(-cost/lambda)/(1+exp(-cost/lambda))` by revealing the action.
 The compensation theorem permits reoptimization; it does not identify old
@@ -151,13 +157,15 @@ The team limit uses a direct bound
 `0 <= lambda * KL(p || p+d)/d <= lambda*d/epsilon^2`, uniformly when success
 probabilities stay in `[epsilon,1-epsilon]`. This proves the main-text claim
 without the appendix's precise quadratic coefficient and cubic Taylor
-remainder. The latter expansion, the unsupported binary derivative's
-extended-real endpoint limits, and the additional posterior-law formulation of
-the record equality case are not separate checked endpoints. Their Section 4
-uses are covered by the support-aware choice iff, direct bound, and conditional
-independence results above. The more-capable/nongarbling proposition cited in
-Section 5 is outside this certificate. This is a Section 4 certificate, not a
-claim that every separate formulation throughout Appendix B is formalized.
+remainder. That exact expansion and the additional posterior-law formulation
+inside the record-garbling proof remain outside the numbered-result claim.
+Their application uses are covered by the direct bound and conditional
+independence results above. The completed v11 modules now also prove the
+unsupported binary endpoint limits and the more-capable/nongarbling
+proposition, including the paper's exact channel counterexample. See the
+[completion report](V11_PROVED_RESULTS.md) for these additions and the remaining
+scope distinctions; verification of the stated results does not assert that
+every intermediate calculation in Appendix B is separately formalized.
 
 ## Reproduction and trust
 
@@ -166,15 +174,18 @@ With the pinned Lean and mathlib versions installed:
 ```sh
 lake exe cache get
 ./scripts/check_section4_certificate.sh
+./scripts/check_trust_boundary.sh
 ```
 
-The script checks the complete byte manifest and source hygiene, builds the
-public entry point, runs the Section 4 and Section 3 foundation audits, checks
-the material-first and original theorem routes, then runs
-`lake env leanchecker --fresh TraceableAgency.Section4.Audit`.
+The first script reproduces the original Section 4 certificate: it checks the
+byte manifest and source hygiene, builds that entry point, runs the Section 4
+and Section 3 foundation audits, checks both representation routes, and runs
+`lake env leanchecker --fresh TraceableAgency.Section4.Audit`. The second
+command additionally rebuilds and audits every project module, including the
+later v11 additions and private helpers, with mandatory fresh replay.
 
 `Section4/Audit.lean` enumerates every theorem in the public Section 4 namespace
-and recursively collects its axioms. It allows only `propext`,
+loaded by its original entry point and recursively collects its axioms. It allows only `propext`,
 `Classical.choice`, and `Quot.sound`, and rejects dependency on the old
 preference-to-representation endpoints. There are no added mathematical axioms,
 proof holes, or kernel bypasses. Generic existing probability and entropy
