@@ -37,7 +37,7 @@ does not claim that a remote workflow run has already occurred.
 
 ## Raw audit, including private helpers
 
-`TraceableAgency/Audit/TrustBoundaryImports.lean` imports all 257 other project
+`TraceableAgency/Audit/TrustBoundaryImports.lean` imports all 272 other project
 source modules. The two new audit files are the only inventory exclusions:
 the umbrella cannot import itself or the auditor that imports it.
 `check_trust_imports.py` includes hidden and Git-ignored Lean sources, excluding
@@ -45,16 +45,16 @@ only dependency/build storage under `.lake` and Git metadata under `.git`.
 It rejects any omitted new project source file.
 
 `TrustBoundary.lean` identifies declarations by their **defining module**, not
-their namespace. Its first complete audit found:
+their namespace. The v11 proved-result completion audit found:
 
 | Quantity | Count |
 |---|---:|
-| Originating project declarations | 9,513 |
-| Theorem roots | 5,781 |
-| Internal/private theorem roots | 1,615 |
+| Originating project declarations | 9,813 |
+| Theorem roots | 6,011 |
+| Internal/private theorem roots | 1,670 |
 | Theorems in other namespaces | 53 |
-| All mathematical roots, including definitions | 9,361 |
-| Declarations in their combined raw dependency closure | 50,756 |
+| All mathematical roots, including definitions | 9,661 |
+| Declarations in their combined raw dependency closure | 51,123 |
 
 The auditor reloads private compiled declaration data with environment
 extensions disabled, traverses the actual types and bodies, and reads raw

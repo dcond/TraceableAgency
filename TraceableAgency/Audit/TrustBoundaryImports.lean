@@ -131,14 +131,18 @@ import TraceableAgency.Section3.UniquenessBasic
 import TraceableAgency.Section3.UniquenessMixture
 import TraceableAgency.Section3.UniquenessParameters
 import TraceableAgency.Section3.UniquenessTransform
+import TraceableAgency.Section3.V11NoComplementarity
 import TraceableAgency.Section4
 import TraceableAgency.Section4.Audit
 import TraceableAgency.Section4.Binary.Choice
 import TraceableAgency.Section4.Binary.Classification
 import TraceableAgency.Section4.Binary.ComparativeStatics
 import TraceableAgency.Section4.Binary.Entropy
+import TraceableAgency.Section4.Binary.V11Endpoints
 import TraceableAgency.Section4.ChoiceExamples
 import TraceableAgency.Section4.InformationZero
+import TraceableAgency.Section4.Interpretation.Audience
+import TraceableAgency.Section4.Interpretation.AudienceBasic
 import TraceableAgency.Section4.MeasurementControls
 import TraceableAgency.Section4.MeasurementDilution
 import TraceableAgency.Section4.MeasurementElicitation
@@ -153,6 +157,9 @@ import TraceableAgency.Section4.MoralHazard.Optimization
 import TraceableAgency.Section4.MoralHazard.SignalChangesEffort
 import TraceableAgency.Section4.MoralHazard.SignalCompensation
 import TraceableAgency.Section4.MoralHazard.Teams
+import TraceableAgency.Section4.MoreCapable
+import TraceableAgency.Section4.MoreCapableAnalysis
+import TraceableAgency.Section4.MoreCapablePayoff
 import TraceableAgency.Section4.OptimizationBasic
 import TraceableAgency.Section4.OptimizationCollapse
 import TraceableAgency.Section4.OptimizationCorollaries
@@ -170,6 +177,7 @@ import TraceableAgency.Section4.SignalValue
 import TraceableAgency.Section4.SupportEntropy
 import TraceableAgency.Section4.TraceTest
 import TraceableAgency.Section4.TraceTestQualitative
+import TraceableAgency.Section4.V11Measurement
 import TraceableAgency.Theorem1
 import TraceableAgency.Theorem1.AffineTools
 import TraceableAgency.Theorem1.Axioms
@@ -223,6 +231,8 @@ import TraceableAgency.Theorem1.MaterialCalibration.TraceEntropySupport
 import TraceableAgency.Theorem1.MaterialCalibration.TraceValue
 import TraceableAgency.Theorem1.MaterialCalibration.UnitAnchors
 import TraceableAgency.Theorem1.MaterialCalibration.Units
+import TraceableAgency.Theorem1.MaterialCalibration.V11Cardinal
+import TraceableAgency.Theorem1.MaterialCalibration.V11Insertion
 import TraceableAgency.Theorem1.MaterialCalibration.ValueAssembly
 import TraceableAgency.Theorem1.MaterialUtility
 import TraceableAgency.Theorem1.NormalizeAffine
@@ -249,16 +259,21 @@ import TraceableAgency.Theorem1.SupportDummy
 import TraceableAgency.Theorem1.SupportMarkedLift
 import TraceableAgency.Theorem1.TheoremClosure
 import TraceableAgency.Theorem1.TraceScaleTools
+import TraceableAgency.Theorem1.V11Affine
+import TraceableAgency.Theorem1.V11BranchComparison
+import TraceableAgency.Theorem1.V11Material
+import TraceableAgency.Theorem1.V11Structural
 import TraceableAgency.Theorem1.ValueSupport
+import TraceableAgency.V11
 import TraceableAgency.Vendor.Shannon.Approx
 import TraceableAgency.Vendor.Shannon.Core
 import TraceableAgency.Vendor.Shannon.Final
 import TraceableAgency.Vendor.Shannon.Rational
 import TraceableAgency.Vendor.Shannon.Uniform
 
-/-! Exhaustive project source inventory for the trust-boundary audit.
-Generated from every project Lean source, excluding this umbrella and the audit
-that consumes it. The certificate script verifies the exact inventory. -/
+/-! Exhaustive project-source inventory for the raw trust audit.
+Only this import umbrella and the auditor consuming it are excluded.
+The certificate script verifies the exact inventory. -/
 
 namespace TraceableAgency.Audit.TrustBoundaryImports
 
@@ -396,14 +411,18 @@ def sourceModules : Array Lean.Name := #[
   `TraceableAgency.Section3.UniquenessMixture,
   `TraceableAgency.Section3.UniquenessParameters,
   `TraceableAgency.Section3.UniquenessTransform,
+  `TraceableAgency.Section3.V11NoComplementarity,
   `TraceableAgency.Section4,
   `TraceableAgency.Section4.Audit,
   `TraceableAgency.Section4.Binary.Choice,
   `TraceableAgency.Section4.Binary.Classification,
   `TraceableAgency.Section4.Binary.ComparativeStatics,
   `TraceableAgency.Section4.Binary.Entropy,
+  `TraceableAgency.Section4.Binary.V11Endpoints,
   `TraceableAgency.Section4.ChoiceExamples,
   `TraceableAgency.Section4.InformationZero,
+  `TraceableAgency.Section4.Interpretation.Audience,
+  `TraceableAgency.Section4.Interpretation.AudienceBasic,
   `TraceableAgency.Section4.MeasurementControls,
   `TraceableAgency.Section4.MeasurementDilution,
   `TraceableAgency.Section4.MeasurementElicitation,
@@ -418,6 +437,9 @@ def sourceModules : Array Lean.Name := #[
   `TraceableAgency.Section4.MoralHazard.SignalChangesEffort,
   `TraceableAgency.Section4.MoralHazard.SignalCompensation,
   `TraceableAgency.Section4.MoralHazard.Teams,
+  `TraceableAgency.Section4.MoreCapable,
+  `TraceableAgency.Section4.MoreCapableAnalysis,
+  `TraceableAgency.Section4.MoreCapablePayoff,
   `TraceableAgency.Section4.OptimizationBasic,
   `TraceableAgency.Section4.OptimizationCollapse,
   `TraceableAgency.Section4.OptimizationCorollaries,
@@ -435,6 +457,7 @@ def sourceModules : Array Lean.Name := #[
   `TraceableAgency.Section4.SupportEntropy,
   `TraceableAgency.Section4.TraceTest,
   `TraceableAgency.Section4.TraceTestQualitative,
+  `TraceableAgency.Section4.V11Measurement,
   `TraceableAgency.Theorem1,
   `TraceableAgency.Theorem1.AffineTools,
   `TraceableAgency.Theorem1.Axioms,
@@ -488,6 +511,8 @@ def sourceModules : Array Lean.Name := #[
   `TraceableAgency.Theorem1.MaterialCalibration.TraceValue,
   `TraceableAgency.Theorem1.MaterialCalibration.UnitAnchors,
   `TraceableAgency.Theorem1.MaterialCalibration.Units,
+  `TraceableAgency.Theorem1.MaterialCalibration.V11Cardinal,
+  `TraceableAgency.Theorem1.MaterialCalibration.V11Insertion,
   `TraceableAgency.Theorem1.MaterialCalibration.ValueAssembly,
   `TraceableAgency.Theorem1.MaterialUtility,
   `TraceableAgency.Theorem1.NormalizeAffine,
@@ -514,7 +539,12 @@ def sourceModules : Array Lean.Name := #[
   `TraceableAgency.Theorem1.SupportMarkedLift,
   `TraceableAgency.Theorem1.TheoremClosure,
   `TraceableAgency.Theorem1.TraceScaleTools,
+  `TraceableAgency.Theorem1.V11Affine,
+  `TraceableAgency.Theorem1.V11BranchComparison,
+  `TraceableAgency.Theorem1.V11Material,
+  `TraceableAgency.Theorem1.V11Structural,
   `TraceableAgency.Theorem1.ValueSupport,
+  `TraceableAgency.V11,
   `TraceableAgency.Vendor.Shannon.Approx,
   `TraceableAgency.Vendor.Shannon.Core,
   `TraceableAgency.Vendor.Shannon.Final,

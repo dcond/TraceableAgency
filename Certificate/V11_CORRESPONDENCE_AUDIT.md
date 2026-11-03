@@ -1,5 +1,9 @@
 # v11 correspondence audit: statements, hypotheses, and remaining gaps
 
+**Historical baseline:** the subsequent [proved-result completion](V11_PROVED_RESULTS.md)
+records the added proofs and the user's clarified scope. The findings below
+describe the pre-completion baseline, not the current coverage of those results.
+
 Audit baseline: commit `0786715` on `codex/section3-completion`.
 This is a semantic comparison of the actual TeX and Lean definitions/types,
 not a further axiom audit and not a claim inferred from successful compilation.
