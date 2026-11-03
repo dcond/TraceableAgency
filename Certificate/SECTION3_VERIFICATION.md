@@ -74,13 +74,16 @@ Write `U` for expected payoff utility and `I` for mutual information.
 | A7 | `U + I + H(q)`; the paper's `U + Gini reduction` is independently verified too |
 | A8 | `U + min(I,c)`, for every `c > 0` |
 
-The A5 and first A7 witnesses are shorter alternatives to the paper's
-constructions. They prove the same exact independence proposition. The product
-bonus vanishes on all canonical two-block comparisons; duplication removes
-it from a full-support lottery. The added prior entropy cancels in A6 and A8
+The paper now uses the checked product-bonus witness for A5 and the independent
+public-coin witness for A8. The product bonus vanishes on all canonical two-block
+comparisons; duplication removes it from a full-support lottery. The first A7
+witness is an additional shorter construction: the added prior entropy cancels in A6 and A8
 comparisons but increases under an action processor that adds unrecorded
 randomisation. The separate Gini proof includes continuity at null outputs,
 garbling monotonicity, the compound chain identity, and the stated merge.
+The paper allows any positive coefficient on conditional record noise; the
+formal A6 counterexample fixes that coefficient at one, which suffices for
+the independence claim. The paper retains the more general readable argument.
 
 ## Reproduction and trust
 
