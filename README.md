@@ -1,6 +1,6 @@
 # TraceableAgency
 
-[![Formalization certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml)
+[![Formalization certificate](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml/badge.svg?branch=main)](https://github.com/dcond/TraceableAgency/actions/workflows/theorem1-certificate.yml?query=branch%3Amain)
 
 Lean 4 verification of all numbered mathematical results in *A Preference for
 Traceable Agency: An Axiomatization of Expected Utility plus Mutual Information*
@@ -54,27 +54,62 @@ maps make their correspondence with the paper reviewable.
 | [`Certificate/`](Certificate/) | Current certificate, detailed claim maps, trust report, and byte manifest |
 | [`Paper/`](Paper/) | Current paper source and reproducible PDF |
 
-## Reproduce
+## Build and verify
 
-Use the pinned Lean toolchain and dependencies, and TeX Live 2026 for the papers:
+Install Lean with [elan](https://lean-lang.org/install/) and Git, then clone
+the repository. Elan selects **Lean 4.32.1** from
+[`lean-toolchain`](lean-toolchain); [`lake-manifest.json`](lake-manifest.json)
+fixes the exact mathlib and transitive dependency revisions.
 
 ```bash
+git clone https://github.com/dcond/TraceableAgency.git
+cd TraceableAgency
 lake exe cache get
 lake build TraceableAgency
-./scripts/build_paper.sh --check v11
+```
+
+Open the repository folder in VS Code with the Lean 4 extension to inspect
+the declarations interactively. The ordinary build checks the public proofs.
+For the complete audit, use Bash, Python 3.10 or later, and
+[ripgrep](https://github.com/BurntSushi/ripgrep) on Linux, macOS, or WSL:
+
+```bash
 ./scripts/check_trust_boundary.sh
 ```
 
-The final command checks the complete repository manifest and pinned dependency
+This checks the complete repository manifest and pinned dependency
 sources, rejects proof holes and unchecked mechanisms, rebuilds every project
 Lean source, audits the raw mathematical dependency closure including private
-helpers, and performs mandatory fresh kernel replay. The GitHub workflow runs
-the complete audit and checks reproducible paper builds.
+helpers, and performs mandatory fresh kernel replay. TeX is not needed for
+the Lean verification.
+
+To reproduce the paper PDF, install TeX Live 2026 with `latexmk` and run:
+
+```bash
+./scripts/build_paper.sh --check v11
+```
+
+The [GitHub workflow](.github/workflows/theorem1-certificate.yml) runs the
+complete audit and checks reproducible paper builds.
 
 For focused checks, use `scripts/check_section3_certificate.sh` and
 `scripts/check_section4_certificate.sh`. See the certificate for their scope
 and the additional v11 statements included in the complete audit.
 
-Citation metadata is in [`CITATION.cff`](CITATION.cff). Lean source is licensed
-under Apache-2.0; the paper remains © Daniele Condorelli and is not relicensed
-by the source-code licence.
+## Contributing, citation, and licences
+
+For corrections or reproduction problems, open an
+[issue](https://github.com/dcond/TraceableAgency/issues). See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for the checks and generated files to
+update when submitting a change.
+
+Citation metadata is in [`CITATION.cff`](CITATION.cff); GitHub's **Cite this
+repository** button gives the preferred paper citation. For the software,
+cite Daniele Condorelli (2026), *TraceableAgency: Lean verification of
+Trace-Tempered Choice*, version 11.0.0, and the commit used.
+
+Project Lean source is
+licensed under [Apache-2.0](LICENSE). The adapted Shannon proof retains its
+[MIT licence and attribution](TraceableAgency/Vendor/Shannon/README.md).
+The [paper's separate licence](Paper/LICENSE) reserves its copyright to
+Daniele Condorelli; it is not relicensed by the software licence.

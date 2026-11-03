@@ -68,7 +68,7 @@ echo "== Reproducible paper =="
 if [[ "${TRACEABLE_SKIP_PAPER_CHECK:-0}" == "1" ]]; then
   echo "paper was checked by the pinned TeX Live job"
 else
-  ./scripts/build_paper.sh --check
+  ./scripts/build_paper.sh --check v10
 fi
 
 echo "== Fresh kernel replay =="

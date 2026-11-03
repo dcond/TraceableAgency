@@ -2,7 +2,7 @@ name: Formalization certificate
 
 on:
   push:
-    branches: [main, codex/v11-verified-release]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   paper:
+    name: Paper (${{ matrix.version }})
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -53,6 +54,7 @@ jobs:
         run: git diff --exit-code -- Paper/trace_tempered_choice_${{ matrix.version }}.pdf
 
   kernel:
+    name: Lean kernel verification
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:

@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 paper_dir="$repo_root/Paper"
 mode="${1:---check}"
-paper_version="${2:-v10}"
+paper_version="${2:-v11}"
 
 case "$mode" in
   --check|--update) ;;
