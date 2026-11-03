@@ -5,6 +5,12 @@
 Lean 4 verification of Theorem 1 in *A Preference for Traceable Agency: An
 Axiomatization of Expected Utility plus Mutual Information* (version 10).
 
+This branch also completes the remaining results of Section 3 in version 11:
+uniqueness, the sign trichotomy, and independence of all eight axioms. It is
+based on the material-first proof branch; the original proof is unchanged.
+See the [Section 3 certificate](Certificate/SECTION3_VERIFICATION.md) for the
+exact claims and commands. The new results introduce no mathematical axioms.
+
 ## Verified theorem
 
 ```lean
@@ -31,6 +37,7 @@ recursively collected kernel foundations are exactly `propext`,
 | Path | Role |
 |---|---|
 | [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact v10 statement and proof |
+| [`TraceableAgency/Section3/`](TraceableAgency/Section3/) | v11 uniqueness, signs, and axiom independence |
 | [`TraceableAgency/PureTrace/`](TraceableAgency/PureTrace/) | Auxiliary constant-payoff characterization |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
 | [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, public-declaration, and mechanical-specification audits |
@@ -46,6 +53,7 @@ lake build TraceableAgency.Audit
 ./scripts/build_theorem1_spec.sh --check
 ./scripts/build_paper.sh --check
 ./scripts/check_theorem1_certificate.sh
+./scripts/check_section3_certificate.sh
 ```
 
 The certificate rejects proof holes and project axioms, checks the complete
