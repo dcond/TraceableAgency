@@ -4,6 +4,11 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
+if ! command -v rg >/dev/null 2>&1; then
+  echo 'ERROR: ripgrep (rg) is required for source auditing; install it before running this check.' >&2
+  exit 1
+fi
+
 ./scripts/update_certificate_manifest.sh --check
 
 if rg --glob '*.lean' '\bsorry\b|\badmit\b|run_meta|opaqueDecl|addDecl(Core|WithoutChecking)?|mkSorry|sorryAx|debug\.skipKernelTC|unsafeCast|Lean\.trustCompiler' TraceableAgency; then
