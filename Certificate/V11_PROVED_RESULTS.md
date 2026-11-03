@@ -8,9 +8,11 @@ exported by `TraceableAgency.V11`, also imported by the public root module.
 
 The paper itself was unchanged at proof-completion commit `5f7e8e8`.
 In particular, the weaker hypotheses of Appendix A Lemmas 9, 11 and 13 did
-**not** need strengthening. The audience proof in v11 has since been rewritten
-to follow the shorter argument formalized here; its proposition statement and
-hypotheses are unchanged.
+**not** need strengthening. Subsequent v11 revisions shorten the audience
+proof and several other Appendix B proofs without changing their statements
+or hypotheses. The audience proof now follows the shorter argument formalized
+here. The [current certificate](FORMALIZATION_CERTIFICATE.md) gives the complete
+numbered-result index and links the original Section 3 and Section 4 maps.
 
 ## Actual axiom use, rather than bundled parameters
 
@@ -109,7 +111,7 @@ Validation passed on 2026-11-03:
   The only changes to pre-existing Lean files are the public root import and
   the exhaustive audit-import inventory. At that verification, both v10 and
   v11 paper files were unchanged, as was the canonical OneDrive v11. The later
-  audience-proof rewrite changes no Lean file or proved statement.
+  paper-proof rewrites change no Lean file or proved statement.
 
 These checks cover the new private helpers and public statements together
 with every original project module. The historical correspondence audit is

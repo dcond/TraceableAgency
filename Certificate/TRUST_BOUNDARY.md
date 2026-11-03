@@ -180,8 +180,13 @@ it does not rebuild all of mathlib from source. It also does not independently
 validate the installed compiler, operating system, or hardware.
 
 Finally, the kernel does not read the TeX paper or certify that the choice of
-definitions captures its economic meaning. The claim maps and explicit theorem
-statements make that correspondence reviewable. The Section 4 certificate
-also lists auxiliary appendix formulations that were replaced by direct
-arguments or are outside its scope. No kernel audit turns those unformalized
-formulations into verified results.
+definitions captures its economic meaning. The
+[current certificate](FORMALIZATION_CERTIFICATE.md) indexes all 34 numbered
+mathematical results in v11, and the [completion report](V11_PROVED_RESULTS.md)
+records the added exact statements and the successful 2026-11-03 verification.
+Those claim maps and explicit theorem hypotheses make the correspondence
+reviewable. The [historical audit](V11_CORRESPONDENCE_AUDIT.md) describes the
+pre-completion state; its resolved findings are not current coverage gaps.
+Individual unnumbered calculations and explanatory formulations remain outside
+the numbered-result claim where identified in the completion report. No kernel
+audit turns those unformalized formulations into verified results.
