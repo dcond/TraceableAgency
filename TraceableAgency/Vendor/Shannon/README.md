@@ -12,7 +12,7 @@ The local adaptation:
 - restricts the final continuity use to full-support probability vectors,
   which is the only case needed by the rational approximation argument;
 - is used only as a generic finite-mathematics layer by
-  `TraceableAgency.External.GenericFaddeev`.
+  `TraceableAgency.PureTrace.Support.GenericFaddeev`.
 
 The characterization proof remains ordinary Lean theorem code: it introduces
 no axioms, opaque constants, or project-specific conventions.
