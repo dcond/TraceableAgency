@@ -6,8 +6,11 @@ illustration, or explanatory paragraph. The original representation proof,
 material-first proof, and application proofs are preserved. The additions are
 exported by `TraceableAgency.V11`, also imported by the public root module.
 
-The paper itself is unchanged. In particular, the weaker hypotheses of
-Appendix A Lemmas 9, 11 and 13 did **not** need strengthening.
+The paper itself was unchanged at proof-completion commit `5f7e8e8`.
+In particular, the weaker hypotheses of Appendix A Lemmas 9, 11 and 13 did
+**not** need strengthening. The audience proof in v11 has since been rewritten
+to follow the shorter argument formalized here; its proposition statement and
+hypotheses are unchanged.
 
 ## Actual axiom use, rather than bundled parameters
 
@@ -72,7 +75,8 @@ updates its own prior `r`. Its only substantive premises are the printed
 support inclusion and nonzero trace weight. It includes pure actual priors,
 boundary priors, observer mass outside actual support, and negative nonzero
 weights. The necessity proof uses partial merging of two actions and strict
-monotonicity of binary entropy, avoiding the paper's endpoint expansion.
+monotonicity of binary entropy, replacing the endpoint expansion in the
+audit-baseline paper. The current v11 proof follows this same argument.
 
 ## Scope and verification
 
@@ -103,8 +107,9 @@ Validation passed on 2026-11-03:
   dependency, or partial mathematical dependency was found.
 - Every pre-existing mathematical proof file is unchanged from `896a580`.
   The only changes to pre-existing Lean files are the public root import and
-  the exhaustive audit-import inventory. Both v10 and v11 paper files remain
-  unchanged, as does the canonical OneDrive v11.
+  the exhaustive audit-import inventory. At that verification, both v10 and
+  v11 paper files were unchanged, as was the canonical OneDrive v11. The later
+  audience-proof rewrite changes no Lean file or proved statement.
 
 These checks cover the new private helpers and public statements together
 with every original project module. The historical correspondence audit is
