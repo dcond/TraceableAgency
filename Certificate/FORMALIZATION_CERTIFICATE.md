@@ -43,11 +43,16 @@ TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1_material :
   TraceableAgency.Theorem1.Theorem1StatementV10
 ```
 
+<details>
+<summary>Compatibility and the original proof</summary>
+
 The `V10` names are retained for compatibility: the representation statement
 and A1–A8 axiom bundle are unchanged in v11. The original public endpoint,
 `TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1`, remains
 proved as well. The [original v10 certificate](FORMALIZATION_CERTIFICATE_V10.md)
 is preserved verbatim as a record of that proof route and its original scope.
+
+</details>
 
 The theorem fixes a finite payoff alphabet with at least two elements and
 ranges over arbitrary finite nonempty action and record alphabets, including

@@ -22,10 +22,8 @@ the exact weaker-axiom interfaces and the final additions to the original
 
 ## Proof surface and trust
 
-Import `TraceableAgency` for the complete public proof surface. The original
-representation proof and the material-first proof prove the same theorem
-statement. Existing names containing `V10` are retained as stable APIs; they
-do not restrict the coverage of this release to version 10.
+Import `TraceableAgency` for the complete public proof surface, including the
+material-first representation proof and every numbered result in the paper.
 
 For every finite payoff alphabet with at least two elements, the representation
 theorem proves that Axioms A1--A8 are equivalent to expected payoff utility
@@ -47,14 +45,14 @@ maps make their correspondence with the paper reviewable.
 
 | Path | Role |
 |---|---|
-| [`TraceableAgency/Theorem1/`](TraceableAgency/Theorem1/) | Exact representation statement, original proof, material-first proof, and v11 appendix interfaces |
+| [`TraceableAgency/Theorem1/MaterialCalibration/`](TraceableAgency/Theorem1/MaterialCalibration/) | Material-first representation proof and appendix interfaces |
 | [`TraceableAgency/Section3/`](TraceableAgency/Section3/) | Uniqueness, signs, axiom independence, and payoff--trace separation |
 | [`TraceableAgency/Section4/`](TraceableAgency/Section4/) | Trace tests, optimal choice, measurement, moral hazard, and audience results |
 | [`TraceableAgency/V11.lean`](TraceableAgency/V11.lean) | Additional exact statements completing the v11 correspondence audit |
 | [`TraceableAgency/Basic/`](TraceableAgency/Basic/) and [`TraceableAgency/Info/`](TraceableAgency/Info/) | Finite probability and information theory |
 | [`TraceableAgency/Audit/`](TraceableAgency/Audit/) | Kernel, dependency, public-declaration, and specification audits |
 | [`Certificate/`](Certificate/) | Current certificate, detailed claim maps, trust report, and byte manifest |
-| [`Paper/`](Paper/) | Current v11 source and reproducible PDF, with v10 preserved |
+| [`Paper/`](Paper/) | Current paper source and reproducible PDF |
 
 ## Reproduce
 
@@ -63,9 +61,7 @@ Use the pinned Lean toolchain and dependencies, and TeX Live 2026 for the papers
 ```bash
 lake exe cache get
 lake build TraceableAgency
-./scripts/build_paper.sh --check v10
 ./scripts/build_paper.sh --check v11
-./scripts/check_theorem1_certificate.sh
 ./scripts/check_trust_boundary.sh
 ```
 
@@ -73,25 +69,11 @@ The final command checks the complete repository manifest and pinned dependency
 sources, rejects proof holes and unchecked mechanisms, rebuilds every project
 Lean source, audits the raw mathematical dependency closure including private
 helpers, and performs mandatory fresh kernel replay. The GitHub workflow runs
-the complete audit and checks reproducible builds of both paper versions.
+the complete audit and checks reproducible paper builds.
 
 For focused checks, use `scripts/check_section3_certificate.sh` and
 `scripts/check_section4_certificate.sh`. See the certificate for their scope
 and the additional v11 statements included in the complete audit.
-
-## Preserved version 10
-
-The [v10 source](Paper/trace_tempered_choice_v10.tex),
-[v10 PDF](Paper/trace_tempered_choice_v10.pdf),
-[original Theorem 1 certificate](Certificate/FORMALIZATION_CERTIFICATE_V10.md),
-[claim map](Certificate/CLAIM_MAP.md), and
-[proof roadmap](Certificate/PAPER_PROOF_ROADMAP.md) are retained. The original
-public theorem remains:
-
-```lean
-TraceTemperedChoiceVerification.trace_tempered_choice_v10_theorem1 :
-  TraceableAgency.Theorem1.Theorem1StatementV10
-```
 
 Citation metadata is in [`CITATION.cff`](CITATION.cff). Lean source is licensed
 under Apache-2.0; the paper remains © Daniele Condorelli and is not relicensed
