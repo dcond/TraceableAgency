@@ -1966,22 +1966,19 @@ For the converse, write $W=\varphi\circ V$ and set
 \[
  \psi(x):=\varphi(\underline u+x)-\varphi(\underline u),\qquad x\ge0.
 \]
-At the uniform prior on $n$ actions, let $E_x$ be the preceding erasure
-experiment with value $\underline u+x$, where $0\le x\le\lambda\log n$,
-and let $E_0$ be silence at the same payoff.  After an action-independent
-coin with probabilities $\theta$ and $1-\theta$, compare continuations
-$(E_x,E_0)$ with $(E_0,E_0)$.  Their $V$-values are
-$\underline u+\theta x$ and $\underline u$, respectively.  Branch
-additivity of $W$ therefore gives
+Choose any $(q,K)$ with value $\underline u+x$, and let $S$ use the same
+alphabets but pay a utility-minimising outcome surely with a constant record.
+After an action-independent coin with probabilities $\theta$ and
+$1-\theta$, compare continuations $(K,S)$ with $(S,S)$ at prior $q$.
+Their $V$-values are $\underline u+\theta x$ and $\underline u$.
+Both $(q,S)$ and the all-silent compound have value $\underline u$,
+so their $W$-values agree.  Branch additivity therefore gives
 \[
- \psi(\theta x)=\theta\psi(x),\qquad 0\le\theta\le1.
+ \psi(\theta x)=\theta\psi(x),\qquad x\ge0,\quad 0\le\theta\le1.
 \]
-The continuation records can use the common alphabet consisting of the
-action labels and the erasure symbol; the formula also covers zero coin
-weights by omitting unreached branches.  Taking $x=\lambda\log n$ makes
-$\psi$ linear on $[0,\lambda\log n]$.  These nested, unbounded intervals
-have a common positive-length overlap, so their slopes agree.  Strict
-increase makes the common slope $\alpha$ positive.  Hence
+Here $\psi(0)=0$.  For $x>0$, put $M=\max\{x,1\}$ and apply the identity
+with weights $x/M$ and $1/M$ to obtain $\psi(x)=x\psi(1)$.
+Strict increase gives $\alpha:=\psi(1)>0$.  Hence
 $W=\alpha V+\beta$, proving part~\textup{(ii)}.
 
 For the parameter claim, a second trace-tempered index $\widetilde V$ is
@@ -2101,14 +2098,9 @@ $m$ times the conditional differences: A8 holds, including strict
 comparisons and singleton posterior supports.  A1, A2, and A5 follow
 immediately; A3 has zero conditional entropy, and the two A4 scores differ
 by $(1+\varepsilon)\log2$.
-For action processing $A\to B$, the common output marginal and the Markov
-chain $Z-A-B$ give the original-minus-processed difference
-\[
- [I(A;Z)-I(B;Z)]
- +\varepsilon[\Sh(Z\mid B)-\Sh(Z\mid A)]
- =(1+\varepsilon)I(A;Z\mid B)\ge0.
-\]
-So A7 holds for every Bayesian completion.  But at a constant payoff, a fair
+Equivalently, $V=U+(1+\varepsilon)I-\varepsilon\Sh(Z)$.
+Action processing preserves $U$ and the output marginal and weakly reduces
+$I$, proving A7 for every Bayesian completion.  But at a constant payoff, a fair
 record independent of the action has value $u(o)-\varepsilon\log2$;
 erasing it gives $u(o)$, violating A6.
 
@@ -2200,19 +2192,22 @@ there are such a $K$ and $q$ with $q\succ_K\delta_a$ for every $a$.
 \end{lemma}
 
 \begin{proof}
-Let $E_o$ be the one-action experiment paying $o$ with a silent record.
-If action and record are independent under $qK$, delete null actions by
-Lemma~\ref{lf:lem:bookkeeping}\textup{(b)}.  The remaining rows coincide.
-Collapsing these actions to one, or drawing them back according to $q$,
-are inverse action processings of the joint law, so Axiom~\textup{(A7)}
-gives indifference.  Erasing or independently regenerating the common
-record gives indifference to $E_o$ by Axiom~\textup{(A6)}.  In particular,
-every pure lottery in $K$ is indifferent to $E_o$.
-
-For arbitrary $q$, erase its record.  The result is indifferent to $E_o$,
-so $(q,K)\succeq(\delta_\ast,E_o)\sim(\delta_a,K)$.  Replacement and duplication
+Let $S$ pay $o$ surely with a silent record on the same action set.
+All priors in $S$ are indifferent by Axiom~\textup{(A7)}: redraw actions
+according to either prior, independently of the original action.
+Erasing the record gives $(q,K)\succeq(q,S)$ by Axiom~\textup{(A6)}.
+If action and record are independent under $qK$, regenerating its record
+marginal from $S$ recovers the same joint law.  Axiom~\textup{(A7)}
+identifies experiments with the same prior and joint law, so
+Axiom~\textup{(A6)} also gives $(q,S)\succeq(q,K)$.
+Every pure prior is independent.  Hence
+\[
+ (q,K)\succeq(q,S)\sim(\delta_a,S)\sim(\delta_a,K),
+\]
+with indifference throughout when action and record are independent under
+$qK$.  Replacement and duplication
 (Lemma~\ref{lf:lem:bookkeeping}\textup{(a)} and Axiom~\textup{(A5)})
-give the within-channel comparison.  Finally, the noisy coin in
+give the within-channel claims.  Finally, the noisy coin in
 Axiom~\textup{(A4)} has independent action and record and is therefore
 indifferent to every pure action.  The strictly preferred revealing coin
 proves the last assertion.
@@ -2352,14 +2347,14 @@ For $\lambda=0$, optimality requires only support on payoff maximisers.
 
 \begin{proof}[Proof of Corollary~\ref{rem:logit}]
 Disjoint row supports make $Z$ identify the action, so $I(A;Z)=\Sh(q)$.
-Each action has a private consequence, hence the optimum has full support.
-On $\supp K_a$, $p_{qK}=q(a)K_a$, so
-$\KL(K_a\|p_{qK})=-\log q(a)$.  The optimality equalities become
-$\bar u(a)-\lambda\log q^*(a)=c$.
-Solving and normalising gives $q^*(a)\propto b_0^{\bar u(a)/\lambda}$;
-in natural-log units this is the stated exponential formula.
-Strict concavity of $\lambda\Sh(q)+\sum_aq(a)\bar u(a)$ proves uniqueness.
-Changing the logarithm base merely rescales the information coefficient.
+Put $C:=\sum_a b_0^{\bar u(a)/\lambda}$ and
+$q^*(a):=b_0^{\bar u(a)/\lambda}/C$.  Expanding the divergence gives
+\[
+ V(q,K)=\lambda\log_{b_0}C-\lambda\KL(q\|q^*).
+\]
+Divergence is nonnegative and vanishes exactly at $q=q^*$, proving unique
+optimality.  In natural-log units this is the stated exponential formula;
+changing the logarithm base merely rescales the information coefficient.
 \end{proof}
 
 \begin{proposition}[Optimal marginal and multiplicity]\label{prop:optimal-marginal}
