@@ -19,6 +19,9 @@ The principal documents are:
   exact formal statement, A1–A8, and their recursive semantic dependencies.
 - [Byte manifest](SHA256SUMS): digests of repository files other than the manifest.
 
+<details>
+<summary>Historical documentation</summary>
+
 The original proof and its public names remain available. The
 [original v10 certificate](FORMALIZATION_CERTIFICATE_V10.md) is preserved
 verbatim; the [original claim map](CLAIM_MAP.md) and
@@ -26,6 +29,8 @@ verbatim; the [original claim map](CLAIM_MAP.md) and
 The [v11 correspondence audit](V11_CORRESPONDENCE_AUDIT.md) is explicitly a
 historical baseline, superseded within the agreed result scope by the
 completion report.
+
+</details>
 
 Import `TraceableAgency` for the complete public surface. Reproduce the full
 source rebuild, raw dependency audit, and mandatory fresh kernel replay with:
