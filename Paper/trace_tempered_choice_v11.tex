@@ -2824,33 +2824,29 @@ at every output with positive actual probability.  The expected reward is
 \]
 For $r=q$, the posterior-entropy identity proves the claim.
 
-Conversely, suppose the equality holds for every channel.  If $q$ is pure,
-full revelation gives $\Sh(r)=0$; the support condition then forces $r=q$.
-Otherwise, every $q(a)<1$, and the support condition also implies every
-$r(a)<1$.  Fix $a$ and consider a binary-output channel that, only when
-the action is $a$, reveals this fact with probability $1-x$, and otherwise
-reports an erasure, where $0<x<1$.  For a prior $p$ with $p(a)<1$, write
-$p^{-a}$ for its normalised restriction to the other actions and $p^x$
-for its posterior after erasure.  The posterior probability of $a$ is
-$p(a)x/[1-p(a)+p(a)x]$.  The binary entropy formula gives
+Conversely, suppose the equality holds for every channel and cancel
+$\lambda\ne0$.  Full revelation gives $\Sh(r)=\Sh(q)$.
+Choose $b$ with $q(b)>0$, so that $r(b)>0$, and set
+$x=\tfrac12\min\{q(b),r(b)\}\in(0,1/2]$.
+For each $a\ne b$, consider the channel that always reports a new record
+$\ast$ after $b$, reports $\ast$ with probability $x$ after $a$, and
+otherwise reveals the action.
+For either prior $p\in\{q,r\}$, only $\ast$ can leave uncertainty; the
+posterior probability of $a$ at that record is
 \[
- \Sh(p^x)=\Sh(p^{-a})-
- \frac{p(a)}{1-p(a)}x\log x+O(x)\qquad(x\downarrow0).
+ t_p:=\frac{xp(a)}{xp(a)+p(b)}.
 \]
-This also holds when $p(a)=0$, with zero coefficient.
-The actual erasure probability is $D_q(x)=1-q(a)+q(a)x$.
-Since the revealing posterior has zero entropy, the hypothesised equality
-for these channels reads
+Let $h(t):=\Sh(t,1-t)$ denote binary entropy.  The actual probability of
+$\ast$ is $xq(a)+q(b)>0$.  Since the prior entropies agree, the assumed
+reward identity for this channel gives $h(t_r)=h(t_q)$.
+Both posterior probabilities lie in $[0,1/2]$, because
+$xp(a)\le x\le p(b)$ for $p=q,r$.  Binary entropy is strictly increasing
+on that interval, so $t_r=t_q$, or
 \[
- \Sh(r)-D_q(x)\Sh(r^x)
- =\Sh(q)-D_q(x)\Sh(q^x).
+ q(a)r(b)=r(a)q(b).
 \]
-Subtract its limit at zero and divide by $x\log x$.
-The displayed expansion yields
-\[
- (1-q(a))\frac{r(a)}{1-r(a)}-q(a)=0,
-\]
-and hence $r(a)=q(a)$.  This holds for every action, proving necessity.
+This identity also holds for $a=b$.  Summing over $a$ gives $r(b)=q(b)$;
+since $q(b)>0$, the same identity then gives $r(a)=q(a)$ for every $a$.
 \end{proof}
 
 To reproduce the criterion on a whole menu of plans, the observer must
