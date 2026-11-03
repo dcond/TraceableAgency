@@ -108,6 +108,15 @@ probability `exp(-cost/lambda)/(1+exp(-cost/lambda))` by revealing the action.
 The compensation theorem permits reoptimization; it does not identify old
 and new optimal lotteries.
 
+In the finite-consequence cost implementation, `augmentedEffortChannel t q`
+depends on the candidate plan `q`. The cost coordinate is independent of the
+realized production variables and has expected cost `q*c`; it is not an
+observed realized effort cost. Different plans therefore use different augmented
+channels. The representation theorem's common-scale block clause justifies
+comparing those plans, as explained in the paper's footnote. This construction
+does not claim that the whole optimization takes place in one fixed augmented
+channel.
+
 The binary classification assumes distinct rows, a nonnegative payoff gap,
 and positive lambda. The Bernoulli technology has `0 < p0 < p1 < 1`; its
 flat-wage interior iff assumes positive cost and lambda. The team limit uses

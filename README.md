@@ -17,6 +17,11 @@ compensation for additional signals. See the
 [Section 4 certificate](Certificate/SECTION4_VERIFICATION.md) for the claim
 map and the precise scope of supporting appendix results.
 
+The [complete trust report](Certificate/TRUST_BOUNDARY.md) records every
+remaining foundation, convention, and source/compiled-code boundary. Run
+`./scripts/check_trust_boundary.sh` for a project source rebuild, raw dependency
+inspection including private helpers, and mandatory fresh kernel replay.
+
 ## Verified theorem
 
 ```lean

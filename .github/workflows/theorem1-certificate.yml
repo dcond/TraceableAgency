@@ -65,3 +65,6 @@ jobs:
           TRACEABLE_SKIP_PAPER_CHECK: 1
           TRACEABLE_SKIP_FRESH_CHECKER: 1
         run: ./scripts/check_theorem1_certificate.sh
+
+      - name: Rebuild all project sources and replay the complete trust certificate
+        run: ./scripts/check_trust_boundary.sh
